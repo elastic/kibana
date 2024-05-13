@@ -231,12 +231,6 @@ export const convertToBuildEsQuery = ({
   }
 };
 
-export interface CombinedQuery {
-  filterQuery: string | undefined;
-  kqlError: Error | undefined;
-  baseKqlQuery: Query;
-}
-
 export const combineQueries = ({
   config,
   dataProviders = [],
@@ -245,7 +239,7 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-}: CombineQueries): CombinedQuery | null => {
+}: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
@@ -260,7 +254,6 @@ export const combineQueries = ({
     return {
       filterQuery,
       kqlError,
-      baseKqlQuery: kuery,
     };
   }
 
@@ -288,6 +281,5 @@ export const combineQueries = ({
   return {
     filterQuery,
     kqlError,
-    baseKqlQuery: kuery,
   };
 };

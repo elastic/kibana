@@ -18,47 +18,39 @@ import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
 import { showCli } from './show';
-import { passwdCli } from './passwd';
-import { hasPasswdCli } from './has_passwd';
 
 const argv = process.argv.slice();
+const program = new Command('bin/kibana-keystore');
 
-async function initialize() {
-  const program = new Command('bin/kibana-keystore');
-  program
-    .version(pkg.version)
-    .description('A tool for managing settings stored in the Kibana keystore');
+program
+  .version(pkg.version)
+  .description('A tool for managing settings stored in the Kibana keystore');
 
-  const keystore = new Keystore(getKeystore());
+const keystore = new Keystore(getKeystore());
 
-  createCli(program, keystore);
-  listCli(program, keystore);
-  addCli(program, keystore);
-  removeCli(program, keystore);
-  showCli(program, keystore);
-  passwdCli(program, keystore);
-  hasPasswdCli(program, keystore);
+createCli(program, keystore);
+listCli(program, keystore);
+addCli(program, keystore);
+removeCli(program, keystore);
+showCli(program, keystore);
 
-  program
-    .command('help <command>')
-    .description('get the help for a specific command')
-    .action(function (cmdName) {
-      const cmd = _.find(program.commands, { _name: cmdName });
-      if (!cmd) return program.error(`unknown command ${cmdName}`);
-      cmd.help();
-    });
-
-  program.command('*', null, { noHelp: true }).action(function (cmd) {
-    program.error(`unknown command ${cmd}`);
+program
+  .command('help <command>')
+  .description('get the help for a specific command')
+  .action(function (cmdName) {
+    const cmd = _.find(program.commands, { _name: cmdName });
+    if (!cmd) return program.error(`unknown command ${cmdName}`);
+    cmd.help();
   });
 
-  // check for no command name
-  const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
-  if (!subCommand) {
-    program.defaultHelp();
-  }
+program.command('*', null, { noHelp: true }).action(function (cmd) {
+  program.error(`unknown command ${cmd}`);
+});
 
-  program.parse(process.argv);
+// check for no command name
+const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+if (!subCommand) {
+  program.defaultHelp();
 }
 
-initialize().catch((e) => console.error(e));
+program.parse(process.argv);

@@ -39,7 +39,6 @@ export interface OverviewModeSelectorProps {
 export function OverviewModeSelector({ value, onChange }: OverviewModeSelectorProps) {
   return (
     <EuiButtonGroup
-      data-test-subj="sloOverviewModeSelector"
       isFullWidth
       legend="This is a basic group"
       options={overviewModeOptions}

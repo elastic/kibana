@@ -11,8 +11,7 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchClient } from '@kbn/search-types';
-import type { DataView, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { DataView, ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {

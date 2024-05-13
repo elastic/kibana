@@ -11,7 +11,7 @@ import type {
   SearchResponse,
   ShardStatistics,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ISearchRequestParams } from '@kbn/search-types';
+import { ISearchRequestParams } from '../../../../common';
 
 export interface IAsyncSearchRequestParams extends ISearchRequestParams {
   keep_alive?: AsyncSearchGetRequest['keep_alive'];

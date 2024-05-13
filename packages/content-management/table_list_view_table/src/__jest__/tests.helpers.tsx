@@ -27,7 +27,6 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     getTagIdsFromReferences: () => [],
     bulkGetUserProfiles: jest.fn(() => Promise.resolve([])),
     getUserProfile: jest.fn(),
-    isTaggingEnabled: () => true,
     ...overrides,
   };
 

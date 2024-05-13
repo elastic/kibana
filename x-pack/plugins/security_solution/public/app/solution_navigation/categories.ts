@@ -24,7 +24,6 @@ export const CATEGORIES: Array<SeparatorLinkCategory<SolutionPageName>> = [
     linkIds: [
       SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
-      SecurityPageName.attackDiscovery,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
     ],

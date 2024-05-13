@@ -65,23 +65,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: [field],
     });
-    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
+    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    usageTracker?.click(AnalyticsEvents.editContextSaved);
+    usageTracker.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
 
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
+    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
   };
 
   useEffect(() => {
-    usageTracker?.load(AnalyticsEvents.editContextFlyoutOpened);
+    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
   }, [usageTracker]);
 
   return (
@@ -124,7 +124,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   label={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Number of documents sent to LLM',
+                      defaultMessage: 'Number of documents to retrieve',
                     }
                   )}
                 >

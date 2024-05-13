@@ -8,26 +8,36 @@
 
 import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { Readable } from 'stream';
+import { pipeline, Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
+import {
+  addObserverVersionTransform,
+  deleteSummaryFieldTransform,
+} from '../lib/utils/transform_helpers';
 import { withClient } from '../lib/utils/with_client';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { Logger } from '../lib/utils/create_logger';
 
-const scenario: Scenario<ApmFields> = async ({
-  logger,
-  versionOverride,
-}: RunOptions & { logger: Logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
   const version = versionOverride as string;
-  const isLegacy = version ? semver.lt(version as string, '8.7.0') : false;
+  const isLegacy = versionOverride && semver.lt(version, '8.7.0');
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
         apmEsClient.pipeline((base: Readable) => {
-          return apmEsClient.getDefaultPipeline({
-            versionOverride: version,
-          })(base);
+          const defaultPipeline = apmEsClient.getDefaultPipeline()(
+            base
+          ) as unknown as NodeJS.ReadableStream;
+
+          return pipeline(
+            defaultPipeline,
+            addObserverVersionTransform(version),
+            deleteSummaryFieldTransform(),
+            (err) => {
+              if (err) {
+                logger.error(err);
+              }
+            }
+          );
         });
       }
     },
@@ -35,7 +45,7 @@ const scenario: Scenario<ApmFields> = async ({
       const successfulTimestamps = range.ratePerMinute(6);
       const instance = apm
         .service({
-          name: `java`,
+          name: `java${isLegacy ? '-legacy' : ''}`,
           environment: 'production',
           agentName: 'java',
         })

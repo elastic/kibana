@@ -131,7 +131,7 @@ describe('sidebar reducer', function () {
           esTypes: undefined,
           aggregatable: false,
           isNull: true,
-          searchable: true,
+          searchable: false,
         }),
         new DataViewField({
           name: 'text2',
@@ -139,7 +139,7 @@ describe('sidebar reducer', function () {
           esTypes: ['keyword'],
           aggregatable: false,
           isNull: false,
-          searchable: true,
+          searchable: false,
         }),
       ],
       fieldCounts: {},

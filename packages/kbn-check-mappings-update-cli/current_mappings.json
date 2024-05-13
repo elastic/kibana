@@ -1711,9 +1711,6 @@
       "status": {
         "type": "keyword"
       },
-      "supports_agentless": {
-        "type": "boolean"
-      },
       "unenroll_timeout": {
         "type": "integer"
       },

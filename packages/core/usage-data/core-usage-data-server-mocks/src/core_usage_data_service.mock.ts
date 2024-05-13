@@ -128,9 +128,6 @@ const createStartContractMock = () => {
         },
         environment: {
           memory: {
-            arrayBuffersBytes: 1,
-            externalBytes: 1,
-            residentSetSizeBytes: 1,
             heapSizeLimit: 1,
             heapTotalBytes: 1,
             heapUsedBytes: 1,

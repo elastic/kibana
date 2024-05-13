@@ -9,7 +9,7 @@ import { ProductLine } from '../../common/product';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
-import type { MeteringCallBackResponse, MeteringCallbackInput, Tier, UsageRecord } from '../types';
+import type { MeteringCallbackInput, Tier, UsageRecord } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
 
 export const cloudSecurityMetringCallback = async ({
@@ -19,7 +19,7 @@ export const cloudSecurityMetringCallback = async ({
   taskId,
   lastSuccessfulReport,
   config,
-}: MeteringCallbackInput): Promise<MeteringCallBackResponse> => {
+}: MeteringCallbackInput): Promise<UsageRecord[]> => {
   const projectId = cloudSetup?.serverless?.projectId || 'missing_project_id';
 
   const tier: Tier = getCloudProductTier(config, logger);
@@ -53,10 +53,10 @@ export const cloudSecurityMetringCallback = async ({
       }
     });
 
-    return { records: cloudSecurityUsageRecords };
+    return cloudSecurityUsageRecords;
   } catch (err) {
     logger.error(`Failed to process Cloud Security metering data ${err}`);
-    return { records: [] };
+    return [];
   }
 };
 

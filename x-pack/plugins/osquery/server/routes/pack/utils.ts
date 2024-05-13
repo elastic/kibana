@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import {
-  isEmpty,
-  pick,
-  reduce,
-  isArray,
-  filter,
-  uniq,
-  map,
-  mapKeys,
-  difference,
-  intersection,
-} from 'lodash';
+import { isEmpty, pick, reduce, isArray, filter, uniq, map, mapKeys } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Shard } from '../../../common/utils/converters';
@@ -117,26 +106,17 @@ export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
   policyIds: string[] = [],
   shards?: Shard
-): { policiesList: string[]; invalidPolicies?: string[] } => {
-  const supportedPackagePolicies = filter(packagePolicies, (packagePolicy) =>
-    satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
-  );
-
-  const supportedPackagePolicyIds = uniq(map(supportedPackagePolicies, 'policy_id'));
+) => {
   // we want to find all policies, because this is a global pack
   if (shards?.['*']) {
-    return { policiesList: supportedPackagePolicyIds };
+    const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+      satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+    );
+
+    return uniq(map(supportedPackagePolicyIds, 'policy_id'));
   }
 
-  // Return only policyIds that are present in supportedPackagePolicyIds
-  const policiesList = intersection(uniq(policyIds), supportedPackagePolicyIds);
-  // Collect leftover policyIds
-  const invalidPolicies = difference(uniq(policyIds), policiesList);
-
-  return {
-    policiesList,
-    ...(invalidPolicies.length && { invalidPolicies }),
-  };
+  return policyIds;
 };
 
 export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, shards?: Shard) => {

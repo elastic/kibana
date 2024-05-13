@@ -47,14 +47,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/search-types",
-                "scope": "common",
-                "docId": "kibKbnSearchTypesPluginApi",
-                "section": "def-common.IEsErrorAttributes",
-                "text": "IEsErrorAttributes"
-              },
-              " | undefined"
+              "IEsErrorAttributes | undefined"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
@@ -368,15 +361,7 @@
             "section": "def-common.KibanaServerError",
             "text": "KibanaServerError"
           },
-          "<",
-          {
-            "pluginId": "@kbn/search-types",
-            "scope": "common",
-            "docId": "kibKbnSearchTypesPluginApi",
-            "section": "def-common.IEsErrorAttributes",
-            "text": "IEsErrorAttributes"
-          },
-          ">"
+          "<IEsErrorAttributes>"
         ],
         "path": "packages/kbn-search-errors/src/types.ts",
         "deprecated": false,

@@ -9,6 +9,7 @@
     "@kbn/dev-tools-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
@@ -30,8 +31,7 @@
     "@kbn/monaco",
     "@kbn/cloud-plugin",
     "@kbn/core-notifications-browser",
-    "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

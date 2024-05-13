@@ -68,7 +68,6 @@ const defaultProps: HeaderActionProps = {
   tabType: TimelineTabs.query,
   timelineId,
   width: 10,
-  fieldBrowserOptions: {},
 };
 
 describe('HeaderActions', () => {

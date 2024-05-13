@@ -67,11 +67,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
-  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
-    padding: 0;
-    position: relative;
-  }
-
   .udtTimeline .euiDataGridRowCell--controlColumn {
     overflow: visible;
   }
@@ -105,9 +100,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlSequence) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
-    .udt--customRow {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
+    .euiDataGridRowCell--lastColumn {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary};`}
     }
     background: repeating-linear-gradient(
       127deg,
@@ -119,8 +113,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
-    .udt--customRow {
+    .euiDataGridRowCell--lastColumn {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
     background: repeating-linear-gradient(
@@ -133,15 +126,13 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.nonRawEvent) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
-    .udt--customRow {
+    .euiDataGridRowCell--lastColumn {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
   }
   .udtTimeline .euiDataGridRow:has(.rawEvent) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
-    .udt--customRow {
+    .euiDataGridRowCell--lastColumn {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
     }
   }

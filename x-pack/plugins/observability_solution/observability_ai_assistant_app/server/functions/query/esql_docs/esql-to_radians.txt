@@ -1,11 +1,12 @@
 TO_RADIANS
 
 Syntax
+TO_RADIANS(v)
 Parameters
-number
+v
 Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts a number in degrees to radians.Supported types
-Example
+DescriptionConverts a number in degrees to
+radians.Supported typesThe input type must be of a numeric type and result is always double.Example
 ```esql
 ROW deg = [90.0, 180.0, 270.0]
 | EVAL rad = TO_RADIANS(deg)

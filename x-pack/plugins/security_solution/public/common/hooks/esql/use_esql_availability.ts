@@ -18,19 +18,17 @@ import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 export const useEsqlAvailability = () => {
   const { uiSettings } = useKibana().services;
   const isEsqlAdvancedSettingEnabled = uiSettings?.get(ENABLE_ESQL);
-
-  const isTimelineEsqlFeatureFlagDisabled =
-    useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-
   const isEsqlRuleTypeEnabled =
     !useIsExperimentalFeatureEnabled('esqlRulesDisabled') && isEsqlAdvancedSettingEnabled;
+  const isESQLTabInTimelineEnabled =
+    !useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled') && isEsqlAdvancedSettingEnabled;
 
   return useMemo(
     () => ({
       isEsqlAdvancedSettingEnabled,
       isEsqlRuleTypeEnabled,
-      isTimelineEsqlEnabledByFeatureFlag: !isTimelineEsqlFeatureFlagDisabled,
+      isESQLTabInTimelineEnabled,
     }),
-    [isEsqlAdvancedSettingEnabled, isTimelineEsqlFeatureFlagDisabled, isEsqlRuleTypeEnabled]
+    [isESQLTabInTimelineEnabled, isEsqlAdvancedSettingEnabled, isEsqlRuleTypeEnabled]
   );
 };

@@ -18,7 +18,7 @@ export function getLayerList({
   selectedMap: MapTypes;
   maps: MapsStartApi | undefined;
   dataViewId: string;
-}): LayerDescriptor[] {
+}): Promise<LayerDescriptor[]> {
   switch (selectedMap) {
     case MapTypes.Http:
       return getHttpRequestsLayerList(maps, dataViewId);

@@ -10,7 +10,6 @@ import {
   ApmFields,
   generateLongId,
   generateShortId,
-  infra,
   Instance,
   log,
   Serializable,
@@ -24,36 +23,15 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
+  const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
-    generate: ({
-      range,
-      clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
-    }) => {
+    generate: ({ range, clients: { apmEsClient, assetsEsClient, logsEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
 
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
       const serviceNames = [...Array(numServices).keys()].map((index) => `synth-node-${index}`);
-
-      const HOSTS = Array(numHosts)
-        .fill(0)
-        .map((_, idx) => infra.host(`my-host-${idx}`));
-
-      const hosts = range
-        .interval('30s')
-        .rate(1)
-        .generator((timestamp) =>
-          HOSTS.flatMap((host) => [
-            host.cpu().timestamp(timestamp),
-            host.memory().timestamp(timestamp),
-            host.network().timestamp(timestamp),
-            host.load().timestamp(timestamp),
-            host.filesystem().timestamp(timestamp),
-            host.diskio().timestamp(timestamp),
-          ])
-        );
 
       const instances = serviceNames.map((serviceName) =>
         apm
@@ -119,12 +97,6 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
       };
 
-      const MESSAGE_LOG_LEVELS = [
-        { message: 'A simple log with something random <random> in the middle', level: 'info' },
-        { message: 'Yet another debug log', level: 'debug' },
-        { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
-      ];
-
       const logsWithTraces = range
         .interval('1m')
         .rate(1)
@@ -132,8 +104,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           return Array(3)
             .fill(0)
             .map(() => {
-              const index = Math.floor(Math.random() * 3);
-              const { message, level } = MESSAGE_LOG_LEVELS[index];
+              const { message, level } = {
+                message: 'A simple log with something random <random> in the middle',
+                level: 'info',
+              };
               const CLUSTER = {
                 clusterId: generateShortId(),
                 clusterName: 'synth-cluster-2',
@@ -171,8 +145,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           return Array(3)
             .fill(0)
             .map(() => {
-              const index = Math.floor(Math.random() * 3);
-              const { message, level } = MESSAGE_LOG_LEVELS[index];
+              const { message, level } = {
+                message: 'A simple log with something random <random> in the middle',
+                level: 'info',
+              };
               const CLUSTER = {
                 clusterId: generateShortId(),
                 clusterName: 'synth-cluster-2',
@@ -229,10 +205,6 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         withClient(
           apmEsClient,
           logger.perf('generating_apm_events', () => tracesGen)
-        ),
-        withClient(
-          infraEsClient,
-          logger.perf('generating_infra_hosts', () => hosts)
         ),
       ];
     },

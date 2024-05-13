@@ -7,13 +7,13 @@
  */
 
 import chalk from 'chalk';
-import { Listr } from 'listr2';
+import Listr from 'listr';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { ErrorReporter } from './i18n';
+import { ErrorReporter, I18nConfig } from './i18n';
 import {
   extractDefaultMessages,
   extractUntrackedMessages,
@@ -21,7 +21,6 @@ import {
   checkConfigs,
   mergeConfigs,
 } from './i18n/tasks';
-import { I18nCheckTaskContext } from './i18n/types';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -31,8 +30,8 @@ const toolingLog = new ToolingLog({
 const runStartTime = Date.now();
 const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
-const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
-  !config?.translations.length && 'No translations found.';
+const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
+  !config.translations.length && 'No translations found.';
 
 run(
   async ({
@@ -75,38 +74,36 @@ run(
 
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    const list = new Listr<I18nCheckTaskContext>(
+    const list = new Listr(
       [
         {
           title: 'Checking .i18nrc.json files',
-          task: (context, task) =>
-            task.newListr(checkConfigs(includeConfig), { exitOnError: true }),
+          task: () => new Listr(checkConfigs(includeConfig), { exitOnError: true }),
         },
         {
           title: 'Merging .i18nrc.json files',
-          task: (context, task) =>
-            task.newListr(mergeConfigs(includeConfig), { exitOnError: true }),
+          task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
         {
           title: 'Checking For Untracked Messages based on .i18nrc.json',
           enabled: (_) => !ignoreUntracked,
           skip: skipOnNoTranslations,
-          task: (context, task) =>
-            task.newListr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
+          task: ({ config }) =>
+            new Listr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
         },
         {
           title: 'Validating Default Messages',
           skip: skipOnNoTranslations,
-          task: (context, task) =>
-            task.newListr(extractDefaultMessages(context.config!, srcPaths), { exitOnError: true }),
+          task: ({ config }) =>
+            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
           skip: skipOnNoTranslations,
-          task: (context, task) =>
-            task.newListr(
+          task: ({ config }) =>
+            new Listr(
               checkCompatibility(
-                context.config!,
+                config,
                 {
                   ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,
@@ -123,7 +120,7 @@ run(
       {
         concurrent: false,
         exitOnError: true,
-        renderer: process.env.CI ? 'verbose' : ('default' as any),
+        renderer: process.env.CI ? 'verbose' : 'default',
       }
     );
 

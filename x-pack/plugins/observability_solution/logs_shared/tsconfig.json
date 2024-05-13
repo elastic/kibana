@@ -36,7 +36,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/search-types",
     "@kbn/discover-shared-plugin"
   ]
 }

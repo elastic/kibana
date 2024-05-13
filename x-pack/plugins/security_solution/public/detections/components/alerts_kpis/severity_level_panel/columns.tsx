@@ -10,7 +10,6 @@ import { capitalize } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
@@ -33,7 +32,6 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityDat
           value={capitalize(severity)}
           queryValue={severity}
           tooltipContent={null}
-          scopeId={TableId.alertsOnAlertsPage}
         />
       </EuiHealth>
     ),

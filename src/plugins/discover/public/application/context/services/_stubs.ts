@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 import { of } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 type SortHit = {

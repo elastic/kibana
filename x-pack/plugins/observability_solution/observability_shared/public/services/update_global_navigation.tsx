@@ -32,7 +32,7 @@ export function updateGlobalNavigation({
     .map((link) => {
       switch (link.id) {
         case CasesDeepLinkId.cases:
-          if (capabilities[casesFeatureId].read_cases) {
+          if (capabilities[casesFeatureId].read_cases && someVisible) {
             return {
               ...link,
               visibleIn: ['sideNav', 'globalSearch'],

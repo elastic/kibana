@@ -7,11 +7,10 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,6 +18,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -170,6 +171,7 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
   fleetStatus?: FleetStatusProviderProps;
@@ -182,41 +184,49 @@ export const FleetAppContext: React.FC<{
     history,
     kibanaVersion,
     extensions,
-    routerHistory: _routerHistory,
+    routerHistory,
+    theme$,
     fleetStatus,
   }) => {
-    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const darkModeObservable = useObservable(theme$);
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
-      <KibanaRenderContextProvider {...startServices}>
-        <RedirectAppLinks
-          coreStart={{
-            application: startServices.application,
-          }}
-        >
-          <KibanaContextProvider services={{ ...startServices }}>
-            <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <QueryClientProvider client={queryClient}>
-                    <ReactQueryDevtools initialIsOpen={false} />
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                        <Router history={history}>
-                          <PackageInstallProvider startServices={startServices}>
-                            <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </QueryClientProvider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
-            </ConfigContext.Provider>
+      <RedirectAppLinks
+        coreStart={{
+          application: startServices.application,
+        }}
+      >
+        <startServices.i18n.Context>
+          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
+            <EuiErrorBoundary>
+              <ConfigContext.Provider value={config}>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <QueryClientProvider client={queryClient}>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                        <UIExtensionsContext.Provider value={extensions}>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                            <Router history={history}>
+                              <PackageInstallProvider
+                                notifications={startServices.notifications}
+                                theme$={theme$}
+                              >
+                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                              </PackageInstallProvider>
+                            </Router>
+                          </FleetStatusProvider>
+                        </UIExtensionsContext.Provider>
+                      </QueryClientProvider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
+                </KibanaVersionContext.Provider>
+              </ConfigContext.Provider>
+            </EuiErrorBoundary>
           </KibanaContextProvider>
-        </RedirectAppLinks>
-      </KibanaRenderContextProvider>
+        </startServices.i18n.Context>
+      </RedirectAppLinks>
     );
   }
 );

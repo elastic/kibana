@@ -68,7 +68,16 @@ export async function installIndexTemplatesAndPipelines({
   // cleanup in the case that a single asset fails to install.
   let newEsReferences: EsAssetReference[] = [];
 
-  if (!onlyForDataStreams) {
+  if (onlyForDataStreams) {
+    // if onlyForDataStreams is present that means we are in create package policy flow
+    // not install flow, meaning we do not have a lock on the installation SO
+    // so we need to use optimistic concurrency control
+    newEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInstallContext.packageInfo.name,
+      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
+    );
+  } else {
     newEsReferences = await updateEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,
@@ -93,18 +102,6 @@ export async function installIndexTemplatesAndPipelines({
       preparedIngestPipelines.install(esClient, logger)
     ),
   ]);
-
-  // only add ES references if templates and pipelines were installed successfully, to prevent upgrade issues for referencing invalid template name
-  if (onlyForDataStreams) {
-    // if onlyForDataStreams is present that means we are in create package policy flow
-    // not install flow, meaning we do not have a lock on the installation SO
-    // so we need to use optimistic concurrency control
-    newEsReferences = await optimisticallyAddEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
-    );
-  }
 
   return {
     esReferences: newEsReferences,

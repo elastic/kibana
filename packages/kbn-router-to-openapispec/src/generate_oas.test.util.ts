@@ -32,7 +32,6 @@ export const testSchema = schema.object({
     scheme: ['prototest'],
     defaultValue: () => 'prototest://something',
   }),
-  any: schema.any({ meta: { description: 'any type' } }),
 });
 
 type RouterMeta = ReturnType<Router['getRoutes']>[number];
@@ -53,18 +52,10 @@ const getRouterDefaults = () => ({
   isVersioned: false,
   path: '/foo/{id}',
   method: 'get',
-  options: {
-    tags: ['foo'],
-    description: 'route',
-  },
   validationSchemas: {
     request: {
-      params: schema.object({
-        id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
-      }),
-      query: schema.object({
-        page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
-      }),
+      params: schema.object({ id: schema.string({ maxLength: 36 }) }),
+      query: schema.object({ page: schema.number({ max: 999, min: 1, defaultValue: 1 }) }),
       body: testSchema,
     },
     response: {
@@ -74,6 +65,7 @@ const getRouterDefaults = () => ({
       unsafe: { body: true },
     },
   },
+  options: { tags: ['foo'] },
   handler: jest.fn(),
 });
 
@@ -81,7 +73,6 @@ const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
-    description: 'versioned route',
     access: 'public',
   },
   handlers: [
@@ -92,19 +83,11 @@ const getVersionedRouterDefaults = () => ({
           request: {
             body: schema.object({
               foo: schema.string(),
-              deprecatedFoo: schema.maybe(
-                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
-              ),
+              deprecatedFoo: schema.maybe(schema.string({ meta: { deprecated: true } })),
             }),
           },
           response: {
-            [200]: {
-              body: () =>
-                schema.object(
-                  { fooResponseWithDescription: schema.string() },
-                  { meta: { description: 'fooResponse' } }
-                ),
-            },
+            [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
           },
         },
         version: 'oas-test-version-1',

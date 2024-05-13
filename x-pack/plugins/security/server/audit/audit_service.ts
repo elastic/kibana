@@ -201,8 +201,7 @@ export function filterEvent(
         (!rule.types ||
           normalize(event.event?.type)?.every((t) => rule.types?.includes(t || ''))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
-        (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!)) &&
-        (!rule.users || !event.user?.name || rule.users.includes(event.user.name))
+        (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );
   }
   return true;

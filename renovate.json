@@ -158,24 +158,6 @@
       "enabled": true
     },
     {
-      "groupName": "OpenAPI Spec",
-      "matchPackageNames": [
-        "@redocly/cli"
-      ],
-      "reviewers": [
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Core",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "babel",
       "matchPackageNames": [
         "@types/babel__core"
@@ -248,24 +230,6 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "CLI tooling",
-      "matchPackageNames": [
-        "listr2"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
         "release_note:skip"
       ],
       "enabled": true

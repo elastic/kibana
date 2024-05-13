@@ -18,7 +18,6 @@ import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
-import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -90,11 +89,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   );
   const { status, savedSearchId, activeTab, savedObjectId, title, description } = timeline;
 
-  const {
-    data: savedSearchById,
-    isFetching,
-    status: savedSearchByIdStatus,
-  } = useQuery({
+  const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
     queryFn: () => (savedSearchId ? savedSearchService.get(savedSearchId) : Promise.resolve(null)),
   });
@@ -122,12 +117,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   useEffect(() => {
     if (isFetching) return;
-    if (savedSearchByIdStatus === 'error' && savedSearchId) {
-      // when a timeline json is uploaded with a saved search Id that not longer
-      // exists, we need to reset the saved search Id in the timeline and remove th saved search
-      dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
-      return;
-    }
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     const latestState = getCombinedDiscoverSavedSearchState();
@@ -137,9 +126,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
-    updateSavedSearch(latestState, timelineId, function onUpdate() {
-      combinedDiscoverSavedSearchStateRef.current = latestState;
-    });
+    updateSavedSearch(latestState, timelineId);
+    combinedDiscoverSavedSearchStateRef.current = latestState;
   }, [
     getCombinedDiscoverSavedSearchState,
     savedSearchById,
@@ -151,8 +139,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     isFetching,
     timelineId,
     dispatch,
-    savedSearchId,
-    savedSearchByIdStatus,
   ]);
 
   useEffect(() => {
@@ -180,14 +166,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
       if (savedSearchId) {
-        try {
-          const localSavedSearch = await savedSearchService.get(savedSearchId);
-          initializeLocalSavedSearch(localSavedSearch, timelineId);
-          savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error('Stale Saved search Id which no longer exists', e);
-        }
+        const localSavedSearch = await savedSearchService.get(savedSearchId);
+        initializeLocalSavedSearch(localSavedSearch, timelineId);
+        savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
       const finalAppState =

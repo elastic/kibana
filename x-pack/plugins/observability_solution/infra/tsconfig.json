@@ -96,9 +96,7 @@
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
     "@kbn/shared-svg",
-    "@kbn/aiops-log-rate-analysis",
-    "@kbn/react-hooks",
-    "@kbn/search-types"
+    "@kbn/aiops-log-rate-analysis"
   ],
   "exclude": [
     "target/**/*"

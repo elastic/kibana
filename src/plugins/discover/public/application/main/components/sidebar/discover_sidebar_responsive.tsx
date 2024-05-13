@@ -27,7 +27,7 @@ import {
   AvailableFields$,
   DataDocuments$,
   RecordRawType,
-} from '../../state_management/discover_data_state_container';
+} from '../../services/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';

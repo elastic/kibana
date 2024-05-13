@@ -222,12 +222,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-    if (!initialQueryParams.load_from) {
-      // Don't setup autosaving editor content when we pre-load content
-      // This prevents losing the user's current console content when
-      // `loadFrom` query param is used for a console session
-      setupAutosave();
-    }
+    setupAutosave();
 
     return () => {
       unsubscribeResizer();

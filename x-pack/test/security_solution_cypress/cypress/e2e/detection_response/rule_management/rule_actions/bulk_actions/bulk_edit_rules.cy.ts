@@ -578,8 +578,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
     });
   });
 
-  // https://github.com/elastic/kibana/issues/182834
-  describe('Investigation fields actions', { tags: ['@skipInServerlessMKI'] }, () => {
+  describe('Investigation fields actions', () => {
     it('Add investigation fields to custom rules', () => {
       getRulesManagementTableRows().then((rows) => {
         const fieldsToBeAdded = ['source.ip', 'destination.ip'];

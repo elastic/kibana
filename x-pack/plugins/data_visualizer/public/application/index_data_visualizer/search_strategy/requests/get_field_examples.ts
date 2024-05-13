@@ -9,11 +9,11 @@ import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/search-types';
-import type { ISearchStart } from '@kbn/data-plugin/public';
+  ISearchStart,
+} from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';

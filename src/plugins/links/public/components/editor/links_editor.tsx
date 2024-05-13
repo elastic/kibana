@@ -28,7 +28,7 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   Link,

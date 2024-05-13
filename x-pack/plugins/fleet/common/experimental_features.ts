@@ -30,7 +30,6 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   subfeaturePrivileges: false,
   enablePackagesStateMachine: true,
   advancedPolicySettings: true,
-  useSpaceAwareness: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

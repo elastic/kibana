@@ -10,15 +10,27 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {
-    const mockMapsStartService = {
-      Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
-    };
+    const mockSetLayerList = jest.fn();
+    const mockUpdateInput = jest.fn();
+    const mockRender = jest.fn();
+    const mockReload = jest.fn();
+
+    const mockEmbeddable = embeddablePluginMock.createStartContract();
+    mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
+      create: () => ({
+        setLayerList: mockSetLayerList,
+        updateInput: mockUpdateInput,
+        render: mockRender,
+        reload: mockReload,
+      }),
+    }));
 
     const mockSpaces = {
       getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
@@ -40,7 +52,7 @@ describe('Embedded Map', () => {
         initialEntries={['/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&']}
       >
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={{ maps: mockMapsStartService, spaces: mockSpaces }}>
+          <KibanaContextProvider services={{ embeddable: mockEmbeddable, spaces: mockSpaces }}>
             <EmbeddedMap
               selectedMap={MapTypes.Http}
               filters={[]}
@@ -53,6 +65,9 @@ describe('Embedded Map', () => {
       </MemoryRouter>
     );
     expect(await findByTestId('serviceOverviewEmbeddedMap')).toBeInTheDocument();
-    expect(await findByTestId('mockMap')).toBeInTheDocument();
+
+    expect(mockSetLayerList).toHaveBeenCalledTimes(1);
+    expect(mockUpdateInput).toHaveBeenCalledTimes(1);
+    expect(mockRender).toHaveBeenCalledTimes(1);
   });
 });

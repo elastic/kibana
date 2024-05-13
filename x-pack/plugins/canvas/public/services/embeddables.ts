@@ -8,7 +8,6 @@
 import { EmbeddableFactory, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 export interface CanvasEmbeddablesService {
-  reactEmbeddableRegistryHasKey: (key: string) => boolean;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   getStateTransfer: () => EmbeddableStateTransfer;
 }

@@ -16,6 +16,7 @@ import type {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  AppMount,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -32,7 +33,7 @@ import type {
   StartedSubPlugins,
   StartPluginsDependencies,
 } from './types';
-import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
+import { SOLUTION_NAME } from './common/translations';
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
@@ -93,18 +94,93 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, triggersActionsUi, usageCollection, management, cases } = plugins;
+    const { home, triggersActionsUi, usageCollection, management } = plugins;
 
-    // Lazily instantiate subPlugins and initialize services
-    const mountDependencies = async (params?: AppMountParameters) => {
-      const { renderApp } = await this.lazyApplicationDependencies();
+    const assistantManagementTitle = i18n.translate(
+      'xpack.securitySolution.securityAiAssistantManagement.app.title',
+      {
+        defaultMessage: 'AI Assistant for Security',
+      }
+    );
+
+    if (home) {
+      home.featureCatalogue.registerSolution({
+        id: APP_ID,
+        title: SOLUTION_NAME,
+        description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
+          defaultMessage:
+            'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
+        }),
+        icon: 'logoSecurity',
+        path: APP_PATH,
+        order: 300,
+      });
+
+      home.featureCatalogue.register({
+        id: 'ai_assistant_security',
+        title: assistantManagementTitle,
+        description: i18n.translate(
+          'xpack.securitySolution.securityAiAssistantManagement.app.description',
+          {
+            defaultMessage: 'Manage your AI Assistant for Security.',
+          }
+        ),
+        icon: 'sparkles',
+        path: '/app/management/kibana/securityAiAssistantManagement',
+        showOnHomePage: false,
+        category: 'admin',
+      });
+
+      if (management) {
+        management.sections.section.kibana.registerApp({
+          id: 'securityAiAssistantManagement',
+          title: assistantManagementTitle,
+          hideFromSidebar: true,
+          order: 1,
+          mount: async (params) => {
+            // required to show the alert table inside cases
+            const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+            const { registerAlertsTableConfiguration } =
+              await this.lazyRegisterAlertsTableConfiguration();
+            registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
+
+            const [coreStart, startPlugins] = await core.getStartServices();
+            const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+            const store = await this.store(coreStart, startPlugins, subPlugins);
+            const services = await this.services.generateServices(coreStart, startPlugins);
+            await this.registerActions(store, params.history, core, services);
+
+            const { renderApp } = await this.lazyApplicationDependencies();
+            const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+
+            return renderApp({
+              ...params,
+              services,
+              store,
+              usageCollection: plugins.usageCollection,
+              children: <ManagementSettings />,
+            });
+          },
+        });
+      }
+    }
+
+    const mount: AppMount = async (params) => {
       const [coreStart, startPlugins] = await core.getStartServices();
+      const services = await this.services.generateServices(coreStart, startPlugins, params);
 
       const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
-      const services = await this.services.generateServices(coreStart, startPlugins, params);
-      return { renderApp, subPlugins, store, services };
+      const { renderApp } = await this.lazyApplicationDependencies();
+      const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+
+      await this.registerActions(store, params.history, core, services);
+      await this.registerAlertsTableConfiguration(triggersActionsUi);
+
+      const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
+
+      return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
     };
 
     // Register main Security Solution plugin
@@ -116,17 +192,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       updater$: this.appUpdater$,
       visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
-      mount: async (params) => {
-        const { renderApp, services, store, subPlugins } = await mountDependencies(params);
-        const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
-
-        await this.registerActions(store, params.history, core, services);
-        await this.registerAlertsTableConfiguration(triggersActionsUi);
-
-        const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
-
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
-      },
+      mount,
     });
 
     // Register legacy SIEM app for backward compatibility
@@ -149,53 +215,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    home?.featureCatalogue.registerSolution({
-      id: APP_ID,
-      title: SOLUTION_NAME,
-      description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
-        defaultMessage:
-          'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
-      }),
-      icon: 'logoSecurity',
-      path: APP_PATH,
-      order: 300,
-    });
-
-    home?.featureCatalogue.register({
-      id: 'ai_assistant_security',
-      title: ASSISTANT_MANAGEMENT_TITLE,
-      description: i18n.translate(
-        'xpack.securitySolution.securityAiAssistantManagement.app.description',
-        {
-          defaultMessage: 'Manage your AI Assistant for Security.',
-        }
-      ),
-      icon: 'sparkles',
-      path: '/app/management/kibana/securityAiAssistantManagement',
-      showOnHomePage: false,
-      category: 'admin',
-    });
-
-    management?.sections.section.kibana.registerApp({
-      id: 'securityAiAssistantManagement',
-      title: ASSISTANT_MANAGEMENT_TITLE,
-      hideFromSidebar: true,
-      order: 1,
-      mount: async (params) => {
-        const { renderApp, services, store } = await mountDependencies();
-        const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
-
-        return renderApp({
-          ...params,
-          services,
-          store,
-          usageCollection,
-          children: <ManagementSettings />,
-        });
-      },
-    });
-
-    cases?.attachmentFramework.registerExternalReference(
+    plugins.cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
 
@@ -318,7 +338,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const subPlugins = await this.createSubPlugins();
     return {
       alerts: subPlugins.alerts.start(storage),
-      attackDiscovery: subPlugins.attackDiscovery.start(),
+      attackDiscovery: subPlugins.attackDiscovery.start(
+        this.experimentalFeatures.attackDiscoveryEnabled
+      ),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
@@ -501,8 +523,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "lazy_actions" */
-      './lazy_actions'
+      /* webpackChunkName: "actions" */
+      './actions'
     );
   }
 
@@ -512,7 +534,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "lazy_assistant_settings_management" */
+      /* webpackChunkName: "actions" */
       './lazy_assistant_settings_management'
     );
   }

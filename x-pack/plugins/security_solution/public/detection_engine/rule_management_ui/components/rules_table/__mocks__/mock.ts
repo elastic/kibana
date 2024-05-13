@@ -199,7 +199,6 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   note: '# this is some markdown documentation',
   setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
-  maxSignals: 100,
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({

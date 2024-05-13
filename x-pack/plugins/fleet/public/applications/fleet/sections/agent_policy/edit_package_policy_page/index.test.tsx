@@ -355,7 +355,7 @@ describe('edit package policy page', () => {
     render();
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
+      expect(renderResult.getByTestId('euiErrorBoundary')).toBeVisible();
     });
   });
 

@@ -19251,20 +19251,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.AgentPolicy.unprivileged_agents",
-            "type": "number",
-            "tags": [],
-            "label": "unprivileged_agents",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.AgentPolicy.is_protected",
             "type": "boolean",
             "tags": [],
@@ -22727,20 +22713,6 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewAgentPolicy.supports_agentless",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "supports_agentless",
-            "description": [],
-            "signature": [
-              "boolean | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -25664,8 +25636,8 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
-            "section": "def-common.AgentPolicy",
-            "text": "AgentPolicy"
+            "section": "def-common.GetAgentPoliciesResponseItem",
+            "text": "GetAgentPoliciesResponseItem"
           },
           ">"
         ],
@@ -26151,8 +26123,8 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
-            "section": "def-common.AgentPolicy",
-            "text": "AgentPolicy"
+            "section": "def-common.GetAgentPoliciesResponseItem",
+            "text": "GetAgentPoliciesResponseItem"
           },
           ">"
         ],
@@ -26175,7 +26147,8 @@
             "docId": "kibFleetPluginApi",
             "section": "def-common.AgentPolicy",
             "text": "AgentPolicy"
-          }
+          },
+          " & { agents?: number | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
         "deprecated": false,

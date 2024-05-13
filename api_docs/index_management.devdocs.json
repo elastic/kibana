@@ -1492,7 +1492,7 @@
               },
               " | undefined; lifecycle?: (",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; }"
+              " & { enabled?: boolean | undefined; }) | undefined; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -1842,7 +1842,7 @@
             "signature": [
               "(",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined"
+              " & { enabled?: boolean | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -3219,7 +3219,7 @@
               },
               " | undefined; lifecycle?: (",
               "IndicesDataStreamLifecycleWithRollover",
-              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; }) | undefined; } | undefined"
+              " & { enabled?: boolean | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,

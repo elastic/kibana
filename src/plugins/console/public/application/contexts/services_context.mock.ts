@@ -7,9 +7,9 @@
  */
 
 import {
-  coreMock,
   notificationServiceMock,
   httpServiceMock,
+  themeServiceMock,
   docLinksServiceMock,
 } from '@kbn/core/public/mocks';
 
@@ -21,8 +21,6 @@ import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
 import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
-
-const coreStart = coreMock.createStart();
 
 export const serviceContextMock = {
   create: (): ContextValue => {
@@ -44,11 +42,11 @@ export const serviceContextMock = {
         autocompleteInfo: new AutocompleteInfoMock(),
       },
       docLinkVersion: 'NA',
+      theme$: themeServiceMock.create().start().theme$,
       docLinks: docLinksServiceMock.createStartContract().links,
       config: {
         isMonacoEnabled: false,
       },
-      startServices: coreStart,
     };
   },
 };

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { GroupByField } from '../../../../../pages/slos/components/slo_list_group_by';
 import { buildCombinedKqlQuery } from './build_kql_query';
 
 describe('buildCombinedKqlQuery', () => {
-  const testData: Array<{
-    title: string;
-    props: { kqlQuery: string; groups: string[]; groupBy: GroupByField };
-  }> = [
+  const testData = [
     {
       title: 'no selected groups, with kql',
       props: {

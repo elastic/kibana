@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverStateContainer } from '../application/main/services/discover_state';
 import type { DiscoverCustomizationService } from './customization_service';
 
 export interface CustomizationCallbackContext {

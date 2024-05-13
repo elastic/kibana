@@ -6,22 +6,34 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
+import { Theme, ThemeProvider } from '@emotion/react';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  useDarkMode,
+} from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { ConfigSchema } from '..';
-import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
+import { customLogsRoutes } from '../components/app/custom_logs';
+import { systemLogsRoutes } from '../components/app/system_logs';
+import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
+import { baseRoutes, routes } from '../routes';
+import { CustomLogs } from '../routes/templates/custom_logs';
+import { SystemLogs } from '../routes/templates/system_logs';
+import { ExperimentalOnboardingFlow } from './experimental_onboarding_flow';
+import { ExperimentalOnboardingFeatureFlag } from '../context/experimental_onboarding_enabled';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -35,10 +47,75 @@ export const breadcrumbsApp = {
   label: onBoardingTitle,
 };
 
+function App() {
+  const customLogRoutesPaths = Object.keys(customLogsRoutes);
+  const systemLogRoutesPaths = Object.keys(systemLogsRoutes);
+
+  return (
+    <>
+      <Routes>
+        {Object.keys(baseRoutes).map((key) => {
+          const path = key as keyof typeof routes;
+          const { handler, exact } = routes[path];
+          const Wrapper = () => {
+            return handler();
+          };
+
+          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+        })}
+        <Route exact path={customLogRoutesPaths}>
+          <CustomLogs>
+            {customLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+            })}
+          </CustomLogs>
+        </Route>
+        <Route exact path={systemLogRoutesPaths}>
+          <SystemLogs>
+            {systemLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+            })}
+          </SystemLogs>
+        </Route>
+      </Routes>
+    </>
+  );
+}
+
+function ObservabilityOnboardingApp() {
+  const darkMode = useDarkMode(false);
+  return (
+    <ThemeProvider
+      theme={(outerTheme?: Theme) => ({
+        ...outerTheme,
+        eui: darkMode ? euiDarkVars : euiLightVars,
+        darkMode,
+      })}
+    >
+      <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+        <App />
+      </div>
+    </ThemeProvider>
+  );
+}
+
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
   deps,
+  experimentalOnboardingFlowEnabled,
   corePlugins: { observability, data },
   config,
 }: {
@@ -51,7 +128,7 @@ export function ObservabilityOnboardingAppRoot({
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
   core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-    uses_legacy_onboarding_page: false,
+    uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
   });
 
   return (
@@ -87,7 +164,15 @@ export function ObservabilityOnboardingAppRoot({
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}
-                  <ObservabilityOnboardingFlow />
+                  <ExperimentalOnboardingFeatureFlag.Provider
+                    value={experimentalOnboardingFlowEnabled}
+                  >
+                    {experimentalOnboardingFlowEnabled ? (
+                      <ExperimentalOnboardingFlow />
+                    ) : (
+                      <ObservabilityOnboardingApp />
+                    )}
+                  </ExperimentalOnboardingFeatureFlag.Provider>
                 </EuiErrorBoundary>
               </Router>
             </i18nCore.Context>
@@ -106,6 +191,7 @@ interface RenderAppProps {
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
+  experimentalOnboardingFlowEnabled: boolean;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
 }

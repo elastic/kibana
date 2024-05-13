@@ -7,75 +7,43 @@
  */
 
 import chalk from 'chalk';
-import { isUndefined, omitBy } from 'lodash';
-import { OpenAPIV3 } from 'openapi-types';
 import globby from 'globby';
-import { basename, dirname, resolve } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import { BundledDocument, bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
 import { removeFilesByGlob } from './utils/remove_files_by_glob';
 import { logger } from './logger';
 import { writeYamlDocument } from './utils/write_yaml_document';
-import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
 
 export interface BundlerConfig {
+  rootDir: string;
   sourceGlob: string;
   outputFilePath: string;
-  specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
-export const bundle = async ({
-  sourceGlob,
-  outputFilePath = 'bundled-{version}.schema.yaml',
-  specInfo,
-}: BundlerConfig) => {
-  logger.debug(chalk.bold(`Bundling API route schemas`));
-  logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);
+export const bundle = async (config: BundlerConfig) => {
+  const {
+    rootDir,
+    sourceGlob,
+    outputFilePath: relativeOutputFilePath = 'target/openapi/bundled.schema.yaml',
+  } = config;
 
-  const sourceFilesGlob = resolve(sourceGlob);
+  logger.debug(chalk.bold(`Bundling API route schemas`));
+  logger.debug(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
+  logger.debug(`👀  Searching for source files`);
+
+  const outputFilePath = join(rootDir, relativeOutputFilePath);
+  const sourceFilesGlob = resolve(rootDir, sourceGlob);
   const schemaFilePaths = await globby([sourceFilesGlob]);
 
   logger.info(`🕵️‍♀️  Found ${schemaFilePaths.length} schemas`);
   logSchemas(schemaFilePaths);
 
   logger.info(`🧹  Cleaning up any previously generated artifacts`);
-  await removeFilesByGlob(
-    dirname(outputFilePath),
-    basename(outputFilePath.replace('{version}', '*'))
-  );
+  await removeFilesByGlob(dirname(outputFilePath), basename(outputFilePath));
 
   logger.debug(`Processing schemas...`);
 
-  const resolvedDocuments = await resolveDocuments(schemaFilePaths);
-
-  logger.success(`Processed ${resolvedDocuments.length} schemas`);
-
-  const blankOasFactory = (oasVersion: string, apiVersion: string) =>
-    createBlankOpenApiDocument(oasVersion, {
-      version: apiVersion,
-      title: specInfo?.title ?? 'Bundled OpenAPI specs',
-      ...omitBy(
-        {
-          description: specInfo?.description,
-          termsOfService: specInfo?.termsOfService,
-          contact: specInfo?.contact,
-          license: specInfo?.license,
-        },
-        isUndefined
-      ),
-    });
-  const resultDocumentsMap = await mergeDocuments(resolvedDocuments, blankOasFactory);
-
-  await writeDocuments(resultDocumentsMap, outputFilePath);
-};
-
-function logSchemas(schemaFilePaths: string[]): void {
-  for (const filePath of schemaFilePaths) {
-    logger.debug(`Found OpenAPI spec ${chalk.bold(filePath)}`);
-  }
-}
-
-async function resolveDocuments(schemaFilePaths: string[]): Promise<BundledDocument[]> {
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
@@ -94,9 +62,26 @@ async function resolveDocuments(schemaFilePaths: string[]): Promise<BundledDocum
       }
     })
   );
+
   const processedDocuments = filterOutSkippedDocuments(resolvedDocuments);
 
-  return processedDocuments;
+  logger.success(`Processed ${processedDocuments.length} schemas`);
+
+  const resultDocument = await mergeDocuments(processedDocuments);
+
+  try {
+    await writeYamlDocument(outputFilePath, resultDocument);
+
+    logger.success(`📖  Wrote all bundled OpenAPI specs to ${chalk.bold(outputFilePath)}`);
+  } catch (e) {
+    logger.error(`Unable to save bundled document to ${chalk.bold(outputFilePath)}: ${e.message}`);
+  }
+};
+
+function logSchemas(schemaFilePaths: string[]): void {
+  for (const filePath of schemaFilePaths) {
+    logger.debug(`Found OpenAPI spec ${chalk.bold(filePath)}`);
+  }
 }
 
 function filterOutSkippedDocuments(
@@ -113,36 +98,4 @@ function filterOutSkippedDocuments(
   }
 
   return processedDocuments;
-}
-
-async function writeDocuments(
-  resultDocumentsMap: Map<string, OpenAPIV3.Document>,
-  outputFilePath: string
-): Promise<void> {
-  for (const [version, document] of resultDocumentsMap.entries()) {
-    const versionedOutputFilePath = getVersionedOutputFilePath(outputFilePath, version);
-
-    try {
-      await writeYamlDocument(versionedOutputFilePath, document);
-
-      logger.success(`📖  Wrote bundled OpenAPI specs to ${chalk.bold(versionedOutputFilePath)}`);
-    } catch (e) {
-      logger.error(
-        `Unable to save bundled document to ${chalk.bold(versionedOutputFilePath)}: ${e.message}`
-      );
-    }
-  }
-}
-
-function getVersionedOutputFilePath(outputFilePath: string, version: string): string {
-  const hasVersionPlaceholder = outputFilePath.indexOf('{version}') > -1;
-  const snakeCasedVersion = version.replaceAll(/[^\w\d]+/g, '_');
-
-  if (hasVersionPlaceholder) {
-    return outputFilePath.replace('{version}', snakeCasedVersion);
-  }
-
-  const filename = basename(outputFilePath);
-
-  return outputFilePath.replace(filename, `${version}-${filename}`);
 }

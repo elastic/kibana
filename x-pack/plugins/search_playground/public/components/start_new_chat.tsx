@@ -37,7 +37,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
-    usageTracker?.load(AnalyticsEvents.startNewChatPageLoaded);
+    usageTracker.load(AnalyticsEvents.startNewChatPageLoaded);
   }, [usageTracker]);
 
   return (
@@ -85,7 +85,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
           <SourcesPanelForStartChat />
         </EuiFlexItem>
 
-        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="startChatButton">
+        <EuiFlexGroup justifyContent="flexEnd">
           <EuiButton
             fill
             iconType="arrowRight"

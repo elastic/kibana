@@ -33,8 +33,7 @@
     "@kbn/field-utils",
     "@kbn/ml-ui-actions",
     "@kbn/visualization-utils",
-    "@kbn/esql-utils",
-    "@kbn/search-types"
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }

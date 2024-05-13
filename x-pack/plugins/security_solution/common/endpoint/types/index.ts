@@ -1000,7 +1000,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
-      mode: AntivirusRegistrationModes;
+      mode?: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {

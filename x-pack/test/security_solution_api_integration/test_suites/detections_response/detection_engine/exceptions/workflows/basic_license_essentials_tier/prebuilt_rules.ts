@@ -37,9 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // See https://github.com/elastic/kibana/issues/182889 for details
-  // on skipping in MKI
-  describe('@serverless @ess @skipInServerlessMKI exceptions workflows for prebuilt rules', () => {
+  describe('@serverless @ess exceptions workflows for prebuilt rules', () => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

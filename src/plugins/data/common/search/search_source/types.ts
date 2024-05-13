@@ -12,9 +12,8 @@ import { Query, AggregateQuery } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { ISearchOptions } from '@kbn/search-types';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AggConfigSerialized, IAggConfigs } from '../../../public';
+import type { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
 import type { SearchSource } from './search_source';
 
 /**

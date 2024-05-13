@@ -8,44 +8,37 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const VIEWER_ROLE = 'viewer';
-
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
+export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'userProfiles']);
-  const svlUserManager = getService('svlUserManager');
 
   describe('User Profile Page', async () => {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole(VIEWER_ROLE);
+      // TODO: migrate to SAML role when profile page displays the data
+      await pageObjects.svlCommonPage.login();
     });
 
     after(async () => {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('User details', async () => {
-      it('should display correct user details', async () => {
+    describe('Theme', async () => {
+      it('should change theme based on the User Profile Theme control', async () => {
         await pageObjects.common.navigateToApp('security_account');
 
-        const userData = await svlUserManager.getUserData(VIEWER_ROLE);
+        const themeKeyPadMenu = await pageObjects.userProfiles.getThemeKeypadMenu();
+        expect(themeKeyPadMenu).not.to.be(null);
 
-        const actualFullname = await pageObjects.userProfiles.getProfileFullname();
-        const actualEmail = await pageObjects.userProfiles.getProfileEmail();
+        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
+        const darkModeTag = await pageObjects.userProfiles.getThemeTag();
+        expect(darkModeTag).to.be('v8dark');
 
-        expect(actualFullname).to.be(userData.fullname);
-        expect(actualEmail).to.be(userData.email);
-      });
+        await pageObjects.userProfiles.changeUserProfileTheme('Light');
+        const lightModeTag = await pageObjects.userProfiles.getThemeTag();
+        expect(lightModeTag).to.be('v8light');
 
-      it('should not have edit actions', async () => {
-        const fullNameInputField = await testSubjects.findAll('userProfileFullName');
-
-        const emailInputField = await testSubjects.findAll('userProfileEmail');
-        const changePasswordButton = await testSubjects.findAll('openChangePasswordForm');
-
-        expect(fullNameInputField).to.have.length(0);
-        expect(emailInputField).to.have.length(0);
-        expect(changePasswordButton).to.have.length(0);
+        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
+        const spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
+        expect(spaceDefaultModeTag).to.be('v8light');
       });
     });
   });

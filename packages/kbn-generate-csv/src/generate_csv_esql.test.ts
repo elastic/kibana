@@ -18,7 +18,7 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';

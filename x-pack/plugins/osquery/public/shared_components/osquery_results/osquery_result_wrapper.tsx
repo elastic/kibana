@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiComment } from '@elastic/eui';
+import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
@@ -73,13 +72,15 @@ const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperP
   services,
   ...restProps
 }) => (
-  <KibanaRenderContextProvider {...services}>
+  <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>
-        <OsqueryActionResult {...restProps} />
-      </QueryClientProvider>
+      <EuiErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <OsqueryActionResult {...restProps} />
+        </QueryClientProvider>
+      </EuiErrorBoundary>
     </KibanaContextProvider>
-  </KibanaRenderContextProvider>
+  </KibanaThemeProvider>
 );
 
 const OsqueryActionResultWrapper = React.memo(OsqueryActionResultWrapperComponent);

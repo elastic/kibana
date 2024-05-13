@@ -285,7 +285,10 @@ export class TelemetryCollectionManagerPlugin
           retrieveSnapshotTelemetryTransaction.startSpan('Prepare response');
           const results = await Promise.all(
             usageData.map(async (clusterStats) => {
-              const { cluster_uuid: clusterUuid } = clusterStats;
+              const { cluster_uuid: clusterUuid } = clusterStats.cluster_stats as Record<
+                string,
+                string
+              >;
 
               return {
                 clusterUuid,

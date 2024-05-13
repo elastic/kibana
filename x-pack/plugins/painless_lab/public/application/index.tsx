@@ -7,27 +7,33 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  HttpSetup,
+  ChromeStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 
-import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
+import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
 
 import { Links } from '../links';
 import { AppContextProvider } from './context';
 import { Main } from './components/main';
-import { PainlessLabStartServices } from '../types';
 
 interface AppDependencies {
   http: HttpSetup;
+  I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
   settings: CoreStart['settings'];
   links: Links;
   chrome: ChromeStart;
-  startServices: PainlessLabStartServices;
+  theme: ThemeServiceStart;
 }
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, uiSettings, links, chrome, settings, startServices }: AppDependencies
+  { http, I18nContext, uiSettings, links, chrome, theme, settings }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
@@ -35,16 +41,18 @@ export function renderApp(
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
+    theme,
   });
   render(
-    <KibanaRenderContextProvider {...startServices}>
-      <KibanaReactContextProvider>
-        <AppContextProvider value={{ http, links, chrome }}>
-          <Main />
-        </AppContextProvider>
-      </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-
+    <I18nContext>
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaReactContextProvider>
+          <AppContextProvider value={{ http, links, chrome }}>
+            <Main />
+          </AppContextProvider>
+        </KibanaReactContextProvider>
+      </KibanaThemeProvider>
+    </I18nContext>,
     element
   );
   return () => unmountComponentAtNode(element);

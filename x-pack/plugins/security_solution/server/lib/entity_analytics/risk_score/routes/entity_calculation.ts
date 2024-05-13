@@ -69,7 +69,7 @@ export const riskScoreEntityCalculationRoute = (
           logger
         );
 
-        const { identifier_type: identifierType, identifier, refresh } = request.body;
+        const { identifier_type: identifierType, identifier } = request.body;
 
         try {
           const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -78,7 +78,7 @@ export const riskScoreEntityCalculationRoute = (
 
           if (entityAnalyticsConfig == null) {
             return siemResponse.error({
-              statusCode: 400,
+              statusCode: 405,
               body: 'No Risk engine configuration found',
             });
           }
@@ -94,7 +94,7 @@ export const riskScoreEntityCalculationRoute = (
 
           if (!enabled) {
             return siemResponse.error({
-              statusCode: 400,
+              statusCode: 405,
               body: 'Risk engine is disabled',
             });
           }
@@ -112,7 +112,6 @@ export const riskScoreEntityCalculationRoute = (
           const identifierFilter = {
             term: { [getFieldForIdentifier(identifierType)]: identifier },
           };
-
           const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
           const result: CalculateAndPersistScoresResponse =
@@ -120,18 +119,13 @@ export const riskScoreEntityCalculationRoute = (
               pageSize,
               identifierType,
               index,
-              filter: {
-                bool: {
-                  filter,
-                },
-              },
+              filter,
               range,
               runtimeMappings,
               weights: [],
               alertSampleSizePerShard,
               afterKeys,
               returnScores: true,
-              refresh,
             });
 
           if (result.errors.length) {

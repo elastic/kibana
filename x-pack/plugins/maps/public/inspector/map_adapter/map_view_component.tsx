@@ -19,7 +19,7 @@ interface State {
   style: string;
 }
 
-export class MapViewComponent extends Component<Props, State> {
+class MapViewComponent extends Component<Props, State> {
   state: State = this.props.adapters.map.getMapState();
 
   _onMapChange = () => {
@@ -45,3 +45,7 @@ export class MapViewComponent extends Component<Props, State> {
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export default MapViewComponent;

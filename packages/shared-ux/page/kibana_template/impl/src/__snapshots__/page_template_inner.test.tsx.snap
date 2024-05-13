@@ -79,10 +79,10 @@ exports[`KibanaPageTemplateInner page sidebar 1`] = `
   minHeight={0}
   offset={0}
 >
-  <_EuiPageSidebar
+  <EuiPageSidebar
     sticky={true}
   >
     Test
-  </_EuiPageSidebar>
+  </EuiPageSidebar>
 </_EuiPageTemplate>
 `;

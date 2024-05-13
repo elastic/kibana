@@ -6,12 +6,11 @@
  */
 
 import { Observable } from 'rxjs';
-
-import type {
-  IKibanaSearchResponse,
+import {
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/search-types';
+} from '@kbn/data-plugin/public';
 import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 
 export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {

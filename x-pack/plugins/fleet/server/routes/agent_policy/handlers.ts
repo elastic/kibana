@@ -20,7 +20,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
-import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -62,21 +62,13 @@ export async function populateAssignedAgentsCount(
 ) {
   await pMap(
     agentPolicies,
-    (agentPolicy: GetAgentPoliciesResponseItem) => {
-      const totalAgents = getAgentsByKuery(esClient, soClient, {
+    (agentPolicy: GetAgentPoliciesResponseItem) =>
+      getAgentsByKuery(esClient, soClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
         kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-      }).then(({ total }) => (agentPolicy.agents = total));
-      const unprivilegedAgents = getAgentsByKuery(esClient, soClient, {
-        showInactive: false,
-        perPage: 0,
-        page: 1,
-        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
-      }).then(({ total }) => (agentPolicy.unprivileged_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents]);
-    },
+      }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
     { concurrency: 10 }
   );
 }

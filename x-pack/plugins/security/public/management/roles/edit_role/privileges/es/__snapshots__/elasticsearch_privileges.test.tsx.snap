@@ -59,7 +59,6 @@ exports[`it renders correctly in serverless mode 1`] = `
             "elasticsearch": Object {
               "cluster": Array [],
               "indices": Array [],
-              "remote_cluster": Array [],
               "run_as": Array [],
             },
             "kibana": Array [],
@@ -142,7 +141,6 @@ exports[`it renders correctly in serverless mode 1`] = `
         "elasticsearch": Object {
           "cluster": Array [],
           "indices": Array [],
-          "remote_cluster": Array [],
           "run_as": Array [],
         },
         "kibana": Array [],
@@ -217,7 +215,6 @@ exports[`it renders without crashing 1`] = `
             "elasticsearch": Object {
               "cluster": Array [],
               "indices": Array [],
-              "remote_cluster": Array [],
               "run_as": Array [],
             },
             "kibana": Array [],
@@ -268,7 +265,6 @@ exports[`it renders without crashing 1`] = `
       isDisabled={false}
       onChange={[Function]}
       onCreateOption={[Function]}
-      optionMatcher={[Function]}
       options={Array []}
       placeholder="Add a user…"
       selectedOptions={Array []}
@@ -349,7 +345,6 @@ exports[`it renders without crashing 1`] = `
         "elasticsearch": Object {
           "cluster": Array [],
           "indices": Array [],
-          "remote_cluster": Array [],
           "run_as": Array [],
         },
         "kibana": Array [],

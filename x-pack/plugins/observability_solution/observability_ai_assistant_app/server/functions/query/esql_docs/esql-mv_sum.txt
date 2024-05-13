@@ -1,10 +1,12 @@
 MV_SUM
 
-Syntax
+
+MV_SUM(v)
 Parameters
-number
+v
 Multivalue expression.
-DescriptionConverts a multivalued field into a single valued field containing the sum of all of the values.Supported types
+DescriptionConverts a multivalued column into a single valued column containing the sum
+of all of the values.Supported types
 Example
 ```esql
 ROW a=[3, 5, 6]

@@ -10,6 +10,7 @@ import { RectAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
+  alertStarted: number;
   color: string;
   id: string;
   threshold: number;
@@ -22,7 +23,7 @@ const RECT_ANNOTATION_TITLE = i18n.translate(
   }
 );
 
-export function AlertThresholdTimeRangeRect({ color, id, threshold }: Props) {
+export function AlertThresholdTimeRangeRect({ alertStarted, color, id, threshold }: Props) {
   return (
     <RectAnnotation
       id={id}
@@ -31,6 +32,7 @@ export function AlertThresholdTimeRangeRect({ color, id, threshold }: Props) {
         {
           coordinates: {
             y0: threshold,
+            x1: alertStarted,
           },
           details: RECT_ANNOTATION_TITLE,
         },

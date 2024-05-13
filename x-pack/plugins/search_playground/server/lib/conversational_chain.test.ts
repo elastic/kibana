@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain } from './conversational_chain';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
+import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Message } from 'ai';
 
@@ -18,7 +18,6 @@ describe('conversational chain', () => {
     chat: Message[],
     expectedFinalAnswer: string,
     expectedDocs: any,
-    expectedTokens: any,
     expectedSearchRequest: any
   ) => {
     const searchMock = jest.fn().mockImplementation(() => {
@@ -50,7 +49,7 @@ describe('conversational chain', () => {
       },
     };
 
-    const llm = new FakeListChatModel({
+    const llm = new FakeListLLM({
       responses,
     });
 
@@ -100,16 +99,10 @@ describe('conversational chain', () => {
       .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '');
     expect(textValue).toEqual(expectedFinalAnswer);
 
-    const annotations = streamToValue
+    const docValue = streamToValue
       .filter((v) => v[0] === '8')
-      .map((entry) => entry.replace(/8:(.*)\n/, '$1'), '')
-      .map((entry) => JSON.parse(entry))
-      .reduce((acc, v) => acc.concat(v), []);
-
-    const docValues = annotations.filter((v: { type: string }) => v.type === 'retrieved_docs');
-    const tokens = annotations.filter((v: { type: string }) => v.type.endsWith('_token_count'));
-    expect(docValues).toEqual(expectedDocs);
-    expect(tokens).toEqual(expectedTokens);
+      .reduce((acc, v) => acc + v.replace(/8:(.*)\n/, '$1'), '');
+    expect(JSON.parse(docValue)).toEqual(expectedDocs);
     expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
   };
 
@@ -132,10 +125,10 @@ describe('conversational chain', () => {
           ],
           type: 'retrieved_docs',
         },
-      ],
-      [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 5 },
+        {
+          count: 15,
+          type: 'context_token_count',
+        },
       ],
       [
         {
@@ -176,10 +169,10 @@ describe('conversational chain', () => {
           ],
           type: 'retrieved_docs',
         },
-      ],
-      [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 5 },
+        {
+          count: 15,
+          type: 'context_token_count',
+        },
       ],
       [
         {
@@ -220,10 +213,10 @@ describe('conversational chain', () => {
           ],
           type: 'retrieved_docs',
         },
-      ],
-      [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 5 },
+        {
+          count: 15,
+          type: 'context_token_count',
+        },
       ],
       [
         {

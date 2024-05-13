@@ -26,10 +26,9 @@ import {
   AxisTicksSettings,
 } from '../../../shared_components';
 import { XYLayerConfig, AxesSettingsConfig } from '../types';
+import { validateExtent } from '../axes_configuration';
 
 import './axis_settings_popover.scss';
-import { validateExtent } from '../../../shared_components/axis/extent/helpers';
-import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -116,13 +115,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * set axis extent
    */
-  setExtent?: (extent?: AxisExtentConfig) => void;
-  /**
-   * Set scale and extent together
-   *
-   * Note: Must set both together or state does not update correctly
-   */
-  setScaleWithExtent?: (extent?: AxisExtentConfig, scale?: YScaleType) => void;
+  setExtent?: (extent: AxisExtentConfig | undefined) => void;
   hasBarOrAreaOnAxis: boolean;
   hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
@@ -239,7 +232,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   useMultilayerTimeAxis,
   scale,
   setScale,
-  setScaleWithExtent,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
@@ -247,13 +239,17 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const onExtentChange = useCallback(
     (newExtent) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
-        const { errorMsg } = validateExtent(hasBarOrAreaOnAxis, newExtent, scale);
-        if (axis === 'x' || newExtent.mode !== 'custom' || !errorMsg) {
+        const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, newExtent);
+        if (
+          axis === 'x' ||
+          newExtent.mode !== 'custom' ||
+          (!boundaryError && !inclusiveZeroError)
+        ) {
           setExtent(newExtent);
         }
       }
     },
-    [setExtent, extent, hasBarOrAreaOnAxis, scale, axis]
+    [extent, axis, hasBarOrAreaOnAxis, setExtent]
   );
 
   const { inputValue: localExtent, handleInputChange: setLocalExtent } = useDebouncedValue<
@@ -340,7 +336,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         >
           <EuiSwitch
             compressed
-            data-test-subj="lnsshowEndzones"
+            data-test-subj={`lnsshowEndzones`}
             label={i18n.translate('xpack.lens.xyChart.showEnzones', {
               defaultMessage: 'Show partial data markers',
             })}
@@ -381,7 +377,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           <EuiSelect
             compressed
             fullWidth
-            data-test-subj="lnsScaleSelect"
+            data-test-subj={`lnsshowEndzones`}
             aria-label={i18n.translate('xpack.lens.xyChart.setScale', {
               defaultMessage: 'Axis scale',
             })}
@@ -405,18 +401,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                 value: 'sqrt',
               },
             ]}
-            onChange={({ target }) => {
-              if (!setScaleWithExtent || !extent) return;
-              const newScale = target.value as YScaleType;
-
-              setScaleWithExtent(
-                {
-                  ...extent,
-                  ...getBounds(extent.mode, newScale, dataBounds),
-                },
-                newScale
-              );
-            }}
+            onChange={(e) => setScale(e.target.value as YScaleType)}
             value={scale}
           />
         </EuiFormRow>
@@ -425,10 +410,9 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         <AxisBoundsControl
           type={axis !== 'x' ? 'metric' : 'bucket'}
           extent={localExtent}
-          scaleType={scale}
           setExtent={setLocalExtent}
           dataBounds={dataBounds}
-          hasBarOrArea={hasBarOrAreaOnAxis}
+          shouldIncludeZero={hasBarOrAreaOnAxis}
           disableCustomRange={hasPercentageAxis}
           testSubjPrefix="lnsXY"
           // X axis is passing the extent object only in case of numeric histogram

@@ -67,6 +67,7 @@ export class ObservabilityOnboardingPlugin
 
     const pluginSetupDeps = plugins;
 
+    const isServerless = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     // set xpack.observability_onboarding.ui.enabled: true
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
@@ -92,6 +93,7 @@ export class ObservabilityOnboardingPlugin
             core: coreStart,
             deps: pluginSetupDeps,
             appMountParameters,
+            experimentalOnboardingFlowEnabled: isServerless,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
           });

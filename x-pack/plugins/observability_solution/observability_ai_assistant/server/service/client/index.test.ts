@@ -688,7 +688,6 @@ describe('Observability AI Assistant client', () => {
           code: ChatCompletionErrorCode.InternalError,
           message: 'Connection unexpectedly closed',
           stack: expect.any(String),
-          meta: {},
         },
         type: StreamingChatResponseEventType.ChatCompletionError,
       });

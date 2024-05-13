@@ -1,11 +1,11 @@
 LENGTH
 
 Syntax
+LENGTH(str)
 Parameters
-string
+str
 String expression. If null, the function returns null.
-DescriptionReturns the character length of a string.Supported types
-Example
+DescriptionReturns the character length of a string.Example
 ```esql
 FROM employees
 | KEEP first_name, last_name

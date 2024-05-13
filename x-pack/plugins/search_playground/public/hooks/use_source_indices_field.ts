@@ -91,10 +91,7 @@ export const useSourceIndicesFields = () => {
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
-      usageTracker?.count(
-        AnalyticsEvents.sourceFieldsLoaded,
-        Object.values(fields)?.flat()?.length
-      );
+      usageTracker.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
     } else {
       setNoFieldsIndicesWarning(null);
     }
@@ -106,14 +103,14 @@ export const useSourceIndicesFields = () => {
     const newIndices = [...selectedIndices, newIndex];
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   const removeIndex = (index: IndexName) => {
     const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   return {

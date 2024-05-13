@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppUnmount } from '@kbn/core/public';
-import { DevToolsStartServices } from './types';
+import { AppUnmount, CoreTheme } from '@kbn/core/public';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
@@ -19,9 +19,10 @@ export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisab
   disabled?: boolean;
 };
 
-interface DevToolMountParams extends DevToolsStartServices {
+interface DevToolMountParams {
   element: HTMLDivElement;
   location: RouteComponentProps['location'];
+  theme$: Observable<CoreTheme>;
 }
 
 export class DevToolApp {

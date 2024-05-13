@@ -15,6 +15,8 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { themeServiceMock } from '@kbn/core/public/mocks';
+
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -101,6 +103,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
           fleetStatus={{
             enabled: true,
             isLoading: false,
@@ -164,6 +167,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
           fleetStatus={{
             enabled: true,

@@ -205,7 +205,6 @@ export async function createChatService({
       conversationId,
       messages,
       persist,
-      disableFunctions,
       signal,
       responseLanguage,
     }) {
@@ -216,7 +215,6 @@ export async function createChatService({
           conversationId,
           messages,
           persist,
-          disableFunctions,
           signal,
           client,
           responseLanguage,

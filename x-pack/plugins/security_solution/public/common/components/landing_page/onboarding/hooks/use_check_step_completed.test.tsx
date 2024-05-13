@@ -17,9 +17,6 @@ import {
 jest.mock('../../../../lib/kibana');
 
 describe('useCheckStepCompleted', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
   it('does nothing when autoCheckIfStepCompleted is not provided', () => {
     const { result } = renderHook(() =>
       useCheckStepCompleted({
@@ -57,30 +54,6 @@ describe('useCheckStepCompleted', () => {
         undo: false,
         trigger: 'auto_check',
       });
-    });
-  });
-
-  it('does not toggleTaskCompleteStatus if authCheckIfStepCompleted was aborted', async () => {
-    const mockAutoCheck = jest.fn(({ abortSignal }) => {
-      abortSignal.abort();
-      return Promise.resolve(false);
-    });
-    const mockToggleTask = jest.fn();
-
-    const { waitFor } = renderHook(() =>
-      useCheckStepCompleted({
-        autoCheckIfStepCompleted: mockAutoCheck,
-        cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
-        indicesExist: true,
-        sectionId: SectionId.getStartedWithAlerts,
-        stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-        toggleTaskCompleteStatus: mockToggleTask,
-      })
-    );
-
-    await waitFor(() => {
-      expect(mockAutoCheck).toHaveBeenCalled();
-      expect(mockToggleTask).not.toHaveBeenCalled();
     });
   });
 });

@@ -44,7 +44,6 @@ import {
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
-  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
@@ -137,16 +136,12 @@ describe(
           getDetails(NEW_TERMS_HISTORY_WINDOW_DETAILS).should('have.text', '51000h');
         });
         cy.get(SCHEDULE_DETAILS).within(() => {
-          getDetails(RUNS_EVERY_DETAILS)
-            .find(INTERVAL_ABBR_VALUE)
-            .should('have.text', `${rule.interval}`);
+          getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
           const humanizedDuration = getHumanizedDuration(
             rule.from ?? 'now-6m',
             rule.interval ?? '5m'
           );
-          getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
-            .find(INTERVAL_ABBR_VALUE)
-            .should('have.text', `${humanizedDuration}`);
+          getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
         });
 
         waitForTheRuleToBeExecuted();

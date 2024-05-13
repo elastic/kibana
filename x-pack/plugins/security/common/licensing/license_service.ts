@@ -77,7 +77,6 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRoleRemoteIndexPrivileges: false,
-        allowRemoteClusterPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -99,7 +98,6 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRoleRemoteIndexPrivileges: false,
-        allowRemoteClusterPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -121,7 +119,6 @@ export class SecurityLicenseService {
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleRemoteIndexPrivileges: isLicensePlatinumOrBetter,
-      allowRemoteClusterPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
       allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };

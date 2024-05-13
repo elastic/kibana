@@ -58,11 +58,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
       getFallbackKibanaUrl(coreStart); // falls back to local network binding
-    const installScriptPath = coreStart.http.staticAssets.getPluginAssetHref(
-      'standalone_agent_setup.sh'
-    );
-
-    const scriptDownloadUrl = `${kibanaUrl}${installScriptPath}`;
+    const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
     const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
     return {

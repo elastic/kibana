@@ -44,7 +44,6 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { servicesAssetsRoutesRepository } from '../assets/services/routes';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
@@ -56,7 +55,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...observabilityOverviewRouteRepository,
     ...serviceMapRouteRepository,
     ...serviceRouteRepository,
-    ...servicesAssetsRoutesRepository,
     ...serviceGroupRouteRepository,
     ...suggestionsRouteRepository,
     ...traceRouteRepository,

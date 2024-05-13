@@ -2570,7 +2570,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          ") => \"esql\""
+          ") => never"
         ],
         "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
@@ -2579,7 +2579,7 @@
           {
             "parentPluginId": "@kbn/es-query",
             "id": "def-common.getAggregateQueryMode.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [],
@@ -3159,6 +3159,72 @@
           {
             "parentPluginId": "@kbn/es-query",
             "id": "def-common.isOfAggregateQueryType.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | { [key: string]: any; } | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isOfEsqlQueryType",
+        "type": "Function",
+        "tags": [],
+        "label": "isOfEsqlQueryType",
+        "description": [
+          "\nTrue if the query is of type AggregateQuery and is of type esql, false otherwise."
+        ],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | { [key: string]: any; } | undefined) => boolean"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isOfEsqlQueryType.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "query",
@@ -5885,7 +5951,7 @@
         "label": "AggregateQuery",
         "description": [],
         "signature": [
-          "{ esql: string; }"
+          "{ sql: string; } | { esql: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
         "deprecated": false,

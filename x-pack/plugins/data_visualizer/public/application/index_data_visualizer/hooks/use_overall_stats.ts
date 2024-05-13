@@ -10,10 +10,10 @@ import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/search-types';
+} from '@kbn/data-plugin/common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
@@ -161,8 +161,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchStrategyParams?.timeFieldName,
       searchStrategyParams?.earliest,
       searchStrategyParams?.latest,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify({ query: searchStrategyParams?.searchQuery }),
+      searchStrategyParams?.searchQuery,
       searchStrategyParams?.index,
     ]
   );

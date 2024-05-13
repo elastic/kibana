@@ -9,7 +9,6 @@ import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { SvlReportingServiceProvider } from './svl_reporting';
 import { SvlUserManagerProvider } from './svl_user_manager';
-import { DataViewApiProvider } from './data_view_api';
 
 export type { RoleCredentials } from './svl_user_manager';
 
@@ -19,5 +18,4 @@ export const services = {
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
   svlUserManager: SvlUserManagerProvider,
-  dataViewApi: DataViewApiProvider,
 };

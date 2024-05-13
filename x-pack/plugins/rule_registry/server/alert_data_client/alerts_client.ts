@@ -620,10 +620,7 @@ export class AlertsClient {
       }
 
       // move away from pulling data from _source in the future
-      return {
-        ...alert.hits.hits[0]._source,
-        _index: alert.hits.hits[0]._index,
-      };
+      return alert.hits.hits[0]._source;
     } catch (error) {
       this.logger.error(`get threw an error: ${error}`);
       throw error;

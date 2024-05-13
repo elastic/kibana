@@ -11,13 +11,9 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
-import {
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
-  SecurityPageName,
-} from '../../../../../common/constants';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
@@ -78,7 +74,6 @@ const RowActionComponent = ({
   const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
-  const [{ pageName }] = useRouteSpy();
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
   const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
     'expandableFlyoutInCreateRuleEnabled'
@@ -100,11 +95,7 @@ const RowActionComponent = ({
   );
 
   let showExpandableFlyout: boolean;
-
-  // disable the old flyout on attack discovery page
-  if (pageName === SecurityPageName.attackDiscovery) {
-    showExpandableFlyout = true;
-  } else if (tableId === TableId.rulePreview) {
+  if (tableId === TableId.rulePreview) {
     showExpandableFlyout = isSecurityFlyoutEnabled && isExpandableFlyoutInCreateRuleEnabled;
   } else {
     showExpandableFlyout = isSecurityFlyoutEnabled;

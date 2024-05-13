@@ -11,12 +11,12 @@ import { catchError } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptionsSerializable,
-} from '@kbn/search-types';
 import { getRequestAbortedSignal } from '../..';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptionsSerializable,
+} from '../../../common/search';
 import type { ISearchStart } from '../types';
 
 export function registerBsearchRoute(

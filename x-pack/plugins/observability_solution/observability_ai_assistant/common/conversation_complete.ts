@@ -129,18 +129,12 @@ interface ErrorMetaAttributes {
     tokenLimit?: number;
     tokenCount?: number;
   };
-  [ChatCompletionErrorCode.FunctionNotFoundError]: {
-    name: string;
-  };
+  [ChatCompletionErrorCode.FunctionNotFoundError]: {};
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
-  constructor(
-    public code: T,
-    message: string,
-    public meta: ErrorMetaAttributes[T] = {} as ErrorMetaAttributes[T]
-  ) {
+  constructor(public code: T, message: string, public meta?: ErrorMetaAttributes[T]) {
     super(message);
   }
 }

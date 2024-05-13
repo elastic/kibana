@@ -45,17 +45,18 @@ export interface ThreatIntelligencePluginStart {
 
 export interface ThreatIntelligencePluginStartDeps {
   data: DataPublicPluginStart;
+}
+
+export type Services = {
   cases: CasesPublicStart;
+  data: DataPublicPluginStart;
+  storage: Storage;
   dataViews: DataViewsPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
   securityLayout: any;
   inspector: InspectorPluginStart;
-}
-
-export interface Services extends CoreStart, ThreatIntelligencePluginStartDeps {
-  storage: Storage;
-}
+} & CoreStart;
 
 export interface LicenseAware {
   isEnterprise(): boolean;

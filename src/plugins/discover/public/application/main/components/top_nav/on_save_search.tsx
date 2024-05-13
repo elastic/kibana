@@ -15,7 +15,7 @@ import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-obj
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({

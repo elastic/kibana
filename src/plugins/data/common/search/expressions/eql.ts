@@ -13,8 +13,8 @@ import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ISearchGeneric } from '@kbn/search-types';
 import {
+  ISearchGeneric,
   KibanaContext,
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,

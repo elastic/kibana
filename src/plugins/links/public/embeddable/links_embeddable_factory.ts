@@ -7,8 +7,8 @@
  */
 
 import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { IProvidesLegacyPanelPlacementSettings } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   EmbeddableFactory,
@@ -46,9 +46,7 @@ const isLinksAttributes = (attributes?: unknown): attributes is LinksAttributes 
 };
 
 export class LinksFactoryDefinition
-  implements
-    EmbeddableFactoryDefinition<LinksInput>,
-    IProvidesLegacyPanelPlacementSettings<LinksInput>
+  implements EmbeddableFactoryDefinition<LinksInput>, IProvidesPanelPlacementSettings<LinksInput>
 {
   latestVersion?: string | undefined;
   telemetry?:
@@ -66,10 +64,10 @@ export class LinksFactoryDefinition
     getIconForSavedObject: () => APP_ICON,
   };
 
-  public getLegacyPanelPlacementSettings: IProvidesLegacyPanelPlacementSettings<
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
     LinksInput,
     LinksAttributes | unknown
-  >['getLegacyPanelPlacementSettings'] = (input, attributes) => {
+  >['getPanelPlacementSettings'] = (input, attributes) => {
     if (!isLinksAttributes(attributes) || !attributes.layout) {
       // if we have no information about the layout of this links panel defer to default panel size and placement.
       return {};

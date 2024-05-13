@@ -94,9 +94,8 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { analytics, i18n: i18nStart, theme };
-  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
+  const addToTimelineButton =
+    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -111,7 +110,6 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
     dataProvider,
     field: key,
     ownFocus: false,
-    startServices,
   };
 
   // Use case is for the barchart legend (for example).
@@ -155,10 +153,8 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
 
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { analytics, i18n: i18nStart, theme };
-
-  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
+  const addToTimelineButton =
+    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -173,7 +169,6 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
     dataProvider,
     field: key,
     ownFocus: false,
-    startServices,
   };
 
   // Use case is for the barchart legend (for example).

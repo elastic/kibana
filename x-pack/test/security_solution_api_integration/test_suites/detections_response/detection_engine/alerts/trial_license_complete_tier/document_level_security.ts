@@ -73,9 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  // Notes: Similar tests should be added for serverless once infrastructure
-  // is in place to test roles in MKI enviornment.
-  describe('@ess @skipInServerless find alert with/without doc level security', () => {
+
+  describe('@ess @serverless @skipInServerless find alert with/without doc level security', () => {
     before(async () => {
       await security.role.create(
         roleToAccessSecuritySolution.name,

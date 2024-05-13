@@ -6,7 +6,9 @@ Binary operators
 Unary operators
 Logical operators
 IS NULL and IS NOT NULL predicates
-Cast (::)
+CIDR_MATCH
+ENDS_WITH
 IN
 LIKE
 RLIKE
+STARTS_WITH

@@ -141,10 +141,7 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(
-    record: AssetCriticalityUpsert,
-    refresh = 'wait_for' as const
-  ): Promise<AssetCriticalityRecord> {
+  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
     const id = createId(record);
     const doc = {
       id_field: record.idField,
@@ -156,7 +153,6 @@ export class AssetCriticalityDataClient {
     await this.options.esClient.update({
       id,
       index: this.getIndex(),
-      refresh: refresh ?? false,
       body: {
         doc,
         doc_as_upsert: true,
@@ -244,11 +240,10 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
+  public async delete(idParts: AssetCriticalityIdParts) {
     await this.options.esClient.delete({
       id: createId(idParts),
       index: this.getIndex(),
-      refresh: refresh ?? false,
     });
   }
 }

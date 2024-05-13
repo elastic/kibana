@@ -433,3 +433,8 @@ This connector was renamed. Refer to <<openai-action-type>>.
 
 For the most up-to-date API details, refer to the
 {kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.
+
+[role="exclude",id="playground"]
+== Playground
+
+Coming in 8.14.0.

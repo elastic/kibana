@@ -40,6 +40,7 @@ interface IntegrationsAppProps {
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 const IntegrationsApp = ({
   basepath,
@@ -49,6 +50,7 @@ const IntegrationsApp = ({
   kibanaVersion,
   extensions,
   setHeaderActionMenu,
+  theme$,
 }: IntegrationsAppProps) => {
   return (
     <IntegrationsAppContext
@@ -59,6 +61,7 @@ const IntegrationsApp = ({
       kibanaVersion={kibanaVersion}
       extensions={extensions}
       setHeaderActionMenu={setHeaderActionMenu}
+      theme$={theme$}
     >
       <AppRoutes />
     </IntegrationsAppContext>
@@ -67,7 +70,7 @@ const IntegrationsApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu, theme$ }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage,
@@ -83,6 +86,7 @@ export function renderApp(
         kibanaVersion={kibanaVersion}
         extensions={extensions}
         setHeaderActionMenu={setHeaderActionMenu}
+        theme$={theme$}
       />
     </UsageTracker>,
     element

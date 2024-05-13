@@ -19,7 +19,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../state_management/discover_data_state_container';
+} from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -31,7 +31,7 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';

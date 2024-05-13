@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
-import { catchError, distinctUntilChanged, EMPTY, map, switchMap } from 'rxjs';
+import { catchError, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { parseInterval } from '../../../common/util/parse_interval';
 import type { ExplorerJob } from '../../application/explorer/explorer_utils';
@@ -21,15 +21,7 @@ export function getJobsObservable(
   return embeddableInput.pipe(
     map((v) => v.jobIds),
     distinctUntilChanged(isEqual),
-    switchMap((jobsIds) =>
-      anomalyDetectorService.getJobs$(jobsIds).pipe(
-        catchError((e) => {
-          // Catch error to prevent the observable from completing
-          setErrorHandler(e.body ?? e);
-          return EMPTY;
-        })
-      )
-    ),
+    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
     map((jobs) => {
       const explorerJobs: ExplorerJob[] = jobs.map((job) => {
         const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
@@ -41,6 +33,10 @@ export function getJobsObservable(
         };
       });
       return explorerJobs;
+    }),
+    catchError((e) => {
+      setErrorHandler(e.body ?? e);
+      return of(undefined);
     })
   );
 }

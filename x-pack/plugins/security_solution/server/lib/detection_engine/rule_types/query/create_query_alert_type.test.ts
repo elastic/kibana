@@ -46,7 +46,6 @@ describe('Custom Query Alerts', () => {
     ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
     version: '8.3',
     publicBaseUrl,
-    alerting,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 

@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 import { CheckAll } from './check_all';
 import { CheckStatus } from '../check_status';
@@ -32,6 +33,10 @@ import type {
 } from '../../../types';
 import { getSizeInBytes } from '../../../helpers';
 import { useDataQualityContext } from '../../data_quality_context';
+
+const SummaryActionsFlexGroup = styled(EuiFlexGroup)`
+  gap: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 export const getResultsSortedByDocsCount = (
   results: Record<string, DataQualityCheckResult> | undefined
@@ -232,7 +237,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup data-test-subj="summaryActions" direction="column" gutterSize="s">
+      <SummaryActionsFlexGroup data-test-subj="summaryActions" direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <CheckAll
             formatBytes={formatBytes}
@@ -269,7 +274,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
             openCreateCaseFlyout={openCreateCaseFlyout}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </SummaryActionsFlexGroup>
     </>
   );
 };

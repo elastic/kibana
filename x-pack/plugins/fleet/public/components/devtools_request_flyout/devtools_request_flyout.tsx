@@ -12,8 +12,7 @@ import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewApiRequestFlyout } from '@kbn/es-ui-shared-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { useStartServices } from '../../hooks';
 
@@ -42,7 +41,7 @@ export const DevtoolsRequestFlyoutButton: React.FunctionComponent<
             description={description}
           />
         </KibanaContextProvider>,
-        services
+        { theme$: services.theme.theme$ }
       )
     );
 

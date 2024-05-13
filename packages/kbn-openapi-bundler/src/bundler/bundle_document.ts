@@ -19,11 +19,6 @@ import { createModifyRequiredProcessor } from './document_processors/modify_requ
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
-import {
-  createFlattenFoldedAllOfItemsProcessor,
-  createMergeNonConflictingAllOfItemsProcessor,
-  createUnfoldSingleAllOfItemProcessor,
-} from './document_processors/reduce_all_of_items';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -77,10 +72,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     createSkipInternalPathProcessor('/internal'),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
-    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED]),
-    createFlattenFoldedAllOfItemsProcessor(),
-    createMergeNonConflictingAllOfItemsProcessor(),
-    createUnfoldSingleAllOfItemProcessor(),
+    createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
@@ -89,7 +81,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     removeUnusedComponentsProcessor.removeUnusedComponents(resolvedDocument.document.components);
   }
 
-  // If document.paths was removed by processors skip the document
+  // If document.paths were removed by processors skip the document
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
     throw new SkipException(
       resolvedDocument.absolutePath,
@@ -97,7 +89,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     );
   }
 
-  return { ...resolvedDocument, bundledRefs: Array.from(bundleRefsProcessor.getBundledRefs()) };
+  return { ...resolvedDocument, bundledRefs: bundleRefsProcessor.getBundledRefs() };
 }
 
 interface MaybeObjectWithPaths {

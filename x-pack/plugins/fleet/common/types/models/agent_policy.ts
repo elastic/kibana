@@ -41,7 +41,6 @@ export interface NewAgentPolicy {
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
   keep_monitoring_alive?: boolean | null;
-  supports_agentless?: boolean | null;
 }
 
 // SO definition for this type is declared in server/types/interfaces
@@ -54,7 +53,6 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
-  unprivileged_agents?: number;
   is_protected: boolean;
 }
 

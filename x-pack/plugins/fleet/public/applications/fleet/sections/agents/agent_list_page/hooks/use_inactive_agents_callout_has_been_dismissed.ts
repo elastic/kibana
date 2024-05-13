@@ -7,31 +7,21 @@
 
 import { useState, useEffect } from 'react';
 
-import type { TOUR_STORAGE_CONFIG } from '../../../../../../constants';
-import { TOUR_STORAGE_KEYS } from '../../../../../../constants';
-import { useStartServices } from '../../../../../../hooks';
+const LOCAL_STORAGE_KEY = 'fleet.inactiveAgentsCalloutHasBeenDismissed';
 
 export const useInactiveAgentsCalloutHasBeenDismissed = (): [boolean, (val: boolean) => void] => {
-  const { uiSettings, storage } = useStartServices();
-
   const [inactiveAgentsCalloutHasBeenDismissed, setInactiveAgentsCalloutHasBeenDismissed] =
     useState(false);
 
   useEffect(() => {
-    setInactiveAgentsCalloutHasBeenDismissed(
-      uiSettings.get('hideAnnouncements', false) ||
-        (
-          storage.get(TOUR_STORAGE_KEYS.INACTIVE_AGENTS) as
-            | TOUR_STORAGE_CONFIG['INACTIVE_AGENTS']
-            | undefined
-        )?.active === false
-    );
-  }, [storage, uiSettings]);
+    const storageValue = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storageValue) {
+      setInactiveAgentsCalloutHasBeenDismissed(Boolean(storageValue));
+    }
+  }, []);
 
   const updateInactiveAgentsCalloutHasBeenDismissed = (newValue: boolean) => {
-    storage.set(TOUR_STORAGE_KEYS.INACTIVE_AGENTS, {
-      active: false,
-    } as TOUR_STORAGE_CONFIG['INACTIVE_AGENTS']);
+    localStorage.setItem(LOCAL_STORAGE_KEY, newValue.toString());
     setInactiveAgentsCalloutHasBeenDismissed(newValue);
   };
 

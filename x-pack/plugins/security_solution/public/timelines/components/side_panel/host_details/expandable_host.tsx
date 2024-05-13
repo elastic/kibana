@@ -21,6 +21,7 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
+import { getSourcererScopeId } from '../../../../helpers';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -99,7 +100,7 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
-          scopeId={scopeId}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}

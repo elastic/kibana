@@ -9,7 +9,6 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { FlattenedBucket } from '../../../../common/components/alerts_treemap/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { GenericBuckets } from '../../../../../common/search_strategy/common';
@@ -36,7 +35,6 @@ export const getSingleGroupByAlertsCountTableColumns = ({
           id={`alert-count-draggable-stackByField0-${stackByField0}-${value}`}
           value={value}
           tooltipContent={null}
-          scopeId={TableId.alertsOnAlertsPage}
         />
       );
     },
@@ -75,7 +73,6 @@ export const getMultiGroupAlertsCountTableColumns = ({
           id={`alert-count-draggable-stackByField0-${stackByField0}-${stackByField1}-${value}`}
           value={value}
           tooltipContent={null}
-          scopeId={TableId.alertsOnAlertsPage}
         />
       );
     },
@@ -94,7 +91,6 @@ export const getMultiGroupAlertsCountTableColumns = ({
           id={`alert-count-draggable-stackByField1-${stackByField0}-${stackByField1}-${value}`}
           value={value}
           tooltipContent={null}
-          scopeId={TableId.alertsOnAlertsPage}
         />
       );
     },

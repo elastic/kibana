@@ -15,8 +15,6 @@ import { useTheme } from 'styled-components';
 
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
-import type { TOUR_STORAGE_CONFIG } from '../constants';
-import { TOUR_STORAGE_KEYS } from '../constants';
 import { useStartServices } from '../hooks';
 
 export const AddAgentHelpPopover = ({
@@ -30,31 +28,19 @@ export const AddAgentHelpPopover = ({
   offset?: number;
   closePopover: NoArgCallback<void>;
 }) => {
-  const { docLinks, uiSettings, storage } = useStartServices();
+  const { docLinks, uiSettings } = useStartServices();
   const theme = useTheme() as EuiTheme;
   const optionalProps: { offset?: number } = {};
-  const hideAddAgentTour: boolean = useMemo(() => {
-    return (
-      uiSettings.get('hideAnnouncements', false) ||
-      (
-        storage.get(TOUR_STORAGE_KEYS.ADD_AGENT_POPOVER) as
-          | TOUR_STORAGE_CONFIG['ADD_AGENT_POPOVER']
-          | undefined
-      )?.active === false
-    );
-  }, [storage, uiSettings]);
-
-  const onFinish = () => {
-    storage.set(TOUR_STORAGE_KEYS.ADD_AGENT_POPOVER, {
-      active: false,
-    } as TOUR_STORAGE_CONFIG['ADD_AGENT_POPOVER']);
-  };
+  const hideAnnouncements: boolean = useMemo(
+    () => uiSettings.get('hideAnnouncements'),
+    [uiSettings]
+  );
 
   if (offset !== undefined) {
     optionalProps.offset = offset; // offset being present in props sets it to 0 so only add if specified
   }
 
-  return hideAddAgentTour ? (
+  return hideAnnouncements ? (
     button
   ) : (
     <EuiTourStep
@@ -81,7 +67,7 @@ export const AddAgentHelpPopover = ({
       zIndex={theme.eui.euiZLevel1 - 1} // put popover behind any modals that happen to be open
       isStepOpen={isOpen}
       minWidth={300}
-      onFinish={onFinish}
+      onFinish={() => {}}
       step={1}
       stepsTotal={1}
       title={
@@ -96,7 +82,6 @@ export const AddAgentHelpPopover = ({
       footerAction={
         <EuiLink
           onClick={() => {
-            onFinish();
             closePopover();
           }}
         >

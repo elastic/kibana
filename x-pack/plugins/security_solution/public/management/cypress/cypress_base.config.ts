@@ -74,7 +74,6 @@ export const getCypressBaseConfig = (
         // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
-        // TODO: undo before merge
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,

@@ -138,7 +138,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               return (
                 <Wrapper>
                   <EuiFlexGroup
-                    data-test-subj="sloGroupOverviewPanel"
                     data-shared-item=""
                     justifyContent="flexEnd"
                     wrap
@@ -155,7 +154,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                             embeddable: api,
                           } as ActionExecutionContext);
                         }}
-                        data-test-subj="o11ySloOverviewEditCriteriaLink"
+                        data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
                       >
                         {i18n.translate('xpack.slo.overviewEmbeddable.editCriteriaLabel', {
                           defaultMessage: 'Edit criteria',

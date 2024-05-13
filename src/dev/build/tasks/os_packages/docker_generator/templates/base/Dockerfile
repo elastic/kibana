@@ -25,27 +25,21 @@ RUN cd /tmp && \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
+
 {{^usePublicArtifact}}
 COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar \
-# Exclude serverless.yml disabled assets
-{{#serverless}}
-  --exclude=screenshotting-plugin/chromium \
-  --exclude=screenshotting-plugin/server/assets \
-{{/serverless}}
-  --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz
+RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-{{#cloud}}
 
+{{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 

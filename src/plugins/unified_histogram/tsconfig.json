@@ -32,7 +32,6 @@
     "@kbn/esql-utils",
     "@kbn/discover-utils",
     "@kbn/visualization-utils",
-    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

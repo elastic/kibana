@@ -182,7 +182,7 @@ export const HASH_TO_VERSION_MAP = {
   'infrastructure-monitoring-log-view|c50526fc6040c5355ed027d34d05b35c': '10.0.0',
   'infrastructure-ui-source|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'ingest_manager_settings|b91ffb075799c78ffd7dbd51a279c8c9': '10.1.0',
-  'ingest-agent-policies|0ab9774bc7728d0c0f37d841570f2872': '10.2.0',
+  'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b': '10.1.0',
   'ingest-download-sources|0b0f6828e59805bd07a650d80817c342': '10.0.0',
   'ingest-outputs|b1237f7fdc0967709e75d65d208ace05': '10.6.0',
   'ingest-package-policies|ca63c4c5a946704f045803a6b975dbc6': '10.9.0',

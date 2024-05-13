@@ -35,7 +35,7 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
-import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
+import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
@@ -68,19 +68,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-  leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
-  cellContext?: EuiDataGridProps['cellContext'];
-  eventIdToNoteIds?: Record<string, string[]>;
-} & Pick<
-  UnifiedDataTableProps,
-  | 'onSort'
-  | 'onSetColumns'
-  | 'sort'
-  | 'onFilter'
-  | 'renderCustomGridBody'
-  | 'trailingControlColumns'
-  | 'isSortEnabled'
->;
+} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort' | 'onFilter' | 'isSortEnabled'>;
 
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
@@ -112,9 +100,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-    leadingControlColumns,
-    cellContext,
-    eventIdToNoteIds,
   }) {
     const dispatch = useDispatch();
 
@@ -384,24 +369,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
-          eventIdToNoteIds={eventIdToNoteIds}
           setCustomGridBodyProps={setCustomGridBodyProps}
-          events={events}
           enabledRowRenderers={enabledRowRenderers}
-          eventIdsAddingNotes={cellContext?.eventIdsAddingNotes}
-          onToggleShowNotes={cellContext?.onToggleShowNotes}
-          refetch={refetch}
         />
       ),
-      [
-        tableRows,
-        enabledRowRenderers,
-        events,
-        eventIdToNoteIds,
-        cellContext?.eventIdsAddingNotes,
-        cellContext?.onToggleShowNotes,
-        refetch,
-      ]
+      [tableRows, enabledRowRenderers]
     );
 
     return (
@@ -452,10 +424,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomBodyCallback}
             trailingControlColumns={trailingControlColumns}
-            externalControlColumns={leadingControlColumns}
-            cellContext={cellContext}
+            renderCustomGridBody={renderCustomBodyCallback}
           />
           {showExpandedDetails && !isTimelineExpandableFlyoutEnabled && (
             <DetailsPanel

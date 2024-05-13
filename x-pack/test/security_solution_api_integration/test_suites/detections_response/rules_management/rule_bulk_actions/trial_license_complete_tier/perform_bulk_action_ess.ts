@@ -46,7 +46,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
-  describe('@ess perform_bulk_action - ESS specific logic', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182512
+  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -106,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, { ...getSimpleRule(ruleId, false), index: ['*'] }),
+        createRule(supertest, log, getSimpleRule(ruleId, false)),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 

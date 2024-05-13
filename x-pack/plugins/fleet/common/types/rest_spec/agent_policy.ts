@@ -16,7 +16,7 @@ export interface GetAgentPoliciesRequest {
   };
 }
 
-export type GetAgentPoliciesResponseItem = AgentPolicy;
+export type GetAgentPoliciesResponseItem = AgentPolicy & { agents?: number };
 
 export type BulkGetAgentPoliciesResponse = BulkGetResult<GetAgentPoliciesResponseItem>;
 export type GetAgentPoliciesResponse = ListResult<GetAgentPoliciesResponseItem>;

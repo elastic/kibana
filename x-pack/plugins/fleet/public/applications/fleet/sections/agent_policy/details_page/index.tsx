@@ -28,6 +28,7 @@ import {
 import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 
+import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import {
   PackagePoliciesView,
   SettingsView,
@@ -54,10 +55,13 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     openAddAgentHelpPopoverOpenByDefault
   );
 
+  const agentStatusRequest = useGetAgentStatus(policyId);
+  const { refreshAgentStatus } = agentStatusRequest;
   const {
     application: { navigateToApp },
   } = useStartServices();
   const routeState = useIntraAppState<AgentPolicyDetailsDeployAgentAction>();
+  const agentStatus = agentStatusRequest.data?.results;
 
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -166,6 +170,8 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const headerRightContent = (
     <HeaderRightContent
       agentPolicy={agentPolicy}
+      agentStatus={agentStatus}
+      policyId={policyId}
       onCancelEnrollment={onCancelEnrollment}
       isLoading={isLoading}
       isAddAgentHelpPopoverOpen={isAddAgentHelpPopoverOpen}
@@ -176,13 +182,15 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>
-      <WithHeaderLayout
-        leftColumn={headerLeftContent}
-        rightColumn={headerRightContent}
-        tabs={headerTabs as unknown as EuiTabProps[]}
-      >
-        {content}
-      </WithHeaderLayout>
+      <AgentStatusRefreshContext.Provider value={{ refresh: refreshAgentStatus }}>
+        <WithHeaderLayout
+          leftColumn={headerLeftContent}
+          rightColumn={headerRightContent}
+          tabs={headerTabs as unknown as EuiTabProps[]}
+        >
+          {content}
+        </WithHeaderLayout>
+      </AgentStatusRefreshContext.Provider>
     </AgentPolicyRefreshContext.Provider>
   );
 };

@@ -109,8 +109,6 @@ function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -122,10 +120,7 @@ function getFunctionSignaturesByReturnType(
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
-
-  const deduped = Array.from(new Set(list));
-
-  return deduped
+  return list
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
@@ -732,22 +727,12 @@ describe('autocomplete', () => {
       ...allEvaFunctions,
       ...allGroupingFunctions,
     ]);
-
-    // expect "bucket" NOT to be suggested for its own parameter
-    testSuggestions(
-      'from a | stats by bucket(',
-      [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
-      ].map((field) => `${field},`)
-    );
-
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
     testSuggestions(
       'from a | stats round(',
       [
-        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
+        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
         ...getFieldNamesByType('number'),
         ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
           'round',

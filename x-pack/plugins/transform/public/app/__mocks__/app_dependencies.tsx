@@ -7,11 +7,12 @@
 
 import { useContext } from 'react';
 import { of } from 'rxjs';
+
 import type {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
   ISearchGeneric,
-} from '@kbn/search-types';
+} from '@kbn/data-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

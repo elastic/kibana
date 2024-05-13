@@ -51,8 +51,6 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-import { Subject } from 'rxjs';
-
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
 import {
@@ -87,6 +85,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import { Subject } from 'rxjs';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -194,7 +193,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: fleetStart.authz,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -237,7 +236,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: fleetStart.authz,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);

@@ -135,7 +135,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
           panelPaddingSize="none"
           repositionOnScroll
           ownFocus={false}
-          panelProps={{ ['data-test-subj']: 'hoverActionsPopover' }}
+          data-test-subj={'hoverActionsPopover'}
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (

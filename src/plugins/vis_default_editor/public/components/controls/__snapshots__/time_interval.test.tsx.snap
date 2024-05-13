@@ -31,7 +31,6 @@ exports[`TimeIntervalParamEditor should match snapshot 1`] = `
     onBlur={[MockFunction]}
     onChange={[Function]}
     onCreateOption={[Function]}
-    optionMatcher={[Function]}
     options={
       Array [
         Object {

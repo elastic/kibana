@@ -46,7 +46,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
     setOriginatingPath(pathValue);
     setOriginatingApp(value);
-    setValueInput(valueInputValue as VisualizeInput | undefined);
+    setValueInput(valueInputValue as any);
     setEmbeddableId(embeddableIdValue);
 
     if (!valueInputValue) {

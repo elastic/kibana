@@ -10,6 +10,7 @@ import type { Setup as InspectorSetupContract } from '@kbn/inspector-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -24,7 +25,11 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+} from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -120,6 +125,7 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
+  dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
@@ -224,18 +230,15 @@ export class MapsPlugin
       name: APP_NAME,
     });
 
-    plugins.embeddable.registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        return {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
+    registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
+      if (!savedObject.managed) {
+        return { savedObjectId: savedObject.id };
       }
-    );
+
+      return {
+        attributes: savedObjectToEmbeddableAttributes(savedObject),
+      };
+    });
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 

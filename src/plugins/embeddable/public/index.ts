@@ -25,7 +25,6 @@ export {
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
-  getReactEmbeddableSavedObjects,
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
@@ -47,6 +46,7 @@ export {
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
+  registerReactEmbeddableSavedObject,
   runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
@@ -80,7 +80,6 @@ export type {
   PanelState,
   PropertySpec,
   RangeSelectContext,
-  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
@@ -97,11 +96,15 @@ export type { EnhancementRegistryDefinition } from './types';
 
 export {
   ReactEmbeddableRenderer,
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
   type ReactEmbeddableRegistration,
   startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
+
+export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

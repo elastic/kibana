@@ -293,7 +293,7 @@ export const IndexPatternTable = ({
       fill={true}
       iconType="plusInCircle"
       onClick={() => setShowCreateDialog(true)}
-      data-test-subj="createDataViewButton"
+      data-test-subj="createIndexPatternButton"
     >
       <FormattedMessage
         id="indexPatternManagement.dataViewTable.createBtn"

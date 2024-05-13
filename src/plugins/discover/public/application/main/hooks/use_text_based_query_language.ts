@@ -10,8 +10,8 @@ import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
-import { useSavedSearchInitial } from '../state_management/discover_state_provider';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
+import { useSavedSearchInitial } from '../services/discover_state_provider';
+import type { DiscoverStateContainer } from '../services/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 

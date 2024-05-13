@@ -55,7 +55,7 @@ export default function Filters() {
   );
 
   return (
-    <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s" wrap>
+    <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s">
       <EuiFlexItem>
         <FilterBar query={selectedQuery} onQueryChange={onQueryChange} />
       </EuiFlexItem>

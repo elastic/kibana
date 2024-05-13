@@ -205,7 +205,6 @@ export const useDatasetQualityTable = () => {
     sort: { sort },
     onTableChange,
     pagination,
-    filteredItems,
     renderedItems,
     columns,
     loading,

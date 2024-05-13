@@ -14,9 +14,6 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useQueryInspector } from '../../../../../common/components/page/manage_query';
-import { formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -47,10 +44,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
-
 export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
-  const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
@@ -65,23 +59,12 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     data: riskScoreData,
     error: riskScoreError,
     loading: loadingRiskScore,
-    inspect: inspectRiskScore,
-    refetch,
   } = useRiskScore({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: nameFilterQuery === undefined,
-  });
-
-  useQueryInspector({
-    deleteQuery,
-    inspect: inspectRiskScore,
-    loading: loadingRiskScore,
-    queryId: RISK_INPUTS_TAB_QUERY_ID,
-    refetch,
-    setQuery,
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
@@ -259,7 +242,6 @@ const ContextsSection: React.FC<{
       <EuiInMemoryTable
         compressed={true}
         loading={loading}
-        data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={[
           {
@@ -364,17 +346,5 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   );
 };
 
-const formatContribution = (value: number): string => {
-  const fixedValue = formatRiskScore(value);
-
-  // prevent +0.00 for values like 0.0001
-  if (fixedValue === '0.00') {
-    return fixedValue;
-  }
-
-  if (value > 0) {
-    return `+${fixedValue}`;
-  }
-
-  return fixedValue;
-};
+const formatContribution = (value: number) =>
+  value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);

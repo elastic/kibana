@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 
-export const getDefaultSingleMetricViewerPanelTitle = (jobId: JobId) =>
+export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
-    defaultMessage: 'ML single metric viewer chart for {jobId}',
-    values: { jobId },
+    defaultMessage: 'ML single metric viewer chart for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
   });

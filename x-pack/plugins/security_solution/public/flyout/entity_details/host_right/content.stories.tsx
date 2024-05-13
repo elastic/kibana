@@ -35,8 +35,6 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('no observed data', () => (
@@ -60,8 +58,6 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('loading', () => (
@@ -85,7 +81,5 @@ storiesOf('Components/HostPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ));

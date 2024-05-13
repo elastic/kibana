@@ -27,7 +27,6 @@ import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
   Threshold,
@@ -676,13 +675,4 @@ export const buildSetupDescription = (label: string, setup: string): ListItems[]
     ];
   }
   return [];
-};
-
-export const buildIntervalDescription = (label: string, value: string): ListItems[] => {
-  return [
-    {
-      title: label,
-      description: <IntervalAbbrScreenReader interval={value} />,
-    },
-  ];
 };

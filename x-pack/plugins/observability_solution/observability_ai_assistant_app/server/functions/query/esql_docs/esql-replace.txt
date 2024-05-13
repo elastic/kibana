@@ -2,14 +2,16 @@ REPLACE
 
 Syntax
 Parameters
-string
+str
 String expression.
 regex
 Regular expression.
-newString
+newStr
 Replacement string.
-DescriptionThe function substitutes in the string str any match of the regular expression regex with the replacement string newStr.Supported types
-ExampleThis example replaces any occurrence of the word "World" with the word "Universe":
+DescriptionThe function substitutes in the string str any match of the regular expression
+regex with the replacement string newStr.If any of the arguments is null, the result is null.Supported types
+ExampleThis example replaces any occurrence of the word "World" with the word
+"Universe":
 ```esql
 ROW str = "Hello World"
 | EVAL str = REPLACE(str, "World", "Universe")

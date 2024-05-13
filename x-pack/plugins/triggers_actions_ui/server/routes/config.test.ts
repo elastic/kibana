@@ -40,7 +40,7 @@ const ruleTypes = [
 ];
 
 describe('createConfigRoute', () => {
-  it('registers the route and returns exposed config values if user is authorized', async () => {
+  it('registers the route and returns config if user is authorized', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
     const mockRulesClient = rulesClientMock.create();
@@ -54,7 +54,6 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
-        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });
@@ -89,7 +88,6 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
-        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });

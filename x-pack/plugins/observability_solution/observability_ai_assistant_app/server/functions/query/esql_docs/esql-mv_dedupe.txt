@@ -2,9 +2,9 @@ MV_DEDUPE
 
 Syntax
 Parameters
-field
+v
 Multivalue expression.
-DescriptionRemove duplicate values from a multivalued field.
+DescriptionRemoves duplicates from a multivalue expression.
 MV_DEDUPE may, but won’t always, sort the values in the column.
 Supported types
 Example

@@ -11,8 +11,13 @@ import type { Writable } from 'stream';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
+import {
+  ESQL_SEARCH_STRATEGY,
+  type IKibanaSearchRequest,
+  type IKibanaSearchResponse,
+  cellHasFormulas,
+  getEsQueryConfig,
+} from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';

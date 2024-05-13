@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { APP_ID } from '../../../common';
@@ -43,8 +43,6 @@ const DetectionResponseComponent = () => {
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
-  const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
-
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
@@ -68,7 +66,7 @@ const DetectionResponseComponent = () => {
                       <EuiFlexItem>
                         <AlertsByStatus
                           signalIndexName={signalIndexName}
-                          additionalFilters={additionalFilters}
+                          additionalFilters={filterQuery ? [filterQuery] : undefined}
                         />
                       </EuiFlexItem>
                     )}

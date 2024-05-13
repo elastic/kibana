@@ -11,8 +11,10 @@ import { set } from '@kbn/safer-lodash-set';
 import { Keystore } from '.';
 import { getKeystore } from './get_keystore';
 
-export async function readKeystore(keystorePath = getKeystore()) {
-  const keystore = await Keystore.initialize(keystorePath);
+export function readKeystore(keystorePath = getKeystore()) {
+  const keystore = new Keystore(keystorePath);
+  keystore.load();
+
   const keys = Object.keys(keystore.data);
   const data = {};
 

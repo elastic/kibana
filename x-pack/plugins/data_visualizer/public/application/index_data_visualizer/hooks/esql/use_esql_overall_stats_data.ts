@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ISearchOptions } from '@kbn/search-types';
+import type { ISearchOptions } from '@kbn/data-plugin/common';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { getESQLWithSafeLimit, ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -455,14 +455,13 @@ export const useESQLOverallStatsData = (
             title: fieldStatsErrorTitle,
           });
         }
-        setQueryHistoryStatus(false);
         // Log error to console for better debugging
         // eslint-disable-next-line no-console
         console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify({ fieldStatsRequest })]
+    [runRequest, toasts, JSON.stringify({ fieldStatsRequest }), onError]
   );
 
   // auto-update

@@ -25,13 +25,6 @@ export const insightsGeneratedEvent: TelemetryEvent = {
         optional: false,
       },
     },
-    alertsContextCount: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of alerts sent as context to the LLM',
-        optional: false,
-      },
-    },
     alertsCount: {
       type: 'integer',
       _meta: {

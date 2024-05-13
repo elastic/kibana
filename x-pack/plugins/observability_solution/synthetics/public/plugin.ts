@@ -159,14 +159,11 @@ export class UptimePlugin
       deepLinks: [
         {
           id: 'overview',
-          title: this._isServerless
-            ? i18n.translate('xpack.synthetics.overviewPage.serverless.linkText', {
-                defaultMessage: 'Overview',
-              })
-            : i18n.translate('xpack.synthetics.overviewPage.linkText', {
-                defaultMessage: 'Monitors',
-              }),
+          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
+            defaultMessage: 'Monitors',
+          }),
           path: '/',
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'certificates',
@@ -174,6 +171,7 @@ export class UptimePlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
+          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {

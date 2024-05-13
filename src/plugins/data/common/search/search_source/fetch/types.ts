@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+
 import { SearchSourceSearchOptions } from '../../..';
 import { GetConfigFn } from '../../../types';
+import { IKibanaSearchResponse } from '../../types';
 
 /**
  * @internal

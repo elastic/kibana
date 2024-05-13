@@ -8,12 +8,11 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { META_FIELD_X_OAS_ANY } from '../oas_meta_fields';
 import { Type, TypeOptions } from './type';
 
 export class AnyType extends Type<any> {
   constructor(options?: TypeOptions<any>) {
-    super(internals.any().meta({ [META_FIELD_X_OAS_ANY]: true }), options);
+    super(internals.any(), options);
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

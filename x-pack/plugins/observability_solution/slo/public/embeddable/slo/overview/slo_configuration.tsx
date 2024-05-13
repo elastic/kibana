@@ -73,7 +73,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="singleSloSelector" grow>
+              <EuiFlexItem grow>
                 <SloSelector
                   singleSelection={true}
                   hasError={hasError}
@@ -157,7 +157,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiFlyoutBody data-test-subj="sloGroupOverviewConfiguration">
+      <EuiFlyoutBody className="sloOverviewEmbeddable">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -200,7 +200,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   );
 
   return (
-    <EuiFlyout data-test-subj="sloSingleOverviewConfiguration" onClose={onCancel}>
+    <EuiFlyout onClose={onCancel}>
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

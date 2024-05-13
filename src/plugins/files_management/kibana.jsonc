@@ -11,6 +11,8 @@
       "files",
       "management"
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

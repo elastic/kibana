@@ -776,7 +776,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly attackDiscoveryEnabled: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -838,7 +838,7 @@
         "label": "AttackDiscoveryPostResponse",
         "description": [],
         "signature": [
-          "{ connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }"
+          "{ connector_id?: string | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
         "deprecated": false,
@@ -1679,7 +1679,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantModelEvaluation: boolean; }"
+          "{ assistantModelEvaluation: boolean; attackDiscoveryEnabled: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -2451,7 +2451,7 @@
         "label": "AttackDiscoveryPostResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ connector_id: Zod.ZodOptional<Zod.ZodString>; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; attackDiscoveries: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }>, \"many\">>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; status: Zod.ZodOptional<Zod.ZodString>; trace_data: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>"
+          "Zod.ZodObject<{ connector_id: Zod.ZodOptional<Zod.ZodString>; attackDiscoveries: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }>, \"many\">>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; status: Zod.ZodOptional<Zod.ZodString>; trace_data: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { connector_id?: string | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { connector_id?: string | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
         "deprecated": false,
@@ -2798,7 +2798,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly attackDiscoveryEnabled: false; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -3023,7 +3023,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; }, { assistantModelEvaluation: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; attackDiscoveryEnabled: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; attackDiscoveryEnabled: boolean; }, { assistantModelEvaluation: boolean; attackDiscoveryEnabled: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,

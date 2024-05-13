@@ -57,7 +57,6 @@ export interface LogstashStats {
   agent?: {
     type: string;
   };
-  // legacy monitoring shape
   logstash_stats?: {
     pipelines?: [
       {
@@ -74,36 +73,9 @@ export interface LogstashStats {
       snapshot?: string;
     };
   };
-  // metricbeat monitoring shape
-  logstash?: {
-    node?: {
-      stats?: {
-        pipelines?: [
-          {
-            id?: string;
-            ephemeral_id: string;
-            queue?: {
-              type: string;
-            };
-          }
-        ];
-        logstash?: {
-          version?: string;
-          uuid?: string;
-          snapshot?: string;
-        };
-      };
-    };
-    elasticsearch?: {
-      cluster?: {
-        id?: string;
-      };
-    };
-  };
 }
 
 export interface LogstashState {
-  // legacy monitoring shape
   logstash_state?: {
     pipeline?: {
       batch_size?: number;
@@ -121,32 +93,6 @@ export interface LogstashState {
               };
             }
           ];
-        };
-      };
-    };
-  };
-  // metricbeat monitoring shape
-  logstash?: {
-    node?: {
-      state?: {
-        pipeline?: {
-          batch_size?: number;
-          workers?: number;
-          representation?: {
-            graph?: {
-              vertices?: [
-                {
-                  config_name?: string;
-                  plugin_type?: string;
-                  meta?: {
-                    source?: {
-                      protocol?: string;
-                    };
-                  };
-                }
-              ];
-            };
-          };
         };
       };
     };
@@ -170,26 +116,20 @@ export interface LogstashProcessOptions {
  */
 export function processStatsResults(
   results: estypes.SearchResponse<LogstashStats>,
-  { clusters, allEphemeralIds, versions, plugins }: LogstashProcessOptions,
-  isSelfMonitoring: boolean
+  { clusters, allEphemeralIds, versions, plugins }: LogstashProcessOptions
 ) {
   const currHits = results?.hits?.hits || [];
   currHits.forEach((hit) => {
-    const clusterUuid = isSelfMonitoring
-      ? hit._source!.cluster_uuid
-      : hit._source!.logstash?.elasticsearch?.cluster?.id;
-
-    if (clusterUuid !== undefined && clusters[clusterUuid] === undefined) {
+    const clusterUuid = hit._source!.cluster_uuid;
+    if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getLogstashBaseStats();
       versions[clusterUuid] = new Map();
       plugins[clusterUuid] = new Map();
     }
-    const logstashStats = isSelfMonitoring
-      ? hit._source?.logstash_stats
-      : hit._source?.logstash?.node?.stats;
+    const logstashStats = hit._source?.logstash_stats;
+    const clusterStats = clusters[clusterUuid].cluster_stats;
 
-    if (clusterUuid !== undefined && logstashStats !== undefined) {
-      const clusterStats = clusters[clusterUuid].cluster_stats || {};
+    if (clusterStats !== undefined && logstashStats !== undefined) {
       clusters[clusterUuid].count = (clusters[clusterUuid].count || 0) + 1;
 
       const thisVersion = logstashStats.logstash?.version;
@@ -198,7 +138,7 @@ export function processStatsResults(
       clusters[clusterUuid].versions = mapToList(a, 'version');
 
       // Internal Collection has no agent field, so default to 'internal_collection'
-      let thisCollectionType = isSelfMonitoring ? 'internal_collection' : hit._source?.agent?.type;
+      let thisCollectionType = hit._source?.agent?.type;
       if (thisCollectionType === undefined) {
         thisCollectionType = 'internal_collection';
       }
@@ -237,17 +177,14 @@ export function processStatsResults(
 export function processLogstashStateResults(
   results: estypes.SearchResponse<LogstashState>,
   clusterUuid: string,
-  { clusters, versions, plugins }: LogstashProcessOptions,
-  isSelfMonitoring: boolean
+  { clusters, plugins }: LogstashProcessOptions
 ) {
   const currHits = results?.hits?.hits || [];
   const clusterStats = clusters[clusterUuid].cluster_stats;
   const pipelineStats = clusters[clusterUuid].cluster_stats?.pipelines;
 
   currHits.forEach((hit) => {
-    const thisLogstashStatePipeline = isSelfMonitoring
-      ? hit._source?.logstash_state?.pipeline
-      : hit._source?.logstash?.node?.state?.pipeline;
+    const thisLogstashStatePipeline = hit._source?.logstash_state?.pipeline;
 
     if (pipelineStats !== undefined && thisLogstashStatePipeline !== undefined) {
       pipelineStats.count = (pipelineStats.count || 0) + 1;
@@ -325,51 +262,44 @@ export function processLogstashStateResults(
 
 export async function fetchLogstashStats(
   callCluster: ElasticsearchClient,
-  clusterUuid: string,
+  clusterUuids: string[],
   start: string,
   end: string,
-  { page = 0, ...options }: { page?: number } & LogstashProcessOptions,
-  isSelfMonitoring: boolean
+  { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const statsField = isSelfMonitoring ? 'logstash_stats' : 'logstash.node.stats';
-  const filterPath: string[] = [
-    'hits.hits._source.cluster_uuid',
-    'hits.hits._source.type',
-    'hits.hits._source.source_node',
-    'hits.hits._source.agent.type',
-    'hits.hits._source.logstash.elasticsearch.cluster.id', // alias for cluster_uuid
-    `hits.hits._source.${statsField}.pipelines.id`,
-    `hits.hits._source.${statsField}.pipelines.ephemeral_id`,
-    `hits.hits._source.${statsField}.pipelines.queue.type`,
-    `hits.hits._source.${statsField}.logstash.version`,
-    `hits.hits._source.${statsField}.logstash.uuid`,
-  ];
-
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
     ignore_unavailable: true,
-    filter_path: filterPath,
+    filter_path: [
+      'hits.hits._source.cluster_uuid',
+      'hits.hits._source.type',
+      'hits.hits._source.source_node',
+      'hits.hits._source.agent.type',
+      'hits.hits._source.logstash_stats.pipelines.id',
+      'hits.hits._source.logstash_stats.pipelines.ephemeral_id',
+      'hits.hits._source.logstash_stats.pipelines.queue.type',
+      'hits.hits._source.logstash_stats.logstash.version',
+      'hits.hits._source.logstash_stats.logstash.uuid',
+    ],
     body: {
       query: createQuery({
         start,
         end,
         filters: [
-          { term: { cluster_uuid: clusterUuid } },
+          { terms: { cluster_uuid: clusterUuids } },
           {
             bool: {
               should: [
                 { term: { type: 'logstash_stats' } },
-                { term: { 'metricset.name': 'node_stats' } },
+                { term: { 'metricset.name': 'stats' } },
               ],
             },
           },
         ],
       }) as estypes.QueryDslQueryContainer,
       from: page * HITS_SIZE,
-      collapse: {
-        field: `${statsField}.logstash.uuid`,
-      },
-      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
+      collapse: { field: 'logstash_stats.logstash.uuid' },
+      sort: [{ ['logstash_stats.timestamp']: { order: 'desc', unmapped_type: 'long' } }],
       size: HITS_SIZE,
     },
   };
@@ -383,7 +313,7 @@ export async function fetchLogstashStats(
 
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processStatsResults(results, options, isSelfMonitoring);
+    processStatsResults(results, options);
   }
   return Promise.resolve();
 }
@@ -394,42 +324,37 @@ export async function fetchLogstashState(
   ephemeralIds: string[],
   start: string,
   end: string,
-  { page = 0, ...options }: { page?: number } & LogstashProcessOptions,
-  isSelfMonitoring: boolean
+  { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
-  const stateField = isSelfMonitoring ? 'logstash_state' : 'logstash.node.state';
-  const filterPath: string[] = [
-    `hits.hits._source.${stateField}.pipeline.batch_size`,
-    `hits.hits._source.${stateField}.pipeline.workers`,
-    `hits.hits._source.${stateField}.pipeline.representation.graph.vertices`,
-    `hits.hits._source.type`,
-  ];
-
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
     ignore_unavailable: true,
-    filter_path: filterPath,
+    filter_path: [
+      'hits.hits._source.logstash_state.pipeline.batch_size',
+      'hits.hits._source.logstash_state.pipeline.workers',
+      'hits.hits._source.logstash_state.pipeline.representation.graph.vertices.config_name',
+      'hits.hits._source.logstash_state.pipeline.representation.graph.vertices.plugin_type',
+      'hits.hits._source.logstash_state.pipeline.representation.graph.vertices.meta.source.protocol',
+      'hits.hits._source.logstash_state.pipeline.representation.graph.vertices',
+      'hits.hits._source.type',
+    ],
     body: {
       query: createQuery({
-        // intentionally not using start and end periods as we need node state info to fill plugin usages
-        // especially with metricbeat monitoring
+        start,
+        end,
         filters: [
-          { terms: { [`${stateField}.pipeline.ephemeral_id`]: ephemeralIds } },
+          { terms: { 'logstash_state.pipeline.ephemeral_id': ephemeralIds } },
           {
             bool: {
-              should: [
-                { term: { type: 'logstash_state' } },
-                { term: { 'metricset.name': 'node' } },
-              ],
+              must: { term: { type: 'logstash_state' } },
             },
           },
         ],
       }) as estypes.QueryDslQueryContainer,
-      collapse: {
-        field: `${stateField}.pipeline.ephemeral_id`,
-      },
+      from: page * HITS_SIZE,
+      collapse: { field: 'logstash_state.pipeline.ephemeral_id' },
       sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-      size: ephemeralIds.length,
+      size: HITS_SIZE,
     },
   };
 
@@ -442,7 +367,7 @@ export async function fetchLogstashState(
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processLogstashStateResults(results, clusterUuid, options, isSelfMonitoring);
+    processLogstashStateResults(results, clusterUuid, options);
   }
   return Promise.resolve();
 }
@@ -468,20 +393,9 @@ export async function getLogstashStats(
     plugins: {},
   };
 
-  // if index name contains '-mb', means metricbeat based monitoring
-  // filter_path and collapse fields in the queries differ on metricbeat vs. self-monitoring
-  // note: agent driven LS monitoring indices pattern differ ".ds-metrics-logstash*"
-  for (const clusterUuid of clusterUuids) {
-    const logstashMonitoringIndex: string = await getLogstashMonitoringIndex(
-      callCluster,
-      clusterUuid
-    );
-
-    // no need to proceed if we don't have monitoring metrics
-    if (logstashMonitoringIndex !== '') {
-      const isSelfMonitoring: boolean = logstashMonitoringIndex.indexOf('-mb') === -1;
-      await fetchLogstashStats(callCluster, clusterUuid, start, end, options, isSelfMonitoring);
-
+  await fetchLogstashStats(callCluster, clusterUuids, start, end, options);
+  await Promise.all(
+    clusterUuids.map(async (clusterUuid) => {
       if (options.clusters[clusterUuid] !== undefined) {
         await fetchLogstashState(
           callCluster,
@@ -489,40 +403,10 @@ export async function getLogstashStats(
           options.allEphemeralIds[clusterUuid],
           start,
           end,
-          options,
-          isSelfMonitoring
+          options
         );
       }
-    }
-  }
+    })
+  );
   return options.clusters;
-}
-
-export async function getLogstashMonitoringIndex(
-  callCluster: ElasticsearchClient,
-  clusterUuid: string
-): Promise<string> {
-  const params: estypes.SearchRequest = {
-    index: INDEX_PATTERN_LOGSTASH,
-    ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        clusterUuid,
-      }) as estypes.QueryDslQueryContainer,
-      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-      size: 1,
-    },
-  };
-
-  const results = await callCluster.search<LogstashStats>(params, {
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
-  });
-  const hitsLength = results?.hits?.hits.length || 0;
-  if (hitsLength > 0) {
-    const [firstDocument] = results.hits.hits;
-    return Promise.resolve(firstDocument._index);
-  }
-  return Promise.resolve('');
 }

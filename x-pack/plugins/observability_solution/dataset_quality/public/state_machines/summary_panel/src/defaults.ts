@@ -11,10 +11,19 @@ export const MAX_RETRIES = 1;
 export const RETRY_DELAY_IN_MS = 5000;
 
 export const defaultContext: DefaultDatasetsSummaryPanelContext = {
+  datasetsQuality: {
+    percentages: [],
+  },
+  datasetsActivity: {
+    total: 0,
+    active: 0,
+  },
   estimatedData: {
     estimatedDataInBytes: 0,
   },
   retries: {
+    datasetsQualityRetries: 0,
+    datasetsActivityRetries: 0,
     estimatedDataRetries: 0,
   },
 };

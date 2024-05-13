@@ -7,7 +7,6 @@
 
 import { isEmpty, isNumber } from 'lodash/fp';
 
-import type { Filter } from '@kbn/es-query';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
@@ -281,8 +280,3 @@ export const buildIsOneOfQueryMatch = ({
 export const isPrimitiveArray = (value: unknown): value is Array<string | number | boolean> =>
   Array.isArray(value) &&
   (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));
-
-export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
-
-export const getNonDropAreaFilters = (filters: Filter[] = []) =>
-  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);

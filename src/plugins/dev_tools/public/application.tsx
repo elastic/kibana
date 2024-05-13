@@ -7,10 +7,12 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -18,13 +20,13 @@ import type {
   ApplicationStart,
   ChromeStart,
   ScopedHistory,
+  CoreTheme,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
-import { DevToolsStartServices } from './types';
 
 export interface AppServices {
   docTitleService: DocTitleService;
@@ -36,9 +38,9 @@ interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
+  theme$: Observable<CoreTheme>;
   appServices: AppServices;
   location: RouteComponentProps['location'];
-  startServices: DevToolsStartServices;
 }
 
 interface MountedDevToolDescriptor {
@@ -51,9 +53,9 @@ function DevToolsWrapper({
   devTools,
   activeDevTool,
   updateRoute,
+  theme$,
   appServices,
   location,
-  startServices,
 }: DevToolsWrapperProps) {
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
@@ -121,7 +123,7 @@ function DevToolsWrapper({
             const params = {
               element,
               location,
-              ...startServices,
+              theme$,
             };
 
             const unmountHandler = await activeDevTool.mount(params);
@@ -167,9 +169,9 @@ export function renderApp(
   application: ApplicationStart,
   chrome: ChromeStart,
   history: ScopedHistory,
+  theme$: Observable<CoreTheme>,
   devTools: readonly DevToolApp[],
-  appServices: AppServices,
-  startServices: DevToolsStartServices
+  appServices: AppServices
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
@@ -178,35 +180,37 @@ export function renderApp(
   setBadge(application, chrome);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...startServices}>
-      <Router>
-        <Routes>
-          {devTools
-            // Only create routes for devtools that are not disabled
-            .filter((devTool) => !devTool.isDisabled())
-            .map((devTool) => (
-              <Route
-                key={devTool.id}
-                path={`/${devTool.id}`}
-                exact={!devTool.enableRouting}
-                render={(props) => (
-                  <DevToolsWrapper
-                    updateRoute={props.history.push}
-                    location={props.location}
-                    activeDevTool={devTool}
-                    devTools={devTools}
-                    appServices={appServices}
-                    startServices={startServices}
-                  />
-                )}
-              />
-            ))}
-          <Route path="/">
-            <Redirect to={`/${devTools[0].id}`} />
-          </Route>
-        </Routes>
-      </Router>
-    </KibanaRenderContextProvider>,
+    <I18nProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <Router>
+          <Routes>
+            {devTools
+              // Only create routes for devtools that are not disabled
+              .filter((devTool) => !devTool.isDisabled())
+              .map((devTool) => (
+                <Route
+                  key={devTool.id}
+                  path={`/${devTool.id}`}
+                  exact={!devTool.enableRouting}
+                  render={(props) => (
+                    <DevToolsWrapper
+                      updateRoute={props.history.push}
+                      location={props.location}
+                      activeDevTool={devTool}
+                      devTools={devTools}
+                      theme$={theme$}
+                      appServices={appServices}
+                    />
+                  )}
+                />
+              ))}
+            <Route path="/">
+              <Redirect to={`/${devTools[0].id}`} />
+            </Route>
+          </Routes>
+        </Router>
+      </KibanaThemeProvider>
+    </I18nProvider>,
     element
   );
 

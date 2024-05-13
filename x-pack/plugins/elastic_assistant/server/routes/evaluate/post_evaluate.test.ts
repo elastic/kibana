@@ -46,6 +46,7 @@ describe('Post Evaluate Route', () => {
     it('returns a 404 if evaluate feature is not registered', async () => {
       context.elasticAssistant.getRegisteredFeatures.mockReturnValueOnce({
         assistantModelEvaluation: false,
+        attackDiscoveryEnabled: false,
       });
 
       const response = await server.inject(

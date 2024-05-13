@@ -13,18 +13,19 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
+
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { PackageInfo } from '../../../types';
-import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';
 
 import { useConfirmForceInstall } from '.';
-
-type StartServices = Pick<FleetStartServices, 'notifications' | 'analytics' | 'i18n' | 'theme'>;
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -42,7 +43,13 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
-function usePackageInstall({ startServices }: { startServices: StartServices }) {
+function usePackageInstall({
+  notifications,
+  theme$,
+}: {
+  notifications: NotificationsStart;
+  theme$: Observable<CoreTheme>;
+}) {
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
@@ -60,8 +67,6 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
     },
     []
   );
-
-  const { notifications } = startServices;
 
   const getPackageInstallStatus = useCallback(
     (pkg: string): PackageInstallItem => {
@@ -110,7 +115,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Reinstalled {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -118,7 +123,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Successfully reinstalled {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
           });
         } else if (isUpgrade) {
@@ -129,7 +134,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Upgraded {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -137,7 +142,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Successfully upgraded {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
           });
         } else {
@@ -148,7 +153,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Installed {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -156,7 +161,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
                 defaultMessage="Successfully installed {title}"
                 values={{ title }}
               />,
-              startServices
+              { theme$ }
             ),
           });
         }
@@ -187,7 +192,14 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
       return true;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getPackageInstallStatus, setPackageInstallStatus, startServices, getPath, history]
+    [
+      getPackageInstallStatus,
+      setPackageInstallStatus,
+      notifications.toasts,
+      theme$,
+      getPath,
+      history,
+    ]
   );
 
   const uninstallPackage = useCallback(
@@ -209,14 +221,14 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
               defaultMessage="Failed to uninstall {title} package"
               values={{ title }}
             />,
-            startServices
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallErrorDescription"
               defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
             />,
-            startServices
+            { theme$ }
           ),
           iconType: 'error',
         });
@@ -230,7 +242,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
               defaultMessage="Uninstalled {title}"
               values={{ title }}
             />,
-            startServices
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
@@ -238,7 +250,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
               defaultMessage="Successfully uninstalled {title}"
               values={{ title }}
             />,
-            startServices
+            { theme$ }
           ),
         });
         if (redirectToVersion !== version) {
@@ -249,7 +261,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
         }
       }
     },
-    [notifications.toasts, setPackageInstallStatus, getPath, history, startServices]
+    [notifications.toasts, setPackageInstallStatus, getPath, history, theme$]
   );
 
   return {

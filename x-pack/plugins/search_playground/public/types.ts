@@ -40,7 +40,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
-  usageCollection?: UsageCollectionStart;
+  usageCollection: UsageCollectionStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
@@ -52,7 +52,7 @@ export interface AppServicesContext {
   share: SharePluginStart;
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
+  usageCollection: UsageCollectionStart;
 }
 
 export enum ChatFormFields {
@@ -74,7 +74,7 @@ export interface ChatForm {
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
-  [ChatFormFields.sourceFields]: { [index: string]: string[] };
+  [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
 }

@@ -211,7 +211,7 @@ function useRole(
       ? rolesAPIClient.getRole(roleName)
       : Promise.resolve({
           name: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
@@ -528,9 +528,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
           docLinks={docLinks}
           canUseRemoteIndices={
             buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
-          }
-          canUseRemoteClusters={
-            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
           }
           isDarkMode={isDarkMode}
           buildFlavor={buildFlavor}

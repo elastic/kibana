@@ -8,8 +8,8 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '@kbn/search-types';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
@@ -44,6 +44,7 @@ import { SearchSessionIncompleteWarning } from './search_session_incomplete_warn
 import { getMockSearchConfig } from '../../../config.mock';
 
 let searchInterceptor: SearchInterceptor;
+let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
@@ -86,7 +87,6 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('SearchInterceptor', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   let sessionService: jest.Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
@@ -139,6 +139,7 @@ describe('SearchInterceptor', () => {
       http: mockCoreSetup.http,
       executionContext: mockCoreSetup.executionContext,
       session: sessionService,
+      theme: themeServiceMock.createSetupContract(),
       searchConfig: getMockSearchConfig({}),
     });
   });

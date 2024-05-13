@@ -13,7 +13,6 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
 import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 
 export interface Props {
   title?: string;
@@ -26,7 +25,6 @@ export interface Props {
   isLayerTOCOpen?: boolean;
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
-  getTooltipRenderer?: () => RenderToolTipContent;
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
@@ -66,10 +64,6 @@ export class MapComponent extends Component<Props> {
       query: this.props.query,
       timeRange: this.props.timeRange,
     });
-
-    if (this.props.getTooltipRenderer) {
-      this._mapEmbeddable.setRenderTooltipContent(this.props.getTooltipRenderer());
-    }
 
     if (this.props.onInitialRenderComplete) {
       this._mapEmbeddable

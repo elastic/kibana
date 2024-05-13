@@ -10,22 +10,20 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
-import type { FleetStartServices } from '../../../../plugin';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface Props {
   children: React.ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  theme$: AppMountParameters['theme$'];
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, startServices }) => {
+export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, startServices);
+      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
       return mount(element);
     });
 
@@ -33,7 +31,7 @@ export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, startSe
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu, startServices]);
+  }, [portalNode, setHeaderActionMenu, theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

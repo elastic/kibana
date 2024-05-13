@@ -91,7 +91,7 @@ describe('View agents list', () => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
-    setUISettings('hideAnnouncements', true);
+    setUISettings('hideAgentActivityTour', true);
 
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);

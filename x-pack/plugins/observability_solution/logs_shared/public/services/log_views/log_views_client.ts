@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { HttpStart } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import { ISearchGeneric } from '@kbn/data-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';

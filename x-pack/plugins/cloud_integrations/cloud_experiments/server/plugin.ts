@@ -50,10 +50,9 @@ export class CloudExperimentsPlugin
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<CloudExperimentsConfigType>();
 
-    this.metadataService = new MetadataService(
-      { metadata_refresh_interval: config.metadata_refresh_interval },
-      this.logger.get('metadata')
-    );
+    this.metadataService = new MetadataService({
+      metadata_refresh_interval: config.metadata_refresh_interval,
+    });
 
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;

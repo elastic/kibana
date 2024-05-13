@@ -282,8 +282,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                       >
                         {singleMetricViewerData !== undefined &&
                           autoZoomDuration !== undefined &&
-                          jobsLoaded &&
-                          selectedJobId === selectedJob?.job_id && (
+                          jobsLoaded && (
                             <TimeSeriesExplorerEmbeddableChart
                               chartWidth={chartWidth - containerPadding}
                               dataViewsService={services[1].data.dataViews}

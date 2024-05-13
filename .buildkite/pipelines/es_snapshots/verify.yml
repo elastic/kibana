@@ -16,7 +16,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -26,7 +26,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
@@ -42,7 +42,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 10
@@ -61,7 +61,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     depends_on:
@@ -76,6 +76,6 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

@@ -9,7 +9,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
 import type { IContext } from './context';
-import { isAnyType } from './mutations/utils';
 
 interface PostProcessMutationsArgs {
   schema: OpenAPIV3.SchemaObject;
@@ -24,12 +23,7 @@ export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) 
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
 const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
-  if (isAnyType(schema)) {
-    mutations.processAnyType(schema);
-    return;
-  }
-
-  mutations.processAllTypes(schema);
+  mutations.processAny(schema);
   /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
   const type: undefined | string = schema.type;
   if (type === 'array') {

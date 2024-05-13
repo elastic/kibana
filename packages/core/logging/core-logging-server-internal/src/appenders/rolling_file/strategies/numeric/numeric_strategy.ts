@@ -14,6 +14,7 @@ import { RollingFileContext } from '../../rolling_file_context';
 import {
   shouldSkipRollout,
   getOrderedRolledFiles,
+  deleteFiles,
   rollCurrentFile,
   rollPreviousFilesInOrder,
 } from './rolling_tasks';
@@ -45,8 +46,7 @@ export const numericRollingStrategyConfigSchema = schema.object({
  *       strategy:
  *         type: numeric
  *         pattern: "-%i"
- *       retention:
- *         maxFiles: 2
+ *         max: 2
  * ```
  * - During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
  *   being written to.
@@ -69,15 +69,6 @@ export class NumericRollingStrategy implements RollingStrategy {
     this.logFilePath = this.context.filePath;
     this.logFileBaseName = basename(this.context.filePath);
     this.logFileFolder = dirname(this.context.filePath);
-    context.setOrderedRolledFileFn(this.getOrderedRolledFiles.bind(this));
-  }
-
-  private async getOrderedRolledFiles() {
-    return await getOrderedRolledFiles({
-      logFileFolder: this.logFileFolder,
-      logFileBaseName: this.logFileBaseName,
-      pattern: this.config.pattern,
-    });
   }
 
   async rollout() {
@@ -91,15 +82,20 @@ export class NumericRollingStrategy implements RollingStrategy {
     }
 
     // get the files matching the pattern in the folder, and sort them by `%i` value
-    const orderedFilesToRoll = await this.getOrderedRolledFiles();
+    const orderedFiles = await getOrderedRolledFiles({
+      logFileFolder,
+      logFileBaseName,
+      pattern,
+    });
+    const filesToRoll = orderedFiles.slice(0, this.config.max - 1);
+    const filesToDelete = orderedFiles.slice(filesToRoll.length, orderedFiles.length);
 
-    if (orderedFilesToRoll.length > 0) {
-      await rollPreviousFilesInOrder({
-        filesToRoll: orderedFilesToRoll,
-        logFileFolder,
-        logFileBaseName,
-        pattern,
-      });
+    if (filesToDelete.length > 0) {
+      await deleteFiles({ logFileFolder, filesToDelete });
+    }
+
+    if (filesToRoll.length > 0) {
+      await rollPreviousFilesInOrder({ filesToRoll, logFileFolder, logFileBaseName, pattern });
     }
 
     await rollCurrentFile({ pattern, logFileBaseName, logFileFolder });

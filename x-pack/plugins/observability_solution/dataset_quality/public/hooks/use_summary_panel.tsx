@@ -10,9 +10,6 @@ import { useInterpret, useSelector } from '@xstate/react';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IDataStreamsStatsClient } from '../services/data_streams_stats';
 import { createDatasetsSummaryPanelStateMachine } from '../state_machines/summary_panel';
-import { useDatasetQualityTable } from '.';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { filterInactiveDatasets } from '../utils';
 
 interface SummaryPanelContextDeps {
   dataStreamStatsClient: IDataStreamsStatsClient;
@@ -20,11 +17,6 @@ interface SummaryPanelContextDeps {
 }
 
 const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextDeps) => {
-  const { service } = useDatasetQualityContext();
-  const { filteredItems } = useDatasetQualityTable();
-
-  const { timeRange } = useSelector(service, (state) => state.context.filters);
-
   const summaryPanelStateService = useInterpret(() =>
     createDatasetsSummaryPanelStateMachine({
       dataStreamStatsClient,
@@ -35,28 +27,29 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
   /*
     Datasets Quality
   */
-
-  const datasetsQuality = {
-    percentages: filteredItems.map((item) => item.degradedDocs.percentage),
-  };
-
-  const isDatasetsQualityLoading = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+  const datasetsQuality = useSelector(
+    summaryPanelStateService,
+    (state) => state.context.datasetsQuality
+  );
+  const isDatasetsQualityLoading = useSelector(
+    summaryPanelStateService,
+    (state) =>
+      state.matches('datasetsQuality.fetching') ||
+      state.matches('datasetsQuality.retrying') ||
+      state.matches('datasetsActivity.fetching')
   );
 
   /*
     Datasets Activity
   */
-  const datasetsActivity = {
-    total: filteredItems.length,
-    active: filterInactiveDatasets({
-      datasets: filteredItems,
-      timeRange,
-    }).length,
-  };
-
-  const isDatasetsActivityLoading = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+  const datasetsActivity = useSelector(
+    summaryPanelStateService,
+    (state) => state.context.datasetsActivity
+  );
+  const isDatasetsActivityLoading = useSelector(
+    summaryPanelStateService,
+    (state) =>
+      state.matches('datasetsActivity.fetching') || state.matches('datasetsActivity.retrying')
   );
 
   /*

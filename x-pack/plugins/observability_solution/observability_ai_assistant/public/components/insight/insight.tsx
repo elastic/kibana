@@ -67,7 +67,6 @@ function ChatContent({
     connectorId,
     initialMessages,
     persist: false,
-    disableFunctions: true,
   });
 
   const lastAssistantResponse = getLastMessageOfType(

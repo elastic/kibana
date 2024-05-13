@@ -131,8 +131,7 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
     hasCompatibleRealms,
     canUseStoredScripts,
     canUseInlineScripts,
-    canUseRemoteIndices: Boolean(xpackUsage.remote_clusters),
-    canUseRemoteClusters: Boolean(xpackUsage.remote_clusters),
+    canUseRemoteIndices: !!xpackUsage.remote_clusters,
   };
 }
 

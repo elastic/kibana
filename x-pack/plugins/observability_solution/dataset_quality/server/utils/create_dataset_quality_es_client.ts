@@ -7,7 +7,6 @@
 
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { Indices } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
   size: number;
@@ -21,16 +20,6 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return esClient.search<TDocument>(searchParams) as Promise<any>;
-    },
-    async msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
-      index = {} as { index?: Indices },
-      searches: TParams[]
-    ): Promise<{
-      responses: Array<InferSearchResponseOf<TDocument, TParams>>;
-    }> {
-      return esClient.msearch({
-        searches: searches.map((search) => [index, search]).flat(),
-      }) as Promise<any>;
     },
   };
 }

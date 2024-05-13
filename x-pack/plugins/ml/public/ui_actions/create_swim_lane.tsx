@@ -56,17 +56,14 @@ export function createAddSwimlanePanelAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      const [coreStart, pluginStart] = await getStartServices();
+      const [coreStart, deps] = await getStartServices();
 
       try {
         const { resolveAnomalySwimlaneUserInput } = await import(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const initialState = await resolveAnomalySwimlaneUserInput({
-          ...coreStart,
-          ...pluginStart,
-        });
+        const initialState = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
 
         presentationContainerParent.addNewPanel({
           panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

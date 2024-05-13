@@ -15,22 +15,6 @@ This functionality is in technical preview and may be changed or removed in a fu
 ST_CENTROID_AGG
 SUM
 VALUES
-Grouping functions
-BUCKET
-Conditional functions and expressions
-CASE
-COALESCE
-GREATEST
-LEAST
-Date and time functions
-DATE_DIFF
-DATE_EXTRACT
-DATE_FORMAT
-DATE_PARSE
-DATE_TRUNC
-NOW
-IP functions
-CIDR_MATCH
 Math functions
 ABS
 ACOS
@@ -54,6 +38,28 @@ SQRT
 TAN
 TANH
 TAU
+String functions
+CONCAT
+LEFT
+LENGTH
+LOCATE
+LTRIM
+REPLACE
+RIGHT
+RTRIM
+SPLIT
+SUBSTRING
+TO_LOWER
+TO_UPPER
+TRIM
+Date and time functions
+BUCKET
+DATE_DIFF
+DATE_EXTRACT
+DATE_FORMAT
+DATE_PARSE
+DATE_TRUNC
+NOW
 Spatial functions
 [preview]
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -73,25 +79,9 @@ ST_X
 [preview]
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 ST_Y
-String functions
-CONCAT
-ENDS_WITH
-FROM_BASE64
-LEFT
-LENGTH
-LOCATE
-LTRIM
-REPLACE
-RIGHT
-RTRIM
-SPLIT
-STARTS_WITH
-SUBSTRING
-TO_BASE64
-TO_LOWER
-TO_UPPER
-TRIM
 Type conversion functions
+FROM_BASE64
+TO_BASE64
 TO_BOOLEAN
 TO_CARTESIANPOINT
 TO_CARTESIANSHAPE
@@ -109,6 +99,11 @@ TO_STRING
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 TO_UNSIGNED_LONG
 TO_VERSION
+Conditional functions and expressions
+CASE
+COALESCE
+GREATEST
+LEAST
 Multi value functions
 MV_AVG
 MV_CONCAT

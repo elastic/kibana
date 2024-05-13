@@ -153,7 +153,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               idPrefix={''}
               isDraggable={false}
               render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
-              scopeId={scopeId}
             />
           );
         },
@@ -176,7 +175,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedHostsCount = useMemo(

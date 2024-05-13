@@ -16,7 +16,6 @@ import * as i18n from './translations';
 
 interface Props {
   connectorId: string | undefined;
-  connectorsAreConfigured: boolean;
   isLoading: boolean;
   onGenerate: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
@@ -24,12 +23,10 @@ interface Props {
 
 const HeaderComponent: React.FC<Props> = ({
   connectorId,
-  connectorsAreConfigured,
   isLoading,
   onGenerate,
   onConnectorIdSelected,
 }) => {
-  const isFlyoutMode = false; // always false for attack discovery
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || isLoading || connectorId == null;
@@ -44,17 +41,14 @@ const HeaderComponent: React.FC<Props> = ({
       data-test-subj="header"
       gutterSize="none"
     >
-      {connectorsAreConfigured && (
-        <EuiFlexItem grow={false}>
-          <ConnectorSelectorInline
-            isFlyoutMode={isFlyoutMode}
-            onConnectorSelected={noop}
-            onConnectorIdSelected={onConnectorIdSelected}
-            selectedConnectorId={connectorId}
-          />
-        </EuiFlexItem>
-      )}
-
+      <EuiFlexItem grow={false}>
+        <ConnectorSelectorInline
+          isFlyoutMode={false}
+          onConnectorSelected={noop}
+          onConnectorIdSelected={onConnectorIdSelected}
+          selectedConnectorId={connectorId}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={connectorId == null ? i18n.SELECT_A_CONNECTOR : null}

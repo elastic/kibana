@@ -72,14 +72,14 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.existOrFail('dataVisualizerPageFileUpload');
     },
 
-    async setESQLQuery(query: string) {
+    async setESQLQuery(
+      query: string,
+      refreshOrUpdateBtnSelector:
+        | 'superDatePickerApplyTimeButton'
+        | 'mlDatePickerRefreshPageButton loaded' = 'mlDatePickerRefreshPageButton loaded'
+    ) {
       await retry.tryForTime(5000, async () => {
-        const superDatePickerApplyTimeButton = await testSubjects.exists(
-          'superDatePickerApplyTimeButton'
-        );
-        const refreshOrUpdateBtnSelector = superDatePickerApplyTimeButton
-          ? 'superDatePickerApplyTimeButton'
-          : 'mlDatePickerRefreshPageButton loaded';
+        await testSubjects.existOrFail(refreshOrUpdateBtnSelector);
         const visibleText = await testSubjects.getVisibleText(refreshOrUpdateBtnSelector);
 
         expect(visibleText).to.eql('Refresh');

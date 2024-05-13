@@ -79,12 +79,12 @@ export class ConsoleUIPlugin
           defaultMessage: 'Console',
         }),
         enableRouting: false,
-        mount: async ({ element }) => {
+        mount: async ({ element, theme$ }) => {
           const [core] = await getStartServices();
 
           const {
+            i18n: { Context: I18nContext },
             docLinks: { DOC_LINK_VERSION, links },
-            ...startServices
           } = core;
 
           const { renderApp } = await import('./application');
@@ -93,12 +93,13 @@ export class ConsoleUIPlugin
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
+            I18nContext,
             notifications,
             usageCollection,
             element,
+            theme$,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
-            startServices,
           });
         },
       });

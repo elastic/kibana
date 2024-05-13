@@ -17,8 +17,8 @@ import {
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
-  MeasuringStrategy,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -217,7 +217,7 @@ export const ControlGroup = () => {
 
   const onDragEnd = ({ over }: DragEndEvent) => {
     if (over) {
-      const overIndex = idsInOrder.indexOf(`${over.id}`);
+      const overIndex = idsInOrder.indexOf(over.id);
       if (draggingIndex !== overIndex) {
         const newIndex = overIndex;
         controlGroup.dispatch.setControlOrders({
@@ -264,16 +264,14 @@ export const ControlGroup = () => {
             {tourStep}
             <EuiFlexItem>
               <DndContext
-                onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+                onDragStart={({ active }) => setDraggingId(active.id)}
                 onDragEnd={onDragEnd}
                 onDragCancel={() => setDraggingId(null)}
                 sensors={sensors}
-                measuring={{
-                  droppable: {
-                    strategy: MeasuringStrategy.Always,
-                  },
-                }}
                 collisionDetection={closestCenter}
+                layoutMeasuring={{
+                  strategy: LayoutMeasuringStrategy.Always,
+                }}
               >
                 <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
                   <EuiFlexGroup

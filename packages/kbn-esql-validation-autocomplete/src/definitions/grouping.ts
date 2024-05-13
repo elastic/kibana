@@ -16,9 +16,8 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.autoBucketDoc', {
       defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
     }),
-    // type agg because it can also be used as an aggregation...
-    type: 'agg',
-    supportedCommands: ['stats'],
+    type: 'grouping',
+    supportedCommands: [],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -32,7 +31,7 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'buckets', type: 'time_literal', constantOnly: true },
         ],
         returnType: 'number',
         examples: ['from index | eval hd = bucket(bytes, 1 hour)'],

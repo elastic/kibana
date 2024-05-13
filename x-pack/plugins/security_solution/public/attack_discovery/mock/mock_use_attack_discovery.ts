@@ -10,7 +10,6 @@ import type { UseAttackDiscovery } from '../use_attack_discovery';
 export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
   fetchAttackDiscoveries: () => Promise<void>
 ): UseAttackDiscovery => ({
-  alertsContextCount: 20,
   approximateFutureTime: null,
   cachedAttackDiscoveries: {
     claudeV3SonnetUsEast1: {
@@ -508,7 +507,6 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
 export const getMockUseAttackDiscoveriesWithNoAttackDiscoveries = (
   fetchAttackDiscoveries: () => Promise<void>
 ): UseAttackDiscovery => ({
-  alertsContextCount: null,
   approximateFutureTime: null,
   cachedAttackDiscoveries: {},
   fetchAttackDiscoveries,
@@ -522,7 +520,6 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveries = (
 export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   fetchAttackDiscoveries: () => Promise<void>
 ): UseAttackDiscovery => ({
-  alertsContextCount: null,
   approximateFutureTime: new Date('2024-04-15T17:13:29.470Z'), // <-- estimated generation completion time
   cachedAttackDiscoveries: {},
   fetchAttackDiscoveries,

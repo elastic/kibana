@@ -2601,6 +2601,10 @@
     },
     "settings": {
       "index": {
+        "lifecycle": {
+          "name": "auditbeat-8.0.0",
+          "rollover_alias": "auditbeat-8.0.0"
+        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

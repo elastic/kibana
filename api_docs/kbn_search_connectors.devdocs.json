@@ -33829,10 +33829,10 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id",
                     "type": "Object",
                     "tags": [],
-                    "label": "notion_secret_key",
+                    "label": "tenant_id",
                     "description": [],
                     "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                     "deprecated": false,
@@ -33840,7 +33840,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.default_value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.default_value",
                         "type": "Uncategorized",
                         "tags": [],
                         "label": "default_value",
@@ -33854,7 +33854,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.depends_on",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.depends_on",
                         "type": "Array",
                         "tags": [],
                         "label": "depends_on",
@@ -33868,7 +33868,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.display",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.display",
                         "type": "string",
                         "tags": [],
                         "label": "display",
@@ -33889,7 +33889,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.label",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.label",
                         "type": "string",
                         "tags": [],
                         "label": "label",
@@ -33900,7 +33900,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.options",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.options",
                         "type": "Array",
                         "tags": [],
                         "label": "options",
@@ -33914,7 +33914,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.order",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.order",
                         "type": "number",
                         "tags": [],
                         "label": "order",
@@ -33925,7 +33925,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.required",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.required",
                         "type": "boolean",
                         "tags": [],
                         "label": "required",
@@ -33939,13 +33939,13 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.sensitive",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.sensitive",
                         "type": "boolean",
                         "tags": [],
                         "label": "sensitive",
                         "description": [],
                         "signature": [
-                          "true"
+                          "false"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -33953,7 +33953,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.tooltip",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.tooltip",
                         "type": "Uncategorized",
                         "tags": [],
                         "label": "tooltip",
@@ -33967,7 +33967,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.type",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -33988,7 +33988,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.ui_restrictions",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.ui_restrictions",
                         "type": "Array",
                         "tags": [],
                         "label": "ui_restrictions",
@@ -34002,7 +34002,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.validations",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.validations",
                         "type": "Array",
                         "tags": [],
                         "label": "validations",
@@ -34016,7 +34016,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.notion_secret_key.value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.tenant_id.value",
                         "type": "string",
                         "tags": [],
                         "label": "value",
@@ -34029,10 +34029,10 @@
                   },
                   {
                     "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id",
                     "type": "Object",
                     "tags": [],
-                    "label": "databases",
+                    "label": "client_id",
                     "description": [],
                     "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                     "deprecated": false,
@@ -34040,18 +34040,21 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.default_value",
-                        "type": "string",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.default_value",
+                        "type": "Uncategorized",
                         "tags": [],
                         "label": "default_value",
                         "description": [],
+                        "signature": [
+                          "null"
+                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.depends_on",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.depends_on",
                         "type": "Array",
                         "tags": [],
                         "label": "depends_on",
@@ -34065,7 +34068,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.display",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.display",
                         "type": "string",
                         "tags": [],
                         "label": "display",
@@ -34086,7 +34089,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.label",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.label",
                         "type": "string",
                         "tags": [],
                         "label": "label",
@@ -34097,7 +34100,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.options",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.options",
                         "type": "Array",
                         "tags": [],
                         "label": "options",
@@ -34111,7 +34114,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.order",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.order",
                         "type": "number",
                         "tags": [],
                         "label": "order",
@@ -34122,7 +34125,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.required",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.required",
                         "type": "boolean",
                         "tags": [],
                         "label": "required",
@@ -34136,7 +34139,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.sensitive",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.sensitive",
                         "type": "boolean",
                         "tags": [],
                         "label": "sensitive",
@@ -34150,18 +34153,21 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.tooltip",
-                        "type": "string",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.tooltip",
+                        "type": "Uncategorized",
                         "tags": [],
                         "label": "tooltip",
                         "description": [],
+                        "signature": [
+                          "null"
+                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.type",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -34174,7 +34180,7 @@
                             "section": "def-common.FieldType",
                             "text": "FieldType"
                           },
-                          ".LIST"
+                          ".STRING"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34182,7 +34188,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.ui_restrictions",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.ui_restrictions",
                         "type": "Array",
                         "tags": [],
                         "label": "ui_restrictions",
@@ -34196,7 +34202,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.validations",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.validations",
                         "type": "Array",
                         "tags": [],
                         "label": "validations",
@@ -34210,7 +34216,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.databases.value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.client_id.value",
                         "type": "string",
                         "tags": [],
                         "label": "value",
@@ -34223,10 +34229,10 @@
                   },
                   {
                     "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value",
                     "type": "Object",
                     "tags": [],
-                    "label": "pages",
+                    "label": "secret_value",
                     "description": [],
                     "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                     "deprecated": false,
@@ -34234,18 +34240,21 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.default_value",
-                        "type": "string",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.default_value",
+                        "type": "Uncategorized",
                         "tags": [],
                         "label": "default_value",
                         "description": [],
+                        "signature": [
+                          "null"
+                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.depends_on",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.depends_on",
                         "type": "Array",
                         "tags": [],
                         "label": "depends_on",
@@ -34259,7 +34268,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.display",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.display",
                         "type": "string",
                         "tags": [],
                         "label": "display",
@@ -34280,7 +34289,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.label",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.label",
                         "type": "string",
                         "tags": [],
                         "label": "label",
@@ -34291,7 +34300,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.options",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.options",
                         "type": "Array",
                         "tags": [],
                         "label": "options",
@@ -34305,7 +34314,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.order",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.order",
                         "type": "number",
                         "tags": [],
                         "label": "order",
@@ -34316,7 +34325,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.required",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.required",
                         "type": "boolean",
                         "tags": [],
                         "label": "required",
@@ -34330,13 +34339,13 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.sensitive",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.sensitive",
                         "type": "boolean",
                         "tags": [],
                         "label": "sensitive",
                         "description": [],
                         "signature": [
-                          "false"
+                          "true"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34344,18 +34353,21 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.tooltip",
-                        "type": "string",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.tooltip",
+                        "type": "Uncategorized",
                         "tags": [],
                         "label": "tooltip",
                         "description": [],
+                        "signature": [
+                          "null"
+                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.type",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -34368,7 +34380,7 @@
                             "section": "def-common.FieldType",
                             "text": "FieldType"
                           },
-                          ".LIST"
+                          ".STRING"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34376,7 +34388,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.ui_restrictions",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.ui_restrictions",
                         "type": "Array",
                         "tags": [],
                         "label": "ui_restrictions",
@@ -34390,7 +34402,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.validations",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.validations",
                         "type": "Array",
                         "tags": [],
                         "label": "validations",
@@ -34404,7 +34416,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.pages.value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.secret_value.value",
                         "type": "string",
                         "tags": [],
                         "label": "value",
@@ -34417,10 +34429,10 @@
                   },
                   {
                     "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username",
                     "type": "Object",
                     "tags": [],
-                    "label": "index_comments",
+                    "label": "username",
                     "description": [],
                     "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                     "deprecated": false,
@@ -34428,7 +34440,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.default_value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.default_value",
                         "type": "Uncategorized",
                         "tags": [],
                         "label": "default_value",
@@ -34442,7 +34454,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.depends_on",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.depends_on",
                         "type": "Array",
                         "tags": [],
                         "label": "depends_on",
@@ -34456,7 +34468,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.display",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.display",
                         "type": "string",
                         "tags": [],
                         "label": "display",
@@ -34469,7 +34481,7 @@
                             "section": "def-common.DisplayType",
                             "text": "DisplayType"
                           },
-                          ".TOGGLE"
+                          ".TEXTBOX"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34477,7 +34489,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.label",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.label",
                         "type": "string",
                         "tags": [],
                         "label": "label",
@@ -34488,7 +34500,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.options",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.options",
                         "type": "Array",
                         "tags": [],
                         "label": "options",
@@ -34502,7 +34514,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.order",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.order",
                         "type": "number",
                         "tags": [],
                         "label": "order",
@@ -34513,7 +34525,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.required",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.required",
                         "type": "boolean",
                         "tags": [],
                         "label": "required",
@@ -34527,7 +34539,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.sensitive",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.sensitive",
                         "type": "boolean",
                         "tags": [],
                         "label": "sensitive",
@@ -34541,204 +34553,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.tooltip",
-                        "type": "string",
-                        "tags": [],
-                        "label": "tooltip",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.FieldType",
-                            "text": "FieldType"
-                          },
-                          ".BOOLEAN"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.ui_restrictions",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "ui_restrictions",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.validations",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "validations",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.index_comments.value",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "value",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/search-connectors",
-                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "concurrent_downloads",
-                    "description": [],
-                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.default_value",
-                        "type": "number",
-                        "tags": [],
-                        "label": "default_value",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.depends_on",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "depends_on",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.display",
-                        "type": "string",
-                        "tags": [],
-                        "label": "display",
-                        "description": [],
-                        "signature": [
-                          {
-                            "pluginId": "@kbn/search-connectors",
-                            "scope": "common",
-                            "docId": "kibKbnSearchConnectorsPluginApi",
-                            "section": "def-common.DisplayType",
-                            "text": "DisplayType"
-                          },
-                          ".NUMERIC"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.label",
-                        "type": "string",
-                        "tags": [],
-                        "label": "label",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.options",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "options",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.order",
-                        "type": "number",
-                        "tags": [],
-                        "label": "order",
-                        "description": [],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.required",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "required",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.sensitive",
-                        "type": "boolean",
-                        "tags": [],
-                        "label": "sensitive",
-                        "description": [],
-                        "signature": [
-                          "false"
-                        ],
-                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.tooltip",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.tooltip",
                         "type": "Uncategorized",
                         "tags": [],
                         "label": "tooltip",
@@ -34752,7 +34567,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.type",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -34765,7 +34580,7 @@
                             "section": "def-common.FieldType",
                             "text": "FieldType"
                           },
-                          ".INTEGER"
+                          ".STRING"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34773,13 +34588,13 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.ui_restrictions",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.ui_restrictions",
                         "type": "Array",
                         "tags": [],
                         "label": "ui_restrictions",
                         "description": [],
                         "signature": [
-                          "string[]"
+                          "never[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -34787,7 +34602,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.validations",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.validations",
                         "type": "Array",
                         "tags": [],
                         "label": "validations",
@@ -34801,7 +34616,207 @@
                       },
                       {
                         "parentPluginId": "@kbn/search-connectors",
-                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.concurrent_downloads.value",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.username.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "password",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.tooltip",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.configuration.password.value",
                         "type": "string",
                         "tags": [],
                         "label": "value",

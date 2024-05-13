@@ -1,13 +1,11 @@
 CONCAT
 
 Syntax
+CONCAT(string1, string2[, ..., stringN])
 Parameters
-string1
+stringX
 Strings to concatenate.
-string2
-Strings to concatenate.
-DescriptionConcatenates two or more strings.Supported types
-Example
+DescriptionConcatenates two or more strings.Example
 ```esql
 FROM employees
 | KEEP first_name, last_name

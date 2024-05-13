@@ -163,7 +163,6 @@ describe('Alerting Plugin', () => {
             maxScheduledPerMinute: 10000,
             isUsingSecurity: false,
             minimumScheduleInterval: { value: '1m', enforce: false },
-            run: { alerts: { max: 1000 }, actions: { max: 1000 } },
           });
 
           expect(setupContract.frameworkAlerts.enabled()).toEqual(false);

@@ -13,8 +13,9 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import {
+  IKibanaSearchRequest,
+  ISearchOptions,
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,

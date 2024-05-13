@@ -16,7 +16,7 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
   embeddableId?: string;
-  valueInput?: object;
+  valueInput?: unknown;
 
   /**
    * Pass current search session id when navigating to an editor,
@@ -37,7 +37,7 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
-  input: object;
+  input: unknown;
   embeddableId?: string;
   size?: {
     width?: number;

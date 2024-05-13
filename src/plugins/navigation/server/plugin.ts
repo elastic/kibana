@@ -33,21 +33,15 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
-    const config = this.initializerContext.config.get<NavigationConfig>();
-    const isSolutionNavExperiementEnabled =
-      Boolean(plugins.cloud?.isCloudEnabled) && !this.isServerless();
+    if (plugins.cloud?.isCloudEnabled && !this.isServerless()) {
+      const config = this.initializerContext.config.get<NavigationConfig>();
 
-    if (isSolutionNavExperiementEnabled) {
-      void core.getStartServices().then(([coreStart, deps]) => {
-        return deps.cloudExperiments
-          ?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-          .then(async (enabled) => {
-            if (enabled) {
-              core.uiSettings.registerGlobal(getUiSettings(config));
-            } else {
-              await this.removeUiSettings(coreStart, getUiSettings(config));
-            }
-          });
+      void core.getStartServices().then(async ([coreStart, deps]) => {
+        if (await deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)) {
+          core.uiSettings.registerGlobal(getUiSettings(config));
+        } else {
+          await this.removeUiSettings(coreStart, getUiSettings(config));
+        }
       });
     }
 

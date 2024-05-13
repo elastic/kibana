@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
@@ -19,28 +19,27 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { GroupSummary } from '@kbn/slo-schema';
 import React, { memo, useState } from 'react';
+import { GroupSummary } from '@kbn/slo-schema';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
-import { useKibana } from '../../../../utils/kibana_react';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
-import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
+import type { SortDirection } from '../../hooks/use_url_search_state';
 
 interface Props {
   group: string;
   kqlQuery?: string;
   sloView: SLOView;
-  sort?: SortField;
+  sort?: string;
   direction?: SortDirection;
-  groupBy: GroupByField;
+  groupBy: string;
   summary?: GroupSummary;
   filters?: Filter[];
 }
@@ -156,59 +155,45 @@ export function GroupListView({
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
-
                 <EuiFlexItem>
-                  {group === 'NO_DATA' ? (
-                    <span>
+                  <EuiToolTip
+                    content={
+                      <>
+                        <EuiText size="s">
+                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
+                            defaultMessage: 'SLO: {name}',
+                            values: {
+                              name: summary?.worst.slo?.name,
+                            },
+                          })}
+                        </EuiText>
+                        <EuiText size="s">
+                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
+                            defaultMessage: 'Instance: {instance}',
+                            values: {
+                              instance: summary?.worst.slo?.instanceId,
+                            },
+                          })}
+                        </EuiText>
+                      </>
+                    }
+                  >
+                    <EuiLink
+                      data-test-subj="o11yGroupListViewLink"
+                      href={basePath.prepend(
+                        paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
+                      )}
+                    >
                       {i18n.translate('xpack.slo.group.worstPerforming', {
                         defaultMessage: 'Worst performing: ',
                       })}
-                      <strong>
-                        {i18n.translate('xpack.slo.group.worstPerforming.notAvailable', {
-                          defaultMessage: 'N/A',
-                        })}
-                      </strong>
-                    </span>
-                  ) : (
-                    <EuiToolTip
-                      content={
-                        <>
-                          <EuiText size="s">
-                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
-                              defaultMessage: 'SLO: {name}',
-                              values: {
-                                name: summary?.worst.slo?.name,
-                              },
-                            })}
-                          </EuiText>
-                          <EuiText size="s">
-                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
-                              defaultMessage: 'Instance: {instance}',
-                              values: {
-                                instance: summary?.worst.slo?.instanceId,
-                              },
-                            })}
-                          </EuiText>
-                        </>
-                      }
-                    >
-                      <EuiLink
-                        data-test-subj="o11yGroupListViewLink"
-                        href={basePath.prepend(
-                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
-                        )}
+                      <EuiTextColor
+                        color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
                       >
-                        {i18n.translate('xpack.slo.group.worstPerforming', {
-                          defaultMessage: 'Worst performing: ',
-                        })}
-                        <EuiTextColor
-                          color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
-                        >
-                          <strong>{worstSLI}</strong>
-                        </EuiTextColor>
-                      </EuiLink>
-                    </EuiToolTip>
-                  )}
+                        <strong>{worstSLI}</strong>
+                      </EuiTextColor>
+                    </EuiLink>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }

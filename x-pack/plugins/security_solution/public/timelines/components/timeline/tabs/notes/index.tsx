@@ -44,7 +44,7 @@ import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
 
-const ScrollableDiv = styled.div`
+const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow-x: hidden;
   overflow-y: auto;
   padding-inline: ${({ theme }) => (theme as EuiTheme).eui.euiSizeM};
@@ -210,7 +210,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
   return (
     <FullWidthFlexGroup gutterSize="none">
-      <EuiFlexItem component={ScrollableDiv} grow={2} id="scrollableNotes">
+      <ScrollableFlexItem grow={2} id="scrollableNotes">
         <StyledPanel paddingSize="none">
           <EuiTitle>
             <h3>{NOTES}</h3>
@@ -226,11 +226,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             />
           )}
         </StyledPanel>
-      </EuiFlexItem>
+      </ScrollableFlexItem>
       <VerticalRule />
-      <EuiFlexItem component={ScrollableDiv} grow={1}>
-        {DetailsPanelContent ?? SidebarContent}
-      </EuiFlexItem>
+      <ScrollableFlexItem grow={1}>{DetailsPanelContent ?? SidebarContent}</ScrollableFlexItem>
     </FullWidthFlexGroup>
   );
 };

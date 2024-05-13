@@ -17,7 +17,6 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
@@ -42,6 +41,7 @@ import {
   geoPointFunction,
   ipPrefixFunction,
   ipRangeFunction,
+  ISearchGeneric,
   kibana,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
@@ -113,7 +113,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       management,
     }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    const { http, getStartServices, notifications, uiSettings, executionContext } = core;
+    const { http, getStartServices, notifications, uiSettings, executionContext, theme } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     this.sessionsClient = new SessionsClient({ http });
@@ -137,6 +137,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
       session: this.sessionService,
+      theme,
       searchConfig: this.initializerContext.config.get().search,
     });
 

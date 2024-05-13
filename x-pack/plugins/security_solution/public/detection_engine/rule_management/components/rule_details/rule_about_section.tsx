@@ -240,16 +240,6 @@ const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
   </EuiText>
 );
 
-interface MaxSignalsProps {
-  maxSignals: number;
-}
-
-const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
-  <EuiText size="s" data-test-subj="maxSignalsPropertyValue">
-    {maxSignals}
-  </EuiText>
-);
-
 interface TagsProps {
   tags: string[];
 }
@@ -421,13 +411,6 @@ const prepareAboutSectionListItems = (
         </span>
       ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
-    });
-  }
-
-  if (rule.max_signals) {
-    aboutSectionListItems.push({
-      title: <span data-test-subj="maxSignalsPropertyTitle">{i18n.MAX_SIGNALS_FIELD_LABEL}</span>,
-      description: <MaxSignals maxSignals={rule.max_signals} />,
     });
   }
 

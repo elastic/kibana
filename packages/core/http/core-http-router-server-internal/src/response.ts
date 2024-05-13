@@ -24,6 +24,10 @@ import type {
 } from '@kbn/core-http-server';
 import mime from 'mime';
 
+export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
+  return typeof response.status === 'number' && typeof response.options === 'object';
+}
+
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal

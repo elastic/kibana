@@ -7,14 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
+import type { FunctionDefinition } from './types';
 
 function createMathDefinition(
   name: string,
-  types: Array<
-    | (FunctionParameterType & FunctionReturnType)
-    | [FunctionParameterType, FunctionParameterType, FunctionReturnType]
-  >,
+  types: Array<string | string[]>,
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -31,7 +28,7 @@ function createMathDefinition(
             { name: 'left', type: type[0] },
             { name: 'right', type: type[1] },
           ],
-          returnType: type[2],
+          returnType: /literal/.test(type[0]) ? type[1] : type[0],
         };
       }
       return {
@@ -94,35 +91,20 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
-      {
-        params: [
-          { name: 'left', type: 'version' },
-          { name: 'right', type: 'version' },
-        ],
-        returnType: 'boolean',
-      },
-      // constant strings okay because of implicit casting for
-      // string to version and ip
-      //
-      // boolean casting is handled on the specific comparison function
-      // that support booleans
-      //
-      // date casting is handled in the validation routine since it's a
-      // general rule. Look in compareLiteralType()
-      ...(['ip', 'version'] as const).flatMap((type) => [
+      ...['date', 'number'].flatMap((type) => [
         {
           params: [
             { name: 'left', type },
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'right', type: 'string', constantOnly: true },
           ],
-          returnType: 'boolean' as const,
+          returnType: 'boolean',
         },
         {
           params: [
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'right', type: 'string', constantOnly: true },
             { name: 'right', type },
           ],
-          returnType: 'boolean' as const,
+          returnType: 'boolean',
         },
       ]),
       ...extraSignatures,
@@ -130,17 +112,17 @@ function createComparisonDefinition(
   };
 }
 
-export const mathFunctions: FunctionDefinition[] = [
+export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
@@ -218,126 +200,98 @@ export const mathFunctions: FunctionDefinition[] = [
       return messages;
     }
   ),
-];
-
-const comparisonFunctions: FunctionDefinition[] = [
-  {
-    name: '==',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
-      defaultMessage: 'Equal to',
-    }),
-    extraSignatures: [
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-      // constant strings okay because of implicit casting
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
-        ],
-        returnType: 'boolean' as const,
-      },
-      {
-        params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-    ],
-  },
-  {
-    name: '!=',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notEqualToDoc', {
-      defaultMessage: 'Not equal to',
-    }),
-    extraSignatures: [
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-      // constant strings okay because of implicit casting
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
-        ],
-        returnType: 'boolean' as const,
-      },
-      {
-        params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-    ],
-  },
-  {
-    name: '<',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.lessThanDoc', {
-      defaultMessage: 'Less than',
-    }),
-  },
-  {
-    name: '>',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc', {
-      defaultMessage: 'Greater than',
-    }),
-  },
-  {
-    name: '<=',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definition.lessThanOrEqualToDoc',
-      {
-        defaultMessage: 'Less than or equal to',
-      }
-    ),
-  },
-  {
-    name: '>=',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc',
-      {
-        defaultMessage: 'Greater than or equal to',
-      }
-    ),
-  },
-].map((op): FunctionDefinition => createComparisonDefinition(op));
-
-const likeFunctions: FunctionDefinition[] = [
-  // Skip the insensitive case equality until it gets restored back
-  // new special comparison operator for strings only
-  // {
-  //   name: '=~',
-  //   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToCaseInsensitiveDoc', {
-  //     defaultMessage: 'Case insensitive equality',
-  //   }),
-  // },
-  {
-    name: 'like',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.likeDoc', {
-      defaultMessage: 'Filter data based on string patterns',
-    }),
-  },
-  { name: 'not_like', description: '' },
-  {
-    name: 'rlike',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.rlikeDoc', {
-      defaultMessage: 'Filter data based on string regular expressions',
-    }),
-  },
-  { name: 'not_rlike', description: '' },
-].map(({ name, description }) => {
-  const def: FunctionDefinition = {
+  ...[
+    {
+      name: '==',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
+        defaultMessage: 'Equal to',
+      }),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
+    },
+    {
+      name: '!=',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definition.notEqualToDoc',
+        {
+          defaultMessage: 'Not equal to',
+        }
+      ),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
+    },
+    {
+      name: '<',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.lessThanDoc', {
+        defaultMessage: 'Less than',
+      }),
+    },
+    {
+      name: '>',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc',
+        {
+          defaultMessage: 'Greater than',
+        }
+      ),
+    },
+    {
+      name: '<=',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definition.lessThanOrEqualToDoc',
+        {
+          defaultMessage: 'Less than or equal to',
+        }
+      ),
+    },
+    {
+      name: '>=',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc',
+        {
+          defaultMessage: 'Greater than or equal to',
+        }
+      ),
+    },
+  ].map((op): FunctionDefinition => createComparisonDefinition(op)),
+  ...[
+    // Skip the insensitive case equality until it gets restored back
+    // new special comparison operator for strings only
+    // {
+    //   name: '=~',
+    //   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToCaseInsensitiveDoc', {
+    //     defaultMessage: 'Case insensitive equality',
+    //   }),
+    // },
+    {
+      name: 'like',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.likeDoc', {
+        defaultMessage: 'Filter data based on string patterns',
+      }),
+    },
+    { name: 'not_like', description: '' },
+    {
+      name: 'rlike',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.rlikeDoc', {
+        defaultMessage: 'Filter data based on string regular expressions',
+      }),
+    },
+    { name: 'not_rlike', description: '' },
+  ].map<FunctionDefinition>(({ name, description }) => ({
     type: 'builtin' as const,
     ignoreAsSuggestion: /not/.test(name),
     name,
@@ -347,166 +301,109 @@ const likeFunctions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'left', type: 'string' as const },
-          { name: 'right', type: 'string' as const },
+          { name: 'left', type: 'string' },
+          { name: 'right', type: 'string' },
         ],
         returnType: 'boolean',
       },
     ],
-  };
-
-  return def;
-});
-
-const inFunctions: FunctionDefinition[] = [
-  {
-    name: 'in',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.inDoc', {
-      defaultMessage:
-        'Tests if the value an expression takes is contained in a list of other expressions',
-    }),
-  },
-  { name: 'not_in', description: '' },
-].map<FunctionDefinition>(({ name, description }) => ({
-  // set all arrays to type "any" for now
-  // this only applies to the "in" operator
-  // e.g. "foo" in ( "foo", "bar" )
-  //
-  // we did this because the "in" operator now supports
-  // mixed-type arrays like ( "1.2.3", versionVar )
-  // because of implicit casting.
-  //
-  // we need to revisit with more robust validation
-  type: 'builtin',
-  ignoreAsSuggestion: /not/.test(name),
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  signatures: [
+  })),
+  ...[
     {
-      params: [
-        { name: 'left', type: 'number' },
-
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
+      name: 'in',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.inDoc', {
+        defaultMessage:
+          'Tests if the value an expression takes is contained in a list of other expressions',
+      }),
+    },
+    { name: 'not_in', description: '' },
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin',
+    ignoreAsSuggestion: /not/.test(name),
+    name,
+    description,
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
+    signatures: [
+      {
+        params: [
+          { name: 'left', type: 'number' },
+          { name: 'right', type: 'number[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'string' },
+          { name: 'right', type: 'string[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'boolean' },
+          { name: 'right', type: 'boolean[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' },
+          { name: 'right', type: 'date[]' },
+        ],
+        returnType: 'boolean',
+      },
+    ],
+  })),
+  ...[
+    {
+      name: 'and',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
+        defaultMessage: 'and',
+      }),
     },
     {
-      params: [
-        { name: 'left', type: 'string' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
+      name: 'or',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.orDoc', {
+        defaultMessage: 'or',
+      }),
     },
-    {
-      params: [
-        { name: 'left', type: 'boolean' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'date' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'version' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'ip' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
-const logicFunctions: FunctionDefinition[] = [
-  {
-    name: 'and',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
-      defaultMessage: 'and',
-    }),
-  },
-  {
-    name: 'or',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.orDoc', {
-      defaultMessage: 'or',
-    }),
-  },
-].map(({ name, description }) => ({
-  type: 'builtin' as const,
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-  signatures: [
-    {
-      params: [
-        { name: 'left', type: 'boolean' as const },
-        { name: 'right', type: 'boolean' as const },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'boolean' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'boolean' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
-const nullFunctions: FunctionDefinition[] = [
-  {
-    name: 'is null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
-    }),
-  },
-  {
-    name: 'is not null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
-    }),
-  },
-].map<FunctionDefinition>(({ name, description }) => ({
-  type: 'builtin',
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  signatures: [
-    {
-      params: [{ name: 'left', type: 'any' }],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
-const otherDefinitions: FunctionDefinition[] = [
+  ].map(({ name, description }) => ({
+    type: 'builtin' as const,
+    name,
+    description,
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
+    supportedOptions: ['by'],
+    signatures: [
+      {
+        params: [
+          { name: 'left', type: 'boolean' },
+          { name: 'right', type: 'boolean' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'null' },
+          { name: 'right', type: 'boolean' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'boolean' },
+          { name: 'right', type: 'null' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'null' },
+          { name: 'right', type: 'null' },
+        ],
+        returnType: 'boolean',
+      },
+    ],
+  })),
   {
     type: 'builtin' as const,
     name: 'not',
@@ -522,6 +419,31 @@ const otherDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  ...[
+    {
+      name: 'is null',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
+      }),
+    },
+    {
+      name: 'is not null',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
+      }),
+    },
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin',
+    name,
+    description,
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
+    signatures: [
+      {
+        params: [{ name: 'left', type: 'any' }],
+        returnType: 'boolean',
+      },
+    ],
+  })),
   {
     type: 'builtin' as const,
     name: '=',
@@ -568,14 +490,4 @@ const otherDefinitions: FunctionDefinition[] = [
       },
     ],
   },
-];
-
-export const builtinFunctions: FunctionDefinition[] = [
-  ...mathFunctions,
-  ...comparisonFunctions,
-  ...likeFunctions,
-  ...inFunctions,
-  ...logicFunctions,
-  ...nullFunctions,
-  ...otherDefinitions,
 ];

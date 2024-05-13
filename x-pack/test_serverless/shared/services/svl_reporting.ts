@@ -109,13 +109,5 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         .auth(username, password);
       return response.text as unknown;
     },
-    async deleteAllReports() {
-      log.debug('ReportingAPI.deleteAllReports');
-
-      // ignores 409 errs and keeps retrying
-      await retry.tryForTime(5000, async () => {
-        await supertest.post('/.reporting*/_delete_by_query').send({ query: { match_all: {} } });
-      });
-    },
   };
 }

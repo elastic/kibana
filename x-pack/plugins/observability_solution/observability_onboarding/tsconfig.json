@@ -18,6 +18,7 @@
     "@kbn/observability-plugin",
     "@kbn/i18n",
     "@kbn/core-http-browser",
+    "@kbn/ui-theme",
     "@kbn/server-route-repository",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",

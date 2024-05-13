@@ -1,7 +1,7 @@
 PI
 
 Syntax
-ParametersDescriptionReturns Pi, the ratio of a circle’s circumference to its diameter.Supported types
+ParametersDescriptionReturns the ratio of a circle’s circumference to its diameter.Supported types
 Example
 ```esql
 ROW PI()

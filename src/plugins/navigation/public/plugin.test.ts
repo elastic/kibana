@@ -160,7 +160,8 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
 
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(
-        'security'
+        'security',
+        { onlyIfNotSet: true }
       );
     });
 

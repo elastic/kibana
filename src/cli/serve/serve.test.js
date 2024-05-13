@@ -10,7 +10,7 @@ import { applyConfigOverrides } from './serve';
 
 describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
-    const output = applyConfigOverrides({}, {}, {}, {});
+    const output = applyConfigOverrides({}, {}, {});
     const defaultEmptyConfig = {
       plugins: {
         paths: [],
@@ -33,8 +33,7 @@ describe('applyConfigOverrides', () => {
         tomato: {
           weight: 100,
         },
-      },
-      {}
+      }
     );
 
     expect(output).toEqual({
@@ -64,8 +63,7 @@ describe('applyConfigOverrides', () => {
           weight: 100,
           arr: [4, 5],
         },
-      },
-      {}
+      }
     );
 
     expect(output).toEqual({

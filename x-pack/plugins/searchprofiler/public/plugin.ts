@@ -47,9 +47,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       enableRouting: false,
       mount: async (params) => {
         const [coreStart] = await getStartServices();
-        const { notifications, analytics, i18n: i18nStart, theme } = coreStart;
-        const startServices = { analytics, i18n: i18nStart, theme };
-
+        const { notifications, i18n: i18nDep } = coreStart;
         const { renderApp } = await import('./application');
 
         const license = await firstValueFrom(licensing.license$);
@@ -59,9 +57,10 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           http,
           initialLicenseStatus,
           el: params.element,
+          I18nContext: i18nDep.Context,
           notifications: notifications.toasts,
+          theme$: params.theme$,
           location: params.location,
-          startServices,
         });
       },
     });

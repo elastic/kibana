@@ -30,19 +30,19 @@ describe('Kibana keystore', () => {
       sandbox.restore();
     });
 
-    it('removes key', async () => {
+    it('removes key', () => {
       const keystore = new Keystore('/data/test.keystore');
 
-      await remove(keystore, 'a2');
+      remove(keystore, 'a2');
 
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo' });
     });
 
-    it('persists the keystore', async () => {
+    it('persists the keystore', () => {
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
-      await remove(keystore, 'a2');
+      remove(keystore, 'a2');
 
       sinon.assert.calledOnce(keystore.save);
     });

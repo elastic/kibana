@@ -136,6 +136,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       inert=""
       role="group"
       style="block-size: 0;"
+      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"
@@ -332,6 +333,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       inert=""
       role="group"
       style="block-size: 0;"
+      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"
@@ -469,6 +471,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
       inert=""
       role="group"
       style="block-size: 0;"
+      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"

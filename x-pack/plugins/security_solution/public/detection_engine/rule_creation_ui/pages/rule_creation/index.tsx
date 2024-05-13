@@ -141,6 +141,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
   const defineStepDefault = useMemo(
     () => ({
       ...stepDefineDefaultValue,
@@ -149,7 +150,6 @@ const CreateRulePageComponent: React.FC = () => {
     }),
     [indicesConfig, threatIndicesConfig]
   );
-
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {

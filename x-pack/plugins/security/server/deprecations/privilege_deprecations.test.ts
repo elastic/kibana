@@ -66,7 +66,6 @@ describe('#getPrivilegeDeprecationsService', () => {
               "elasticsearch": Object {
                 "cluster": Array [],
                 "indices": Array [],
-                "remote_cluster": undefined,
                 "remote_indices": undefined,
                 "run_as": Array [],
               },
@@ -140,7 +139,6 @@ describe('#getPrivilegeDeprecationsService', () => {
               "elasticsearch": Object {
                 "cluster": Array [],
                 "indices": Array [],
-                "remote_cluster": undefined,
                 "remote_indices": undefined,
                 "run_as": Array [],
               },

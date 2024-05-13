@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/160062
-  describe.skip('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();

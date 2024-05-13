@@ -53,9 +53,6 @@ Object {
       },
       "metas": Array [
         Object {
-          "x-oas-any-type": true,
-        },
-        Object {
           "x-oas-optional": true,
         },
       ],
@@ -170,9 +167,6 @@ Object {
         "presence": "optional",
       },
       "metas": Array [
-        Object {
-          "x-oas-any-type": true,
-        },
         Object {
           "x-oas-optional": true,
         },
@@ -293,9 +287,6 @@ Object {
         "presence": "optional",
       },
       "metas": Array [
-        Object {
-          "x-oas-any-type": true,
-        },
         Object {
           "x-oas-optional": true,
         },
@@ -480,9 +471,6 @@ Object {
         "presence": "optional",
       },
       "metas": Array [
-        Object {
-          "x-oas-any-type": true,
-        },
         Object {
           "x-oas-optional": true,
         },
@@ -771,11 +759,6 @@ Object {
                   "flags": Object {
                     "error": [Function],
                   },
-                  "metas": Array [
-                    Object {
-                      "x-oas-any-type": true,
-                    },
-                  ],
                   "type": "any",
                 },
               },
@@ -3093,11 +3076,6 @@ Object {
                   "flags": Object {
                     "error": [Function],
                   },
-                  "metas": Array [
-                    Object {
-                      "x-oas-any-type": true,
-                    },
-                  ],
                   "type": "any",
                 },
               },
@@ -3741,11 +3719,6 @@ Object {
                                   "flags": Object {
                                     "error": [Function],
                                   },
-                                  "metas": Array [
-                                    Object {
-                                      "x-oas-any-type": true,
-                                    },
-                                  ],
                                   "type": "any",
                                 },
                               },
@@ -4214,11 +4187,6 @@ Object {
                       "flags": Object {
                         "error": [Function],
                       },
-                      "metas": Array [
-                        Object {
-                          "x-oas-any-type": true,
-                        },
-                      ],
                       "type": "any",
                     },
                   },
@@ -4266,11 +4234,6 @@ Object {
                       "flags": Object {
                         "error": [Function],
                       },
-                      "metas": Array [
-                        Object {
-                          "x-oas-any-type": true,
-                        },
-                      ],
                       "type": "any",
                     },
                   },
@@ -5781,11 +5744,6 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
-              "metas": Array [
-                Object {
-                  "x-oas-any-type": true,
-                },
-              ],
               "type": "any",
             },
           },

@@ -11,7 +11,7 @@ import type {
   SqlQueryRequest,
   SqlQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const SQL_SEARCH_STRATEGY = 'sql';
 

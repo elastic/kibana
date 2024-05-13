@@ -30,7 +30,6 @@ const chatCompleteBaseRt = t.type({
       conversationId: t.string,
       title: t.string,
       responseLanguage: t.string,
-      disableFunctions: toBooleanRt,
       instructions: t.array(
         t.union([
           t.string,
@@ -167,7 +166,6 @@ async function chatComplete(
       screenContexts,
       responseLanguage,
       instructions,
-      disableFunctions,
     },
   } = params;
 
@@ -213,7 +211,6 @@ async function chatComplete(
     responseLanguage,
     instructions,
     simulateFunctionCalling,
-    disableFunctions,
   });
 
   return response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled));

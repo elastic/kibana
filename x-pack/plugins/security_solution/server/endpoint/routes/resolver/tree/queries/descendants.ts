@@ -65,10 +65,10 @@ export class DescendantsQuery extends BaseResolverQuery {
               },
             },
             {
-              terms: { 'event.category': ['process'] },
+              term: { 'event.category': 'process' },
             },
             {
-              terms: { 'event.kind': ['event', 'alert'] },
+              term: { 'event.kind': 'event' },
             },
           ],
         },

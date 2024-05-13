@@ -16,6 +16,6 @@ export function createSkipNodeWithInternalPropProcessor(
   skipProperty: string
 ): DocumentNodeProcessor {
   return {
-    shouldRemove: (node) => skipProperty in node,
+    enter: (node) => skipProperty in node,
   };
 }

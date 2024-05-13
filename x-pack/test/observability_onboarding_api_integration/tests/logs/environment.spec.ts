@@ -27,10 +27,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(request.body.apiEndpoint).to.be(
         `${MOCKED_PUBLIC_BASE_URL}/internal/observability_onboarding`
       );
-      expect(request.body.scriptDownloadUrl).to.match(
-        new RegExp(
-          `${MOCKED_PUBLIC_BASE_URL}/.+?/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
-        )
+      expect(request.body.scriptDownloadUrl).to.be(
+        `${MOCKED_PUBLIC_BASE_URL}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
       );
     });
   });
@@ -43,10 +41,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(request.body.apiEndpoint).to.be(
         `${MOCKED_KIBANA_URL}/internal/observability_onboarding`
       );
-      expect(request.body.scriptDownloadUrl).to.match(
-        new RegExp(
-          `${MOCKED_KIBANA_URL}/.+?/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
-        )
+      expect(request.body.scriptDownloadUrl).to.be(
+        `${MOCKED_KIBANA_URL}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
       );
     });
   });

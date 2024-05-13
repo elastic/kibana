@@ -17,7 +17,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { getAssistantToolParams } from './helpers';
+import { getAssistantToolParams, isAttackDiscoveryFeatureEnabled } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
@@ -62,6 +62,16 @@ export const postAttackDiscoveryRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
+
+          // feature flag check:
+          const attackDiscoveryFeatureEnabled = isAttackDiscoveryFeatureEnabled({
+            assistantContext,
+            pluginName,
+          });
+
+          if (!attackDiscoveryFeatureEnabled) {
+            return response.notFound();
+          }
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
@@ -133,13 +143,12 @@ export const postAttackDiscoveryRoute = (
             });
           }
 
-          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
+          const parsedAttackDiscoveries = JSON.parse(rawAttackDiscoveries);
 
           return response.ok({
             body: {
-              alertsContextCount,
-              attackDiscoveries,
               connector_id: connectorId,
+              attackDiscoveries: parsedAttackDiscoveries,
               replacements: latestReplacements,
             },
           });

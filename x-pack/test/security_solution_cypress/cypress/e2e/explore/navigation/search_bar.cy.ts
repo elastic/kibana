@@ -23,8 +23,7 @@ import { getHostIpFilter } from '../../../objects/filter';
 import { hostsUrl } from '../../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-// Failing: See https://github.com/elastic/kibana/issues/182932
-describe.skip('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
+describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

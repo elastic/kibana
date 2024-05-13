@@ -426,7 +426,7 @@ describe('Saved Object', () => {
               },
             });
 
-            savedObject.searchSource!.setField('index', indexPattern);
+            savedObject.searchSource!.setFields({ index: indexPattern });
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({

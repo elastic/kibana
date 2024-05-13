@@ -621,7 +621,18 @@ export class SettingsPageObject extends FtrService {
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-    await this.testSubjects.click('createDataViewButton');
+
+    // if showing no data view prompt
+    const noDataView = await this.testSubjects.exists('createDataViewButton');
+    if (noDataView) {
+      await this.testSubjects.click('createDataViewButton');
+      return;
+    }
+
+    const tableView = await this.testSubjects.exists('createIndexPatternButton');
+    if (tableView) {
+      await this.testSubjects.click('createIndexPatternButton');
+    }
   }
 
   async selectRollupIndexPatternType() {

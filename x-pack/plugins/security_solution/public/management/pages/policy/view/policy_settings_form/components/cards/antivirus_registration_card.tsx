@@ -51,7 +51,15 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const isEditMode = mode === 'edit';
-    const currentMode = policy.windows.antivirus_registration.mode;
+
+    let currentMode: AntivirusRegistrationModes;
+    if (policy.windows.antivirus_registration.mode) {
+      currentMode = policy.windows.antivirus_registration.mode;
+    } else {
+      currentMode = policy.windows.antivirus_registration.enabled
+        ? AntivirusRegistrationModes.enabled
+        : AntivirusRegistrationModes.disabled;
+    }
 
     const labels: Record<AntivirusRegistrationModes, React.ReactNode> = useMemo(
       () => ({

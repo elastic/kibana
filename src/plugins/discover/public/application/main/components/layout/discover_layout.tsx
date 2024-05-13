@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -32,11 +30,11 @@ import {
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -44,7 +42,7 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
+import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
@@ -158,37 +156,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onPopulateWhereClause = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      if (query && isOfAggregateQueryType(query) && 'esql' in query) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        // send the field type for casting
-        const fieldType = typeof field !== 'string' ? field.type : undefined;
-        // weird existence logic from Discover components
-        // in the field it comes the operator _exists_ and in the value the field
-        // I need to take care of it here but I think it should be handled on the fieldlist instead
-        const updatedQuery = appendWhereClauseToESQLQuery(
-          query.esql,
-          fieldName === '_exists_' ? String(values) : fieldName,
-          fieldName === '_exists_' ? undefined : values,
-          fieldName === '_exists_' ? '_exists_' : operation,
-          fieldType
-        );
-        data.query.queryString.setQuery({
-          esql: updatedQuery,
-        });
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
-        }
-      }
-    },
-    [data.query.queryString, query, trackUiMetric]
-  );
-
-  const onFilter = isPlainRecord
-    ? (onPopulateWhereClause as DocViewFilterFn)
-    : (onAddFilter as DocViewFilterFn);
-
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
@@ -267,7 +234,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
-          onAddFilter={onFilter}
+          onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
@@ -277,16 +244,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       </>
     );
   }, [
-    resultState,
-    isPlainRecord,
-    dataView,
-    stateContainer,
     currentColumns,
-    viewMode,
-    onFilter,
-    onFieldEdited,
+    dataView,
+    isPlainRecord,
     mainContainer,
+    onAddFilter,
     onDropFieldToTable,
+    onFieldEdited,
+    resultState,
+    stateContainer,
+    viewMode,
     panelsToggle,
   ]);
 
@@ -362,7 +329,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddField={onAddColumn}
                 columns={currentColumns}
-                onAddFilter={onFilter}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
                 onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
                 selectedDataView={dataView}

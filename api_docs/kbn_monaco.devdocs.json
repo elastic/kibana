@@ -1171,9 +1171,6 @@
             "tags": [],
             "label": "endOffset",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
             "path": "packages/kbn-monaco/src/console/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -7,12 +7,14 @@
  */
 
 export const getOrderedRolledFilesMock = jest.fn();
+export const deleteFilesMock = jest.fn();
 export const rollPreviousFilesInOrderMock = jest.fn();
 export const rollCurrentFileMock = jest.fn();
 export const shouldSkipRolloutMock = jest.fn();
 
 jest.doMock('./rolling_tasks', () => ({
   getOrderedRolledFiles: getOrderedRolledFilesMock,
+  deleteFiles: deleteFilesMock,
   rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
   rollCurrentFile: rollCurrentFileMock,
   shouldSkipRollout: shouldSkipRolloutMock,
@@ -21,6 +23,7 @@ jest.doMock('./rolling_tasks', () => ({
 export const resetAllMock = () => {
   shouldSkipRolloutMock.mockReset();
   getOrderedRolledFilesMock.mockReset();
+  deleteFilesMock.mockReset();
   rollPreviousFilesInOrderMock.mockReset();
   rollCurrentFileMock.mockReset();
 };

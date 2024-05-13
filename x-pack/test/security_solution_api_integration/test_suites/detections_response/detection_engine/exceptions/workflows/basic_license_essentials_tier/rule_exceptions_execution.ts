@@ -67,8 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(path);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/181887
-    describe.skip('creating rules with exceptions', () => {
+    describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
       });

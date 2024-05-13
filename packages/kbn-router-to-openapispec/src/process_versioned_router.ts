@@ -69,7 +69,6 @@ export const processVersionedRouter = (
       );
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: {
-          summary: route.options.description ?? '',
           requestBody: hasBody
             ? {
                 content: extractVersionedRequestBody(route, converter),
@@ -123,6 +122,7 @@ export const extractVersionedResponses = (
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
+        description: route.options.description ?? 'No description',
         content: {
           ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
           [getVersionedContentTypeString(

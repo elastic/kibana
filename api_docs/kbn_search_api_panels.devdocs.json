@@ -518,39 +518,6 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.PreprocessDataPanel",
-        "type": "Function",
-        "tags": [],
-        "label": "PreprocessDataPanel",
-        "description": [],
-        "signature": [
-          "({ docLinks, images }: React.PropsWithChildren<{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }>) => JSX.Element"
-        ],
-        "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.PreprocessDataPanel.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ docLinks, images }",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }>"
-            ],
-            "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-common.SelectClientPanel",
         "type": "Function",
         "tags": [],

@@ -44,45 +44,26 @@ NotesContainer.displayName = 'NotesContainer';
 interface Props {
   ariaRowindex: number;
   associateNote: AssociateNote;
-  className?: string;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: (eventId?: string) => void;
-  eventId?: string;
+  toggleShowAddNote: () => void;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, className, notes, showAddNote, toggleShowAddNote, eventId }) => {
+  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
       (noteId: string) => {
         associateNote(noteId);
-        if (eventId != null) {
-          toggleShowAddNote(eventId);
-        } else {
-          toggleShowAddNote();
-        }
+        toggleShowAddNote();
       },
-      [associateNote, toggleShowAddNote, eventId]
+      [associateNote, toggleShowAddNote]
     );
 
-    const onCancelAddNote = useCallback(() => {
-      if (eventId != null) {
-        toggleShowAddNote(eventId);
-      } else {
-        toggleShowAddNote();
-      }
-    }, [eventId, toggleShowAddNote]);
-
     return (
-      <NoteCardsCompContainer
-        className={className}
-        data-test-subj="note-cards"
-        hasShadow={false}
-        paddingSize="none"
-      >
+      <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
             <NotesContainer
@@ -104,7 +85,7 @@ export const NoteCards = React.memo<Props>(
             <AddNote
               associateNote={associateNoteAndToggleShow}
               newNote={newNote}
-              onCancelAddNote={onCancelAddNote}
+              onCancelAddNote={toggleShowAddNote}
               updateNewNote={setNewNote}
             />
           </AddNoteContainer>

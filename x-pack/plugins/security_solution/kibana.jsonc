@@ -53,7 +53,6 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
-      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",

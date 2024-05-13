@@ -96,7 +96,10 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
-      osqueryEnabled: schema.boolean({ defaultValue: true }),
+      osqueryEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
       inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: true }),

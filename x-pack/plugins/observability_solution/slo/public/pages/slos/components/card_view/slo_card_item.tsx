@@ -24,7 +24,7 @@ import {
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
@@ -83,15 +83,13 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const { handleCreateRule, handleAttachToDashboardSave } = useSloListActions({
-    slo,
-    setIsActionsPopoverOpen,
-    setIsAddRuleFlyoutOpen,
-  });
-
-  const closeDeleteModal = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
+  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm, handleAttachToDashboardSave } =
+    useSloListActions({
+      slo,
+      setDeleteConfirmationModalOpen,
+      setIsActionsPopoverOpen,
+      setIsAddRuleFlyoutOpen,
+    });
 
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
@@ -168,7 +166,11 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
+        <SloDeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
       ) : null}
 
       {isResetConfirmationModalOpen ? (
@@ -244,12 +246,6 @@ export function SloCardChart({
               title: slo.name,
               subtitle: subTitle,
               value: sliValue,
-              trendA11yTitle: i18n.translate('xpack.slo.slo.sLOGridItem.trendA11yLabel', {
-                defaultMessage: `The "{title}" trend`,
-                values: {
-                  title: slo.name,
-                },
-              }),
               trendShape: MetricTrendShape.Area,
               trend: historicalSliData?.map((d) => ({
                 x: d.key as number,

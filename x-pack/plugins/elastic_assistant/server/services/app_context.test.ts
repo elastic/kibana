@@ -54,6 +54,7 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
+        attackDiscoveryEnabled: false,
       });
       appContextService.stop();
 
@@ -103,6 +104,7 @@ describe('AppContextService', () => {
       const pluginName = 'pluginName';
       const features: AssistantFeatures = {
         assistantModelEvaluation: true,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -117,10 +119,12 @@ describe('AppContextService', () => {
       const pluginOne = 'plugin1';
       const featuresOne: AssistantFeatures = {
         assistantModelEvaluation: true,
+        attackDiscoveryEnabled: false,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
         assistantModelEvaluation: false,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -135,9 +139,11 @@ describe('AppContextService', () => {
       const pluginName = 'pluginName';
       const featuresOne: AssistantFeatures = {
         assistantModelEvaluation: true,
+        attackDiscoveryEnabled: false,
       };
       const featuresTwo: AssistantFeatures = {
         assistantModelEvaluation: false,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);

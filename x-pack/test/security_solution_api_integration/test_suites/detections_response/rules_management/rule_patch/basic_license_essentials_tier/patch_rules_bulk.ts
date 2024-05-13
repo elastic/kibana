@@ -62,7 +62,6 @@ export default ({ getService }: FtrProviderContext) => {
       it('should patch defaultable fields', async () => {
         const expectedRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
-          max_signals: 200,
           setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
@@ -79,7 +78,6 @@ export default ({ getService }: FtrProviderContext) => {
             body: [
               {
                 rule_id: 'rule-1',
-                max_signals: expectedRule.max_signals,
                 setup: expectedRule.setup,
                 related_integrations: expectedRule.related_integrations,
               },

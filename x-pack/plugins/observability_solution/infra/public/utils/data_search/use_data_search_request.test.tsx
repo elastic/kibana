@@ -8,8 +8,12 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { firstValueFrom, Observable, of, Subject } from 'rxjs';
-import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import {
+  DataPublicPluginStart,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+  ISearchStart,
+} from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { PluginKibanaContextValue } from '../../hooks/use_kibana';

@@ -724,6 +724,39 @@
       },
       {
         "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-common.isKibanaResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isKibanaResponse",
+        "description": [],
+        "signature": [
+          "(response: Record<string, any>) => boolean"
+        ],
+        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.isKibanaResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
         "id": "def-common.isSafeMethod",
         "type": "Function",
         "tags": [],

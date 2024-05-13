@@ -61,10 +61,6 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
 
-export const ADD_NOTE_CONTAINER = '[data-test-subj="add-note-container"]';
-
-export const RESOLVER_GRAPH_CONTAINER = '[data-test-subj="resolver:graph"]';
-
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
@@ -284,12 +280,16 @@ export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
-  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
-  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
-  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
-  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
+  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
+  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
+  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
+  COPY: '[data-test-subj="hover-actions-copy-button"]',
+  SHOW_TOP: '[data-test-subj=show-top-field]',
 };
+
+export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
+
+export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
 
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 

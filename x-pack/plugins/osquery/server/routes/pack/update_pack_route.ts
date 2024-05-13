@@ -112,17 +112,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           )
         );
 
-        const { policiesList, invalidPolicies } = getInitialPolicies(
-          packagePolicies,
-          policy_ids,
-          shards
-        );
-
-        if (invalidPolicies?.length) {
-          return response.badRequest({
-            body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
-          });
-        }
+        const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
 
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,

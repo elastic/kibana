@@ -1003,18 +1003,28 @@ describe('solution navigations', () => {
     }
   });
 
+  it('should throw if the active solution navigation is not registered', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+
+    expect(() => {
+      projectNavigation.changeActiveSolutionNavigation('3');
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Solution navigation definition with id \\"3\\" does not exist."`
+    );
+  });
+
   it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService, application } = setup({
+    const { projectNavigation, navLinksService } = setup({
       locationPathName: '/app/app3', // we are on app3 which only exists in solution3
       navLinkIds: ['app1', 'app2', 'app3'],
     });
 
-    navLinksService.get.mockReturnValue({ url: '/app/app3', href: '/app/app3' } as any);
-
     const getActiveDefinition = () =>
-      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
+      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
 
-    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
 
     {
       const definition = await getActiveDefinition();
@@ -1022,12 +1032,20 @@ describe('solution navigations', () => {
     }
 
     // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('solution2');
+    projectNavigation.changeActiveSolutionNavigation('2');
 
     {
       const definition = await getActiveDefinition();
       expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
-      expect(application.navigateToUrl).toHaveBeenCalled(); // Redirect
     }
+
+    navLinksService.get.mockReturnValue({ url: '/app/app2', href: '/app/app2' } as any);
+    projectNavigation.changeActiveSolutionNavigation('2', { redirect: true }); // We ask to redirect to the home page of solution 2
+    {
+      const definition = await getActiveDefinition();
+      expect(definition?.id).toBe('solution2');
+    }
+
+    navLinksService.get.mockReset();
   });
 });

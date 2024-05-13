@@ -12,10 +12,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import {
-  DataDocuments$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
+import { DataDocuments$, DataTotalHits$ } from '../../services/discover_data_state_container';
 import { FetchStatus } from '../../../types';
 
 describe('useFetchMoreRecords', () => {

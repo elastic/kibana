@@ -103,6 +103,7 @@ Object {
             inert=""
             role="group"
             style="block-size: 0;"
+            tabindex="-1"
           >
             <div
               class="euiAccordion__children emotion-euiAccordion__children"
@@ -240,6 +241,7 @@ Object {
           inert=""
           role="group"
           style="block-size: 0;"
+          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"
@@ -433,6 +435,7 @@ Object {
             id="exceptionItemCardComments"
             role="group"
             style="block-size: 0;"
+            tabindex="-1"
           >
             <div
               class="euiAccordion__children emotion-euiAccordion__children"
@@ -569,6 +572,7 @@ Object {
           id="exceptionItemCardComments"
           role="group"
           style="block-size: 0;"
+          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"

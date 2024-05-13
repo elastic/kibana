@@ -47,6 +47,7 @@ export class SecurityUsageReportingTask {
       taskTitle,
       version,
       meteringCallback,
+      options,
     } = setupContract;
 
     this.cloudSetup = cloudSetup;
@@ -64,7 +65,12 @@ export class SecurityUsageReportingTask {
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
               run: async () => {
-                return this.runTask(taskInstance, core, meteringCallback);
+                return this.runTask(
+                  taskInstance,
+                  core,
+                  meteringCallback,
+                  options?.lookBackLimitMinutes
+                );
               },
               cancel: async () => {},
             };
@@ -79,7 +85,6 @@ export class SecurityUsageReportingTask {
 
   public start = async ({ taskManager, interval }: SecurityUsageReportingTaskStartContract) => {
     if (!taskManager) {
-      this.logger.error(`missing required taskmanager service during start of ${this.taskType}`);
       return;
     }
 
@@ -104,12 +109,13 @@ export class SecurityUsageReportingTask {
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    meteringCallback: MeteringCallback
+    meteringCallback: MeteringCallback,
+    lookBackLimitMinutes?: number
   ) => {
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
-      return { state: taskInstance.state };
+      return;
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
@@ -120,21 +126,15 @@ export class SecurityUsageReportingTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
-    const epochDate = new Date();
-    epochDate.setFullYear(1969);
-    const lastSuccessfulReport: Date =
-      (taskInstance.state.lastSuccessfulReport &&
-        new Date(taskInstance.state.lastSuccessfulReport)) ||
-      epochDate;
+    const lastSuccessfulReport =
+      taskInstance.state.lastSuccessfulReport && new Date(taskInstance.state.lastSuccessfulReport);
 
     let usageRecords: UsageRecord[] = [];
-    let latestRecordTimestamp: Date | undefined;
-    let shouldRunAgain = false;
     // save usage record query time so we can use it to know where
     // the next query range should start
     const meteringCallbackTime = new Date();
     try {
-      const meteringCallbackResponse = await meteringCallback({
+      usageRecords = await meteringCallback({
         esClient,
         cloudSetup: this.cloudSetup,
         logger: this.logger,
@@ -143,14 +143,9 @@ export class SecurityUsageReportingTask {
         abortController: this.abortController,
         config: this.config,
       });
-      usageRecords = meteringCallbackResponse.records ?? [];
-      latestRecordTimestamp = meteringCallbackResponse.latestTimestamp;
-      shouldRunAgain = meteringCallbackResponse.shouldRunAgain ?? false;
     } catch (err) {
-      this.logger.error(
-        `failed to retrieve usage records starting from ${lastSuccessfulReport.toISOString()}: ${err}`
-      );
-      return { state: taskInstance.state, runAt: new Date() };
+      this.logger.error(`failed to retrieve usage records: ${err}`);
+      return;
     }
 
     this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
@@ -163,36 +158,59 @@ export class SecurityUsageReportingTask {
 
         if (!usageReportResponse.ok) {
           const errorResponse = await usageReportResponse.json();
-          this.logger.warn(`API error ${usageReportResponse.status}, ${errorResponse}`);
-          return { state: taskInstance.state, runAt: new Date() };
+          this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
+          return;
         }
 
         this.logger.info(
-          `(${
-            usageRecords.length
-          }) usage records starting from ${lastSuccessfulReport.toISOString()} were sent successfully: ${
-            usageReportResponse.status
-          }, ${usageReportResponse.statusText}`
+          `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
         );
       } catch (err) {
-        this.logger.warn(
-          `Failed to send (${
-            usageRecords.length
-          }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
-        );
-        shouldRunAgain = true;
+        this.logger.error(`Failed to send usage records report ${err} `);
       }
     }
 
     const state = {
-      lastSuccessfulReport:
-        !usageRecords.length || usageReportResponse?.status === 201
-          ? (latestRecordTimestamp || meteringCallbackTime).toISOString()
-          : lastSuccessfulReport.toISOString(),
+      lastSuccessfulReport: this.shouldUpdateLastSuccessfulReport(usageRecords, usageReportResponse)
+        ? meteringCallbackTime.toISOString()
+        : this.getFailedLastSuccessfulReportTime(
+            meteringCallbackTime,
+            lastSuccessfulReport,
+            lookBackLimitMinutes
+          ).toISOString(),
     };
-
-    return shouldRunAgain ? { state, runAt: new Date() } : { state };
+    return { state };
   };
+
+  private getFailedLastSuccessfulReportTime(
+    meteringCallbackTime: Date,
+    lastSuccessfulReport: Date,
+    lookBackLimitMinutes?: number
+  ): Date {
+    const nextLastSuccessfulReport = lastSuccessfulReport || meteringCallbackTime;
+
+    if (!lookBackLimitMinutes) {
+      return nextLastSuccessfulReport;
+    }
+
+    const lookBackLimitTime = new Date(meteringCallbackTime.setMinutes(-lookBackLimitMinutes));
+
+    if (nextLastSuccessfulReport > lookBackLimitTime) {
+      return nextLastSuccessfulReport;
+    }
+
+    this.logger.error(
+      `lastSuccessfulReport time of ${nextLastSuccessfulReport.toISOString()} is past the limit of ${lookBackLimitMinutes} minutes, adjusting lastSuccessfulReport to ${lookBackLimitTime.toISOString()}`
+    );
+    return lookBackLimitTime;
+  }
+
+  private shouldUpdateLastSuccessfulReport(
+    usageRecords: UsageRecord[],
+    usageReportResponse: Response | undefined
+  ): boolean {
+    return !usageRecords.length || usageReportResponse?.status === 201;
+  }
 
   private get taskId() {
     return `${this.taskType}:${this.version}`;

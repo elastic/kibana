@@ -20,9 +20,7 @@ describe('useStepFromQueryString', () => {
         getComponentTemplateDatastreams: jest.fn(),
         postDataStreamMappingsFromTemplate: jest.fn(),
       },
-      startServices: {
-        overlays: { openModal: jest.fn() },
-      },
+      overlays: { openModal: jest.fn() } as any,
     } as any);
   });
   it('should do nothing if there no impacted data_streams', async () => {
@@ -40,7 +38,7 @@ describe('useStepFromQueryString', () => {
   });
 
   it('should try to update mappings if there is impacted data_streams', async () => {
-    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
+    const { api, overlays } = jest.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -53,7 +51,7 @@ describe('useStepFromQueryString', () => {
     });
 
     jest
-      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
+      .mocked(useComponentTemplatesContext().overlays.openModal)
       .mockReturnValue({ onClose: jest.fn() } as any);
 
     const {
@@ -65,11 +63,11 @@ describe('useStepFromQueryString', () => {
     await showDatastreamRolloverModal('logs-test.data@custom');
 
     expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
-    expect(startServices.overlays.openModal).not.toBeCalled();
+    expect(overlays.openModal).not.toBeCalled();
   });
 
   it('should show datastream rollover modal if there is an error when updating mappings', async () => {
-    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
+    const { api, overlays } = jest.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -82,7 +80,7 @@ describe('useStepFromQueryString', () => {
     });
 
     jest
-      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
+      .mocked(useComponentTemplatesContext().overlays.openModal)
       .mockReturnValue({ onClose: jest.fn() } as any);
 
     const {
@@ -92,6 +90,6 @@ describe('useStepFromQueryString', () => {
     } = renderHook(() => useDatastreamsRollover());
 
     await showDatastreamRolloverModal('logs-test.data@custom');
-    expect(startServices.overlays.openModal).toBeCalled();
+    expect(overlays.openModal).toBeCalled();
   });
 });

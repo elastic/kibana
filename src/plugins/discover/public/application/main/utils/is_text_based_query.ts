@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { RecordRawType } from '../state_management/discover_data_state_container';
+import { RecordRawType } from '../services/discover_data_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 
 /**

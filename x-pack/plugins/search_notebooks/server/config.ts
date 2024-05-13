@@ -12,13 +12,6 @@ export * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  catalog: schema.maybe(
-    schema.object({
-      url: schema.uri(),
-      ttl: schema.number({ defaultValue: 900 }),
-      errorTTL: schema.number({ defaultValue: 3600 }),
-    })
-  ),
 });
 
 type SearchNotebooksSchema = TypeOf<typeof configSchema>;

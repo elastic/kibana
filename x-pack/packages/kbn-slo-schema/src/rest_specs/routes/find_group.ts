@@ -28,7 +28,7 @@ const findSLOGroupsParamsSchema = t.partial({
 
 const sloGroupWithSummaryResponseSchema = t.type({
   group: t.string,
-  groupBy: groupBySchema,
+  groupBy: t.string,
   summary: groupSummarySchema,
 });
 

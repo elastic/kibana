@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
 import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
@@ -120,8 +119,6 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
-      const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
-      const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
       // create 2 rules
@@ -146,9 +143,14 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId1, start, end }])
+        .send([
+          {
+            rule_id: ruleId1,
+            start: '2023-10-19T12:00:00.000Z',
+            end: '2023-10-22T12:00:00.000Z',
+          },
+        ])
         .expect(200);
-
       const result = response.body;
       const backfillId = result[0].id;
       const schedule = result[0].schedule;
@@ -161,20 +163,43 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       expect(typeof adHocRun1.createdAt).to.be('string');
       expect(adHocRun1.duration).to.eql('12h');
       expect(adHocRun1.enabled).to.eql(true);
-      expect(adHocRun1.start).to.eql(start);
-      expect(adHocRun1.end).to.eql(end);
+      expect(adHocRun1.start).to.eql('2023-10-19T12:00:00.000Z');
+      expect(adHocRun1.end).to.eql('2023-10-22T12:00:00.000Z');
       expect(adHocRun1.status).to.eql('pending');
       expect(adHocRun1.spaceId).to.eql(spaceId);
       testExpectedRule(adHocRun1, undefined, true);
-
-      let currentStart = start;
-      adHocRun1.schedule.forEach((sched: any) => {
-        expect(sched.interval).to.eql('12h');
-        expect(sched.status).to.eql('pending');
-        const runAt = moment(currentStart).add(12, 'hours').toISOString();
-        expect(sched.runAt).to.eql(runAt);
-        currentStart = runAt;
-      });
+      expect(adHocRun1.schedule).to.eql([
+        {
+          runAt: '2023-10-20T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          runAt: '2023-10-20T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          runAt: '2023-10-21T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          runAt: '2023-10-21T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          runAt: '2023-10-22T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          runAt: '2023-10-22T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+      ]);
 
       // delete both rules which will mark the api keys for invalidation
       await supertestWithoutAuth

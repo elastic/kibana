@@ -134,13 +134,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should export rules with defaultable fields when values are set', async () => {
+    it('should export rules with defaultbale fields when values are set', async () => {
       const defaultableFields: BaseDefaultableFields = {
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
         ],
-        max_signals: 100,
         setup: '# some setup markdown',
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
@@ -316,7 +315,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       const ruleToDuplicate = getCustomQueryRuleParams({
         rule_id: ruleId,
-        max_signals: 100,
         setup: '# some setup markdown',
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },

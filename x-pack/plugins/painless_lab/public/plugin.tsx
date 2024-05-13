@@ -52,15 +52,13 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         const [core] = await getStartServices();
 
         const {
+          i18n: { Context: I18nContext },
           notifications,
           docLinks,
           chrome,
           settings,
-          analytics,
-          i18n: i18nStart,
           theme,
         } = core;
-        const startServices = { analytics, i18n: i18nStart, theme };
 
         const license = await firstValueFrom(licensing.license$);
         const licenseStatus = checkLicenseStatus(license);
@@ -73,12 +71,13 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
 
         const { renderApp } = await import('./application');
         const tearDownApp = renderApp(element, {
+          I18nContext,
           http,
           uiSettings,
           links: getLinks(docLinks),
           chrome,
+          theme,
           settings,
-          startServices,
         });
 
         return () => {

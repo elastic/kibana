@@ -10,7 +10,7 @@ import React from 'react';
 import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useBoolean } from '@kbn/react-hooks';
+import { useBoolean } from '../../../../../hooks/use_boolean';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,

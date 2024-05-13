@@ -22,8 +22,7 @@ export interface AddToTimelineButtonProps {
 
 export const SECURITY_APP_NAME = 'Security';
 export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
-  const { timelines, appName, analytics, i18n, theme } = useKibana().services;
-  const startServices = { analytics, i18n, theme };
+  const { timelines, appName } = useKibana().services;
   const { field, value, isIcon, iconProps } = props;
 
   const queryIds = isArray(value) ? value : [value];
@@ -61,6 +60,5 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
     ...(isIcon
       ? { showTooltip: true, Component: TimelineIconComponent }
       : { Component: TimelineComponent }),
-    startServices,
   });
 };

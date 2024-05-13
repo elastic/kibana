@@ -19,13 +19,17 @@ describe('esqlToOptions', () => {
   });
   it('should transform all columns if fieldTYpe is not passed', () => {
     expect(
-      esqlToOptions([
-        { name: '@timestamp', id: '@timestamp', meta: { type: 'date' } },
-        { name: 'agent.build.original', id: 'agent.build.original', meta: { type: 'string' } },
-        { name: 'amqp.app-id', id: 'amqp.app-id', meta: { type: 'string' } },
-        { name: 'amqp.auto-delete', id: 'amqp.auto-delete', meta: { type: 'number' } },
-        { name: 'amqp.class-id', id: 'amqp.class-id', meta: { type: 'boolean' } },
-      ])
+      esqlToOptions({
+        type: 'datatable',
+        rows: [],
+        columns: [
+          { name: '@timestamp', id: '@timestamp', meta: { type: 'date' } },
+          { name: 'agent.build.original', id: 'agent.build.original', meta: { type: 'string' } },
+          { name: 'amqp.app-id', id: 'amqp.app-id', meta: { type: 'string' } },
+          { name: 'amqp.auto-delete', id: 'amqp.auto-delete', meta: { type: 'number' } },
+          { name: 'amqp.class-id', id: 'amqp.class-id', meta: { type: 'boolean' } },
+        ],
+      })
     ).toEqual([
       { label: '@timestamp' },
       { label: 'agent.build.original' },
@@ -37,13 +41,17 @@ describe('esqlToOptions', () => {
   it('should transform only columns of exact fieldType', () => {
     expect(
       esqlToOptions(
-        [
-          { name: '@timestamp', id: '@timestamp', meta: { type: 'date' } },
-          { name: 'agent.build.original', id: 'agent.build.original', meta: { type: 'string' } },
-          { name: 'amqp.app-id', id: 'amqp.app-id', meta: { type: 'string' } },
-          { name: 'amqp.auto-delete', id: 'amqp.auto-delete', meta: { type: 'number' } },
-          { name: 'amqp.class-id', id: 'amqp.class-id', meta: { type: 'boolean' } },
-        ],
+        {
+          type: 'datatable',
+          rows: [],
+          columns: [
+            { name: '@timestamp', id: '@timestamp', meta: { type: 'date' } },
+            { name: 'agent.build.original', id: 'agent.build.original', meta: { type: 'string' } },
+            { name: 'amqp.app-id', id: 'amqp.app-id', meta: { type: 'string' } },
+            { name: 'amqp.auto-delete', id: 'amqp.auto-delete', meta: { type: 'number' } },
+            { name: 'amqp.class-id', id: 'amqp.class-id', meta: { type: 'boolean' } },
+          ],
+        },
         'string'
       )
     ).toEqual([{ label: 'agent.build.original' }, { label: 'amqp.app-id' }]);

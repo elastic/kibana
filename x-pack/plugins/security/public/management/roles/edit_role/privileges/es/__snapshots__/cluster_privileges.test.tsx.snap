@@ -15,7 +15,6 @@ exports[`it renders without crashing 1`] = `
       isDisabled={false}
       onChange={[Function]}
       onCreateOption={[Function]}
-      optionMatcher={[Function]}
       options={
         Array [
           Object {

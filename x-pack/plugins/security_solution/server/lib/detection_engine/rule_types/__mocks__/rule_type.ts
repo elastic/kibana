@@ -24,7 +24,6 @@ import type { QueryRuleParams, RuleParams } from '../../rule_schema';
 // this is only used in tests
 import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor.test_helpers';
 import { getCompleteRuleMock } from '../../rule_schema/mocks';
-import { DEFAULT_MAX_ALERTS } from '@kbn/alerting-plugin/server/config';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -46,7 +45,6 @@ export const createRuleTypeMocks = (
     registerType: ({ executor }) => {
       alertExecutor = executor;
     },
-    getConfig: () => ({ run: { alerts: { max: DEFAULT_MAX_ALERTS } } }),
   } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();

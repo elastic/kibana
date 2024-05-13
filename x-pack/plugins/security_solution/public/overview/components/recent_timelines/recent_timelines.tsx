@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
@@ -14,7 +21,7 @@ import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
-import { HoverPopover } from '../../../common/components/hover_popover';
+import { WithHoverActions } from '../../../common/components/with_hover_actions';
 import { TimelineType } from '../../../../common/api/timeline';
 
 import { RecentTimelineCounts } from './counts';
@@ -46,42 +53,56 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
       [onOpenTimeline, timeline.savedObjectId]
     );
 
-    return (
-      <>
-        <HoverPopover
-          anchorPosition="rightDown"
-          hoverContent={
-            <EuiToolTip
-              content={
-                timeline.timelineType === TimelineType.default
-                  ? i18n.OPEN_AS_DUPLICATE
-                  : i18n.OPEN_AS_DUPLICATE_TEMPLATE
-              }
-            >
-              <EuiButtonIcon
-                aria-label={
+    const render = useCallback(
+      (showHoverContent) => (
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          data-test-subj="overview-recent-timelines"
+        >
+          <EuiFlexItem grow={false}>
+            <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
+            <RecentTimelineCounts timeline={timeline} />
+            {timeline.description && timeline.description.length && (
+              <EuiText color="subdued" size="xs">
+                <ClampText>{timeline.description}</ClampText>
+              </EuiText>
+            )}
+          </EuiFlexItem>
+
+          {showHoverContent && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
                   timeline.timelineType === TimelineType.default
                     ? i18n.OPEN_AS_DUPLICATE
                     : i18n.OPEN_AS_DUPLICATE_TEMPLATE
                 }
-                data-test-subj="open-duplicate"
-                isDisabled={timeline.savedObjectId == null}
-                iconSize="s"
-                iconType="copy"
-                onClick={handleClick}
-                size="s"
-              />
-            </EuiToolTip>
-          }
-        >
-          <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
-          <RecentTimelineCounts timeline={timeline} />
-          {timeline.description && timeline.description.length && (
-            <EuiText color="subdued" size="xs">
-              <ClampText>{timeline.description}</ClampText>
-            </EuiText>
+              >
+                <EuiButtonIcon
+                  aria-label={
+                    timeline.timelineType === TimelineType.default
+                      ? i18n.OPEN_AS_DUPLICATE
+                      : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+                  }
+                  data-test-subj="open-duplicate"
+                  isDisabled={timeline.savedObjectId == null}
+                  iconSize="s"
+                  iconType="copy"
+                  onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           )}
-        </HoverPopover>
+        </EuiFlexGroup>
+      ),
+      [handleClick, onOpenTimeline, timeline]
+    );
+
+    return (
+      <>
+        <WithHoverActions render={render} />
         <>{!isLastItem && <EuiSpacer size="l" />}</>
       </>
     );
@@ -121,7 +142,7 @@ export const RecentTimelines = React.memo<RecentTimelinesProps>(
       );
     }
 
-    return <div data-test-subj="overview-recent-timelines">{content}</div>;
+    return <>{content}</>;
   }
 );
 

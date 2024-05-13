@@ -124,11 +124,6 @@ const NetworkDetailsComponent: React.FC = () => {
     }
   }, [globalFilters, indexPattern, networkDetailsFilter, query, uiSettings]);
 
-  const additionalFilters = useMemo(
-    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
-    [rawFilteredQuery]
-  );
-
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
     id: ID,
@@ -231,14 +226,14 @@ const NetworkDetailsComponent: React.FC = () => {
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={additionalFilters}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={additionalFilters}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

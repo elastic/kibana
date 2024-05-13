@@ -18,7 +18,6 @@ interface WriterBulkResponse {
 interface BulkParams {
   host?: RiskScore[];
   user?: RiskScore[];
-  refresh?: 'wait_for';
 }
 
 export interface RiskEngineDataWriter {
@@ -43,7 +42,6 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
 
       const { errors, items, took } = await this.options.esClient.bulk({
         operations: this.buildBulkOperations(params),
-        refresh: params.refresh ?? false,
       });
 
       return {

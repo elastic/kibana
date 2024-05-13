@@ -43,7 +43,6 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       getNavigation: jest.fn(async (id) =>
         id === 'alert-with-nav' ? { path: '/alert' } : undefined
       ),
-      getMaxAlertsPerRun: jest.fn(),
     },
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),

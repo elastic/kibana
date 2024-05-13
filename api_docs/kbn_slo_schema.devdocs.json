@@ -691,7 +691,7 @@
         "label": "DeleteSLOInstancesInput",
         "description": [],
         "signature": [
-          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
+          "{ list: { sloId: string; instanceId: string; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -706,7 +706,7 @@
         "label": "DeleteSLOInstancesParams",
         "description": [],
         "signature": [
-          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
+          "{ list: { sloId: string; instanceId: string; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -850,7 +850,7 @@
         "label": "FindSLOGroupsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: \"status\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\"; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
+          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: string; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
         "deprecated": false,
@@ -3274,18 +3274,12 @@
           "<{ list: ",
           "ArrayC",
           "<",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ sloId: ",
           "StringC",
           "; instanceId: ",
           "StringC",
-          "; }>, ",
-          "PartialC",
-          "<{ excludeRollup: ",
-          "BooleanC",
-          "; }>]>>; }>; }>"
+          "; }>>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -5120,18 +5114,8 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ungrouped\">, ",
-          "LiteralC",
-          "<\"slo.tags\">, ",
-          "LiteralC",
-          "<\"status\">, ",
-          "LiteralC",
-          "<\"slo.indicator.type\">, ",
-          "LiteralC",
-          "<\"_index\">]>; summary: ",
+          "StringC",
+          "; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -15423,18 +15407,8 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ungrouped\">, ",
-          "LiteralC",
-          "<\"slo.tags\">, ",
-          "LiteralC",
-          "<\"status\">, ",
-          "LiteralC",
-          "<\"slo.indicator.type\">, ",
-          "LiteralC",
-          "<\"_index\">]>; summary: ",
+          "StringC",
+          "; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",

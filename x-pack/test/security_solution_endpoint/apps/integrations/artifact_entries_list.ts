@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('For each artifact list under management', function () {
     // It's flaky only in Serverless
-    targetTags(this, ['@ess', '@serverless']);
+    targetTags(this, ['@ess', '@skipInServerless']);
 
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -155,13 +155,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } else if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
-          const newValue = (formAction.value || '') + (suffix ? suffix : '');
-          await testSubjects.setValue(formAction.selector, newValue);
-          await testSubjects.getAttribute(formAction.selector, 'value').then((value) => {
-            if (value !== newValue) {
-              return testSubjects.setValue(formAction.selector, newValue);
-            }
-          });
+          await testSubjects.setValue(
+            formAction.selector,
+            (formAction.value || '') + (suffix ? suffix : '')
+          );
         } else if (formAction.type === 'clear') {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')

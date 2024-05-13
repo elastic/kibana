@@ -29,7 +29,6 @@
       "contentManagement"
     ],
     "optionalPlugins": [
-      "dataVisualizer",
       "home",
       "share",
       "usageCollection",

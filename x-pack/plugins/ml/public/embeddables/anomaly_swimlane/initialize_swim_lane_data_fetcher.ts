@@ -8,15 +8,14 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
   debounceTime,
-  EMPTY,
   from,
   map,
-  type Observable,
   of,
   shareReplay,
   skipWhile,
@@ -56,9 +55,7 @@ export const initializeSwimLaneDataFetcher = (
   const selectedJobs$ = getJobsObservable(
     swimLaneApi.jobIds.pipe(map((jobIds) => ({ jobIds }))),
     anomalyDetectorService,
-    (error) => {
-      blockingError.next(error);
-    }
+    (error) => blockingError.next(error)
   ).pipe(shareReplay(1));
 
   const swimLaneInput$ = combineLatest({
@@ -108,7 +105,7 @@ export const initializeSwimLaneDataFetcher = (
         } catch (e) {
           // handle query syntax errors
           blockingError.next(e);
-          return EMPTY;
+          return of(undefined);
         }
 
         return from(
@@ -149,12 +146,12 @@ export const initializeSwimLaneDataFetcher = (
               );
             }
             return of(overallSwimlaneData);
-          }),
-          catchError((error) => {
-            blockingError.next(error);
-            return EMPTY;
           })
         );
+      }),
+      catchError((error) => {
+        blockingError.next(error);
+        return of(undefined);
       })
     )
     .subscribe((data) => {

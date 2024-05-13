@@ -55,7 +55,7 @@ export const getRuntimeFieldEditorLoader =
               ctx={ctx}
             />
           </KibanaReactContextProvider>,
-          core
+          { theme$: theme.theme$ }
         )
       );
 

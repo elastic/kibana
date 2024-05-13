@@ -2,11 +2,12 @@ RIGHT
 
 Syntax
 Parameters
-string
+str
 The string from which to returns a substring.
 length
 The number of characters to return.
-DescriptionReturn the substring that extracts length chars from str starting from the right.Supported types
+DescriptionReturn the substring that extracts length chars from str starting
+from the right.Supported types
 Example
 ```esql
 FROM employees

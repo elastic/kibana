@@ -26,7 +26,6 @@ export const Default: Story<void> = () => {
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
-            recalculatingScore={false}
           />
         </div>
       </TestProvider>

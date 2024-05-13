@@ -7,8 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import {
+  DataView,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  isRunningResponse,
+  TimeRange,
+} from '@kbn/data-plugin/common';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 

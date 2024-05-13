@@ -78,12 +78,11 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
-import { AggConfigs, EsQuerySortValue } from '../..';
+import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -95,7 +94,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
+import { getEsQueryConfig, IKibanaSearchResponse, isRunningResponse, UI_SETTINGS } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -210,7 +209,7 @@ export class SearchSource {
    * @private
    * @param newFields New field array.
    */
-  private setFields(newFields: SearchSourceFields) {
+  setFields(newFields: SearchSourceFields) {
     this.fields = newFields;
     return this;
   }

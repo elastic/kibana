@@ -112,7 +112,6 @@ export {
   getRequestValidation,
   getResponseValidation,
   isFullValidatorContainer,
-  isKibanaResponse,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';

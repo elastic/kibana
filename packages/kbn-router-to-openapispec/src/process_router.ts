@@ -61,7 +61,6 @@ export const processRouter = (
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: {
-          summary: route.options.description ?? '',
           requestBody: !!validationSchemas?.body
             ? {
                 content: {

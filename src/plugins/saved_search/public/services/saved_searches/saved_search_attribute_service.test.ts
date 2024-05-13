@@ -224,6 +224,7 @@ describe('getSavedSearchAttributeService', () => {
             "removeField": [MockFunction],
             "serialize": [MockFunction],
             "setField": [MockFunction],
+            "setFields": [MockFunction],
             "setOverwriteDataViewType": [MockFunction],
             "setParent": [MockFunction],
             "toExpressionAst": [MockFunction],

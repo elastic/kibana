@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Inspect, Maybe } from '../../../common';
 

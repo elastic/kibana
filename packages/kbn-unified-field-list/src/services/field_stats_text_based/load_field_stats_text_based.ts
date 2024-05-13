@@ -8,8 +8,11 @@
 
 import { lastValueFrom } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  DataPublicPluginStart,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '@kbn/data-plugin/public';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQL_LATEST_VERSION, getESQLWithSafeLimit } from '@kbn/esql-utils';

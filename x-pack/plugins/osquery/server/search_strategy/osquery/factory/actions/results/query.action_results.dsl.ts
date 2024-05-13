@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/search-types';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
 import moment from 'moment';

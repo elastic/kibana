@@ -9,10 +9,10 @@ import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs';
 import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
   IEsSearchRequest,
-} from '@kbn/search-types';
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '@kbn/data-plugin/common';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';

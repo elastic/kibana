@@ -134,7 +134,6 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.clickUseFullDataButton(
       testData.expected.totalDocCountFormatted
     );
-    await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
   }
 
   async function checkPageDetails(testData: TestData) {

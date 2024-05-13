@@ -69,6 +69,8 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
   };
 });
 
+jest.mock('../../../common/components/hover_actions', () => ({ HoverActions: () => null }));
+
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => {
   return {

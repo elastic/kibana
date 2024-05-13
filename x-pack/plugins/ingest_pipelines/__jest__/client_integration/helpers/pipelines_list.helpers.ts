@@ -110,5 +110,4 @@ export type PipelineListTestSubjects =
   | 'emptyList.title'
   | 'sectionLoading'
   | 'pipelineLoadError'
-  | 'jsonCodeBlock'
   | 'reloadButton';

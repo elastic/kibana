@@ -44,7 +44,6 @@ export interface RiskScoreServiceFactoryParams {
   riskEngineDataClient: RiskEngineDataClient;
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
-  refresh?: 'wait_for';
 }
 
 export const riskScoreServiceFactory = ({

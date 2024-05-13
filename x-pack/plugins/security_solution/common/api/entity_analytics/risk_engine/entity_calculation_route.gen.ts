@@ -28,10 +28,6 @@ export const RiskScoresEntityCalculationRequest = z.object({
    * Used to define the type of entity.
    */
   identifier_type: IdentifierType,
-  /**
-   * If 'wait_for' the request will wait for the index refresh.
-   */
-  refresh: z.literal('wait_for').optional(),
 });
 
 export type RiskScoresEntityCalculationResponse = z.infer<

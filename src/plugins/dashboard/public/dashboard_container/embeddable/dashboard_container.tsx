@@ -26,6 +26,7 @@ import {
   embeddableInputToSubject,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
+  reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
@@ -61,11 +62,11 @@ import {
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
-import { placePanel } from '../panel_placement';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
+import { placePanel } from '../component/panel_placement';
+import { runPanelPlacementStrategy } from '../component/panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
-import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
+import { getDashboardPanelPlacementSetting } from '../external_api/dashboard_panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
@@ -481,7 +482,7 @@ export class DashboardContainer
   ) {
     const {
       notifications: { toasts },
-      embeddable: { getEmbeddableFactory, reactEmbeddableRegistryHasKey },
+      embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
 
     const onSuccess = (id?: string, title?: string) => {
@@ -568,9 +569,6 @@ export class DashboardContainer
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
@@ -682,7 +680,6 @@ export class DashboardContainer
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
-      this.setExpandedPanelId(undefined);
     });
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
@@ -734,9 +731,6 @@ export class DashboardContainer
   };
 
   public async getPanelTitles(): Promise<string[]> {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
@@ -820,9 +814,6 @@ export class DashboardContainer
   };
 
   public removePanel(id: string) {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
     if (reactEmbeddableRegistryHasKey(type)) {

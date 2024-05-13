@@ -11,7 +11,7 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
-import type { IEsSearchResponse } from '@kbn/search-types';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrService } from '../ftr_provider_context';

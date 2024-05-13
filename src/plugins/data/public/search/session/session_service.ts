@@ -37,7 +37,6 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ISearchOptions } from '@kbn/search-types';
 import { SearchUsageCollector } from '../..';
 import { ConfigSchema } from '../../../config';
 import type {
@@ -51,6 +50,7 @@ import {
   TrackedSearchState,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
+import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';

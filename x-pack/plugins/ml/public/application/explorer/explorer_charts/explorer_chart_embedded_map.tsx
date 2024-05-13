@@ -7,19 +7,14 @@
 
 import React, { useState, useEffect } from 'react';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
-import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Dictionary } from '../../../../common/types/common';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
-import { useMlKibana } from '../../contexts/kibana';
+import { MlEmbeddedMapComponent } from '../../components/ml_embedded_map';
 interface Props {
   seriesConfig: Dictionary<any>;
 }
 
 export function EmbeddedMapComponentWrapper({ seriesConfig }: Props) {
-  const {
-    services: { maps: mapsPlugin },
-  } = useMlKibana();
-
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
   useEffect(() => {
@@ -31,16 +26,9 @@ export function EmbeddedMapComponentWrapper({ seriesConfig }: Props) {
     }
   }, [seriesConfig]);
 
-  return mapsPlugin ? (
+  return (
     <div data-test-subj="xpack.ml.explorer.embeddedMap" style={{ width: '100%', height: 300 }}>
-      <mapsPlugin.Map
-        layerList={layerList}
-        hideFilterActions={true}
-        mapSettings={{
-          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
-          autoFitToDataBounds: true,
-        }}
-      />
+      <MlEmbeddedMapComponent layerList={layerList} />
     </div>
-  ) : null;
+  );
 }

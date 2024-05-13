@@ -1,12 +1,12 @@
 SPLIT
 
-Syntax
+
 Parameters
-string
+str
 String expression. If null, the function returns null.
 delim
 Delimiter. Only single byte delimiters are currently supported.
-DescriptionSplit a single valued string into multiple strings.Supported types
+DescriptionSplits a single valued string into multiple strings.Supported types
 Example
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"

@@ -9,13 +9,13 @@
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useUrlTracking } from './hooks/use_url_tracking';
-import { DiscoverStateContainer } from './state_management/discover_state';
+import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { useSavedSearchInitial } from './state_management/discover_state_provider';
+import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
 import { addLog } from '../../utils/add_log';

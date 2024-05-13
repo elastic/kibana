@@ -79,19 +79,13 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
       },
     },
     pipeline: {
-      async createPipeline() {
+      async click() {
         await testSubjects.click('create-a-pipeline-button');
       },
       async expectNavigateToCreatePipelinePage() {
         expect(await browser.getCurrentUrl()).contain(
           '/app/management/ingest/ingest_pipelines/create'
         );
-      },
-      async managePipeline() {
-        await testSubjects.click('manage-pipeline-button');
-      },
-      async expectNavigateToManagePipelinePage() {
-        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines');
       },
     },
   };

@@ -7,7 +7,8 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { AlertingConfig, configSchema } from './config';
+import { configSchema } from './config';
+import { AlertsConfigType } from './types';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
@@ -78,11 +79,8 @@ export const plugin = async (initContext: PluginInitializerContext) => {
   return new AlertingPlugin(initContext);
 };
 
-export const config: PluginConfigDescriptor<AlertingConfig> = {
+export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
-  exposeToBrowser: {
-    rules: { run: { alerts: { max: true } } },
-  },
   deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(

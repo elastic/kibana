@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import { useBoolean } from '@kbn/react-hooks';
+import { useBoolean } from '../../../../hooks/use_boolean';
 
 interface Props {
   items: React.ReactNode[];

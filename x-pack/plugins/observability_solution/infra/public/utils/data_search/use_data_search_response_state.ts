@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
-import type { IKibanaSearchRequest } from '@kbn/search-types';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { useObservableState } from '../use_observable';
 import { ParsedDataSearchResponseDescriptor } from './types';
 

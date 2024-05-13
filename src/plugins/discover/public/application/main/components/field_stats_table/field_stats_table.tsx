@@ -6,28 +6,109 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  IEmbeddable,
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { of, map } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
-export type { FieldStatisticsTableProps };
+import type { DiscoverStateContainer } from '../../services/discover_state';
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
 
-const statsTableCss = css({
-  width: '100%',
-  height: '100%',
-  overflowY: 'auto',
-  '.kbnDocTableWrapper': {
-    overflowX: 'hidden',
-  },
-});
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
 
-const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
+
+export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+  dataView: DataView;
+  savedSearch?: SavedSearch;
+  query?: Query | AggregateQuery;
+  visibleFieldNames?: string[];
+  filters?: Filter[];
+  showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
+  fieldsToFetch?: string[];
+  totalDocuments?: number;
+  samplingOption?: SamplingOption;
+}
+export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
+  showDistributions?: boolean;
+}
+
+export interface FieldStatisticsTableProps {
+  /**
+   * Determines which columns are displayed
+   */
+  columns: string[];
+  /**
+   * The used data view
+   */
+  dataView: DataView;
+  /**
+   * Saved search description
+   */
+  searchDescription?: string;
+  /**
+   * Saved search title
+   */
+  searchTitle?: string;
+  /**
+   * Optional saved search
+   */
+  savedSearch?: SavedSearch;
+  /**
+   * Optional query to update the table content
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Filters query to update the table content
+   */
+  filters?: Filter[];
+  /**
+   * State container with persisted settings
+   */
+  stateContainer?: DiscoverStateContainer;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  searchSessionId?: string;
+}
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
@@ -41,69 +122,154 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     searchSessionId,
   } = props;
-
   const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
 
   const services = useDiscoverServices();
-  const dataVisualizerService = services.dataVisualizer;
+  const [embeddable, setEmbeddable] = useState<
+    | ErrorEmbeddable
+    | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
+    | undefined
+  >();
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
-  // State from Discover we want the embeddable to reflect
   const showPreviewByDefault = useMemo(
     () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
-  const lastReloadRequestTime$ = useMemo(() => {
-    return stateContainer?.dataState?.refetch$
-      ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
-      : fallBacklastReloadRequestTime$;
-  }, [stateContainer]);
+  useEffect(() => {
+    const availableFields$ = stateContainer?.dataState.data$.availableFields$;
+    const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
+      if (output.showDistributions !== undefined && stateContainer) {
+        stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
+      }
+    });
 
-  const lastReloadRequestTime = useObservable(lastReloadRequestTime$, 0);
+    const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        embeddable.updateInput({ lastReloadRequestTime: Date.now() });
+      }
+    });
+
+    const fields = availableFields$?.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
+        embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
+      }
+    });
+
+    return () => {
+      sub?.unsubscribe();
+      refetch?.unsubscribe();
+      fields?.unsubscribe();
+    };
+  }, [embeddable, stateContainer]);
 
   useEffect(() => {
-    // Track should only be called once when component is loaded
-    trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
-  }, [trackUiMetric]);
+    if (embeddable && !isErrorEmbeddable(embeddable)) {
+      // Update embeddable whenever one of the important input changes
+      embeddable.updateInput({
+        dataView,
+        savedSearch,
+        query,
+        filters,
+        visibleFieldNames: columns,
+        onAddFilter,
+        sessionId: searchSessionId,
+        fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
+        totalDocuments,
+        samplingOption: {
+          mode: 'normal_sampling',
+          shardSize: 5000,
+          seed: searchSessionId,
+        } as NormalSamplingOption,
+      });
+      embeddable.reload();
+    }
+  }, [
+    embeddable,
+    dataView,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    onAddFilter,
+    searchSessionId,
+    totalDocuments,
+    stateContainer,
+  ]);
 
-  const samplingOption: NormalSamplingOption = useMemo(
-    () =>
-      ({
-        mode: 'normal_sampling',
-        shardSize: 5000,
-        seed: searchSessionId,
-      } as NormalSamplingOption),
-    [searchSessionId]
-  );
+  useEffect(() => {
+    if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
+      // Update embeddable whenever one of the important input changes
+      embeddable.updateInput({
+        showPreviewByDefault,
+      });
 
-  const updateState = useCallback(
-    (changes) => {
-      if (changes.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions });
+      embeddable.reload();
+    }
+  }, [showPreviewByDefault, embeddable]);
+
+  useEffect(() => {
+    let unmounted = false;
+    const loadEmbeddable = async () => {
+      if (services.embeddable) {
+        const factory = services.embeddable.getEmbeddableFactory<
+          DataVisualizerGridEmbeddableInput,
+          DataVisualizerGridEmbeddableOutput
+        >('data_visualizer_grid');
+        if (factory) {
+          // Initialize embeddable with information available at mount
+          const initializedEmbeddable = await factory.create({
+            id: 'discover_data_visualizer_grid',
+            dataView,
+            savedSearch,
+            query,
+            showPreviewByDefault,
+            onAddFilter,
+          });
+          if (!unmounted) {
+            setEmbeddable(initializedEmbeddable);
+          }
+        }
       }
-    },
-    [stateContainer]
-  );
+    };
+    loadEmbeddable();
+    return () => {
+      unmounted = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.embeddable, showPreviewByDefault]);
 
-  if (!dataVisualizerService) return null;
+  // We can only render after embeddable has already initialized
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+
+      trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
+    }
+
+    return () => {
+      // Clean up embeddable upon unmounting
+      embeddable?.destroy();
+    };
+  }, [embeddable, embeddableRoot, trackUiMetric]);
+
+  const statsTableCss = css`
+    overflow-y: auto;
+
+    .kbnDocTableWrapper {
+      overflow-x: hidden;
+    }
+  `;
 
   return (
-    <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
-      <dataVisualizerService.FieldStatisticsTable
-        shouldGetSubfields={true}
-        dataView={dataView}
-        savedSearch={savedSearch}
-        filters={filters}
-        query={query}
-        visibleFieldNames={columns}
-        sessionId={searchSessionId}
-        totalDocuments={totalDocuments}
-        samplingOption={samplingOption}
-        lastReloadRequestTime={lastReloadRequestTime}
-        onAddFilter={onAddFilter}
-        showPreviewByDefault={showPreviewByDefault}
-        onTableUpdate={updateState}
+    <EuiFlexItem css={statsTableCss}>
+      <div
+        data-test-subj="dscFieldStatsEmbeddedContent"
+        ref={embeddableRoot}
+        // Match the scroll bar of the Discover doc table
+        className="kbnDocTableWrapper"
       />
     </EuiFlexItem>
   );

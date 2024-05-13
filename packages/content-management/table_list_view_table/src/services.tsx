@@ -62,8 +62,6 @@ export interface Services {
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<TagListProps>;
-  /** Predicate to indicate if tagging features is enabled */
-  isTaggingEnabled: () => boolean;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -262,7 +260,6 @@ export const TableListViewKibanaProvider: FC<
           DateFormatterComp={(props) => <FormattedRelative {...props} />}
           currentAppId$={application.currentAppId$}
           navigateToUrl={application.navigateToUrl}
-          isTaggingEnabled={() => Boolean(savedObjectsTagging)}
           getTagList={getTagList}
           TagList={TagList}
           itemHasTags={itemHasTags}

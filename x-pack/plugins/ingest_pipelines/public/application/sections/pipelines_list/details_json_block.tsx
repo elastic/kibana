@@ -18,11 +18,6 @@ export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => 
   const uuid = useRef(0);
   uuid.current++;
 
-  // Convert JSON object to string
-  const jsonString = JSON.stringify(json, null, 2);
-  // Replace all newline characters with empty spaces
-  const formattedString = jsonString.replace(/\\n/g, ' ');
-
   return (
     <EuiCodeBlock
       paddingSize="s"
@@ -30,9 +25,8 @@ export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => 
       overflowHeight={json.length > 0 ? 300 : undefined}
       isCopyable
       key={uuid.current}
-      data-test-subj="jsonCodeBlock"
     >
-      {formattedString}
+      {JSON.stringify(json, null, 2)}
     </EuiCodeBlock>
   );
 };

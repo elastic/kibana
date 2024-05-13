@@ -23,12 +23,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
+
 import {
   getNumTransformAssets,
   TransformInstallWithCurrentUserPermissionCallout,
 } from '../../../../../../../components/transform_install_as_current_user_callout';
 
-import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -81,21 +83,20 @@ const UpdatesAvailableMsg = ({
       defaultMessage: 'New version available',
     })}
   >
-    <FormattedMessage
-      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-      defaultMessage="Upgrade to version {latestVersion} to get the latest features. {changelogLink}"
-      values={{
-        latestVersion,
-        changelogLink: (
-          <EuiLink onClick={toggleChangelogModal}>
-            <FormattedMessage
-              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
-              defaultMessage="View changelog."
-            />
-          </EuiLink>
-        ),
-      }}
-    />
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <FormattedMessage
+          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+          defaultMessage="Upgrade to version {latestVersion} to get the latest features."
+          values={{ latestVersion }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <p>
+          <EuiLink onClick={toggleChangelogModal}>{'View changelog.'}</EuiLink>
+        </p>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiCallOut>
 );
 
@@ -116,10 +117,10 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices }: Props) => {
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
@@ -338,7 +339,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
                         dryRunData={dryRunData}
                         isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                         setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
-                        startServices={startServices}
+                        theme$={theme$}
                       />
                     </p>
                   </>

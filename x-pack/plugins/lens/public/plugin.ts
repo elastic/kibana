@@ -63,6 +63,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -386,21 +387,6 @@ export class LensPlugin {
         'lens',
         new EmbeddableFactory(getStartServicesForEmbeddable)
       );
-
-      embeddable.registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-        CONTENT_ID,
-        (savedObject) => {
-          if (!savedObject.managed) {
-            return { savedObjectId: savedObject.id };
-          }
-
-          const panel = {
-            attributes: savedObjectToEmbeddableAttributes(savedObject),
-          };
-
-          return panel;
-        }
-      );
     }
 
     if (share) {
@@ -455,6 +441,21 @@ export class LensPlugin {
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
+    );
+
+    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        const panel = {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+
+        return panel;
+      }
     );
 
     const getPresentationUtilContext = () =>

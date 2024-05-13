@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { sendMessageEvent, SendMessageEventData } from './analytics/events';
@@ -13,7 +14,6 @@ import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
-import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
@@ -143,6 +143,27 @@ export function defineRoutes({
         throw e;
       }
 
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
+
+      const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
+
+      function pushStreamUpdate() {
+        reader
+          .read()
+          .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+            if (done) {
+              end();
+              return;
+            }
+            push(textDecoder.decode(value));
+            pushStreamUpdate();
+          })
+          .catch(() => {});
+      }
+
+      pushStreamUpdate();
+
       analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
         connectorType:
           connector.actionTypeId +
@@ -151,7 +172,7 @@ export function defineRoutes({
         isCitationsEnabled: data.citations,
       });
 
-      return handleStreamResponse({ logger, stream, response, request });
+      return response.ok(responseWithHeaders);
     })
   );
 

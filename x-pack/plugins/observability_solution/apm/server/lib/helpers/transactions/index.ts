@@ -164,10 +164,17 @@ export function isRootTransaction(searchAggregatedTransactions: boolean) {
       };
 }
 
-export function isDurationSummaryNotSupportedFilter(): QueryDslQueryContainer {
+export function getDurationLegacyFilter(): QueryDslQueryContainer {
   return {
     bool: {
-      must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+      must: [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+          },
+        },
+      ],
     },
   };
 }

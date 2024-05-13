@@ -19,6 +19,5 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./upgrade'));
     loadTestFile(require.resolve('./input_package_create_upgrade'));
-    loadTestFile(require.resolve('./input_package_rollback'));
   });
 }

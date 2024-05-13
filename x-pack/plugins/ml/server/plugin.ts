@@ -45,6 +45,7 @@ import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
 import { filtersRoutes } from './routes/filters';
+import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
 import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
@@ -266,6 +267,7 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
+    indicesRoutes(routeInit);
     managementRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,

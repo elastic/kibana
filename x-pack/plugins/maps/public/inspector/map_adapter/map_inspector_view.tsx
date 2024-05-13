@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { LazyWrapper } from '../../lazy_wrapper';
+
+const getLazyComponent = () => {
+  return lazy(() => import('./map_view_component'));
+};
 
 export const MapInspectorView = {
   title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
@@ -22,12 +26,6 @@ export const MapInspectorView = {
     return Boolean(adapters.map);
   },
   component: (props: { adapters: Adapters }) => {
-    const Component = dynamic(async () => {
-      const { MapViewComponent } = await import('./map_view_component');
-      return {
-        default: MapViewComponent,
-      };
-    });
-    return <Component {...props} />;
+    return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
   },
 };

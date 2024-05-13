@@ -45,5 +45,4 @@ export {
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 export type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 
-export { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+export { useUiSetting$, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

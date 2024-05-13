@@ -47,8 +47,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/data-view-utils",
     "@kbn/esql-utils",
-    "@kbn/react-kibana-mount",
-    "@kbn/field-utils"
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",

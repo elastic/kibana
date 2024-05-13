@@ -6,20 +6,26 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
 import { EventRenderer } from './event_renderer';
 import { RightPanelContext } from '../context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import { TestProviders } from '../../../../common/mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
+const mockTheme = getMockTheme({ eui: { euiFontSizeXS: '' } });
 const renderEventRenderer = (contextValue: RightPanelContext) =>
   render(
-    <RightPanelContext.Provider value={contextValue}>
-      <EventRenderer />
-    </RightPanelContext.Provider>,
-    { wrapper: TestProviders }
+    <IntlProvider locale="en">
+      <ThemeProvider theme={mockTheme}>
+        <RightPanelContext.Provider value={contextValue}>
+          <EventRenderer />
+        </RightPanelContext.Provider>
+      </ThemeProvider>
+    </IntlProvider>
   );
 
 describe('<EventRenderer />', () => {

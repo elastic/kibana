@@ -125,8 +125,6 @@ describe('PinnedTabContent', () => {
       pinnedEventIds: {},
       showExpandedDetails: false,
       onEventClosed: jest.fn(),
-      eventIdToNoteIds: {},
-      expandedDetail: {},
     };
   });
 

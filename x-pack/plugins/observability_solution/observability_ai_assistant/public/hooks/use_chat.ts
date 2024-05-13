@@ -53,7 +53,6 @@ interface UseChatPropsWithoutContext {
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
   persist: boolean;
-  disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
 }
@@ -70,7 +69,6 @@ function useChatWithoutContext({
   onConversationUpdate,
   onChatComplete,
   persist,
-  disableFunctions,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
   const systemMessage = useMemo(() => {
@@ -161,7 +159,6 @@ function useChatWithoutContext({
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
-        disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
         responseLanguage: getPreferredLanguage(),
@@ -260,7 +257,6 @@ function useChatWithoutContext({
       handleError,
       handleSignalAbort,
       persist,
-      disableFunctions,
       service,
       systemMessage,
       getPreferredLanguage,

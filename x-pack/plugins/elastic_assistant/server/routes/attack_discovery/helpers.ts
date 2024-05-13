@@ -16,7 +16,7 @@ import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_mo
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AssistantToolParams } from '../../types';
+import { AssistantToolParams, ElasticAssistantApiRequestHandlerContext } from '../../types';
 
 export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
   {
@@ -68,3 +68,15 @@ export const getAssistantToolParams = ({
   request,
   size,
 });
+
+export const isAttackDiscoveryFeatureEnabled = ({
+  assistantContext,
+  pluginName,
+}: {
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
+  pluginName: string;
+}): boolean => {
+  const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
+
+  return registeredFeatures.attackDiscoveryEnabled === true;
+};

@@ -39,8 +39,6 @@ storiesOf('Components/UserPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('integration disabled', () => (
@@ -57,8 +55,6 @@ storiesOf('Components/UserPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('no managed data', () => (
@@ -75,8 +71,6 @@ storiesOf('Components/UserPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('no observed data', () => (
@@ -113,8 +107,6 @@ storiesOf('Components/UserPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ))
   .add('loading', () => (
@@ -155,7 +147,5 @@ storiesOf('Components/UserPanelContent', module)
       isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
     />
   ));

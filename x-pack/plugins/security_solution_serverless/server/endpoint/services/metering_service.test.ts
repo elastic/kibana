@@ -93,9 +93,9 @@ describe('EndpointMeteringService', () => {
       };
       (args.esClient as ElasticsearchClientMock).search.mockResolvedValueOnce(esSearchResponse);
       const endpointMeteringService = new EndpointMeteringService();
-      const { records } = await endpointMeteringService.getUsageRecords(args);
+      const usageRecords = await endpointMeteringService.getUsageRecords(args);
 
-      expect(records[0]).toEqual({
+      expect(usageRecords[0]).toEqual({
         id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,
@@ -133,13 +133,13 @@ describe('EndpointMeteringService', () => {
       };
       (args.esClient as ElasticsearchClientMock).search.mockResolvedValueOnce(esSearchResponse);
       const endpointMeteringService = new EndpointMeteringService();
-      const { records } = await endpointMeteringService.getUsageRecords(args);
+      const usageRecords = await endpointMeteringService.getUsageRecords(args);
       const usageTypePostfix =
         productLine === ProductLine.endpoint
           ? productLine
           : `${ProductLine.cloud}_${ProductLine.endpoint}`;
 
-      expect(records[0]).toEqual({
+      expect(usageRecords[0]).toEqual({
         id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,

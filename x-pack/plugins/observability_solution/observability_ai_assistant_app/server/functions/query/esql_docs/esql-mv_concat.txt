@@ -2,11 +2,12 @@ MV_CONCAT
 
 Syntax
 Parameters
-string
+v
 Multivalue expression.
 delim
 Delimiter.
-DescriptionConverts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.Supported types
+DescriptionConverts a multivalued string expression into a single valued column containing
+the concatenation of all values separated by a delimiter.Supported types
 Examples
 ```esql
 ROW a=["foo", "zoo", "bar"]

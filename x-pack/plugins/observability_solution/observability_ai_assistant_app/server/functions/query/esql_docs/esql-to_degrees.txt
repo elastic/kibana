@@ -1,11 +1,12 @@
 TO_DEGREES
 
 Syntax
+TO_DEGREES(v)
 Parameters
-number
+v
 Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts a number in radians to degrees.Supported types
-Example
+DescriptionConverts a number in radians to
+degrees.Supported typesThe input type must be of a numeric type and result is always double.Example
 ```esql
 ROW rad = [1.57, 3.14, 4.71]
 | EVAL deg = TO_DEGREES(rad)

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Listr } from 'listr2';
+import Listr from 'listr';
 import { run } from '@kbn/dev-cli-runner';
 
 import {
@@ -25,21 +25,19 @@ export function runTelemetryExtract() {
         [
           {
             title: 'Parsing .telemetryrc.json files',
-            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
+            task: () => new Listr(parseConfigsTask(), { exitOnError: true }),
           },
           {
             title: 'Extracting Telemetry Collectors',
-            task: (context, task) =>
-              task.newListr(extractCollectorsTask(context), { exitOnError: true }),
+            task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
           },
           {
             title: 'Generating Schema files',
-            task: (context, task) =>
-              task.newListr(generateSchemasTask(context), { exitOnError: true }),
+            task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
           },
           {
             title: 'Writing to file',
-            task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
+            task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
           },
         ],
         {

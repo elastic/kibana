@@ -8,12 +8,15 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { setupApp } from './app/setup_app';
@@ -41,53 +44,41 @@ export interface StartDeps {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
-  dashboard: DashboardStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
     setupApp(core, developerExamples);
+  }
 
-    const startServicesPromise = core.getStartServices();
-
-    embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+  public start(core: CoreStart, deps: StartDeps) {
+    registerCreateFieldListAction(deps.uiActions);
+    registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
         './react_embeddables/field_list/field_list_react_embeddable'
       );
-      const [coreStart, deps] = await startServicesPromise;
-      return getFieldListFactory(coreStart, deps);
+      return getFieldListFactory(core, deps);
     });
+    registerFieldListPanelPlacementSetting();
 
-    embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
+    registerCreateEuiMarkdownAction(deps.uiActions);
+    registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
       const { markdownEmbeddableFactory } = await import(
         './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
       );
       return markdownEmbeddableFactory;
     });
 
-    embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+    registerAddSearchPanelAction(deps.uiActions);
+    registerSearchEmbeddable(deps);
+
+    registerCreateDataTableAction(deps.uiActions);
+    registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
       );
-      const [coreStart, deps] = await startServicesPromise;
-      return getDataTableFactory(coreStart, deps);
+      return getDataTableFactory(core, deps);
     });
-
-    registerSearchEmbeddable(
-      embeddable,
-      new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
-    );
-  }
-
-  public start(core: CoreStart, deps: StartDeps) {
-    registerCreateFieldListAction(deps.uiActions);
-    registerFieldListPanelPlacementSetting(deps.dashboard);
-
-    registerCreateEuiMarkdownAction(deps.uiActions);
-
-    registerAddSearchPanelAction(deps.uiActions);
-
-    registerCreateDataTableAction(deps.uiActions);
   }
 
   public stop() {}

@@ -272,7 +272,7 @@ export const updateTotalCount = actionCreator<{ id: string; totalCount: number }
 
 export const updateSavedSearchId = actionCreator<{
   id: string;
-  savedSearchId: string | null;
+  savedSearchId: string;
 }>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
 
 export const initializeSavedSearch = actionCreator<{

@@ -41,6 +41,7 @@ import {
   getCoreChrome,
   getIndexPatternService,
   getToasts,
+  getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
   getTimeFilter,
   getUsageCollection,
@@ -385,7 +386,8 @@ export class SavedMap {
 
   public hasSaveAndReturnConfig() {
     const hasOriginatingApp = this.hasOriginatingApp();
-    return hasOriginatingApp;
+    const isNewMap = !this.getSavedObjectId();
+    return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }
 
   public getTitle(): string {
@@ -437,7 +439,7 @@ export class SavedMap {
 
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return !!this._originatingApp && !hasSavedObjectId;
+    return getIsAllowByValueEmbeddables() && !!this._originatingApp && !hasSavedObjectId;
   }
 
   public async save({

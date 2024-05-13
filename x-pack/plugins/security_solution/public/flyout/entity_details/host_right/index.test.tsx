@@ -51,6 +51,22 @@ describe('HostPanel', () => {
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
   });
 
+  it('renders loading state when risk score is loading', () => {
+    mockedHostRiskScore.mockReturnValue({
+      ...mockHostRiskScoreState,
+      data: undefined,
+      loading: true,
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+  });
+
   it('renders loading state when observed host is loading', () => {
     mockedUseObservedHost.mockReturnValue({
       ...mockObservedHostData,

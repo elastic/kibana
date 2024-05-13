@@ -279,7 +279,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        'xpack.infra.featureFlags.osqueryEnabled (boolean)',
+        'xpack.infra.featureFlags.osqueryEnabled (any)',
         'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
@@ -330,7 +330,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
-        'xpack.alerting.rules.run.alerts.max (number)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',

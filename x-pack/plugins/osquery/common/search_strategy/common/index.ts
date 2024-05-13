@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 export type Maybe<T> = T | null;
 

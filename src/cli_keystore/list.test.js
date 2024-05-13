@@ -42,17 +42,17 @@ describe('Kibana keystore', () => {
       sandbox.restore();
     });
 
-    it('outputs keys', async () => {
+    it('outputs keys', () => {
       const keystore = new Keystore('/data/test.keystore');
-      await list(keystore);
+      list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.log);
       sinon.assert.calledWith(Logger.prototype.log, 'a1.b2.c3\na2');
     });
 
-    it('handles a nonexistent keystore', async () => {
+    it('handles a nonexistent keystore', () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      await list(keystore);
+      list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.error);
       sinon.assert.calledWith(

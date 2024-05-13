@@ -1224,7 +1224,7 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-common.triggerVisualizeActionsTextBasedLanguages.$5",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [],

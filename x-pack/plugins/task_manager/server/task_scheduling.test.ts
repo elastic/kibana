@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import moment from 'moment';
 
 import { asTaskRunEvent, TaskPersistence } from './task_events';
@@ -836,15 +836,16 @@ describe('TaskScheduling', () => {
   });
 
   describe('ephemeralRunNow', () => {
-    test('runs a task ephemerally', async () => {
-      const ephemeralEvents$ = new BehaviorSubject<Partial<TaskLifecycleEvent>>({});
+    // https://github.com/elastic/kibana/issues/181847
+    test.skip('runs a task ephemerally', async () => {
+      const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
       const ephemeralTask = taskManagerMock.createTask({
         state: {
           foo: 'bar',
         },
       });
       const customEphemeralTaskLifecycleMock = ephemeralTaskLifecycleMock.create({
-        events$: ephemeralEvents$ as Observable<TaskLifecycleEvent>,
+        events$: ephemeralEvents$,
       });
 
       customEphemeralTaskLifecycleMock.attemptToRun.mockImplementation((value) => {
@@ -879,6 +880,7 @@ describe('TaskScheduling', () => {
           })
         )
       );
+
       await expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
     });
 

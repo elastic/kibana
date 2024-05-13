@@ -36,7 +36,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_TOGGLE,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -150,9 +149,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       });
       if (getEditedRule().interval) {
         cy.get(SCHEDULE_DETAILS).within(() => {
-          getDetails(RUNS_EVERY_DETAILS)
-            .find(INTERVAL_ABBR_VALUE)
-            .should('have.text', getEditedRule().interval);
+          getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
         });
       }
     });

@@ -21,6 +21,5 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
     "@kbn/bfetch-error",
-    "@kbn/search-types",
   ]
 }

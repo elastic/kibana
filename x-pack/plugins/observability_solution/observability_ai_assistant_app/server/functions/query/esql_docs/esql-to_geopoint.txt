@@ -1,11 +1,14 @@
 TO_GEOPOINT
 
 Syntax
+TO_GEOPOINT(v)
 Parameters
-field
+v
 Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input value to a geo_point value. A string will only be successfully converted if it respects the WKT Point format.Supported types
-Example
+The input type must be a string or a geo_point.
+DescriptionConverts an input value to a geo_point value.Supported types
+A string will only be successfully converted if it respects the
+WKT Point format.Example
 ```esql
 ROW wkt = "POINT(42.97109630194 14.7552534413725)"
 | EVAL pt = TO_GEOPOINT(wkt)

@@ -12,7 +12,6 @@ import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption, EuiToolTip } fr
 import { FieldIcon } from '@kbn/react-field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { MIDDLE_TRUNCATION_PROPS } from '../../common/constants';
 
 function fieldsToOptions(
@@ -33,7 +32,6 @@ function fieldsToOptions(
         value: field,
         label: field.displayName ? field.displayName : field.name,
         prepend: FieldTypeIcon,
-        name: field.name,
       };
       if (isFieldDisabled && isFieldDisabled(field)) {
         option.disabled = true;
@@ -121,7 +119,6 @@ export function SingleFieldSelect({
       isDisabled={!fields || fields.length === 0}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{ panelMinWidth }}
-      optionMatcher={comboBoxFieldOptionMatcher}
       {...rest}
     />
   );

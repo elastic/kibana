@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DocLinksStart, OverlayStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import React, { useCallback } from 'react';
 
@@ -15,13 +15,15 @@ import { ConfirmForceInstallModal } from '../components';
 
 const confirmForceInstall = ({
   pkg,
-  core,
+  overlays,
+  docLinks,
 }: {
   pkg: { name: string; version: string };
-  core: CoreStart;
+  overlays: OverlayStart;
+  docLinks: DocLinksStart;
 }): Promise<boolean> =>
   new Promise((resolve) => {
-    const session = core.overlays.openModal(
+    const session = overlays.openModal(
       toMountPoint(
         <ConfirmForceInstallModal
           pkg={pkg}
@@ -33,18 +35,17 @@ const confirmForceInstall = ({
             session.close();
             resolve(false);
           }}
-          docLinks={core.docLinks}
-        />,
-        core
+          docLinks={docLinks}
+        />
       )
     );
   });
 
 export const useConfirmForceInstall = () => {
-  const core = useStartServices();
+  const { overlays, docLinks } = useStartServices();
 
   return useCallback(
-    (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, core }),
-    [core]
+    (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, overlays, docLinks }),
+    [docLinks, overlays]
   );
 };

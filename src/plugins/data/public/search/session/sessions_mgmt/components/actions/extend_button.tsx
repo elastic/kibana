@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import moment from 'moment';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
@@ -81,7 +81,7 @@ export const createExtendActionDescriptor = (
     const ref = core.overlays.openModal(
       toMountPoint(
         <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
-        core
+        { theme$: core.theme.theme$ }
       )
     );
     await ref.onClose;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { pick, take } from 'lodash';
 import {
@@ -13,7 +12,6 @@ import {
   concat,
   EMPTY,
   from,
-  identity,
   isObservable,
   Observable,
   of,
@@ -29,15 +27,14 @@ import {
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
 import { UserInstruction } from '../../../../common/types';
+import { createFunctionResponseError } from '../../../../common/utils/create_function_response_error';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../../chat_function_client';
 import type { ChatFunctionWithoutConnector } from '../../types';
-import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
-import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 import { hideTokenCountEvents } from './hide_token_count_events';
 
@@ -50,7 +47,6 @@ function executeFunctionAndCatchError({
   messages,
   chat,
   signal,
-  logger,
 }: {
   name: string;
   args: string | undefined;
@@ -58,7 +54,6 @@ function executeFunctionAndCatchError({
   messages: Message[];
   chat: ChatFunctionWithoutConnector;
   signal: AbortSignal;
-  logger: Logger;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -77,13 +72,12 @@ function executeFunctionAndCatchError({
 
     return executeFunctionResponse$.pipe(
       catchError((error) => {
-        logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
         // We want to catch the error only when a promise occurs
         // if it occurs in the Observable, we cannot easily recover
         // from it because the function may have already emitted
         // values which could lead to an invalid conversation state,
         // so in that case we let the stream fail.
-        return of(createServerSideFunctionResponseError({ name, error }));
+        return of(createFunctionResponseError({ name, error }));
       }),
       switchMap((response) => {
         if (isObservable(response)) {
@@ -120,26 +114,22 @@ function executeFunctionAndCatchError({
 function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
-  disableFunctions,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
-  disableFunctions: boolean;
 }) {
-  if (functionLimitExceeded || disableFunctions) {
-    return [];
-  }
+  const systemFunctions = functionLimitExceeded
+    ? []
+    : functionClient
+        .getFunctions()
+        .map((fn) => fn.definition)
+        .filter(
+          (def) =>
+            !def.visibility ||
+            [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
+        );
 
-  const systemFunctions = functionClient
-    .getFunctions()
-    .map((fn) => fn.definition)
-    .filter(
-      (def) =>
-        !def.visibility ||
-        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-    );
-
-  const actions = functionClient.getActions();
+  const actions = functionLimitExceeded ? [] : functionClient.getActions();
 
   const allDefinitions = systemFunctions
     .concat(actions)
@@ -156,8 +146,6 @@ export function continueConversation({
   functionCallsLeft,
   requestInstructions,
   knowledgeBaseInstructions,
-  logger,
-  disableFunctions,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -166,17 +154,12 @@ export function continueConversation({
   functionCallsLeft: number;
   requestInstructions: Array<string | UserInstruction>;
   knowledgeBaseInstructions: UserInstruction[];
-  logger: Logger;
-  disableFunctions: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
-  const functionLimitExceeded = functionCallsLeft <= 0;
-
   const definitions = getFunctionDefinitions({
-    functionLimitExceeded,
+    functionLimitExceeded: functionCallsLeft <= 0,
     functionClient,
-    disableFunctions,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
@@ -206,10 +189,7 @@ export function continueConversation({
       return chat(operationName, {
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
-      }).pipe(
-        emitWithConcatenatedMessage(),
-        functionLimitExceeded ? catchFunctionNotFoundError() : identity
-      );
+      }).pipe(emitWithConcatenatedMessage());
     }
 
     const functionCallName = lastMessage.function_call?.name;
@@ -231,7 +211,7 @@ export function continueConversation({
     if (currentFunctionCallsLeft === 0) {
       // create a function call response error so the LLM knows it needs to stop calling functions
       return of(
-        createServerSideFunctionResponseError({
+        createFunctionResponseError({
           name: functionCallName,
           error: createFunctionLimitExceededError(),
         })
@@ -254,7 +234,7 @@ export function continueConversation({
       } catch (error) {
         // return a function response error for the LLM to handle
         return of(
-          createServerSideFunctionResponseError({
+          createFunctionResponseError({
             name: functionCallName,
             error,
           })
@@ -267,7 +247,7 @@ export function continueConversation({
     if (!functionClient.hasFunction(functionCallName)) {
       // tell the LLM the function was not found
       return of(
-        createServerSideFunctionResponseError({
+        createFunctionResponseError({
           name: functionCallName,
           error: createFunctionNotFoundError(functionCallName),
         })
@@ -281,7 +261,6 @@ export function continueConversation({
       functionClient,
       messages: messagesWithUpdatedSystemMessage,
       signal,
-      logger,
     });
   }
 
@@ -306,8 +285,6 @@ export function continueConversation({
               signal,
               knowledgeBaseInstructions,
               requestInstructions,
-              logger,
-              disableFunctions,
             });
           })
         )

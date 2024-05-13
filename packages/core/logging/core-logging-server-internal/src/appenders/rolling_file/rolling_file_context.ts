@@ -8,8 +8,6 @@
 
 import { statSync } from 'fs';
 
-export type GetOrderedRolledFileFn = () => Promise<string[]>;
-
 /**
  * Context shared between the rolling file manager, policy and strategy.
  */
@@ -37,18 +35,5 @@ export class RollingFileContext {
       this.currentFileTime = Date.now();
       this.currentFileSize = 0;
     }
-  }
-
-  #orderedRolledFileFn?: GetOrderedRolledFileFn;
-
-  public async getOrderedRolledFiles(): Promise<string[]> {
-    if (this.#orderedRolledFileFn) {
-      return this.#orderedRolledFileFn();
-    }
-    throw new Error('orderedRolledFileFn not registered on the context');
-  }
-
-  public setOrderedRolledFileFn(fn: GetOrderedRolledFileFn) {
-    this.#orderedRolledFileFn = fn;
   }
 }

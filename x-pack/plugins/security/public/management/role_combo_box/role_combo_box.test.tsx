@@ -60,7 +60,6 @@ describe('RoleComboBox', () => {
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
-        optionMatcher={[Function]}
         options={
           Array [
             Object {

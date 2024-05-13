@@ -36,14 +36,14 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, notifications, analytics, i18n, theme } = useKibana().services;
+  const { http, notifications } = useKibana().services;
 
   const history = useHistory();
 
   const [, setRulesTable] = useSessionStorage(RULES_TABLE_SESSION_STORAGE_KEY);
 
   const rulePageNavigation = useCallback(async () => {
-    setRulesTable({
+    await setRulesTable({
       tags,
     });
     history.push({
@@ -58,15 +58,14 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
-    const startServices = { analytics, notifications, i18n, theme };
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
     setIsCreateRuleLoading(false);
-    showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
+    showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
     // Triggering a refetch of rules and alerts to update the UI
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
-  }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
+  }, [createRuleFn, http, notifications, queryClient]);
 
   return (
     <EuiSkeletonText

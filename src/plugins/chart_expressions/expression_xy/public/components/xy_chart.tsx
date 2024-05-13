@@ -521,8 +521,8 @@ export function XYChart({
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
-      const validExtent = validateExtent(hasBarOrArea, extent);
-      if (validExtent || extent.enforce) {
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if ((!inclusiveZeroError && !boundaryError) || extent.enforce) {
         min = extent.lowerBound ?? NaN;
         max = extent.upperBound ?? NaN;
       }

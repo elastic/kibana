@@ -87,8 +87,7 @@ export async function fetchESUsage(
 
   const response = await callCluster.search(params);
   const esResponse = response as estypes.SearchResponse<ClusterStats>;
-  const responseLength = esResponse?.hits?.hits?.length || 0;
-  if (responseLength === 0) {
+  if (esResponse.hits.hits.length === 0) {
     return {
       count: 0,
       enabled: false,

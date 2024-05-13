@@ -20,7 +20,6 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
-import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
   useAssetCriticalityPrivileges,
@@ -61,13 +60,10 @@ import {
 } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import {
-  UserOverview,
-  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-} from '../../../../overview/components/user_overview';
+import { UserOverview } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
@@ -77,7 +73,6 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -185,24 +180,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
-
-  const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
-    detailName,
-    { onSuccess: refetchRiskScore }
-  );
-
-  const additionalFilters = useMemo(
-    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
-    [rawFilteredQuery]
-  );
-
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
     enabled: canReadAssetCriticality,
-    onChange: calculateEntityRiskScore,
   });
 
   return (
@@ -269,14 +250,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={additionalFilters}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={additionalFilters}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

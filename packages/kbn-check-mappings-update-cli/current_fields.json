@@ -510,7 +510,6 @@
     "revision",
     "schema_version",
     "status",
-    "supports_agentless",
     "unenroll_timeout",
     "updated_at",
     "updated_by"

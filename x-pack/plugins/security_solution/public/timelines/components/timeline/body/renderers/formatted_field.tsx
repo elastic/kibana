@@ -126,7 +126,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
-    const classNames = truncate ? 'eui-textTruncate' : undefined;
+    const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
     const date = (
       <FormattedDate
         className={classNames}

@@ -18,10 +18,11 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import type { FleetStartServices } from '../../../../../../../plugin';
 import type {
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
@@ -44,7 +45,7 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  theme$: Observable<CoreTheme>;
 }
 
 /*
@@ -76,7 +77,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
-  startServices,
+  theme$,
 }) => {
   const history = useHistory();
   const { getPath } = useLink();
@@ -184,7 +185,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             defaultMessage="Updated {title} and upgraded policies"
             values={{ title }}
           />,
-          startServices
+          { theme$ }
         ),
         text: toMountPoint(
           <FormattedMessage
@@ -192,7 +193,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             defaultMessage="Successfully updated {title} and upgraded policies"
             values={{ title }}
           />,
-          startServices
+          { theme$ }
         ),
       });
 
@@ -229,7 +230,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     packagePolicyIds,
     dryRunData,
     notifications.toasts,
-    startServices,
+    theme$,
     navigateToNewSettingsPage,
   ]);
 

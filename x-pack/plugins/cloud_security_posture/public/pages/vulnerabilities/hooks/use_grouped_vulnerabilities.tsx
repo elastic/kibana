@@ -6,7 +6,7 @@
  */
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/securitysolution-grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';

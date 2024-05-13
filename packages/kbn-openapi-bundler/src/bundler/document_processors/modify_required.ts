@@ -20,7 +20,7 @@ import { inlineRef } from './utils/inline_ref';
  */
 export function createModifyRequiredProcessor(): DocumentNodeProcessor {
   return {
-    onRefNodeLeave(node, resolvedRef) {
+    ref(node, resolvedRef) {
       if (!hasProp(node, X_MODIFY, 'required')) {
         return;
       }
@@ -48,7 +48,7 @@ export function createModifyRequiredProcessor(): DocumentNodeProcessor {
 
       node.required = Object.keys(resolvedRef.refNode.properties);
     },
-    onNodeLeave(node) {
+    leave(node) {
       if (!hasProp(node, X_MODIFY, 'required')) {
         return;
       }

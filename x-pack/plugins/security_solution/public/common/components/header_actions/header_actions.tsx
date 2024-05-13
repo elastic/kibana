@@ -78,7 +78,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     onSelectAll,
     showEventsSelect,
     showSelectAllCheckbox,
-    showFullScreenToggle = true,
     sort,
     tabType,
     timelineId,
@@ -223,19 +222,17 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
             </EventsThContent>
           </EventsTh>
         )}
-        {fieldBrowserOptions && (
-          <EventsTh role="button">
-            <FieldBrowserContainer>
-              {triggersActionsUi.getFieldBrowser({
-                browserFields,
-                columnIds: columnHeaders.map(({ id }) => id),
-                onResetColumns,
-                onToggleColumn,
-                options: fieldBrowserOptions,
-              })}
-            </FieldBrowserContainer>
-          </EventsTh>
-        )}
+        <EventsTh role="button">
+          <FieldBrowserContainer>
+            {triggersActionsUi.getFieldBrowser({
+              browserFields,
+              columnIds: columnHeaders.map(({ id }) => id),
+              onResetColumns,
+              onToggleColumn,
+              options: fieldBrowserOptions,
+            })}
+          </FieldBrowserContainer>
+        </EventsTh>
 
         <EventsTh role="button">
           <StatefulRowRenderersBrowser
@@ -243,34 +240,33 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
             timelineId={timelineId}
           />
         </EventsTh>
-        {showFullScreenToggle && (
-          <EventsTh role="button">
-            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
-                <EuiButtonIcon
-                  aria-label={
-                    isFullScreen({
-                      globalFullScreen,
-                      isActiveTimelines: isActiveTimeline(timelineId),
-                      timelineFullScreen,
-                    })
-                      ? EXIT_FULL_SCREEN
-                      : i18n.FULL_SCREEN
-                  }
-                  display={fullScreen ? 'fill' : 'empty'}
-                  color="primary"
-                  data-test-subj={
-                    // a full screen button gets created for timeline and for the host page
-                    // this sets the data-test-subj for each case so that tests can differentiate between them
-                    isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
-                  }
-                  iconType="fullScreen"
-                  onClick={toggleFullScreen}
-                />
-              </EuiToolTip>
-            </EventsThContent>
-          </EventsTh>
-        )}
+
+        <EventsTh role="button">
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+            <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+              <EuiButtonIcon
+                aria-label={
+                  isFullScreen({
+                    globalFullScreen,
+                    isActiveTimelines: isActiveTimeline(timelineId),
+                    timelineFullScreen,
+                  })
+                    ? EXIT_FULL_SCREEN
+                    : i18n.FULL_SCREEN
+                }
+                display={fullScreen ? 'fill' : 'empty'}
+                color="primary"
+                data-test-subj={
+                  // a full screen button gets created for timeline and for the host page
+                  // this sets the data-test-subj for each case so that tests can differentiate between them
+                  isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
+                }
+                iconType="fullScreen"
+                onClick={toggleFullScreen}
+              />
+            </EuiToolTip>
+          </EventsThContent>
+        </EventsTh>
         {tabType !== TimelineTabs.eql && (
           <EventsTh role="button" data-test-subj="timeline-sorting-fields">
             <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

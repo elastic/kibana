@@ -152,9 +152,14 @@ export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
+  ISearchGeneric,
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
@@ -183,6 +188,7 @@ export type {
   SearchUsageCollector,
 } from './search';
 
+export type { ISearchOptions } from '../common';
 export { isRunningResponse } from '../common';
 
 // Search namespace

@@ -17,6 +17,11 @@ export type {
 
 export type {
   EsQuerySortValue,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
   ISearchSource,
   SearchError,
   SearchRequest,

@@ -12,10 +12,10 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/search-types';
+} from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';

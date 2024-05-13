@@ -13,7 +13,7 @@ import { EditContextAction } from './edit_context/edit_context_action';
 
 export const Toolbar: React.FC = () => {
   return (
-    <EuiFlexGroup gutterSize="s" data-test-subj="playground-header-actions">
+    <EuiFlexGroup gutterSize="s">
       <EditContextAction />
       <ViewQueryAction />
       <ViewCodeAction />

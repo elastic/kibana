@@ -22,7 +22,6 @@ interface StartChatPanelProps {
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;
-  dataTestSubj: string;
 }
 
 export const StartChatPanel: FC<PropsWithChildren<StartChatPanelProps>> = ({
@@ -30,9 +29,8 @@ export const StartChatPanel: FC<PropsWithChildren<StartChatPanelProps>> = ({
   description,
   children,
   isValid,
-  dataTestSubj,
 }) => (
-  <EuiPanel hasBorder paddingSize="l" data-test-subj={dataTestSubj}>
+  <EuiPanel hasBorder paddingSize="l">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiTitle size="xs">
         <h5>{title}</h5>

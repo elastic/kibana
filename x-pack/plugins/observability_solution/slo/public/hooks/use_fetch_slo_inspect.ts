@@ -16,8 +16,13 @@ interface SLOInspectResponse {
   rollUpTransform: TransformPutTransformRequest;
   summaryTransform: TransformPutTransformRequest;
   temporaryDoc: Record<string, any>;
-  rollUpTransformCompositeQuery: string;
-  summaryTransformCompositeQuery: string;
+}
+
+export interface UseInspectSLOResponse {
+  data: SLOInspectResponse | undefined;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
 }
 
 export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {

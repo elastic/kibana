@@ -320,7 +320,6 @@ export const useActionsLogFilter = ({
               status={getActionStatus(statusName)}
             />
           ) as unknown as string,
-          searchableLabel: statusName,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))

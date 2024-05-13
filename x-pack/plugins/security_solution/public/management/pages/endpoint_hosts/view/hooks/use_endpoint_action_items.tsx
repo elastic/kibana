@@ -43,9 +43,7 @@ export const useEndpointActionItems = (
     canIsolateHost,
     canUnIsolateHost,
     canAccessEndpointActionsLogManagement,
-    canReadFleetAgentPolicies,
-    canWriteFleetAgents,
-    canReadFleetAgents,
+    canAccessFleet,
   } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -179,7 +177,7 @@ export const useEndpointActionItems = (
           />
         ),
       },
-      ...(canReadFleetAgentPolicies
+      ...(canAccessFleet
         ? [
             {
               icon: 'gear',
@@ -206,10 +204,6 @@ export const useEndpointActionItems = (
                 />
               ),
             },
-          ]
-        : []),
-      ...(canReadFleetAgents
-        ? [
             {
               icon: 'gear',
               key: 'agentDetailsLink',
@@ -234,10 +228,6 @@ export const useEndpointActionItems = (
                 />
               ),
             },
-          ]
-        : []),
-      ...(canWriteFleetAgents
-        ? [
             {
               icon: 'gear',
               key: 'agentPolicyReassignLink',
@@ -282,8 +272,6 @@ export const useEndpointActionItems = (
     options?.isEndpointList,
     canIsolateHost,
     canUnIsolateHost,
-    canReadFleetAgentPolicies,
-    canReadFleetAgents,
-    canWriteFleetAgents,
+    canAccessFleet,
   ]);
 };

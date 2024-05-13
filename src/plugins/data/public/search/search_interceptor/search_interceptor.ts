@@ -36,35 +36,32 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
-import type {
-  AnalyticsServiceStart,
+import {
   ApplicationStart,
   CoreStart,
   DocLinksStart,
   ExecutionContextSetup,
-  I18nStart,
   IUiSettingsClient,
-  ThemeServiceStart,
+  ThemeServiceSetup,
   ToastsSetup,
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
-import type {
-  SanitizedConnectionRequestParams,
-  IKibanaSearchRequest,
-  ISearchOptionsSerializable,
-} from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
-import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   isRunningResponse,
+  ISearchOptions,
+  ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
+  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
@@ -86,6 +83,7 @@ export interface SearchInterceptorDeps {
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
+  theme: ThemeServiceSetup;
   searchConfig: SearchConfigSchema;
 }
 
@@ -119,26 +117,14 @@ export class SearchInterceptor {
   private inspector!: InspectorStart;
 
   /*
-   * Services for toMountPoint
-   * @internal
-   */
-  private startRenderServices!: {
-    analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
-    i18n: I18nStart;
-    theme: Pick<ThemeServiceStart, 'theme$'>;
-  };
-
-  /*
    * @internal
    */
   constructor(private readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart, depsStart]) => {
-      const { application, docLinks, analytics, i18n: i18nStart, theme } = coreStart;
-      this.application = application;
-      this.docLinks = docLinks;
-      this.startRenderServices = { analytics, i18n: i18nStart, theme };
+      this.application = coreStart.application;
+      this.docLinks = coreStart.docLinks;
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 
@@ -301,7 +287,7 @@ export class SearchInterceptor {
     const search = () => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
-        () => {},
+        ({ isSearchStored: boolean }) => {},
       ];
       return this.runSearch(
         { id, ...request },
@@ -573,10 +559,10 @@ export class SearchInterceptor {
     );
   }
 
-  private showTimeoutErrorToast = (e: SearchTimeoutError, _sessionId?: string) => {
+  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application), this.startRenderServices),
+      text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
     });
   };
 
@@ -587,11 +573,13 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (_sessionId?: string) => {
+  private showRestoreWarningToast = (sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), this.startRenderServices),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
+          theme$: this.deps.theme.theme$,
+        }),
       },
       {
         toastLifeTimeMs: 60000,
@@ -624,7 +612,7 @@ export class SearchInterceptor {
     if (searchErrorDisplay) {
       this.deps.toasts.addDanger({
         title: searchErrorDisplay.title,
-        text: toMountPoint(searchErrorDisplay.body, this.startRenderServices),
+        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

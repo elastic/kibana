@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
+
+import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 
 /**

@@ -445,18 +445,11 @@ export const useSourcererDataView = (
     }
   }, [missingPatterns, selectedDataView, selectedPatterns]);
 
-  const sourcererDataView = useMemo(() => {
-    const _dv =
-      selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView;
-    // Make sure the title is up to date, so that the correct index patterns are used everywhere
-    return {
-      ..._dv,
-      dataView: {
-        ..._dv.dataView,
-        title: selectedPatterns.join(','),
-      },
-    };
-  }, [legacyDataView, missingPatterns.length, selectedDataView, selectedPatterns]);
+  const sourcererDataView = useMemo(
+    () =>
+      selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView,
+    [legacyDataView, missingPatterns.length, selectedDataView]
+  );
 
   const indicesExist = useMemo(() => {
     if (loading || sourcererDataView.loading) {

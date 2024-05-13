@@ -38,16 +38,3 @@ export const indexNameToDataStreamParts = (dataStreamName: string) => {
     namespace,
   };
 };
-
-export const extractIndexNameFromBackingIndex = (
-  indexString: string,
-  type: DataStreamType
-): string => {
-  const pattern: RegExp = new RegExp(
-    `(?:\\.ds-)?(${type}-(?:[^-.]+(?:\\.[^.]+)+)-[^-]+)-\\d{4}\\.\\d{2}\\.\\d{2}-\\d{6}`
-  );
-
-  const match = indexString.match(pattern);
-
-  return match ? match[1] : indexString;
-};

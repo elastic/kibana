@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
-import React, { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
-import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
-import { GroupByField } from '../../../../pages/slos/components/slo_list_group_by';
 import { SLOView } from '../../../../pages/slos/components/toggle_slo_view';
-import { SortField } from '../../../../pages/slos/hooks/use_url_search_state';
+import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
 import { buildCombinedKqlQuery } from './helpers/build_kql_query';
 
 interface Props {
-  groupBy: GroupByField;
+  groupBy: string;
   groups?: string[];
   kqlQuery?: string;
   sloView: SLOView;
-  sort?: SortField;
+  sort?: string;
   filters?: Filter[];
   reloadSubject: Subject<boolean>;
 }

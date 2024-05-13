@@ -59,7 +59,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
-  const cloudSetup = appContextService.getCloud();
 
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
@@ -157,19 +156,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             defaultMessage:
               '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
             values: { agentPolicyName: preconfiguredAgentPolicy.name },
-          })
-        );
-      }
-
-      if (
-        (!cloudSetup?.isServerlessEnabled ||
-          !appContextService.getExperimentalFeatures().agentless) &&
-        preconfiguredAgentPolicy?.supports_agentless !== undefined
-      ) {
-        throw new FleetError(
-          i18n.translate('xpack.fleet.preconfiguration.support_agentless', {
-            defaultMessage:
-              '`supports_agentless` is only allowed in serverless environments that support the agentless feature',
           })
         );
       }
@@ -386,7 +372,9 @@ async function addPreconfiguredPolicyPackages(
       await addPackageToAgentPolicy(
         soClient,
         esClient,
+        installedPackage,
         agentPolicy,
+        defaultOutput,
         packageInfo,
         name,
         id,

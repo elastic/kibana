@@ -143,8 +143,7 @@ export const cli = () => {
         statusCode = await executeCommand(command, envVars, workDir);
       } catch (err) {
         log.error('An error occured when running the test script.');
-        log.error(err.message);
-        statusCode = 1;
+        log.error(err);
       } finally {
         // Delete serverless project
         log.info(`${id} : Deleting project ${PROJECT_NAME}...`);

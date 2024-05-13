@@ -12,7 +12,7 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
+import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
@@ -36,7 +36,7 @@ export const assetCriticalityDeleteRoute = (
         version: '1',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecord),
+            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
           },
         },
       },
@@ -59,13 +59,10 @@ export const assetCriticalityDeleteRoute = (
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-          await assetCriticalityClient.delete(
-            {
-              idField: request.query.id_field,
-              idValue: request.query.id_value,
-            },
-            request.query.refresh
-          );
+          await assetCriticalityClient.delete({
+            idField: request.query.id_field,
+            idValue: request.query.id_value,
+          });
 
           return response.ok();
         } catch (e) {

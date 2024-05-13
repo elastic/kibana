@@ -7,26 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
 import { Layouts } from '../../layouts/layouts';
 import { BufferAppender } from '../buffer/buffer_appender';
-import {
-  createTriggeringPolicy,
-  triggeringPolicyConfigSchema,
-  type TriggeringPolicy,
-} from './policies';
-import {
-  createRollingStrategy,
-  rollingStrategyConfigSchema,
-  type RollingStrategy,
-} from './strategies';
-import {
-  createRetentionPolicy,
-  mergeRetentionPolicyConfig,
-  retentionPolicyConfigSchema,
-  type RetentionPolicy,
-} from './retention';
+import { createTriggeringPolicy, triggeringPolicyConfigSchema, TriggeringPolicy } from './policies';
+import { RollingStrategy, createRollingStrategy, rollingStrategyConfigSchema } from './strategies';
 import { RollingFileManager } from './rolling_file_manager';
 import { RollingFileContext } from './rolling_file_context';
 
@@ -41,7 +27,6 @@ export class RollingFileAppender implements DisposableAppender {
     fileName: schema.string(),
     policy: triggeringPolicyConfigSchema,
     strategy: rollingStrategyConfigSchema,
-    retention: schema.maybe(retentionPolicyConfigSchema),
   });
 
   private isRolling = false;
@@ -51,9 +36,8 @@ export class RollingFileAppender implements DisposableAppender {
   private readonly layout: Layout;
   private readonly context: RollingFileContext;
   private readonly fileManager: RollingFileManager;
-  private readonly triggeringPolicy: TriggeringPolicy;
-  private readonly rollingStrategy: RollingStrategy;
-  private readonly retentionPolicy: RetentionPolicy;
+  private readonly policy: TriggeringPolicy;
+  private readonly strategy: RollingStrategy;
   private readonly buffer: BufferAppender;
 
   constructor(config: RollingFileAppenderConfig) {
@@ -61,12 +45,8 @@ export class RollingFileAppender implements DisposableAppender {
     this.context.refreshFileInfo();
     this.fileManager = new RollingFileManager(this.context);
     this.layout = Layouts.create(config.layout);
-    this.triggeringPolicy = createTriggeringPolicy(config.policy, this.context);
-    this.rollingStrategy = createRollingStrategy(config.strategy, this.context);
-    this.retentionPolicy = createRetentionPolicy(
-      mergeRetentionPolicyConfig(config.retention, config.strategy),
-      this.context
-    );
+    this.policy = createTriggeringPolicy(config.policy, this.context);
+    this.strategy = createRollingStrategy(config.strategy, this.context);
     this.buffer = new BufferAppender();
   }
 
@@ -116,9 +96,8 @@ export class RollingFileAppender implements DisposableAppender {
     }
     this.isRolling = true;
     try {
-      await this.rollingStrategy.rollout();
+      await this.strategy.rollout();
       await this.fileManager.closeStream();
-      await this.retentionPolicy.apply();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('[RollingFileAppender]: error while rolling file: ', e);
@@ -150,6 +129,6 @@ export class RollingFileAppender implements DisposableAppender {
    * Checks if the current event should trigger a rollout
    */
   private needRollout(record: LogRecord) {
-    return this.triggeringPolicy.isTriggeringEvent(record);
+    return this.policy.isTriggeringEvent(record);
   }
 }

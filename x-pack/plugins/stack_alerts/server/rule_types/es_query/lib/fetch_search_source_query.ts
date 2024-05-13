@@ -112,17 +112,18 @@ export function updateSearchSource(
   alertLimit?: number
 ): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeField = index.getTimeField();
+  const timeFieldName = params.timeField || index.timeFieldName;
 
-  if (!timeField) {
-    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
+  if (!timeFieldName) {
+    throw new Error('Invalid data view without timeFieldName.');
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
+  const field = index.fields.find((f) => f.name === timeFieldName);
   const filters = [
     buildRangeFilter(
-      timeField,
+      field!,
       { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
       index
     ),
@@ -134,7 +135,7 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater than
       // the timestamp of the previous run, so that those documents are not counted twice
       filterToExcludeHitsFromPreviousRun = buildRangeFilter(
-        timeField,
+        field!,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
         index
       );
@@ -149,7 +150,7 @@ export function updateSearchSource(
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
-      [timeField.name]: {
+      [timeFieldName]: {
         order: SortDirection.desc,
         format: 'strict_date_optional_time||epoch_millis',
       },

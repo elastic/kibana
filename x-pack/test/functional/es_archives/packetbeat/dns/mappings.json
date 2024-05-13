@@ -3092,6 +3092,10 @@
     },
     "settings": {
       "index": {
+        "lifecycle": {
+          "name": "packetbeat-7.0.0",
+          "rollover_alias": "packetbeat-7.0.0"
+        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

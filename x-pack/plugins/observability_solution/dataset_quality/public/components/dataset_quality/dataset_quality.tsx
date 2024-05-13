@@ -41,16 +41,16 @@ export const createDatasetQuality = ({
     );
 
     return (
-      <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <SummaryPanelProvider
-          dataStreamStatsClient={dataStreamStatsClient}
-          toasts={core.notifications.toasts}
-        >
+      <SummaryPanelProvider
+        dataStreamStatsClient={dataStreamStatsClient}
+        toasts={core.notifications.toasts}
+      >
+        <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
           <KibanaContextProviderForPlugin>
             <DatasetQuality />
           </KibanaContextProviderForPlugin>
-        </SummaryPanelProvider>
-      </DatasetQualityContext.Provider>
+        </DatasetQualityContext.Provider>
+      </SummaryPanelProvider>
     );
   };
 };
@@ -67,10 +67,10 @@ function DatasetQuality() {
         <Header />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Filters />
+        <SummaryPanel />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SummaryPanel />
+        <Filters />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Table />

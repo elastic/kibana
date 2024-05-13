@@ -7,6 +7,7 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
+import type { MutableRefObject } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ProductLine } from './configs';
 import type { StepLinkId } from './step_links/types';
@@ -45,7 +46,7 @@ type AutoCheckEnablePrebuiltRulesSteps = ({
   kibanaServicesHttp,
   onError,
 }: {
-  abortSignal: AbortController;
+  abortSignal: MutableRefObject<AbortController>;
   kibanaServicesHttp: HttpSetup;
   onError?: (error: Error) => void;
 }) => Promise<boolean>;

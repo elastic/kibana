@@ -14,25 +14,24 @@ const APP_TRACKER_NAME = 'search_playground';
 export const useUsageTracker = () => {
   const { usageCollection } = useKibana().services;
 
-  return useMemo(() => {
-    if (usageCollection) {
-      return {
-        click: usageCollection.reportUiCounter.bind(
-          usageCollection,
-          APP_TRACKER_NAME,
-          METRIC_TYPE.CLICK
-        ),
-        count: usageCollection.reportUiCounter.bind(
-          usageCollection,
-          APP_TRACKER_NAME,
-          METRIC_TYPE.COUNT
-        ),
-        load: usageCollection.reportUiCounter.bind(
-          usageCollection,
-          APP_TRACKER_NAME,
-          METRIC_TYPE.LOADED
-        ),
-      };
-    }
-  }, [usageCollection]);
+  return useMemo(
+    () => ({
+      click: usageCollection.reportUiCounter.bind(
+        usageCollection,
+        APP_TRACKER_NAME,
+        METRIC_TYPE.CLICK
+      ),
+      count: usageCollection.reportUiCounter.bind(
+        usageCollection,
+        APP_TRACKER_NAME,
+        METRIC_TYPE.COUNT
+      ),
+      load: usageCollection.reportUiCounter.bind(
+        usageCollection,
+        APP_TRACKER_NAME,
+        METRIC_TYPE.LOADED
+      ),
+    }),
+    [usageCollection]
+  );
 };

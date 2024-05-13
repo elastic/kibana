@@ -29,6 +29,5 @@
     "@kbn/core-chrome-browser",
     "@kbn/discover-plugin",
     "@kbn/security-plugin",
-    "@kbn/search-types",
   ]
 }

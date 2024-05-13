@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IKibanaSearchRequest } from '@kbn/search-types';
+import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';

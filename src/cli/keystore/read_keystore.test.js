@@ -14,18 +14,14 @@ import { Keystore } from '.';
 
 describe('cli/serve/read_keystore', () => {
   beforeEach(() => {
-    Keystore.initialize.mockResolvedValue(Promise.resolve(new Keystore()));
-  });
-
-  afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('returns structured keystore data', async () => {
+  it('returns structured keystore data', () => {
     const keystoreData = { 'elasticsearch.password': 'changeme' };
     Keystore.prototype.data = keystoreData;
 
-    const data = await readKeystore();
+    const data = readKeystore();
     expect(data).toEqual({
       elasticsearch: {
         password: 'changeme',
@@ -33,17 +29,17 @@ describe('cli/serve/read_keystore', () => {
     });
   });
 
-  it('uses data path if provided', async () => {
+  it('uses data path if provided', () => {
     const keystorePath = path.join('/foo/', 'kibana.keystore');
 
-    await readKeystore(keystorePath);
-    expect(Keystore.initialize.mock.calls[0][0]).toContain(keystorePath);
+    readKeystore(keystorePath);
+    expect(Keystore.mock.calls[0][0]).toContain(keystorePath);
   });
 
-  it('uses the getKeystore path if not', async () => {
-    await readKeystore();
+  it('uses the getKeystore path if not', () => {
+    readKeystore();
     // we test exact path scenarios in get_keystore.test.js - we use both
     // deprecated and new to cover any older local environments
-    expect(Keystore.initialize.mock.calls[0][0]).toMatch(/data|config/);
+    expect(Keystore.mock.calls[0][0]).toMatch(/data|config/);
   });
 });

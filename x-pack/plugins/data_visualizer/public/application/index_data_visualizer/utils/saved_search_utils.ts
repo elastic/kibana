@@ -9,17 +9,17 @@
 // `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import type { Query, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import { isSavedSearchSavedObject } from '../../../../common/types';
 
@@ -63,10 +63,6 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
     : undefined;
 }
 
-function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
-  return isPopulatedObject(query, ['query', 'language']);
-}
-
 /**
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
@@ -82,17 +78,18 @@ export function getEsQueryFromSavedSearch({
   dataView: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearch | null | undefined;
-  query?: Query | AggregateQuery;
+  query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
   if (!dataView && !savedSearch) return;
 
-  // Cannot support AggregateQuery (esql or sql) here
-  if (query && !isNonAggregateQuery(query)) return;
-
   const userQuery = query;
   const userFilters = filters;
+
+  if (filterManager && userFilters) {
+    filterManager.addFilters(userFilters);
+  }
 
   const savedSearchSource = getSavedSearchSource(savedSearch);
 
@@ -129,7 +126,7 @@ export function getEsQueryFromSavedSearch({
     const combinedQuery = buildEsQuery(
       dataView,
       userQuery ?? [],
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+      filterManager?.getFilters() ?? [],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
@@ -143,17 +140,16 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchSource) {
+    // FIXME: Add support for AggregateQuery type #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    if (savedSearchSource.getField('filter')) {
-      // Rehydrate filter from saved search object into filter manager's store
-      if (filterManager) {
-        filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
-      }
-    }
+    const currentFilters =
+      userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
+    if (filterManager) filterManager.addFilters(currentFilters);
+
     const combinedQuery = buildEsQuery(
       dataView,
       currentQuery,
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+      filterManager ? filterManager?.getFilters() : currentFilters,
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 

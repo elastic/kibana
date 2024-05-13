@@ -34,8 +34,6 @@ import {
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import type { FormHook } from '../../../../shared_imports';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
@@ -52,7 +50,6 @@ jest.mock('@elastic/eui', () => {
     },
   };
 });
-const mockedUseKibana = mockUseKibana();
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
@@ -121,7 +118,6 @@ describe('StepAboutRuleComponent', () => {
         indexPatterns: stubIndexPattern,
       },
     ]);
-    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
     useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
       jobs: [],
     }));
@@ -286,7 +282,6 @@ describe('StepAboutRuleComponent', () => {
         },
       ],
       investigationFields: [],
-      maxSignals: 100,
     };
 
     await act(async () => {
@@ -348,7 +343,6 @@ describe('StepAboutRuleComponent', () => {
         },
       ],
       investigationFields: [],
-      maxSignals: 100,
     };
 
     await act(async () => {

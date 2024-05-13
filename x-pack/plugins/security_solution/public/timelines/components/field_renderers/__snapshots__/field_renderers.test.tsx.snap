@@ -17,28 +17,28 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        data-test-subj="cellActions-renderContent-source.as.organization.name"
+        class=""
       >
-        <div>
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
           <div
-            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="withHoverActionsButton"
           >
-            <div>
-              <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
-                tabindex="-1"
+            <div
+              data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
+              tabindex="-1"
+            >
+              <span
+                class="c0"
+                data-test-subj="render-content-source.as.organization.name"
               >
                 <span
-                  class="c0"
-                  data-test-subj="render-content-source.as.organization.name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    Test Org
-                  </span>
+                  Test Org
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -53,28 +53,28 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        data-test-subj="cellActions-renderContent-source.as.number"
+        class=""
       >
-        <div>
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
           <div
-            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="withHoverActionsButton"
           >
-            <div>
-              <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
-                tabindex="-1"
+            <div
+              data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
+              tabindex="-1"
+            >
+              <span
+                class="c0"
+                data-test-subj="render-content-source.as.number"
               >
                 <span
-                  class="c0"
-                  data-test-subj="render-content-source.as.number"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    12345
-                  </span>
+                  12345
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -105,35 +105,35 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 }
 
 <div
-    data-test-subj="cellActions-renderContent-host.name"
+    class=""
   >
-    <div>
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+    >
       <div
-        class="euiPopover emotion-euiPopover-inline-block"
+        data-test-subj="withHoverActionsButton"
       >
-        <div>
-          <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
-            tabindex="-1"
+        <div
+          data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+          tabindex="-1"
+        >
+          <span
+            class="c0"
+            data-test-subj="render-content-host.name"
           >
             <span
-              class="c0"
-              data-test-subj="render-content-host.name"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <a
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="host-details-button"
+                href="securitySolutionUI/hosts/name/raspberrypi"
+                rel="noreferrer"
               >
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
-                >
-                  raspberrypi
-                </a>
-              </span>
+                raspberrypi
+              </a>
             </span>
-          </div>
+          </span>
         </div>
       </div>
     </div>
@@ -152,35 +152,35 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
 }
 
 <div
-    data-test-subj="cellActions-renderContent-host.name"
+    class=""
   >
-    <div>
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+    >
       <div
-        class="euiPopover emotion-euiPopover-inline-block"
+        data-test-subj="withHoverActionsButton"
       >
-        <div>
-          <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
-            tabindex="-1"
+        <div
+          data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+          tabindex="-1"
+        >
+          <span
+            class="c0"
+            data-test-subj="render-content-host.name"
           >
             <span
-              class="c0"
-              data-test-subj="render-content-host.name"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <a
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="host-details-button"
+                href="securitySolutionUI/hosts/name/raspberrypi"
+                rel="noreferrer"
               >
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
-                >
-                  raspberrypi
-                </a>
-              </span>
+                raspberrypi
+              </a>
             </span>
-          </div>
+          </span>
         </div>
       </div>
     </div>
@@ -205,28 +205,28 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        data-test-subj="cellActions-renderContent-source.geo.city_name"
+        class=""
       >
-        <div>
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
           <div
-            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="withHoverActionsButton"
           >
-            <div>
-              <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
-                tabindex="-1"
+            <div
+              data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
+              tabindex="-1"
+            >
+              <span
+                class="c0"
+                data-test-subj="render-content-source.geo.city_name"
               >
                 <span
-                  class="c0"
-                  data-test-subj="render-content-source.geo.city_name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    New York
-                  </span>
+                  New York
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -237,28 +237,28 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        data-test-subj="cellActions-renderContent-source.geo.region_name"
+        class=""
       >
-        <div>
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+        >
           <div
-            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="withHoverActionsButton"
           >
-            <div>
-              <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
-                tabindex="-1"
+            <div
+              data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
+              tabindex="-1"
+            >
+              <span
+                class="c0"
+                data-test-subj="render-content-source.geo.region_name"
               >
                 <span
-                  class="c0"
-                  data-test-subj="render-content-source.geo.region_name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    New York
-                  </span>
+                  New York
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>

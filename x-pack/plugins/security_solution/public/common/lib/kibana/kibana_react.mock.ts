@@ -14,6 +14,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -57,7 +58,6 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
-import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -127,25 +127,24 @@ export const createStartServicesMock = (
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
-  const timelineDataService = dataPluginMock.createStartContract();
-  const alerting = alertingPluginMock.createStartContract();
+  const mockTimelineFilterManager = createFilterManagerMock();
 
   /*
    * Below mocks are needed by unified field list
    * when data service is passed through as a prop
    *
    * */
-  timelineDataService.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+  data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
     from: '2021-08-31T22:00:00.000Z',
     to: '2022-09-01T09:16:29.553Z',
   }));
-  timelineDataService.query.timefilter.timefilter.getTime = jest.fn(() => {
+  data.query.timefilter.timefilter.getTime = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
-  timelineDataService.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+  data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
     return { pause: true, value: 1000 };
   });
-  timelineDataService.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
+  data.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
   /** ************************************************* */
 
   return {
@@ -250,8 +249,7 @@ export const createStartServicesMock = (
     fieldFormats: fieldFormatsMock,
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     upselling: new UpsellingService(),
-    timelineDataService,
-    alerting,
+    timelineFilterManager: mockTimelineFilterManager,
   } as unknown as StartServices;
 };
 

@@ -9,7 +9,7 @@
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 
 const services = {
   capabilities: {

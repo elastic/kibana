@@ -8,8 +8,7 @@
 
 import { resolve, join } from 'path';
 import { I18N_RC } from '../constants';
-import { checkConfigNamespacePrefix, arrayify } from '..';
-import { I18nCheckTaskContext } from '../types';
+import { ErrorReporter, checkConfigNamespacePrefix, arrayify } from '..';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
@@ -19,7 +18,7 @@ export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
-    task: async (context: I18nCheckTaskContext) => {
+    task: async (context: { reporter: ErrorReporter }) => {
       try {
         await checkConfigNamespacePrefix(configPath);
       } catch (err) {

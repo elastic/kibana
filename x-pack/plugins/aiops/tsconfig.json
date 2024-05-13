@@ -70,7 +70,6 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

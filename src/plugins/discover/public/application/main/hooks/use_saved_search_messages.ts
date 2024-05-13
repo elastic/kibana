@@ -16,8 +16,8 @@ import type {
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
-} from '../state_management/discover_data_state_container';
-import { RecordRawType } from '../state_management/discover_data_state_container';
+} from '../services/discover_data_state_container';
+import { RecordRawType } from '../services/discover_data_state_container';
 
 /**
  * Sends COMPLETE message to the main$ observable with the information

@@ -16,6 +16,7 @@ import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
 import { createAddSwimlanePanelAction } from './create_swim_lane';
 import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
+import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createEditSingleMetricViewerPanelAction } from './edit_single_metric_viewer_panel_action';
 import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import {
@@ -28,11 +29,12 @@ import { createVisToADJobAction } from './open_vis_in_ml_action';
 import {
   entityFieldSelectionTrigger,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
-  SWIM_LANE_SELECTION_TRIGGER,
   swimLaneSelectionTrigger,
+  SWIM_LANE_SELECTION_TRIGGER,
 } from './triggers';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
+export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
@@ -48,6 +50,7 @@ export function registerMlUiActions(
     core.getStartServices
   );
   const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
+  const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   const editSingleMetricViewerPanelAction = createEditSingleMetricViewerPanelAction(
     core.getStartServices
   );
@@ -71,6 +74,7 @@ export function registerMlUiActions(
   // Assign triggers
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSingleMetricViewerPanelAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSwimlanePanelAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);

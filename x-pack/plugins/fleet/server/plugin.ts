@@ -288,13 +288,10 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
-
-    registerSavedObjects(core.savedObjects, {
-      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
-    });
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({

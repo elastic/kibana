@@ -43,8 +43,7 @@ describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete),
-        { wrapper: TestProviders }
+        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
       expect(asFragment()).toMatchSnapshot();
@@ -67,9 +66,7 @@ describe('Field Renderers', () => {
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen), {
-        wrapper: TestProviders,
-      });
+      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen));
 
       expect(asFragment()).toMatchSnapshot();
     });
@@ -86,8 +83,7 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source),
-        { wrapper: TestProviders }
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
       expect(asFragment()).toMatchSnapshot();

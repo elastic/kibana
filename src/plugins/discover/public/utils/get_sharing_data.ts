@@ -24,7 +24,7 @@ import {
 import {
   DiscoverAppState,
   isEqualFilters,
-} from '../application/main/state_management/discover_app_state_container';
+} from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 
 /**

@@ -29,8 +29,8 @@ jest.mock('../../lib/kibana', () => {
     useKibana: () => mockedUseKibana,
   };
 });
-jest.mock('@kbn/react-kibana-mount', () => {
-  const original = jest.requireActual('@kbn/react-kibana-mount');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,

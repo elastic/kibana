@@ -10,6 +10,7 @@ import {
   isReferenceOrValueEmbeddable,
   PanelIncompatibleError,
   PanelNotFoundError,
+  reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
@@ -18,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DashboardPanelState } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
 import { pluginServices } from '../../../services/plugin_services';
-import { placeClonePanel } from '../../panel_placement';
+import { placeClonePanel } from '../../component/panel_placement';
 import { DashboardContainer } from '../dashboard_container';
 
 const duplicateLegacyInput = async (
@@ -76,17 +77,13 @@ const duplicateReactEmbeddableInput = async (
 };
 
 export async function duplicateDashboardPanel(this: DashboardContainer, idToDuplicate: string) {
-  const {
-    notifications: { toasts },
-    embeddable: { reactEmbeddableRegistryHasKey },
-  } = pluginServices.getServices();
   const panelToClone = this.getInput().panels[idToDuplicate] as DashboardPanelState;
 
   const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
     : await duplicateLegacyInput(this, panelToClone, idToDuplicate);
 
-  toasts.addSuccess({
+  pluginServices.getServices().notifications.toasts.addSuccess({
     title: dashboardClonePanelActionStrings.getSuccessMessage(),
     'data-test-subj': 'addObjectToContainerSuccess',
   });
