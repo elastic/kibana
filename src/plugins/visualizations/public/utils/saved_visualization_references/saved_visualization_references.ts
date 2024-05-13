@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import { Reference } from '@kbn/content-management-utils';
 import {
   extractSearchSourceReferences,
@@ -87,7 +89,7 @@ export function extractReferences({
   references = [],
 }: {
   attributes: SerializableAttributes;
-  references: Reference[];
+  references: SavedObjectReference[];
 }) {
   const updatedAttributes = { ...attributes };
   const updatedReferences = [...references];
@@ -96,7 +98,7 @@ export function extractReferences({
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
       updatedAttributes.searchSourceFields as SerializedSearchSourceFields
     );
-    updatedAttributes.searchSourceFields = searchSource;
+    updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
     searchSourceReferences.forEach((r) => updatedReferences.push(r));
   }
 
