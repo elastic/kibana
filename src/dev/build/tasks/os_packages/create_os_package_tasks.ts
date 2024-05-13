@@ -84,22 +84,24 @@ export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
   async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubuntu',
-      context: false,
-      serverless: true,
-      image: true,
-      dockerBuildDate,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'aarch64',
-      baseImage: 'ubuntu',
-      context: false,
-      serverless: true,
-      image: true,
-      dockerBuildDate,
-    });
+    await Promise.all([
+      runDockerGenerator(config, log, build, {
+        architecture: 'x64',
+        baseImage: 'ubuntu',
+        context: false,
+        serverless: true,
+        image: true,
+        dockerBuildDate,
+      }),
+      runDockerGenerator(config, log, build, {
+        architecture: 'aarch64',
+        baseImage: 'ubuntu',
+        context: false,
+        serverless: true,
+        image: true,
+        dockerBuildDate,
+      }),
+    ]);
   },
 };
 

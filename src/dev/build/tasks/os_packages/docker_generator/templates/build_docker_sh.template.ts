@@ -27,8 +27,8 @@ function generator({
   const dockerTargetName = `${imageTag}${imageFlavor}:${tag}`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   const dockerBuild = dockerCrossCompile
-    ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`
-    : `docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
+    ? `docker buildx build --quiet --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`
+    : `docker build --quiet -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
   return dedent(`
   #!/usr/bin/env bash
   #
