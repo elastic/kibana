@@ -214,6 +214,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           | undefined
         >(
           filePaths,
+          // @ts-expect-error
           async (filePath) => {
             let result:
               | CypressCommandLine.CypressRunResult
@@ -473,10 +474,12 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       const initialResults = await runSpecs(files);
       // If there are failed tests, retry them
 
+      // eslint-disable-next-line no-console
       console.error('initialResults', JSON.stringify(initialResults, null, 2));
 
       const retryResults = await runSpecs([...failedSpecFilePaths]);
 
+      // eslint-disable-next-line no-console
       console.error('retryResults', JSON.stringify(initialResults, null, 2));
 
       const finalResults = [
