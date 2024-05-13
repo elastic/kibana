@@ -88,11 +88,7 @@ it.each([
         '/api/include-test/{id}': {},
       },
     },
-    excludes: {
-      paths: {
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-other-plugin'],
   },
   {
     queryParam: { pluginId: 'myPlugin' },
@@ -105,21 +101,12 @@ it.each([
         '/api/include-test/{id}': {},
       },
     },
-    excludes: {
-      paths: {
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-other-plugin'],
   },
   {
     queryParam: { pluginId: 'nonExistant' },
     includes: {},
-    excludes: {
-      paths: {
-        '/my-include-test': {},
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-include-test', '/my-other-plugin'],
   },
   {
     queryParam: { pluginId: 'myOtherPlugin', pathStartsWith: '/api/my-other-plugin' },
@@ -132,11 +119,7 @@ it.each([
         },
       },
     },
-    excludes: {
-      paths: {
-        '/my-include-test': {},
-      },
-    },
+    excludes: ['/my-include-test'],
   },
   {
     queryParam: { access: 'public', version: '2023-10-31' },
@@ -150,13 +133,11 @@ it.each([
         },
       },
     },
-    excludes: {
-      paths: {
-        '/api/my-include-test/{id}': {},
-        '/api/my-include-test/exclude-test': {},
-        '/api/my-other-plugin': {},
-      },
-    },
+    excludes: [
+      '/api/my-include-test/{id}',
+      '/api/my-include-test/exclude-test',
+      '/api/my-other-plugin',
+    ],
   },
 ])(
   'can filter paths based on query params $queryParam',
@@ -186,6 +167,17 @@ it.each([
     const result = await supertest(server.listener).get('/api/oas').query(queryParam);
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject(includes);
-    expect(result.body).not.toMatchObject(excludes);
+    excludes.forEach((exclude) => {
+      expect(result.body.paths).not.toHaveProperty(exclude);
+    });
   }
 );
+
+it('only accepts "public" or "internal" for "access" query param', async () => {
+  const server = await startService({ config: { server: { oas: { enabled: true } } } });
+  const result = await supertest(server.listener).get('/api/oas').query({ access: 'invalid' });
+  expect(result.body.message).toBe(
+    'Invalid access query parameter. Must be one of "public" or "internal".'
+  );
+  expect(result.status).toBe(400);
+});
