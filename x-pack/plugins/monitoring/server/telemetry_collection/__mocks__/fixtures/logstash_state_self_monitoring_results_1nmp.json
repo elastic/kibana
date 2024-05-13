@@ -3,7 +3,7 @@
     "hits" : {
       "hits" : [
         {
-          "_index" : ".monitoring-logstash-7-mb-2021.01.28",
+          "_index" : ".monitoring-logstash-7-2021.01.28",
           "_type" : "_doc",
           "_id" : "CiziSXcB1VO1nvgvRr-E",
           "_score" : 0.0,
