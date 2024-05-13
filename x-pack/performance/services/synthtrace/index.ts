@@ -51,7 +51,9 @@ export class SynthtraceClient {
       version: this.packageVersion,
     });
 
-    this.synthtraceEsClient.pipeline(this.synthtraceEsClient.getDefaultPipeline(false));
+    this.synthtraceEsClient.pipeline(
+      this.synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+    );
   }
 
   async index(events: SynthtraceGenerator<ApmFields>) {
