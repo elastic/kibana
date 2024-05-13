@@ -221,12 +221,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               | undefined;
             failedSpecFilePaths.push(filePath);
 
-            return withProcRunner<
-              Array<
-                | CypressCommandLine.CypressRunResult
-                | CypressCommandLine.CypressFailedRunResult
-                | undefined
-              >
+            await withProcRunner<
+              | CypressCommandLine.CypressRunResult
+              | CypressCommandLine.CypressFailedRunResult
+              | undefined
             >(log, async (procs) => {
               const abortCtrl = new AbortController();
 
