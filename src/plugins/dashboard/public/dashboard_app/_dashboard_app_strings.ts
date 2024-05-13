@@ -266,11 +266,11 @@ export const getAddTimeSliderControlButtonTitle = () =>
 
 export const filterTourStrings = {
   title: i18n.translate('dashboard.topNav.filterTour.tourTitle', {
-    defaultMessage: 'We made changes to the filters logic',
+    defaultMessage: 'Filter logic changes',
   }),
   description: i18n.translate('dashboard.topNav.filterTour.tourDescription', {
     defaultMessage:
-      'When a dashboard contains more than one dataview, filter(s) will be ignored for visualizations where the dataview does not contain the filtering field.',
+      "If a dashboard has multiple data views, filters are ignored by visualizations that don't contain that filter field.",
   }),
   tourOptOut: i18n.translate('dashboard.topNav.filterTour.tourOptOutCheckboxLabel', {
     defaultMessage: "Don't show again",
