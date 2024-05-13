@@ -9,10 +9,11 @@ import { queue } from 'async';
 import { FromSchema } from 'json-schema-to-ts';
 import { mean } from 'd3-array';
 import moment from 'moment';
-import rison from '@kbn/rison';
+import dedent from 'dedent';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import rison from '@kbn/rison';
 import { type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
@@ -25,6 +26,8 @@ import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/ap
 import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
+
+import type { GetAiopsLogRateAnalysisFunctionResponse } from '../../common/types';
 
 import { FunctionRegistrationParameters } from '.';
 // import { ApmTimeseries, getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
@@ -72,7 +75,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      contexts: ['aiops'],
+      // contexts: ['aiops'],
       name: 'get_aiops_log_rate_analysis',
       descriptionForUser: i18n.translate(
         'xpack.aiops.observabilityAiAssistant.functions.registerGetAiopsLogRateAnalyssi.descriptionForUser',
@@ -80,7 +83,18 @@ export function registerGetAiopsLogRateAnalysisFunction({
           defaultMessage: `Log rate analysis is a feature that uses advanced statistical methods to identify reasons for increases or decreases in log rates.`,
         }
       ),
-      description: `Log rate analysis is a Elastic AIOps feature that uses advanced statistical methods to identify reasons for increases or decreases in time series of log rates. The analysis returns significant field/value pairs found in the log rate change. The importance of field/value pairs is logIncrease descending. Briefly explain the data with value examples. Values with the same increase might correlate. Suggest actionable insights for remediations and identify potential security and performance issues. Finally, if available, provide a link to the log rate analysis UI.`,
+      description: dedent(`
+        Log rate analysis is an Elastic AIOps feature to identify causes of spike/dips in time series of log rates. The analysis returns significant field/value pairs found in the log rate change sorted by logIncrease descending.
+
+        Users will see a UI with a chart of the log rate over time, with the log rate change highlighted. The UI will also include a table with all identified significant field/value pairs.
+
+        Your task is to summarize the provided data and provide context about the given data on display in the UI:
+
+        - Infer and explain the environment the data was obtained from, summarize the most contributing field/value pairs and provide some field/value pair examples.
+        - If the data hints at a security or performance issue, explain the root cause and 1-2 steps to remediate the problem.
+
+        Your output should be very concise, non-repeating, to-the-point. Your audience are technical users like SREs or Security Analysts using Elasticsearch and Kibana.
+      `),
       parameters,
     },
     async ({ arguments: args }, abortSignal): Promise<GetAiopsLogRateAnalysisFunctionResponse> => {
@@ -90,12 +104,12 @@ export function registerGetAiopsLogRateAnalysisFunction({
 
       // CHANGE POINT DETECTION
 
-      const barTarget = 70;
+      const barTarget = 75;
       const earliestMs = dateMath.parse(args.start)?.valueOf();
       const latestMs = dateMath.parse(args.end, { roundUp: true })?.valueOf();
 
       if (earliestMs === undefined || latestMs === undefined) {
-        return { content: 'Could not parse time range.', data: [] };
+        return { content: 'Could not parse time range.', data: { significantItems: [] } };
       }
       const delta = latestMs - earliestMs;
       const dayMs = 86400 * 1000;
@@ -289,23 +303,22 @@ export function registerGetAiopsLogRateAnalysisFunction({
       const debugDelta = (debugEndTime - debugStartTime) / 1000;
       console.log(`Took: ${debugDelta}s`);
 
+      const logRateChange = {
+        type: Object.keys(histogram.aggregations.change_point_request.type)[0],
+        timestamp: histogram.aggregations.change_point_request.bucket.key,
+        [logRateAttributeName]: histogram.aggregations.change_point_request.bucket.doc_count,
+        averageLogRate: Math.round(mean(Object.values(buckets)) ?? 0),
+        logRateAggregationIntervalUsedForAnalysis: moment
+          .duration(Math.round(intervalMs / 1000), 'seconds')
+          .humanize(),
+        ...(sampleProbability < 1 ? { documentSamplingFactorForAnalysis: sampleProbability } : {}),
+        extendedChangePoint,
+      };
+
       return {
         content: {
-          logRateAnalysisUILink: `/app/ml/aiops/log_rate_analysis?index=${
-            args.dataViewId
-          }&_a=${rison.encode({
-            logRateAnalysis: {
-              wp: {
-                bMin: wp.baselineMin,
-                bMax: wp.baselineMax,
-                dMin: wp.deviationMin,
-                dMax: wp.deviationMax,
-              },
-            },
-          })}`,
           logRateChange: {
             type: Object.keys(histogram.aggregations.change_point_request.type)[0],
-            timestamp: histogram.aggregations.change_point_request.bucket.key,
             [logRateAttributeName]: histogram.aggregations.change_point_request.bucket.doc_count,
             averageLogRate: Math.round(mean(Object.values(buckets)) ?? 0),
             logRateAggregationIntervalUsedForAnalysis: moment
@@ -331,14 +344,26 @@ export function registerGetAiopsLogRateAnalysisFunction({
                   : `${doc_count} documents up from 0 documents in baseline`,
             })),
         },
-        data: [...significantTerms, ...significantCategories],
+        data: {
+          dateHistogram: buckets,
+          logRateAnalysisUILink: `/app/ml/aiops/log_rate_analysis?index=${
+            args.dataViewId
+          }&_a=${rison.encode({
+            logRateAnalysis: {
+              wp: {
+                bMin: wp.baselineMin,
+                bMax: wp.baselineMax,
+                dMin: wp.deviationMin,
+                dMax: wp.deviationMax,
+              },
+            },
+          })}`,
+          logRateChange,
+          significantItems: [...significantTerms, ...significantCategories],
+        },
       };
     }
   );
 }
 
 export type GetAiopsLogRateAnalysisFunctionArguments = FromSchema<typeof parameters>;
-export interface GetAiopsLogRateAnalysisFunctionResponse {
-  content: any;
-  data: typeof significantTerms;
-}

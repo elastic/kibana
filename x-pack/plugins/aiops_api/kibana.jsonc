@@ -6,12 +6,14 @@
   "plugin": {
     "id": "aiopsApi",
     "server": true,
-    "browser": false,
+    "browser": true,
     "requiredPlugins": [
       "licensing",
       "observabilityAIAssistant"
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": [
+      "charts"
+    ]
   }
 }
