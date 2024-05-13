@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from 'zod';
 
-import { agentLoggingLevels } from '../constants';
+import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
 import type { SettingsConfig } from './types';
 
@@ -143,6 +143,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_level',
     },
-    schema: z.nativeEnum(agentLoggingLevels).default(agentLoggingLevels.Info),
+    schema: z.nativeEnum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
   },
 ];
