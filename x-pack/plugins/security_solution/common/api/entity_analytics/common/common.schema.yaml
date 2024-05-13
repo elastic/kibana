@@ -272,3 +272,16 @@ components:
         - type: 'global_identifier'
           host: 0.5
           user: 0.1
+
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      required:
+        - status_code
+        - message
+      properties:
+        status_code:
+          type: integer
+          minimum: 400
+        message:
+          type: string

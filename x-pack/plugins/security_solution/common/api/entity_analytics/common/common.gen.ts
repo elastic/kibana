@@ -199,3 +199,12 @@ export const RiskScoreWeight = z.union([RiskScoreWeightGlobal, RiskScoreWeightCa
  */
 export type RiskScoreWeights = z.infer<typeof RiskScoreWeights>;
 export const RiskScoreWeights = z.array(RiskScoreWeight);
+
+/**
+ * Task manager is unavailable
+ */
+export type TaskManagerUnavailableResponse = z.infer<typeof TaskManagerUnavailableResponse>;
+export const TaskManagerUnavailableResponse = z.object({
+  status_code: z.number().int().min(400),
+  message: z.string(),
+});

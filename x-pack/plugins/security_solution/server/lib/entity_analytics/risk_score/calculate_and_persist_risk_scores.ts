@@ -11,6 +11,7 @@ import type { RiskScoresCalculationResponse } from '../../../../common/api/entit
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { calculateRiskScores } from './calculate_risk_scores';
+import type { CalculateAndPersistScoresParams } from '../types';
 
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
@@ -44,5 +45,5 @@ export const calculateAndPersistRiskScores = async (
 
   const result = { after_keys: afterKeys, errors, scores_written: scoresWritten };
 
-  return returnScores ? { ...result, scores } : result; // fix this
+  return returnScores ? { ...result, scores } : result;
 };

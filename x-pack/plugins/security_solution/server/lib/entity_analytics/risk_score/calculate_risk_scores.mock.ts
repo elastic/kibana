@@ -91,6 +91,8 @@ const buildResponseMock = (
     ],
     user: [],
   },
+  errors: [],
+  scores_written: 1,
   ...overrides,
 });
 

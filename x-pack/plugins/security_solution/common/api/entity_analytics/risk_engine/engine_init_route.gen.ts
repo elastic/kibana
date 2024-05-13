@@ -18,13 +18,20 @@ import { z } from 'zod';
 
 export type RiskEngineInitResponse = z.infer<typeof RiskEngineInitResponse>;
 export const RiskEngineInitResponse = z.object({
-  result: z
-    .object({
-      risk_engine_enabled: z.boolean().optional(),
-      risk_engine_resources_installed: z.boolean().optional(),
-      risk_engine_configuration_created: z.boolean().optional(),
-      legacy_risk_engine_disabled: z.boolean().optional(),
-      errors: z.array(z.string()).optional(),
-    })
-    .optional(),
+  result: RiskEngineInitResult,
+});
+
+export type RiskEngineInitResult = z.infer<typeof RiskEngineInitResult>;
+export const RiskEngineInitResult = z.object({
+  risk_engine_enabled: z.boolean(),
+  risk_engine_resources_installed: z.boolean(),
+  risk_engine_configuration_created: z.boolean(),
+  legacy_risk_engine_disabled: z.boolean(),
+  errors: z.array(z.string()),
+});
+
+export type RiskEngineInitErrorResponse = z.infer<typeof RiskEngineInitErrorResponse>;
+export const RiskEngineInitErrorResponse = z.object({
+  message: z.string(),
+  full_error: z.string(),
 });

@@ -25,8 +25,20 @@ paths:
           description: Successful response
           content:
             application/json:
-              schema:
+              schema:                
                 $ref: '#/components/schemas/RiskEngineDisableResponse'
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineDisableErrorResponse'
 
 components:
   schemas:
@@ -35,3 +47,13 @@ components:
       properties:
         success:
           type: boolean
+    RiskEngineDisableErrorResponse:
+      type: object
+      required:
+        - message
+        - full_error
+      properties:
+        message:
+          type: string
+        full_error:
+          type: string

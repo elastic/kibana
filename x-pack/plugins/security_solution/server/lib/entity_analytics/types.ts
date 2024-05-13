@@ -6,8 +6,12 @@
  */
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
-import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
-import type { EntityAfterKey } from '../../../common/api/entity_analytics/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AfterKeys,
+  EntityAfterKey,
+  RiskScoreWeights,
+} from '../../../common/api/entity_analytics/common';
 import type { IdentifierType, Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
@@ -19,12 +23,6 @@ export interface EntityAnalyticsRoutesDeps {
   logger: Logger;
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
-}
-export interface InitRiskEngineError {
-  body: {
-    message: string;
-    full_error: RiskEngineInitResponse | undefined;
-  };
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -76,15 +74,29 @@ export interface RiskEngineConfiguration {
   alertSampleSizePerShard?: number;
 }
 
-// TODO params for calculateRiskScores calculateandPersistRiskScores
-// export interface CalculateScoresParams {
+export interface CalculateScoresParams {
+  afterKeys: AfterKeys;
+  debug?: boolean;
+  index: string;
+  filter?: unknown;
+  identifierType?: IdentifierType;
+  pageSize: number;
+  range: { start: string; end: string };
+  runtimeMappings: MappingRuntimeFields;
+  weights?: RiskScoreWeights;
+  alertSampleSizePerShard?: number;
+}
 
-// export interface CalculateAndPersistScoresResponse {
-//   after_keys: AfterKeys;
-//   errors: string[];
-//   scores_written: number;
-//   scores?: { // TODO was this added recently or I am missing something?
-//     host?: RiskScore[];
-//     user?: RiskScore[];
-//   };
-// }
+export interface CalculateAndPersistScoresParams {
+  afterKeys: AfterKeys;
+  debug?: boolean;
+  index: string;
+  filter?: unknown;
+  identifierType: IdentifierType;
+  pageSize: number;
+  range: Range;
+  runtimeMappings: MappingRuntimeFields;
+  weights?: RiskScoreWeights;
+  alertSampleSizePerShard?: number;
+  returnScores?: boolean;
+}

@@ -8,7 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
-import type { EntityAnalyticsConfig, RiskEngineConfiguration } from '../types';
+import type {
+  CalculateAndPersistScoresParams,
+  CalculateScoresParams,
+  EntityAnalyticsConfig,
+  RiskEngineConfiguration,
+} from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';

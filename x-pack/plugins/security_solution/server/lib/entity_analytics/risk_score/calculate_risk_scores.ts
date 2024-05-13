@@ -45,7 +45,11 @@ import {
   buildWeightingOfScoreByCategory,
   getGlobalWeightForIdentifierType,
 } from './risk_weights';
-import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
+import type {
+  CalculateRiskScoreAggregations,
+  CalculateScoresParams,
+  RiskScoreBucket,
+} from '../types';
 import {
   MAX_INPUTS_COUNT,
   RISK_SCORING_INPUTS_COUNT_MAX,

@@ -8,12 +8,9 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
-import {
-  RiskEngineStatus,
-  MAX_SPACES_COUNT,
-  RiskScoreEntity,
-} from '../../../../common/entity_analytics/risk_engine';
+import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
@@ -199,7 +196,7 @@ export class RiskEngineDataClient {
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    if (legacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED) {
+    if (legacyRiskEngineStatus === RiskEngineStatus.enum.NOT_INSTALLED) {
       return true;
     }
 
@@ -221,17 +218,17 @@ export class RiskEngineDataClient {
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
+    return newlegacyRiskEngineStatus === RiskEngineStatus.enum.NOT_INSTALLED;
   }
 
   private async getCurrentStatus() {
     const configuration = await this.getConfiguration();
 
     if (configuration) {
-      return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
+      return configuration.enabled ? RiskEngineStatus.enum.ENABLED : RiskEngineStatus.enum.DISABLED;
     }
 
-    return RiskEngineStatus.NOT_INSTALLED;
+    return RiskEngineStatus.enum.NOT_INSTALLED;
   }
 
   private async getIsMaxAmountOfRiskEnginesReached() {
@@ -271,9 +268,9 @@ export class RiskEngineDataClient {
     });
 
     if (transforms.length === 0) {
-      return RiskEngineStatus.NOT_INSTALLED;
+      return RiskEngineStatus.enum.NOT_INSTALLED;
     }
 
-    return RiskEngineStatus.ENABLED;
+    return RiskEngineStatus.enum.ENABLED;
   }
 }

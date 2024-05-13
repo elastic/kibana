@@ -20,3 +20,9 @@ export type RiskEngineEnableResponse = z.infer<typeof RiskEngineEnableResponse>;
 export const RiskEngineEnableResponse = z.object({
   success: z.boolean().optional(),
 });
+
+export type RiskEngineEnableErrorResponse = z.infer<typeof RiskEngineEnableErrorResponse>;
+export const RiskEngineEnableErrorResponse = z.object({
+  message: z.string(),
+  full_error: z.string(),
+});

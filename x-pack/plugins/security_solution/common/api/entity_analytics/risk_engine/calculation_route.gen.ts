@@ -24,6 +24,7 @@ import {
   IdentifierType,
   DateRange,
   RiskScoreWeights,
+  EntityRiskScore,
 } from '../common/common.gen';
 
 export type RiskScoresCalculationRequest = z.infer<typeof RiskScoresCalculationRequest>;
@@ -70,4 +71,16 @@ export const RiskScoresCalculationResponse = z.object({
    * The number of risk scores persisted to elasticsearch.
    */
   scores_written: z.number(),
+  scores: z
+    .object({
+      /**
+       * A list of host risk scores
+       */
+      host: z.array(EntityRiskScore).optional(),
+      /**
+       * A list of user risk scores
+       */
+      user: z.array(EntityRiskScore).optional(),
+    })
+    .optional(),
 });

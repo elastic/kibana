@@ -12,12 +12,6 @@ export enum RiskScoreEntity {
   user = 'user',
 }
 
-export enum RiskEngineStatus {
-  NOT_INSTALLED = 'NOT_INSTALLED',
-  DISABLED = 'DISABLED',
-  ENABLED = 'ENABLED',
-}
-
 export interface InitRiskEngineResult {
   legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;

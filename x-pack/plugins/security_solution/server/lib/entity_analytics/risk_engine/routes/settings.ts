@@ -42,6 +42,7 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
         if (!result) {
           throw new Error('Unable to get risk engine configuration');
         }
+        // type body with open api schema
         return response.ok({
           body: {
             range: result.range,
