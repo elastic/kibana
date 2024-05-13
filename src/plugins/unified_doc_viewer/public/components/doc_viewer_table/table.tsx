@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiFieldSearch,
   EuiSpacer,
-  EuiTablePagination,
   EuiSelectableMessage,
   EuiDataGrid,
   EuiDataGridProps,
@@ -63,6 +62,22 @@ const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
+
+const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
+  columnVisibility: {
+    visibleColumns: ['name', 'value'],
+    setVisibleColumns: () => null,
+  },
+  rowHeightsOptions: { defaultHeight: 'auto' },
+  gridStyle: {
+    border: 'horizontal',
+    stripes: true,
+    rowHover: 'highlight',
+    header: 'underline',
+    cellPadding: 's',
+    fontSize: 's',
+  },
+};
 
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
@@ -263,12 +278,10 @@ export const DocViewerTable = ({
       }
     );
 
-  // TODO: use EuiDataGrid pagination instead
-  const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
-    usePager({
-      initialPageSize: getPageSize(storage),
-      totalItems: restItems.length,
-    });
+  const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
+    initialPageSize: getPageSize(storage),
+    totalItems: restItems.length,
+  });
   const showPagination = totalPages !== 0;
 
   const onChangePageSize = useCallback(
@@ -278,6 +291,18 @@ export const DocViewerTable = ({
     },
     [changePageSize, storage]
   );
+
+  const pagination = useMemo(() => {
+    return showPagination
+      ? {
+          onChangeItemsPerPage: onChangePageSize,
+          onChangePage: changePageIndex,
+          pageIndex: curPageIndex,
+          pageSize,
+          pageSizeOptions: PAGE_SIZE_OPTIONS,
+        }
+      : undefined;
+  }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
 
   const gridColumns: EuiDataGridProps['columns'] = [
     {
@@ -324,7 +349,50 @@ export const DocViewerTable = ({
     },
   ];
 
-  const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
+  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId }) => {
+      const row = rows[rowIndex];
+      const {
+        action: { flattenedField },
+        field: { field, fieldMapping, fieldType, scripted },
+        value: { formattedValue, ignored },
+      } = row;
+
+      if (columnId === 'name') {
+        return (
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <FieldName
+              fieldName={field}
+              fieldType={fieldType}
+              fieldMapping={fieldMapping}
+              scripted={scripted}
+              highlight={getFieldSearchMatchingHighlight(
+                fieldMapping?.displayName ?? field,
+                searchText
+              )}
+            />
+            {/* TODO: how to highlight pinned fields? */}
+          </EuiFlexGroup>
+        );
+      }
+
+      if (columnId === 'value') {
+        return (
+          <TableFieldValue
+            field={field}
+            formattedValue={formattedValue}
+            rawValue={flattenedField}
+            ignoreReason={ignored}
+          />
+        );
+      }
+
+      return null;
+    },
+    [rows, searchText]
+  );
 
   return (
     <EuiFlexGroup
@@ -372,89 +440,20 @@ export const DocViewerTable = ({
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            {/* Transform props into useMemo/useCallback */}
             <EuiDataGrid
+              {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
                 defaultMessage: 'Field values',
               })}
               className="kbnDocViewer__fieldsGrid"
               columns={gridColumns}
-              columnVisibility={{
-                visibleColumns: ['name', 'value'],
-                setVisibleColumns: () => null,
-              }}
-              rowHeightsOptions={{ defaultHeight: 'auto' }}
               toolbarVisibility={false}
-              gridStyle={{
-                border: 'horizontal',
-                stripes: true,
-                rowHover: 'highlight',
-                header: 'underline',
-                cellPadding: 's',
-                fontSize: 's',
-              }}
               rowCount={rows.length}
-              renderCellValue={({ rowIndex, columnId }) => {
-                const row = rows[rowIndex];
-                const {
-                  action: { flattenedField },
-                  field: { field, fieldMapping, fieldType, scripted },
-                  value: { formattedValue, ignored },
-                } = row;
-
-                if (columnId === 'name') {
-                  return (
-                    <EuiFlexGroup responsive={false} gutterSize="s">
-                      <FieldName
-                        fieldName={field}
-                        fieldType={fieldType}
-                        fieldMapping={fieldMapping}
-                        scripted={scripted}
-                        highlight={getFieldSearchMatchingHighlight(
-                          fieldMapping?.displayName ?? field,
-                          searchText
-                        )}
-                      />
-                      {/* TODO: how to highlight pinned fields? */}
-                    </EuiFlexGroup>
-                  );
-                }
-
-                if (columnId === 'value') {
-                  return (
-                    <TableFieldValue
-                      field={field}
-                      formattedValue={formattedValue}
-                      rawValue={flattenedField}
-                      ignoreReason={ignored}
-                    />
-                  );
-                }
-
-                return null;
-              }}
+              renderCellValue={renderCellValue}
+              pagination={pagination}
             />
           </EuiFlexItem>
         </>
-      )}
-
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
-
-      {/* TODO: what pagination should we use? */}
-
-      {showPagination && (
-        <EuiFlexItem grow={false}>
-          <EuiTablePagination
-            activePage={curPageIndex}
-            itemsPerPage={pageSize}
-            itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-            pageCount={totalPages}
-            onChangeItemsPerPage={onChangePageSize}
-            onChangePage={changePageIndex}
-          />
-        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
