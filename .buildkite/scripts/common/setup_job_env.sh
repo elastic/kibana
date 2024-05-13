@@ -22,7 +22,7 @@ fi
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
   if command -v docker &> /dev/null; then
-    echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.cog
+    echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
   fi
 }
 
