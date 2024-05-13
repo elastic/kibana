@@ -13,9 +13,11 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 /**
  * Get statistics for all selected Elasticsearch clusters.
  *
- * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
+ * @param start
+ * @param end
+ * @param maxBucketSize
  */
 export async function getElasticsearchStats(
   callCluster: ElasticsearchClient,
@@ -37,11 +39,13 @@ export async function getElasticsearchStats(
 /**
  * Fetch the Elasticsearch stats.
  *
- * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids Cluster UUIDs to limit the request against
  *
  * Returns the response for the aggregations to fetch details for the product.
+ * @param start
+ * @param end
+ * @param maxBucketSize
  */
 export async function fetchElasticsearchStats(
   callCluster: ElasticsearchClient,
@@ -60,6 +64,7 @@ export async function fetchElasticsearchStats(
       'hits.hits._source.version',
       'hits.hits._source.cluster_stats',
       'hits.hits._source.stack_stats',
+      'hits.hits._source.elasticsearch',
     ],
     body: {
       size: maxBucketSize,
@@ -70,7 +75,14 @@ export async function fetchElasticsearchStats(
              * Note: Unlike most places, we don't care about the old _type: cluster_stats because it would NOT
              * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
              */
-            { term: { type: 'cluster_stats' } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                ],
+              },
+            },
             { terms: { cluster_uuid: clusterUuids } },
             {
               range: {
@@ -93,6 +105,18 @@ export async function fetchElasticsearchStats(
 }
 
 export interface ESClusterStats {
+  elasticsearch?: {
+    cluster: {
+      id: string;
+      name: string;
+      stats: {
+        stack: object;
+        nodes: {
+          versions: string[];
+        };
+      };
+    };
+  };
   cluster_uuid: string;
   cluster_name: string;
   timestamp: string;
@@ -107,5 +131,20 @@ export interface ESClusterStats {
 export function handleElasticsearchStats(response: estypes.SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map((cluster) => cluster._source!);
+  return clusters.map((cluster) => {
+    const clusterStats = cluster._source!;
+
+    // tolerate metricbeat monitoring structure
+    if (clusterStats.elasticsearch) {
+      clusterStats.cluster_stats = clusterStats.elasticsearch.cluster.stats;
+      clusterStats.cluster_uuid = clusterStats.elasticsearch.cluster.id;
+      clusterStats.cluster_name = clusterStats.elasticsearch.cluster.name;
+      if (clusterStats.elasticsearch.cluster.stats.nodes.versions.length > 0) {
+        clusterStats.version = clusterStats.elasticsearch.cluster.stats.nodes.versions[0] || '';
+      }
+      clusterStats.elasticsearch = undefined;
+    }
+
+    return clusterStats;
+  });
 }

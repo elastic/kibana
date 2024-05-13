@@ -1978,7 +1978,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
+                "path": "src/plugins/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",

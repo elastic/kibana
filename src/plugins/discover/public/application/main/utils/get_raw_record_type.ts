@@ -7,7 +7,7 @@
  */
 
 import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { RecordRawType } from '../services/discover_data_state_container';
+import { RecordRawType } from '../state_management/discover_data_state_container';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
   if (query && isOfAggregateQueryType(query)) {

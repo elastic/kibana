@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingPublicPlugin } from './plugin';
+import { AlertingPublicPlugin, AlertingUIConfig } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createManagementSectionMock,
@@ -17,7 +17,17 @@ jest.mock('./services/rule_api', () => ({
   loadRuleType: jest.fn(),
 }));
 
-const mockInitializerContext = coreMock.createPluginInitializerContext();
+const mockAlertingUIConfig: AlertingUIConfig = {
+  rules: {
+    run: {
+      alerts: {
+        max: 1000,
+      },
+    },
+  },
+};
+
+const mockInitializerContext = coreMock.createPluginInitializerContext(mockAlertingUIConfig);
 const management = managementPluginMock.createSetupContract();
 const mockSection = createManagementSectionMock();
 

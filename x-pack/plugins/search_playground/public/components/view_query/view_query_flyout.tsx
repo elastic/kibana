@@ -106,7 +106,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       ...tempQueryFields,
       [index]: newFields,
     });
-    usageTracker.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
+    usageTracker?.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
   };
 
   const saveQuery = () => {
@@ -117,12 +117,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     const groupedQueryFields = groupTypeQueryFields(fields, tempQueryFields);
 
     groupedQueryFields.forEach((typeQueryFields) =>
-      usageTracker.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
+      usageTracker?.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
     );
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.viewQueryFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.viewQueryFlyoutOpened);
   }, [usageTracker]);
 
   return (

@@ -23,14 +23,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCapabilities } from '../../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
-import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
@@ -79,7 +78,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
 
-  const { mutate: deleteSlo } = useDeleteSlo();
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
@@ -87,9 +85,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const [sloToReset, setSloToReset] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
   const handleDeleteConfirm = () => {
-    if (sloToDelete) {
-      deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
-    }
     setSloToDelete(undefined);
   };
 
@@ -476,10 +471,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       ) : null}
 
       {sloToDelete ? (
-        <SloDeleteConfirmationModal
+        <SloDeleteModal
           slo={sloToDelete}
           onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
+          onSuccess={handleDeleteConfirm}
         />
       ) : null}
 
