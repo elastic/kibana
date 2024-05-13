@@ -127,7 +127,7 @@ describe('TaskClaiming', () => {
       getCapacity: () => 10,
     });
 
-    expect(taskManagerLogger.info).toHaveBeenCalledTimes(1);
+    expect(taskManagerLogger.info).toHaveBeenCalledTimes(2);
     expect(taskManagerLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
       `"Task Manager will never claim tasks of the following types as their \\"maxConcurrency\\" is set to 0: limitedToZero, anotherLimitedToZero"`
     );

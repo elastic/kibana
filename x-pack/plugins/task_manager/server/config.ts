@@ -154,7 +154,7 @@ export const configSchema = schema.object(
       max: 100,
       min: 1,
     }),
-    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
+    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_DEFAULT }),
     request_timeouts: requestTimeoutsConfig,
   },
   {

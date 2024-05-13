@@ -64,7 +64,7 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
   const taskClaimOwnership$ = new Subject<ClaimOwnershipResult>();
 
-  claimAvailableTasks(opts)
+  claimAvailableTasksApm(opts)
     .then((result) => {
       taskClaimOwnership$.next(result);
     })
@@ -76,6 +76,22 @@ export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<Claim
     });
 
   return taskClaimOwnership$;
+}
+
+async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
+  const apmTrans = apm.startTransaction(
+    TASK_MANAGER_MARK_AS_CLAIMED,
+    TASK_MANAGER_TRANSACTION_TYPE
+  );
+
+  try {
+    const result = await claimAvailableTasks(opts);
+    apmTrans.end('success');
+    return result;
+  } catch (err) {
+    apmTrans.end('failure');
+    throw err;
+  }
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
@@ -211,24 +227,12 @@ async function searchAvailableTasks({
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
 
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
-
-  try {
-    const result = await taskStore.fetch({
-      query,
-      sort,
-      size,
-      seq_no_primary_term: true,
-    });
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+  return await taskStore.fetch({
+    query,
+    sort,
+    size,
+    seq_no_primary_term: true,
+  });
 }
 
 function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
