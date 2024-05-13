@@ -9,11 +9,19 @@ import { DocLinks } from '@kbn/doc-links';
 
 class PlaygroundDocLinks {
   public chatPlayground: string = '';
+  public retrievalOptimize: string = '';
+  public retrieval: string = '';
+  public context: string = '';
+  public hiddenFields: string = '';
 
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
     this.chatPlayground = newDocLinks.playground.chatPlayground;
+    this.retrievalOptimize = newDocLinks.playground.retrievalOptimize;
+    this.retrieval = newDocLinks.playground.retrieval;
+    this.context = newDocLinks.playground.context;
+    this.hiddenFields = newDocLinks.playground.hiddenFields;
   }
 }
 

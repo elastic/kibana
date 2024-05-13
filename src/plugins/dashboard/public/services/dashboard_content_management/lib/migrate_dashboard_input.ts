@@ -9,11 +9,11 @@
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   EmbeddableFactoryNotFoundError,
-  reactEmbeddableRegistryHasKey,
   runEmbeddableFactoryMigrations,
 } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import { type DashboardEmbeddableService } from '../../embeddable/types';
+import { pluginServices } from '../../plugin_services';
 import { SavedDashboardInput } from '../types';
 
 /**
@@ -26,6 +26,9 @@ export const migrateDashboardInput = (
   dashboardInput: SavedDashboardInput,
   embeddable: DashboardEmbeddableService
 ) => {
+  const {
+    embeddable: { reactEmbeddableRegistryHasKey },
+  } = pluginServices.getServices();
   let anyMigrationRun = false;
   if (!dashboardInput) return dashboardInput;
   if (dashboardInput.controlGroupInput) {

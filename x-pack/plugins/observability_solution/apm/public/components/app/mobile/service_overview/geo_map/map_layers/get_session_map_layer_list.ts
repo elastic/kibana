@@ -36,9 +36,7 @@ const SESSION_PER_REGION = `__kbnjoin__cardinality_of_session.id__${PER_REGION_L
 const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.session.metric.label', {
   defaultMessage: 'Sessions',
 });
-export async function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
-  const basemapLayerDescriptor = await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
-
+export function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
   const sessionsByCountryLayer: VectorLayerDescriptor = {
     joins: [
       {
@@ -117,9 +115,5 @@ export async function getSessionMapLayerList(maps: MapsStartApi | undefined, dat
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return [
-    ...(basemapLayerDescriptor ? [basemapLayerDescriptor] : []),
-    sessionsByRegionLayer,
-    sessionsByCountryLayer,
-  ] as BaseLayerDescriptor[];
+  return [sessionsByRegionLayer, sessionsByCountryLayer] as BaseLayerDescriptor[];
 }

@@ -1217,7 +1217,9 @@
           "parentPluginId": "timelines",
           "id": "def-public.TimelinesUIStart.getHoverActions",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "getHoverActions",
           "description": [],
           "signature": [
@@ -1225,8 +1227,34 @@
             "HoverActionsConfig"
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "kubernetesSecurity",
+              "path": "x-pack/plugins/kubernetes_security/public/hooks/use_filter.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/public/timelines/add_to_timeline_button.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            }
+          ],
           "children": [],
           "returnComment": []
         },

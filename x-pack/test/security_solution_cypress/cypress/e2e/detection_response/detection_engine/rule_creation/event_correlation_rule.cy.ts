@@ -39,6 +39,7 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
@@ -125,12 +126,16 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();

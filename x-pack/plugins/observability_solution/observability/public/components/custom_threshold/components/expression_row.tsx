@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState, ReactElement } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
   builtInComparators,
@@ -61,13 +60,6 @@ interface ExpressionRowProps {
   dataView: DataViewBase;
   children?: React.ReactNode;
 }
-
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 -4px;
-`;
 
 // eslint-disable-next-line react/function-component-definition
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
@@ -173,7 +165,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow>
-          <StyledExpressionRow style={{ gap: 24 }} />
           <>
             <EuiSpacer size={'xs'} />
             <CustomEquationEditor

@@ -806,6 +806,8 @@
       "@kbn/eso-plugin/*": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
       "@kbn/esql-ast": ["packages/kbn-esql-ast"],
       "@kbn/esql-ast/*": ["packages/kbn-esql-ast/*"],
+      "@kbn/esql-ast-inspector-plugin": ["examples/esql_ast_inspector"],
+      "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
       "@kbn/esql-utils": ["packages/kbn-esql-utils"],
       "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
       "@kbn/esql-validation-autocomplete": ["packages/kbn-esql-validation-autocomplete"],

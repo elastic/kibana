@@ -37,6 +37,23 @@ jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
 
 const services = createDiscoverServicesMock();
 
+function findSubjects(component: ReactWrapper) {
+  return {
+    mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
+    errorMsg: findTestSubject(component!, 'discoverNoResultsError').exists(),
+    adjustTimeRange: findTestSubject(component!, 'discoverNoResultsTimefilter').exists(),
+    adjustSearch: findTestSubject(component!, 'discoverNoResultsAdjustSearch').exists(),
+    adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
+    checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
+    disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
+    viewMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
+    searchAllMatchesGivesNoResults: findTestSubject(
+      component!,
+      'discoverSearchAllMatchesGivesNoResults'
+    ).exists(),
+  };
+}
+
 async function mountAndFindSubjects(
   props: Omit<
     DiscoverNoResultsProps,
@@ -66,14 +83,8 @@ async function mountAndFindSubjects(
   });
 
   return {
-    mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
-    errorMsg: findTestSubject(component!, 'discoverNoResultsError').exists(),
-    adjustTimeRange: findTestSubject(component!, 'discoverNoResultsTimefilter').exists(),
-    adjustSearch: findTestSubject(component!, 'discoverNoResultsAdjustSearch').exists(),
-    adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
-    checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
-    disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
-    viewMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
+    component: component!,
+    subjects: findSubjects(component!),
   };
 }
 
@@ -90,7 +101,7 @@ describe('DiscoverNoResults', () => {
           query: undefined,
           filters: undefined,
         });
-        expect(result).toMatchInlineSnapshot(`
+        expect(result.subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
@@ -99,6 +110,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
             "viewMatchesButton": false,
           }
         `);
@@ -111,7 +123,7 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(result).toMatchInlineSnapshot(`
+        expect(result.subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
@@ -120,18 +132,180 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
             "viewMatchesButton": true,
           }
         `);
-        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
       });
 
-      test('passes strict_date_optional_time format to range query', async () => {
-        await mountAndFindSubjects({
+      test('should handle no results after the button is pressed', async () => {
+        (RxApi.lastValueFrom as jest.Mock).mockImplementation(async () => ({
+          rawResponse: {},
+        }));
+        const result = await mountAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: '' },
           filters: [],
         });
+        expect(result.subjects).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          findTestSubject(result.component, 'discoverNoResultsViewAllMatches').simulate('click');
+        });
+
+        const component = result.component.update();
+
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+
+        expect(findSubjects(component)).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": true,
+            "viewMatchesButton": false,
+          }
+        `);
+      });
+
+      test('should handle timeout after the button is pressed', async () => {
+        (RxApi.lastValueFrom as jest.Mock).mockImplementation(async () => ({
+          rawResponse: {
+            timed_out: true,
+          },
+        }));
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [],
+        });
+        expect(result.subjects).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          findTestSubject(result.component, 'discoverNoResultsViewAllMatches').simulate('click');
+        });
+
+        const component = result.component.update();
+
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+
+        expect(findSubjects(component)).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+      });
+
+      test('should handle failures after the button is pressed', async () => {
+        (RxApi.lastValueFrom as jest.Mock).mockImplementation(async () => ({
+          rawResponse: {
+            _clusters: {
+              total: 2,
+              successful: 1,
+            },
+            aggregations: {
+              earliest_timestamp: {
+                value_as_string: '2020-09-01T08:30:00.000Z',
+              },
+              latest_timestamp: {
+                value_as_string: '2022-09-01T08:30:00.000Z',
+              },
+            },
+          },
+        }));
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [],
+        });
+        expect(result.subjects).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          findTestSubject(result.component, 'discoverNoResultsViewAllMatches').simulate('click');
+        });
+
+        const component = result.component.update();
+
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+
+        expect(findSubjects(component)).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": false,
+            "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": false,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+      });
+
+      test('passes strict_date_optional_time format to range query', async () => {
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [],
+        });
+
+        await act(async () => {
+          findTestSubject(result.component, 'discoverNoResultsViewAllMatches').simulate('click');
+        });
+
         expect(services.data.search.search).toHaveBeenLastCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
@@ -163,7 +337,8 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '*' },
           filters: undefined,
         });
-        expect(result).toHaveProperty('adjustSearch', true);
+        expect(result.subjects).toHaveProperty('adjustSearch', true);
+        expect(result.subjects).toHaveProperty('disableFiltersButton', false);
       });
 
       test('shows "adjust filters" message when having filters', async () => {
@@ -172,8 +347,55 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [{} as Filter],
         });
-        expect(result).toHaveProperty('adjustFilters', true);
-        expect(result).toHaveProperty('disableFiltersButton', true);
+        expect(result.subjects).toHaveProperty('adjustFilters', true);
+        expect(result.subjects).toHaveProperty('disableFiltersButton', true);
+      });
+
+      test('should handle no results when having filters and after the button is pressed', async () => {
+        (RxApi.lastValueFrom as jest.Mock).mockImplementation(async () => ({
+          rawResponse: {},
+        }));
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: 'css*' },
+          filters: [{} as Filter],
+        });
+        expect(result.subjects).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": true,
+            "adjustSearch": true,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": true,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
+            "viewMatchesButton": true,
+          }
+        `);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          findTestSubject(result.component, 'discoverNoResultsViewAllMatches').simulate('click');
+        });
+
+        const component = result.component.update();
+
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+
+        expect(findSubjects(component)).toMatchInlineSnapshot(`
+          Object {
+            "adjustFilters": true,
+            "adjustSearch": true,
+            "adjustTimeRange": true,
+            "checkIndices": false,
+            "disableFiltersButton": true,
+            "errorMsg": false,
+            "mainMsg": true,
+            "searchAllMatchesGivesNoResults": true,
+            "viewMatchesButton": false,
+          }
+        `);
       });
     });
   });

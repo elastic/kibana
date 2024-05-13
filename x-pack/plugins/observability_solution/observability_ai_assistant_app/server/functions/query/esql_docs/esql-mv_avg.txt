@@ -1,12 +1,10 @@
 MV_AVG
 
 Syntax
-MV_AVG(expression)
 Parameters
-expression
+number
 Multivalue expression.
-DescriptionConverts a multivalued expression into a single valued column containing the
-average of all of the values.Supported types
+DescriptionConverts a multivalued field into a single valued field containing the average of all of the values.Supported types
 Example
 ```esql
 ROW a=[3, 5, 1, 6]

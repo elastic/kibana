@@ -50,7 +50,7 @@ import {
 const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
-  skipUnavailable: false,
+  skipUnavailable: true,
   nodeConnections: 3,
   proxyAddress: '',
   proxySocketConnections: 18,

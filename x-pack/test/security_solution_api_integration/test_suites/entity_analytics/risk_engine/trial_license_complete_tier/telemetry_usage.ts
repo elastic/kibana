@@ -103,7 +103,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should return riskEngineMetrics with expected values', async () => {
+      // https://github.com/elastic/kibana/issues/183246
+      it('@skipInServerlessMKI should return riskEngineMetrics with expected values', async () => {
         await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
         await retry.try(async () => {
           const {

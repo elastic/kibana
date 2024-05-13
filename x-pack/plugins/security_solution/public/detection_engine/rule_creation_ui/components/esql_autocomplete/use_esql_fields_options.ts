@@ -6,7 +6,8 @@
  */
 import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -16,14 +17,14 @@ import { getEsqlQueryConfig } from '../../../rule_creation/logic/get_esql_query_
 import type { FieldType } from '../../../rule_creation/logic/esql_validator';
 
 export const esqlToOptions = (
-  data: { error: unknown } | Datatable | undefined | null,
+  columns: { error: unknown } | DatatableColumn[] | undefined | null,
   fieldType?: FieldType
 ) => {
-  if (data && 'error' in data) {
+  if (columns && 'error' in columns) {
     return [];
   }
 
-  const options = (data?.columns ?? []).reduce<Array<{ label: string }>>((acc, { id, meta }) => {
+  const options = (columns ?? []).reduce<Array<{ label: string }>>((acc, { id, meta }) => {
     // if fieldType absent, we do not filter columns by type
     if (!fieldType || fieldType === meta.type) {
       acc.push({ label: id });
@@ -46,11 +47,11 @@ type UseEsqlFieldOptions = (
  * fetches ES|QL fields and convert them to Combobox options
  */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
-  const kibana = useKibana<{ expressions: ExpressionsStart }>();
+  const kibana = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { expressions } = kibana.services;
+  const { data: dataService } = kibana.services;
 
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, expressions });
+  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService.search.search });
   const { data, isLoading } = useQuery(queryConfig);
 
   const options = useMemo(() => {

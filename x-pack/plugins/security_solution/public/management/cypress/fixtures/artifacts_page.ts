@@ -193,8 +193,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'click',
-          customSelector: 'button[title="@timestamp"]',
+          type: 'input',
+          customSelector: '[data-test-subj="fieldAutocompleteComboBox"] input',
+          value: '@timestamp{downArrow}{enter}',
         },
         {
           type: 'click',

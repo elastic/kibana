@@ -1,3 +1,54 @@
+CIDR_MATCH
+CIDR_MATCH
+
+Syntax
+Parameters
+ip
+IP address of type ip (both IPv4 and IPv6 are supported).
+blockX
+CIDR block to test the IP against.
+DescriptionReturns true if the provided IP is contained in one of the provided CIDR blocks.Supported types
+Example
+```esql
+FROM hosts
+| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
+| KEEP card, host, ip0, ip1
+```
+
+ENDS_WITH
+ENDS_WITH
+
+Syntax
+Parameters
+str
+String expression. If null, the function returns null.
+suffix
+String expression. If null, the function returns null.
+DescriptionReturns a boolean that indicates whether a keyword string ends with another string.Supported types
+Example
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_E = ENDS_WITH(last_name, "d")
+```
+
+STARTS_WITH
+STARTS_WITH
+
+Syntax
+Parameters
+str
+String expression. If null, the function returns null.
+prefix
+String expression. If null, the function returns null.
+DescriptionReturns a boolean that indicates whether a keyword string starts with another string.Supported types
+Example
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_S = STARTS_WITH(last_name, "B")
+```
+
 Binary operators
 Binary operators
 
@@ -100,42 +151,6 @@ FROM employees
 | STATS COUNT(emp_no)
 ```
 
-CIDR_MATCH
-CIDR_MATCH
-
-Syntax
-CIDR_MATCH(ip, block1[, ..., blockN])
-Parameters
-ip
-IP address of type ip (both IPv4 and IPv6 are supported).
-blockX
-CIDR block to test the IP against.
-DescriptionReturns true if the provided IP is contained in one of the provided CIDR
-blocks.Example
-```esql
-FROM hosts
-| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
-| KEEP card, host, ip0, ip1
-```
-
-ENDS_WITH
-ENDS_WITH
-
-Syntax
-Parameters
-str
-String expression. If null, the function returns null.
-suffix
-String expression. If null, the function returns null.
-DescriptionReturns a boolean that indicates whether a keyword string ends with another
-string.Supported types
-Example
-```esql
-FROM employees
-| KEEP last_name
-| EVAL ln_E = ENDS_WITH(last_name, "d")
-```
-
 IN
 IN
 
@@ -155,6 +170,7 @@ also act on a constant (literal) expression. The right-hand side of the operator
 represents the pattern.The following wildcard characters are supported:
 * matches zero or more characters.
 ? matches one character.
+Supported types
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
@@ -167,27 +183,9 @@ RLIKE
 Use RLIKE to filter data based on string patterns using using
 regular expressions. RLIKE usually acts on a field placed on
 the left-hand side of the operator, but it can also act on a constant (literal)
-expression. The right-hand side of the operator represents the pattern.
+expression. The right-hand side of the operator represents the pattern.Supported types
 ```esql
 FROM employees
 | WHERE first_name RLIKE ".leja.*"
 | KEEP first_name, last_name
-```
-
-STARTS_WITH
-STARTS_WITH
-
-Syntax
-Parameters
-str
-String expression. If null, the function returns null.
-prefix
-String expression. If null, the function returns null.
-DescriptionReturns a boolean that indicates whether a keyword string starts with another
-string.Supported types
-Example
-```esql
-FROM employees
-| KEEP last_name
-| EVAL ln_S = STARTS_WITH(last_name, "B")
 ```

@@ -22,7 +22,12 @@ export const ChatPlaygroundOverview: React.FC = () => {
         indices: [],
       }}
     >
-      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlPlaygroundPage">
+      <EuiPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="svlPlaygroundPage"
+        grow={false}
+      >
         <EuiPageTemplate.Header
           pageTitle={
             <EuiFlexGroup>

@@ -103,7 +103,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
               defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
             <EuiLink
-              href={docLinks.chatPlayground}
+              href={docLinks.context}
               target="_blank"
               data-test-subj="context-optimization-documentation-link"
             >

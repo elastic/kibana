@@ -25,7 +25,7 @@ import {
 } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-import { SLOInspectWrapper } from './common/slo_inspect';
+import { SLOInspectWrapper } from './common/slo_inspect/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;

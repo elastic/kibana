@@ -17,7 +17,6 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
   describe('conflicts', function () {
-    this.tags('failsOnMKI');
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
@@ -31,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
-        .query({ pattern: 'logs-*' })
+        .query({ pattern: 'logs-2017.01.*' })
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({

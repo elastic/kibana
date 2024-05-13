@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
-  ESQL_LATEST_VERSION,
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
+  getESQLQueryColumnsRaw,
 } from '@kbn/esql-utils';
-import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
@@ -59,7 +58,10 @@ export async function getESQLMeta(esql: string) {
     getIndexPatternService()
   );
   return {
-    columns: await getColumns(esql),
+    columns: await getESQLQueryColumnsRaw({
+      esqlQuery: esql,
+      search: getData().search.search,
+    }),
     adhocDataViewId: adhocDataView.id!,
     ...getFields(adhocDataView),
   };
@@ -84,34 +86,6 @@ export function getFieldType(column: ESQLColumn) {
       return 'number';
     default:
       return undefined;
-  }
-}
-
-async function getColumns(esql: string) {
-  const params = {
-    query: esql + ' | limit 0',
-    version: ESQL_LATEST_VERSION,
-  };
-
-  try {
-    const resp = await lastValueFrom(
-      getData().search.search(
-        { params },
-        {
-          strategy: 'esql',
-        }
-      )
-    );
-
-    const searchResponse = resp.rawResponse as unknown as ESQLSearchReponse;
-    return searchResponse.all_columns ? searchResponse.all_columns : searchResponse.columns;
-  } catch (error) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
-        defaultMessage: 'Unable to load columns. {errorMessage}',
-        values: { errorMessage: error.message },
-      })
-    );
   }
 }
 

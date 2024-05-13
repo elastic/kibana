@@ -7036,22 +7036,6 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; setFields: (newFields: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceFields",
-                    "text": "SearchSourceFields"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSource",
-                    "text": "SearchSource"
-                  },
                   "; getId: () => string; getFields: () => ",
                   {
                     "pluginId": "data",
@@ -9875,58 +9859,6 @@
                 ],
                 "signature": [
                   "K"
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSource.setFields",
-            "type": "Function",
-            "tags": [
-              "private"
-            ],
-            "label": "setFields",
-            "description": [
-              "\nInternal, do not use. Overrides all search source fields with the new field array.\n"
-            ],
-            "signature": [
-              "(newFields: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ") => this"
-            ],
-            "path": "src/plugins/data/common/search/search_source/search_source.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.SearchSource.setFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newFields",
-                "description": [
-                  "New field array."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceFields",
-                    "text": "SearchSourceFields"
-                  }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
                 "deprecated": false,
@@ -33021,22 +32953,6 @@
             "text": "SearchSourceFields"
           },
           ">(field: K) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSource",
-            "text": "SearchSource"
-          },
-          "; setFields: (newFields: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceFields",
-            "text": "SearchSourceFields"
-          },
-          ") => ",
           {
             "pluginId": "data",
             "scope": "common",

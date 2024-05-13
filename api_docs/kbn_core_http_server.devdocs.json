@@ -15371,10 +15371,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/indices.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {

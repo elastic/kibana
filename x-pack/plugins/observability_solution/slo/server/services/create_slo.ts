@@ -9,6 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -94,23 +95,27 @@ export class CreateSLO {
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
     temporaryDoc: Record<string, any>;
+    rollUpTransformCompositeQuery: string;
+    summaryTransformCompositeQuery: string;
   } {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
     const rollUpTransform = this.transformManager.inspect(slo);
     const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
-
     const summaryTransform = this.summaryTransformManager.inspect(slo);
-
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
+      slo,
       pipeline,
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      slo,
+      // @ts-expect-error there is some issue with deprecated types being used in es types
+      rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
+      // @ts-expect-error there is some issue with deprecated types being used in es types
+      summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }
 

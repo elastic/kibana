@@ -7,9 +7,9 @@ Multivalue expression. If null, the function returns null.
 start
 Start position. If null, the function returns null. The start argument can be negative. An index of -1 is used to specify the last value in the list.
 end
-End position. Optional; if omitted, the position at start is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.
+End position(included). Optional; if omitted, the position at start is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.
 DescriptionReturns a subset of the multivalued field using the start and end index values.Supported types
-Example
+Examples
 row a = [1, 2, 2, 3]
 | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
 row a = [1, 2, 2, 3]

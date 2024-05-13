@@ -77,10 +77,10 @@ describe('OpenAPI Bundler - different API versions', () => {
     });
 
     expect(bundledSpecs).toEqual({
-      '2023-10-31.yaml': expect.objectContaining({
+      '2023_10_31.yaml': expect.objectContaining({
         paths: spec1.paths,
       }),
-      '2023-11-11.yaml': expect.objectContaining({
+      '2023_11_11.yaml': expect.objectContaining({
         paths: spec2.paths,
       }),
     });

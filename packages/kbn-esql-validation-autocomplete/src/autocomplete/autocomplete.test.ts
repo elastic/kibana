@@ -732,6 +732,16 @@ describe('autocomplete', () => {
       ...allEvaFunctions,
       ...allGroupingFunctions,
     ]);
+
+    // expect "bucket" NOT to be suggested for its own parameter
+    testSuggestions(
+      'from a | stats by bucket(',
+      [
+        ...getFieldNamesByType(['number', 'date']),
+        ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
+      ].map((field) => `${field},`)
+    );
+
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
     testSuggestions(

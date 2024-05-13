@@ -55,7 +55,11 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
   readonly options: HttpResponseOptions;
 }
 
-export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
+export function isKibanaResponse(response?: Record<string, any>): response is IKibanaResponse {
+  if (!response) {
+    return false;
+  }
+
   const { status, options, payload, ...rest } = response;
 
   if (Object.keys(rest).length !== 0) {

@@ -31,14 +31,16 @@ describe('HoverActionsPopover', () => {
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
-  it('renders', () => {
+  it('renders the children', () => {
     const getActions = () => Promise.resolve([]);
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover {...defaultProps} children={null} />
+        <HoverActionsPopover {...defaultProps}>
+          <TestComponent />
+        </HoverActionsPopover>
       </CellActionsProvider>
     );
-    expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('test-component')).toBeInTheDocument();
   });
 
   it('renders actions when hovered', async () => {

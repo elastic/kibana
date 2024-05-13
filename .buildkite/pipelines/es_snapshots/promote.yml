@@ -12,6 +12,6 @@ steps:
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

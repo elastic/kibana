@@ -1308,11 +1308,7 @@
             "type": "string",
             "description": "A JSON payload sent to the create comment URL to create a case comment. You can use variables to add Kibana Cases data to the payload. The required variable is `case.comment`. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated once the Mustache variables have been placed when the REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
             "examples": [
-              {
-                "body": {
-                  "[object Object]": null
-                }
-              }
+              "{\"body\": {{{case.comment}}}}"
             ]
           },
           "createCommentMethod": {
@@ -1336,19 +1332,7 @@
             "type": "string",
             "description": "A JSON payload sent to the create case URL to create a case. You can use variables to add case data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
             "examples": [
-              {
-                "fields": {
-                  "summary": {
-                    "[object Object]": null
-                  },
-                  "description": {
-                    "[object Object]": null
-                  },
-                  "labels": {
-                    "[object Object]": null
-                  }
-                }
-              }
+              "{\"fields\": {\"summary\": {{{case.title}}},\"description\": {{{case.description}}},\"labels\": {{{case.tags}}}}}"
             ]
           },
           "createIncidentMethod": {
@@ -1393,19 +1377,7 @@
             "type": "string",
             "description": "The JSON payload sent to the update case URL to update the case. You can use variables to add Kibana Cases data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
             "examples": [
-              {
-                "fields": {
-                  "summary": {
-                    "[object Object]": null
-                  },
-                  "description": {
-                    "[object Object]": null
-                  },
-                  "labels": {
-                    "[object Object]": null
-                  }
-                }
-              }
+              "{\"fields\": {\"summary\": {{{case.title}}},\"description\": {{{case.description}}},\"labels\": {{{case.tags}}}}}"
             ]
           },
           "updateIncidentMethod": {

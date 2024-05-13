@@ -4679,11 +4679,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "indexing_complete": "true",
-          "name": "packetbeat",
-          "rollover_alias": "packetbeat-7.6.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"
@@ -9052,10 +9047,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "packetbeat-8.0.0",
-          "rollover_alias": "packetbeat-8.0.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

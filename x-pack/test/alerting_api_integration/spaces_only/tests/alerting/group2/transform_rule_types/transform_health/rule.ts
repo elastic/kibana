@@ -23,15 +23,12 @@ import { TRANSFORM_HEALTH_RESULTS } from '@kbn/transform-plugin/common/constants
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
-import { runSoon } from '../../../group3/test_helpers';
 
 const CONNECTOR_TYPE_ID = '.index';
 const RULE_TYPE_ID = 'transform_health';
 const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
-
-const RULE_INTERVAL_SECONDS = 10000;
 
 interface CreateRuleParams {
   name: string;
@@ -114,14 +111,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly', async () => {
+      await stopTransform(transformId);
+
       const ruleId = await createRule({
         name: 'Test all transforms',
         includeTransforms: ['*'],
       });
-
-      await stopTransform(transformId);
-
-      await runSoon({ id: ruleId, supertest, retry });
 
       log.debug('Checking created alerts...');
 
@@ -196,7 +191,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [action],
           notify_when: 'onActiveAlert',
           params: {

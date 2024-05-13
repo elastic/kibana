@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { CellActionsMode } from '@kbn/cell-actions';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -35,6 +34,7 @@ import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
 import {
+  CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';

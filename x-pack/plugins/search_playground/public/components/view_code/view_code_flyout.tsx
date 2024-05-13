@@ -37,15 +37,15 @@ export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
   if (cloud) {
     return `
 es_client = Elasticsearch(
-  "${cloud.elasticsearchUrl}",
-  api_key=os.environ["ES_API_KEY"]
+    "${cloud.elasticsearchUrl}",
+    api_key=os.environ["ES_API_KEY"]
 )
       `;
   }
 
   return `
 es_client = Elasticsearch(
-  "<your-elasticsearch-url>"
+    "<your-elasticsearch-url>"
 )
   `;
 };

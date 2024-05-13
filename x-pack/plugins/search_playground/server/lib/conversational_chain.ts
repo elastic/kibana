@@ -130,7 +130,7 @@ class ConversationalChainFn {
         question: (input) => input.question,
       },
       prompt,
-      this.options.model,
+      this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
     ]);
 
     const conversationalRetrievalQAChain = RunnableSequence.from([
@@ -140,11 +140,7 @@ class ConversationalChainFn {
       },
       answerChain,
       new BytesOutputParser(),
-    ]).withConfig({
-      metadata: {
-        type: 'conversational_retrieval_qa',
-      },
-    });
+    ]);
 
     const stream = await conversationalRetrievalQAChain.stream(
       {
@@ -163,7 +159,7 @@ class ConversationalChainFn {
               tags,
               metadata: Record<string, string>
             ) {
-              if (metadata?.type === 'conversational_retrieval_qa') {
+              if (metadata?.type === 'question_answer_qa') {
                 data.appendMessageAnnotation({
                   type: 'prompt_token_count',
                   count: getTokenEstimateFromMessages(msg),

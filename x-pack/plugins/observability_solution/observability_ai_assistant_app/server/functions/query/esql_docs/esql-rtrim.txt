@@ -2,9 +2,9 @@ RTRIM
 
 Syntax
 Parameters
-str
+string
 String expression. If null, the function returns null.
-DescriptionRemoves trailing whitespaces from strings.Supported types
+DescriptionRemoves trailing whitespaces from a string.Supported types
 Example
 ```esql
 ROW message = "   some text  ",  color = " red "

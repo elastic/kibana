@@ -14,7 +14,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import type { UnifiedHistogramContainerProps } from '@kbn/unified-histogram-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { useCallback } from 'react';
-import { EsqlInTimelineTrigger } from '../../../../../../actions/constants';
+import { EsqlInTimelineTrigger } from '../../../../../../app/actions/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 export type WithPreventableEvent<T> = T & {

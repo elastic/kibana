@@ -87,7 +87,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('when there are installed prebuilt rules', () => {
+    // https://github.com/elastic/kibana/issues/183241
+    describe('@skipInServerlessMKI when there are installed prebuilt rules', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
         await installMockPrebuiltRules(supertest, es);

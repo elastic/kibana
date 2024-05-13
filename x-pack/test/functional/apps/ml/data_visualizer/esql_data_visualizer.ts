@@ -310,7 +310,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    describe('with farequote', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183046
+    describe.skip('with farequote', function () {
       runTests(esqlFarequoteData);
     });
 

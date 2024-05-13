@@ -4864,6 +4864,8 @@ components:
           type: number
         agents:
           type: number
+        unprivileged_agents:
+          type: number
         agent_features:
           type: array
           items:
