@@ -9,3 +9,6 @@ A substring to locate in the input string
 start
 The start index
 DescriptionReturns an integer that indicates the position of a keyword substring within another stringSupported types
+Example
+row a = "hello"
+| eval a_ll = locate(a, "ll")
