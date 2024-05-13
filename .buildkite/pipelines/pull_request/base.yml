@@ -74,7 +74,8 @@ steps:
     label: 'Check Types'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 60
+    key: check_types
+    timeout_in_minutes: 70
     retry:
       automatic:
         - exit_status: '-1'
@@ -93,6 +94,7 @@ steps:
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
+    key: checks
     agents:
       queue: n2-2-spot
     timeout_in_minutes: 60
