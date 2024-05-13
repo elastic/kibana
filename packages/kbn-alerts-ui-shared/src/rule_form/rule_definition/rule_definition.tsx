@@ -21,7 +21,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
-  EuiFormRow,
 } from '@elastic/eui';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
@@ -233,14 +232,12 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
             </EuiText>
           }
         >
-          <EuiFormRow fullWidth>
-            <RuleSchedule
-              interval={schedule.interval}
-              minimumScheduleInterval={minimumScheduleInterval}
-              errors={errors}
-              onChange={onChange}
-            />
-          </EuiFormRow>
+          <RuleSchedule
+            interval={schedule.interval}
+            minimumScheduleInterval={minimumScheduleInterval}
+            errors={errors}
+            onChange={onChange}
+          />
         </EuiDescribedFormGroup>
         {shouldShowConsumerSelect && (
           <EuiDescribedFormGroup
@@ -252,14 +249,12 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
               </EuiText>
             }
           >
-            <EuiFormRow fullWidth>
-              <RuleConsumerSelection
-                consumers={authorizedConsumers}
-                selectedConsumer={consumer as RuleCreationValidConsumer}
-                errors={errors}
-                onChange={onChange}
-              />
-            </EuiFormRow>
+            <RuleConsumerSelection
+              consumers={authorizedConsumers}
+              selectedConsumer={consumer as RuleCreationValidConsumer}
+              errors={errors}
+              onChange={onChange}
+            />
           </EuiDescribedFormGroup>
         )}
         <EuiFlexItem>
@@ -285,9 +280,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                   </EuiText>
                 }
               >
-                <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
-                  <RuleAlertDelay alertDelay={alertDelay} errors={errors} onChange={onChange} />
-                </EuiFormRow>
+                <RuleAlertDelay alertDelay={alertDelay} errors={errors} onChange={onChange} />
               </EuiDescribedFormGroup>
             </EuiPanel>
           </EuiAccordion>

@@ -100,40 +100,38 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
   );
 
   return (
-    <EuiFlexItem>
-      <EuiFormRow
-        fullWidth
-        data-test-subj="ruleSchedule"
-        display="rowCompressed"
-        helpText={helpText}
-        isInvalid={errors.interval?.length > 0}
-        error={errors.interval}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={2}>
-            <EuiFieldText
-              fullWidth
-              inputMode="numeric"
-              pattern="[1-9][0-9]*"
-              prepend={labelForRuleChecked}
-              isInvalid={errors.interval?.length > 0}
-              value={intervalNumber}
-              name="interval"
-              data-test-subj="ruleScheduleNumberInput"
-              onChange={onIntervalNumberChange}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiSelect
-              fullWidth
-              value={intervalUnit}
-              options={getTimeOptions(intervalNumber ?? 1)}
-              onChange={onIntervalUnitChange}
-              data-test-subj="ruleScheduleUnitInput"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    </EuiFlexItem>
+    <EuiFormRow
+      fullWidth
+      data-test-subj="ruleSchedule"
+      display="rowCompressed"
+      helpText={helpText}
+      isInvalid={errors.interval?.length > 0}
+      error={errors.interval}
+    >
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={2}>
+          <EuiFieldText
+            fullWidth
+            inputMode="numeric"
+            pattern="[1-9][0-9]*"
+            prepend={labelForRuleChecked}
+            isInvalid={errors.interval?.length > 0}
+            value={intervalNumber}
+            name="interval"
+            data-test-subj="ruleScheduleNumberInput"
+            onChange={onIntervalNumberChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <EuiSelect
+            fullWidth
+            value={intervalUnit}
+            options={getTimeOptions(intervalNumber ?? 1)}
+            onChange={onIntervalUnitChange}
+            data-test-subj="ruleScheduleUnitInput"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };

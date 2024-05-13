@@ -51,6 +51,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
       isInvalid={errors.alertDelay?.length > 0}
       error={errors.alertDelay}
       data-test-subj="alertDelay"
+      display="rowCompressed"
     >
       <EuiFieldText
         fullWidth

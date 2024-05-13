@@ -38,28 +38,30 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.STACK_ALERTS,
 ];
 
+const DEFAULT_FORM_VALUES = (ruleTypeId: string) => ({
+  id: 'test-id',
+  name: 'test',
+  params: {},
+  schedule: {
+    interval: '1m',
+  },
+  alertDelay: {
+    active: 5,
+  },
+  notifyWhen: null,
+  consumer: 'stackAlerts',
+  enabled: true,
+  tags: [],
+  actions: [],
+  ruleTypeId,
+});
+
 export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
   const { data, charts, dataViews, unifiedSearch, triggersActionsUi } = props;
 
   const [ruleTypeId, setRuleTypeId] = useState<string>('.es-query');
 
-  const [formValue, setFormValue] = useState<InitialRule>({
-    id: 'test-id',
-    name: 'test',
-    params: {},
-    schedule: {
-      interval: '1m',
-    },
-    alertDelay: {
-      active: 5,
-    },
-    notifyWhen: null,
-    consumer: 'stackAlerts',
-    enabled: true,
-    tags: [],
-    actions: [],
-    ruleTypeId,
-  });
+  const [formValue, setFormValue] = useState<InitialRule>(DEFAULT_FORM_VALUES(ruleTypeId));
 
   const onChange = useCallback(
     (property: string, value: unknown) => {
@@ -86,6 +88,11 @@ export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
     },
     [formValue]
   );
+
+  const onRuleTypeChange = useCallback((newRuleTypeId: string) => {
+    setRuleTypeId(newRuleTypeId);
+    setFormValue(DEFAULT_FORM_VALUES(newRuleTypeId));
+  }, []);
 
   const { docLinks, http, toasts } = useKibana<{
     docLinks: DocLinksStart;
@@ -135,11 +142,11 @@ export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
         <EuiTitle>
           <h1>Switch Rule Types:</h1>
         </EuiTitle>
-        <EuiButton onClick={() => setRuleTypeId('.es-query')}>Es Query</EuiButton>
-        <EuiButton onClick={() => setRuleTypeId('metrics.alert.threshold')}>
+        <EuiButton onClick={() => onRuleTypeChange('.es-query')}>Es Query</EuiButton>
+        <EuiButton onClick={() => onRuleTypeChange('metrics.alert.threshold')}>
           Metric Threshold
         </EuiButton>
-        <EuiButton onClick={() => setRuleTypeId('observability.rules.custom_threshold')}>
+        <EuiButton onClick={() => onRuleTypeChange('observability.rules.custom_threshold')}>
           Custom Threshold
         </EuiButton>
       </div>
