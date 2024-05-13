@@ -214,7 +214,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           | undefined
         >(
           filePaths,
-          // @ts-expect-error
           async (filePath) => {
             let result:
               | CypressCommandLine.CypressRunResult
