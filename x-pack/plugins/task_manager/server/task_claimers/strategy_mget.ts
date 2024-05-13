@@ -152,6 +152,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
   const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
+    .slice(0, initialCapacity)
     .map((task) => {
       if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
         task.scheduledAt = task.retryAt;
@@ -163,13 +164,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       task.status = TaskStatus.Claiming;
 
       return task;
-    })
-    .slice(0, initialCapacity);
+    });
 
   const finalResults: ConcreteTaskInstance[] = [];
   let conflicts = staleTasks.size;
   try {
-    const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: true });
+    const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: false });
     for (const updateResult of updateResults) {
       if (isOk(updateResult)) {
         finalResults.push(updateResult.value);
