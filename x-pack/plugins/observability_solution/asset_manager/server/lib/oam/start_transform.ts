@@ -22,7 +22,7 @@ export async function startTransform(
       { logger }
     );
   } catch (err) {
-    logger.error(`Cannot start SLO transform [${transformId}]`);
+    logger.error(`Cannot start OAM transform [${transformId}]`);
     throw err;
   }
 }

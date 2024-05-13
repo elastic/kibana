@@ -12,7 +12,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { generateMetricAggregations } from './generate_metric_aggregations';
-import { OAM_BASE_PREFIX } from '../../../../common/constants_oam';
+import {
+  OAM_BASE_PREFIX,
+  OAM_DEFAULT_FREQUENCY,
+  OAM_DEFAULT_SYNC_DELAY,
+} from '../../../../common/constants_oam';
 import { generateMetadataAggregations } from './generate_metadata_aggregations';
 import { generateTransformId } from './generate_transform_id';
 import { generateIngestPipelineId } from '../ingest_pipeline/generate_ingest_pipeline_id';
@@ -47,11 +51,11 @@ export function generateTransform(definition: OAMDefinition): TransformPutTransf
       index: `${OAM_BASE_PREFIX}.noop`,
       pipeline: generateIngestPipelineId(definition),
     },
-    frequency: definition.settings?.frequency || '1m',
+    frequency: definition.settings?.frequency || OAM_DEFAULT_FREQUENCY,
     sync: {
       time: {
         field: definition.settings?.syncField ?? definition.timestampField,
-        delay: definition.settings?.syncDelay ?? '60s',
+        delay: definition.settings?.syncDelay ?? OAM_DEFAULT_SYNC_DELAY,
       },
     },
     settings: {

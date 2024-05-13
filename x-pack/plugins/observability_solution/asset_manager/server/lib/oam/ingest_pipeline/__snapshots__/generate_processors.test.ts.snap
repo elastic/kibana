@@ -16,24 +16,13 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "asset.indexPattern",
+      "field": "asset.indexPatterns",
       "value": "[\\"kbn-data-forge-fake_stack.*\\"]",
     },
   },
   Object {
     "json": Object {
-      "field": "asset.indexPattern",
-    },
-  },
-  Object {
-    "set": Object {
-      "field": "asset.category",
-      "value": "[\\"service\\",\\"logs\\"]",
-    },
-  },
-  Object {
-    "json": Object {
-      "field": "asset.category",
+      "field": "asset.indexPatterns",
     },
   },
   Object {

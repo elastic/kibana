@@ -12,7 +12,6 @@ export const oamDefinition = oamDefinitionSchema.parse({
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
   timestampField: '@timestamp',
-  categories: ['service', 'logs'],
   identityFields: ['log.logger'],
   identityTemplate: 'service:{{log.logger}}',
   metadata: ['tags', 'host.name', 'kubernetes.pod.name'],

@@ -16,6 +16,9 @@ import { createAndInstallTransform } from '../../lib/oam/create_and_install_tran
 import { OAMSecurityException } from '../../lib/oam/errors/oam_security_exception';
 import { InvalidTransformError } from '../../lib/oam/errors/invalid_transform_error';
 import { startTransform } from '../../lib/oam/start_transform';
+import { deleteOAMDefinition } from '../../lib/oam/delete_oam_definition';
+import { deleteIngestPipeline } from '../../lib/oam/delete_ingest_pipeline';
+import { stopAndDeleteTransform } from '../../lib/oam/stop_and_delete_transform';
 
 export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -23,7 +26,7 @@ export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, OAMDefinition>(
     {
-      path: '/api/oam',
+      path: '/api/oam/defintion',
       validate: {
         body: (body, res) => {
           try {
@@ -35,17 +38,32 @@ export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
       },
     },
     async (context, req, res) => {
+      let definitionCreated = false;
+      let ingestPipelineCreated = false;
+      let transformCreated = false;
+      const soClient = (await context.core).savedObjects.client;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       try {
-        const soClient = (await context.core).savedObjects.client;
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
         const definition = await saveOAMDefinition(soClient, req.body);
+        definitionCreated = true;
         await createAndInstallIngestPipeline(esClient, definition, logger);
+        ingestPipelineCreated = true;
         await createAndInstallTransform(esClient, definition, logger);
+        transformCreated = true;
         await startTransform(esClient, definition, logger);
 
         return res.ok({ body: definition });
       } catch (e) {
+        // Clean up anything that was successful.
+        if (definitionCreated) {
+          deleteOAMDefinition(soClient, req.body, logger);
+        }
+        if (ingestPipelineCreated) {
+          deleteIngestPipeline(esClient, req.body, logger);
+        }
+        if (transformCreated) {
+          stopAndDeleteTransform(esClient, req.body, logger);
+        }
         if (e instanceof OAMIdConflict) {
           return res.conflict({ body: e });
         }

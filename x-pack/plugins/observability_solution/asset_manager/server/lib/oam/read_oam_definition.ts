@@ -8,7 +8,7 @@
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { OAMDefinition, oamDefinitionSchema } from '@kbn/oam-schema';
 import { SO_OAM_DEFINITION_TYPE } from '../../saved_objects';
-import { OAMNotFound } from './errors/oam_not_found';
+import { OAMDefinitionNotFound } from './errors/oam_not_found';
 
 export async function readOAMDefinition(
   soClient: SavedObjectsClientContract,
@@ -24,7 +24,7 @@ export async function readOAMDefinition(
   if (response.total === 0) {
     const message = `Unable to find OAM Defintion with [${id}]`;
     logger.error(message);
-    throw new OAMNotFound(message);
+    throw new OAMDefinitionNotFound(message);
   }
 
   try {

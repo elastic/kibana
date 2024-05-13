@@ -8,7 +8,7 @@
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { OAMDefinition } from '@kbn/oam-schema';
 import { SO_OAM_DEFINITION_TYPE } from '../../saved_objects';
-import { OAMNotFound } from './errors/oam_not_found';
+import { OAMDefinitionNotFound } from './errors/oam_not_found';
 
 export async function deleteOAMDefinition(
   soClient: SavedObjectsClientContract,
@@ -24,7 +24,7 @@ export async function deleteOAMDefinition(
 
   if (response.total === 0) {
     logger.error(`Unable to delete OAM Definition [${definition.id}] because it doesn't exist.`);
-    throw new OAMNotFound(`OAM Defintion with [${definition.id}] not found.`);
+    throw new OAMDefinitionNotFound(`OAM Defintion with [${definition.id}] not found.`);
   }
 
   await soClient.delete(SO_OAM_DEFINITION_TYPE, response.saved_objects[0].id);

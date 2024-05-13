@@ -12,9 +12,8 @@ export const assetSchema = z.intersection(
   z.object({
     asset: z.object({
       id: z.string(),
-      indexPattern: arrayOfStringsSchema,
-      category: arrayOfStringsSchema,
-      identityField: arrayOfStringsSchema,
+      indexPatterns: arrayOfStringsSchema,
+      identityFields: arrayOfStringsSchema,
       metric: z.record(z.string(), z.number()),
     }),
   }),

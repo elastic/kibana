@@ -17,15 +17,11 @@ export const oamAssetComponentTemplateConfig: ClusterPutComponentTemplateRequest
       properties: {
         asset: {
           properties: {
-            category: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
             id: {
               ignore_above: 1024,
               type: 'keyword',
             },
-            indexPattern: {
+            indexPatterns: {
               ignore_above: 1024,
               type: 'keyword',
             },

@@ -13,9 +13,8 @@ import { InvalidTransformError } from '../../lib/oam/errors/invalid_transform_er
 import { readOAMDefinition } from '../../lib/oam/read_oam_definition';
 import { stopAndDeleteTransform } from '../../lib/oam/stop_and_delete_transform';
 import { deleteIngestPipeline } from '../../lib/oam/delete_ingest_pipeline';
-import { deleteIndex } from '../../lib/oam/delete_index';
 import { deleteOAMDefinition } from '../../lib/oam/delete_oam_definition';
-import { OAMNotFound } from '../../lib/oam/errors/oam_not_found';
+import { OAMDefinitionNotFound } from '../../lib/oam/errors/oam_not_found';
 
 export function deleteOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -23,7 +22,7 @@ export function deleteOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, unknown, unknown>(
     {
-      path: '/api/oam/{id}',
+      path: '/api/oam/definition/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -38,12 +37,11 @@ export function deleteOAMDefinitionRoute<T extends RequestHandlerContext>({
         const definition = await readOAMDefinition(soClient, req.params.id, logger);
         await stopAndDeleteTransform(esClient, definition, logger);
         await deleteIngestPipeline(esClient, definition, logger);
-        await deleteIndex(esClient, definition, logger);
         await deleteOAMDefinition(soClient, definition, logger);
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {
-        if (e instanceof OAMNotFound) {
+        if (e instanceof OAMDefinitionNotFound) {
           return res.notFound({ body: e });
         }
         if (e instanceof OAMSecurityException || e instanceof InvalidTransformError) {

@@ -8,3 +8,5 @@
 export const OAM_VERSION = 'v1';
 export const OAM_BASE_PREFIX = `.oam-observability.asset-${OAM_VERSION}`;
 export const OAM_TRANSFORM_PREFIX = `oam-observability-asset-${OAM_VERSION}`;
+export const OAM_DEFAULT_FREQUENCY = '1m';
+export const OAM_DEFAULT_SYNC_DELAY = '60s';

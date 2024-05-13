@@ -24,7 +24,6 @@ export const oamDefinitionSchema = z.object({
   indexPatterns: arrayOfStringsSchema,
   identityFields: arrayOfStringsSchema,
   identityTemplate: z.string(),
-  categories: arrayOfStringsSchema,
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),

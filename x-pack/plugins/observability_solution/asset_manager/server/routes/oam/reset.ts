@@ -17,7 +17,7 @@ import { deleteIndex } from '../../lib/oam/delete_index';
 import { createAndInstallIngestPipeline } from '../../lib/oam/create_and_install_ingest_pipeline';
 import { createAndInstallTransform } from '../../lib/oam/create_and_install_transform';
 import { startTransform } from '../../lib/oam/start_transform';
-import { OAMNotFound } from '../../lib/oam/errors/oam_not_found';
+import { OAMDefinitionNotFound } from '../../lib/oam/errors/oam_not_found';
 
 export function resetOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -25,7 +25,7 @@ export function resetOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: '/api/oam/{id}/_reset',
+      path: '/api/oam/definition/{id}/_reset',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -51,7 +51,7 @@ export function resetOAMDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {
-        if (e instanceof OAMNotFound) {
+        if (e instanceof OAMDefinitionNotFound) {
           return res.notFound({ body: e });
         }
         if (e instanceof OAMSecurityException || e instanceof InvalidTransformError) {

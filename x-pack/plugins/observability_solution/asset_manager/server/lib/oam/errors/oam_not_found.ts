@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export class OAMNotFound extends Error {
+export class OAMDefinitionNotFound extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'OAMNotFound';

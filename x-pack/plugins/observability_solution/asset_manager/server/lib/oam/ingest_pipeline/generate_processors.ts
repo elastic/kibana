@@ -59,24 +59,13 @@ export function generateProcessors(definition: OAMDefinition) {
     },
     {
       set: {
-        field: 'asset.indexPattern',
+        field: 'asset.indexPatterns',
         value: JSON.stringify(definition.indexPatterns),
       },
     },
     {
       json: {
-        field: 'asset.indexPattern',
-      },
-    },
-    {
-      set: {
-        field: 'asset.category',
-        value: JSON.stringify(definition.categories),
-      },
-    },
-    {
-      json: {
-        field: 'asset.category',
+        field: 'asset.indexPatterns',
       },
     },
     {

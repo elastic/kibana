@@ -29,7 +29,7 @@ export async function createAndInstallIngestPipeline(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot create OAM tranform for [${definition.id}] asset defintion`);
+    logger.error(`Cannot create OAM ingest pipeline for [${definition.id}] asset defintion`);
     if (e.meta?.body?.error?.type === 'security_exception') {
       throw new OAMSecurityException(e.meta.body.error.reason, definition);
     }
