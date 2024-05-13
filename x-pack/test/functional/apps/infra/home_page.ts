@@ -8,17 +8,25 @@
 import expect from '@kbn/expect';
 import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
+import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, INVENTORY_PATH } from './constants';
+import { generateDockerContainersData } from './helpers';
+import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 const DATE_WITH_POD_WITH_DATA = DATES.metricsAndLogs.pods.withData;
+const DATE_WITH_DOCKER_DATA_FROM = '2023-03-28T18:20:00.000Z';
+const DATE_WITH_DOCKER_DATA_TO = '2023-03-28T18:21:00.000Z';
+const DATE_WITH_DOCKER_DATA = '03/28/2023 6:20:00 PM';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
+  const esClient = getService('es');
+  const infraSynthtraceKibanaClient = getService('infraSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -74,6 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
@@ -355,7 +364,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await returnTo(INVENTORY_PATH);
         });
 
-        it('Should redirect to Node Details page', async () => {
+        it('Should redirect to Pod Details page', async () => {
           await pageObjects.infraHome.goToPods();
           await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
           await pageObjects.infraHome.clickOnFirstNode();
@@ -369,6 +378,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           await returnTo(INVENTORY_PATH);
+        });
+
+        describe('Redirect to Container Details page', () => {
+          let synthEsClient: InfraSynthtraceEsClient;
+          before(async () => {
+            const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
+            await infraSynthtraceKibanaClient.installSystemPackage(version);
+            synthEsClient = await getInfraSynthtraceEsClient(esClient);
+            await synthEsClient.index(
+              generateDockerContainersData({
+                from: DATE_WITH_DOCKER_DATA_FROM,
+                to: DATE_WITH_DOCKER_DATA_TO,
+                count: 5,
+              })
+            );
+          });
+
+          after(async () => {
+            return await synthEsClient.clean();
+          });
+          it('Should redirect to Container Details page', async () => {
+            await pageObjects.infraHome.goToContainer();
+            await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
+            await pageObjects.infraHome.clickOnFirstNode();
+            await pageObjects.infraHome.clickOnGoToNodeDetails();
+
+            await retry.try(async () => {
+              const documentTitle = await browser.getTitle();
+              expect(documentTitle).to.contain(
+                'container-id-4 - Inventory - Infrastructure - Observability - Elastic'
+              );
+            });
+
+            await returnTo(INVENTORY_PATH);
+          });
         });
       });
     });

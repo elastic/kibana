@@ -66,7 +66,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
             }
           />
         }
-        data-test-subj="infraAssetDetailsDockerContainerChartsSection${metric}"
+        data-test-subj={`infraAssetDetailsDockerChartsSection${metric}`}
         id="dockerContainerCharts"
         ref={ref}
       >

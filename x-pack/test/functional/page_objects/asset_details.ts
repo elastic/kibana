@@ -103,6 +103,15 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
+    async getOverviewTabDockerMetricCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
     async getOverviewTabKubernetesMetricCharts() {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
