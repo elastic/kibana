@@ -135,7 +135,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        const waitForIntercept = proxy
+        proxy
           .intercept(
             'conversation',
             (body) => !isFunctionTitleRequest(body),
@@ -149,8 +149,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);
           expect(llmResponse).to.contain('This error is nothing to worry about. Have a nice day!');
         });
-
-        await waitForIntercept;
       });
     });
   });
