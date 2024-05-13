@@ -75,6 +75,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { UnprivilegedConfirmModal } from './confirm_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -129,6 +130,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
 
   const integrationInfo = useMemo(
     () =>
@@ -436,6 +438,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
+  const onClickSave = () => {
+    if (
+      packageInfo &&
+      isRootPrivilegesRequired(packageInfo) &&
+      (agentPolicy?.unprivileged_agents ?? 0) > 0
+    ) {
+      setIsConfirmModalOpen(true);
+    } else {
+      onSubmit();
+    }
+  };
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -546,6 +561,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {isConfirmModalOpen ? (
+          <UnprivilegedConfirmModal
+            onCancel={() => setIsConfirmModalOpen(false)}
+            onConfirm={onSubmit}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            agentPolicyName={agentPolicy?.name ?? ''}
+          />
+        ) : null}
         <StepsWithLessPadding steps={steps} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
@@ -588,7 +611,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    onClick={() => onSubmit()}
+                    onClick={onClickSave}
                     isLoading={formState === 'LOADING'}
                     disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
                     iconType="save"
