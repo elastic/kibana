@@ -27,7 +27,7 @@ export type Pod = {
 
 export type Node = {
     name: string;
-    memory_availabe: number | undefined;
+    memory_available: number | undefined;
     memory_usage: number | undefined;
     cpu_utilization: number| undefined;
 };
