@@ -75,6 +75,7 @@ export const typeInOsqueryFieldInput = (text: string, index = 0) =>
     .eq(index)
     .within(() => {
       cy.getBySel('comboBoxInput').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('comboBoxInput').type(text);
     });
 
