@@ -32,6 +32,14 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.family === 'chromium') {
+          launchOptions.args.push(
+            '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
+          );
+        }
+        return launchOptions;
+      });
       samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
