@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { analyticsServiceMock, coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsCoreService } from './types';
 
@@ -15,6 +15,7 @@ export type CoreServiceFactory = PluginServiceFactory<ControlsCoreService>;
 export const coreServiceFactory: CoreServiceFactory = () => {
   const corePluginMock = coreMock.createStart();
   return {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     theme: themeServiceMock.createSetupContract(),
     i18n: corePluginMock.i18n,
     notifications: corePluginMock.notifications,

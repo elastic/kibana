@@ -24,7 +24,9 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {
       defaultMessage: 'Visualize in Maps',
     }),
-  isCompatible: async () => !!getVisualizeCapabilities().show,
+  isCompatible: async (context) => {
+    return Boolean(!!getVisualizeCapabilities().show && context.dataViewSpec && context.fieldName);
+  },
   getHref: async (context) => {
     const { getMapsLink } = await import('./get_maps_link');
     const { app, path } = await getMapsLink(context);

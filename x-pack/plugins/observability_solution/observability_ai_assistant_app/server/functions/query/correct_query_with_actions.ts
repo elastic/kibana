@@ -22,6 +22,7 @@ const fixedQueryByOneAction = async (queryString: string) => {
     const correctText = firstAction.edits[0].text;
     const problematicString = queryString.substring(range.startColumn - 1, range.endColumn - 1);
     const fixedQuery = queryString.replace(problematicString, correctText);
+
     return {
       query: fixedQuery,
       shouldRunAgain: Boolean(actions.length),

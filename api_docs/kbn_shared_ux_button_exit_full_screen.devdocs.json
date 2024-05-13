@@ -78,9 +78,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "KibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
         "deprecated": false,
@@ -91,12 +91,12 @@
             "id": "def-common.ExitFullScreenButtonKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "KibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
             "deprecated": false,

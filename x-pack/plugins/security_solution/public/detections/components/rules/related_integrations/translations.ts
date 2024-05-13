@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INTEGRATIONS_INSTALLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.relatedIntegrations.installedTitle',
+export const INTEGRATIONS_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.relatedIntegrations.disabledTitle',
   {
-    defaultMessage: 'Installed',
+    defaultMessage: 'Disabled',
   }
 );
 
@@ -40,7 +40,7 @@ export const INTEGRATIONS_UNINSTALLED_TOOLTIP = i18n.translate(
 export const INTEGRATIONS_ENABLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTitle',
   {
-    defaultMessage: 'Installed: enabled',
+    defaultMessage: 'Enabled',
   }
 );
 

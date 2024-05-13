@@ -639,7 +639,9 @@ export const ActionForm = ({
             // TODO: fix in https://github.com/elastic/kibana/issues/155993
             // actionTypes with subtypes need to be updated in case they switched to a
             // subtype that is not the default one
-            actions[0].actionTypeId = savedAction.actionTypeId;
+            activeActionItem.indices.forEach((index: number) => {
+              actions[index].actionTypeId = savedAction.actionTypeId;
+            });
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
             indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));

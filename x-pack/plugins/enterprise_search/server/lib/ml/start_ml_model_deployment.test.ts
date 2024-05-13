@@ -26,8 +26,8 @@ describe('startMlModelDeployment', () => {
     jest.clearAllMocks();
   });
 
-  it('should error when there is no trained model provider', () => {
-    expect(() => startMlModelDeployment(modelName, undefined)).rejects.toThrowError(
+  it('should error when there is no trained model provider', async () => {
+    await expect(() => startMlModelDeployment(modelName, undefined)).rejects.toThrowError(
       'Machine Learning is not enabled'
     );
   });

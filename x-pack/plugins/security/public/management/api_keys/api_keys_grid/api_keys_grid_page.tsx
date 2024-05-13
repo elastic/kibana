@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -705,7 +705,10 @@ export interface TimeToolTipProps {
   timestamp: number;
 }
 
-export const TimeToolTip: FunctionComponent<TimeToolTipProps> = ({ timestamp, children }) => {
+export const TimeToolTip: FunctionComponent<PropsWithChildren<TimeToolTipProps>> = ({
+  timestamp,
+  children,
+}) => {
   return (
     <EuiToolTip content={moment(timestamp).format('LLL')}>
       <span>{children ?? moment(timestamp).fromNow()}</span>

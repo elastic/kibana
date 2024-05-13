@@ -99,6 +99,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsBulkCreate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -36,7 +37,7 @@ interface SecurityRoutePageWrapperProps {
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityRoutePageWrapper: React.FC<SecurityRoutePageWrapperProps> = ({
+export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWrapperProps>> = ({
   children,
   pageName,
   redirectOnMissing,

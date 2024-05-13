@@ -33,6 +33,7 @@
     "@kbn/core-plugins-server",
     "@kbn/utility-types",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

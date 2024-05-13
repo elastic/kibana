@@ -20,7 +20,7 @@ export const SourcesPanelSidebar: React.FC = () => {
       <EuiFlexItem>
         <EuiCallOut
           title={i18n.translate('xpack.searchPlayground.sources.callout', {
-            defaultMessage: 'Changes here will reset your custom query',
+            defaultMessage: 'Changes update the query used to search your data',
           })}
           iconType="warning"
           size="s"

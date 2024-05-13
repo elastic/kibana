@@ -37,9 +37,8 @@ import { DEFAULT_BAR_TARGET } from '../../../common/constants';
 import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
 import { type AggregatableField } from '../../types/esql_data_visualizer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../../embeddables/grid_embeddable/constants';
 import type {
-  ESQLDataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
@@ -78,10 +77,11 @@ export const getDefaultESQLDataVisualizerListState = (
   showEmptyFields: false,
   probability: null,
   rndSamplerPref: 'off',
+  query: { esql: '' },
   ...overrides,
 });
 export const useESQLDataVisualizerData = (
-  input: ESQLDataVisualizerGridEmbeddableInput,
+  input: ESQLDataVisualizerGridEmbeddableState,
   dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
   setQuery?: React.Dispatch<React.SetStateAction<ESQLQuery>>
 ) => {
@@ -91,10 +91,10 @@ export const useESQLDataVisualizerData = (
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
-  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+  const componentExecutionContext: KibanaExecutionContext = useMemo(() => {
     const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      name: 'esql_field_statistics_table',
       id: input.id,
     };
 
@@ -104,7 +104,7 @@ export const useESQLDataVisualizerData = (
     };
   }, [parentExecutionContext, input.id]);
 
-  useExecutionContext(executionContext, embeddableExecutionContext);
+  useExecutionContext(executionContext, componentExecutionContext);
 
   const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
@@ -591,23 +591,26 @@ export const useESQLDataVisualizerData = (
     [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = async (q?: AggregateQuery) => {
-    // When user submits a new query
-    // resets all current requests and other data
-    if (cancelOverallStatsRequest) {
-      cancelOverallStatsRequest();
-    }
-    if (cancelFieldStatsRequest) {
-      cancelFieldStatsRequest();
-    }
-    // Reset field stats to fetch state
-    setFieldStatFieldsToFetch(undefined);
-    setMetricConfigs(defaults.metricConfigs);
-    setNonMetricConfigs(defaults.nonMetricConfigs);
-    if (isESQLQuery(q) && setQuery) {
-      setQuery(q);
-    }
-  };
+  const onQueryUpdate = useCallback(
+    async (q?: AggregateQuery) => {
+      // When user submits a new query
+      // resets all current requests and other data
+      if (cancelOverallStatsRequest) {
+        cancelOverallStatsRequest();
+      }
+      if (cancelFieldStatsRequest) {
+        cancelFieldStatsRequest();
+      }
+      // Reset field stats to fetch state
+      setFieldStatFieldsToFetch(undefined);
+      setMetricConfigs(defaults.metricConfigs);
+      setNonMetricConfigs(defaults.nonMetricConfigs);
+      if (isESQLQuery(q) && setQuery) {
+        setQuery(q);
+      }
+    },
+    [cancelFieldStatsRequest, cancelOverallStatsRequest, setQuery]
+  );
 
   return {
     totalCount,

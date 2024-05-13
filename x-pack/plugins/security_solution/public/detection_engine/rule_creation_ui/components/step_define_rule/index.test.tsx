@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
-
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-
+import React, { useEffect, useState } from 'react';
+import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
+import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import { StepDefineRule, aggregatableFields } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { fireEvent, render, within } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useRuleForms } from '../../pages/form';
-import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
-import {
-  defaultSchedule,
-  stepAboutDefaultValue,
-  stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
-import type { FormHook } from '../../../../shared_imports';
+import { schema as defineRuleSchema } from './schema';
+import { stepDefineDefaultValue } from '../../../../detections/pages/detection_engine/rules/utils';
+import type { FormSubmitHandler } from '../../../../shared_imports';
+import { useForm } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 
+// Mocks integrations
+jest.mock('../../../fleet_integrations/api');
 jest.mock('../../../../common/components/query_bar', () => {
   return {
     QueryBar: jest.fn(({ filterQuery }) => {
@@ -279,37 +275,261 @@ test('aggregatableFields with aggregatable: true', function () {
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
+
+const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
+const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
+
 describe('StepDefineRule', () => {
-  const TestComp = ({
-    setFormRef,
-    ruleType = stepDefineDefaultValue.ruleType,
-  }: {
-    setFormRef: (form: FormHook<DefineStepRule, DefineStepRule>) => void;
-    ruleType?: Type;
-  }) => {
-    const { defineStepForm, eqlOptionsSelected, setEqlOptionsSelected } = useRuleForms({
-      defineStepDefault: { ...stepDefineDefaultValue, ruleType },
-      aboutStepDefault: stepAboutDefaultValue,
-      scheduleStepDefault: defaultSchedule,
-      actionsStepDefault: stepActionsDefaultValue,
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+  });
+
+  it('renders correctly', () => {
+    render(<TestForm />, {
+      wrapper: TestProviders,
     });
 
-    setFormRef(defineStepForm);
+    expect(screen.getByTestId('stepDefineRule')).toBeDefined();
+  });
 
-    return (
+  describe('related integrations', () => {
+    beforeEach(() => {
+      fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
+        integrations: [
+          {
+            package_name: 'package-a',
+            package_title: 'Package A',
+            latest_package_version: '1.0.0',
+            is_installed: false,
+            is_enabled: false,
+          },
+        ],
+      });
+    });
+
+    it('submits form without selected related integrations', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />, {
+        wrapper: TestProviders,
+      });
+
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          relatedIntegrations: expect.anything(),
+        }),
+        true
+      );
+    });
+
+    it('submits saved early related integrations', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+        relatedIntegrations: [
+          { package: 'package-a', version: '1.2.3' },
+          { package: 'package-b', integration: 'integration-a', version: '3.2.1' },
+        ],
+      };
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />, {
+        wrapper: TestProviders,
+      });
+
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          relatedIntegrations: [
+            { package: 'package-a', version: '1.2.3' },
+            { package: 'package-b', integration: 'integration-a', version: '3.2.1' },
+          ],
+        }),
+        true
+      );
+    });
+
+    it('submits a selected related integration', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+        relatedIntegrations: undefined,
+      };
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />, {
+        wrapper: TestProviders,
+      });
+
+      await addRelatedIntegrationRow();
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: within(screen.getByTestId('relatedIntegrations')).getByTestId(
+          COMBO_BOX_TOGGLE_BUTTON_TEST_ID
+        ),
+        optionIndex: 0,
+      });
+      await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '1.2.3' });
+
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          relatedIntegrations: [{ package: 'package-a', version: '1.2.3' }],
+        }),
+        true
+      );
+    });
+  });
+
+  describe('handleSetRuleFromTimeline', () => {
+    it('updates KQL query correctly', () => {
+      const kqlQuery = {
+        index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+        queryBar: {
+          filters: [],
+          query: {
+            query: 'host.name:*',
+            language: 'kuery',
+          },
+          saved_id: null,
+        },
+      };
+
+      mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+        useEffect(() => {
+          handleSetRuleFromTimeline(kqlQuery);
+        }, [handleSetRuleFromTimeline]);
+
+        return { onOpenTimeline, loading: false };
+      });
+
+      render(<TestForm />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.getAllByTestId('query-bar')[0].textContent).toBe(
+        `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
+      );
+    });
+
+    it('updates EQL query correctly', async () => {
+      const eqlQuery = {
+        index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+        queryBar: {
+          filters: [],
+          query: {
+            query: 'process where true',
+            language: 'eql',
+          },
+          saved_id: null,
+        },
+        eqlOptions: {
+          eventCategoryField: 'cool.field',
+          tiebreakerField: 'another.field',
+          timestampField: 'cool.@timestamp',
+          query: 'process where true',
+          size: 77,
+        },
+      };
+
+      mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+        useEffect(() => {
+          handleSetRuleFromTimeline(eqlQuery);
+        }, [handleSetRuleFromTimeline]);
+
+        return { onOpenTimeline, loading: false };
+      });
+
+      render(<TestForm ruleType="eql" />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(
+        eqlQuery.queryBar.query.query
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('eql-settings-trigger'));
+      });
+
+      expect(
+        within(screen.getByTestId('eql-event-category-field')).queryByRole('combobox')
+      ).toHaveValue(eqlQuery.eqlOptions.eventCategoryField);
+
+      expect(
+        within(screen.getByTestId('eql-tiebreaker-field')).queryByRole('combobox')
+      ).toHaveValue(eqlQuery.eqlOptions.tiebreakerField);
+
+      expect(within(screen.getByTestId('eql-timestamp-field')).queryByRole('combobox')).toHaveValue(
+        eqlQuery.eqlOptions.timestampField
+      );
+    });
+  });
+});
+
+interface TestFormProps {
+  ruleType?: RuleType;
+  initialState?: Partial<DefineStepRule>;
+  onSubmit?: FormSubmitHandler<DefineStepRule>;
+}
+
+function TestForm({
+  ruleType = stepDefineDefaultValue.ruleType,
+  initialState,
+  onSubmit,
+}: TestFormProps): JSX.Element {
+  const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
+  const { form } = useForm({
+    options: { stripEmptyFields: false },
+    schema: defineRuleSchema,
+    defaultValue: { ...stepDefineDefaultValue, ...initialState },
+    onSubmit,
+  });
+
+  return (
+    <>
       <StepDefineRule
         isLoading={false}
-        form={defineStepForm}
+        form={form}
         indicesConfig={[]}
         threatIndicesConfig={[]}
-        optionsSelected={eqlOptionsSelected}
-        setOptionsSelected={setEqlOptionsSelected}
+        optionsSelected={selectedEqlOptions}
+        setOptionsSelected={setSelectedEqlOptions}
         indexPattern={{ fields: [], title: '' }}
         isIndexPatternLoading={false}
         browserFields={{}}
         isQueryBarValid={true}
-        setIsQueryBarValid={() => {}}
-        setIsThreatQueryBarValid={() => {}}
+        setIsQueryBarValid={jest.fn()}
+        setIsThreatQueryBarValid={jest.fn()}
         ruleType={ruleType}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
@@ -321,87 +541,51 @@ describe('StepDefineRule', () => {
         thresholdFields={[]}
         enableThresholdSuppression={false}
       />
-    );
-  };
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+      <button type="button" onClick={form.submit}>
+        {'Submit'}
+      </button>
+    </>
+  );
+}
+
+function submitForm(): Promise<void> {
+  return act(async () => {
+    fireEvent.click(screen.getByText('Submit'));
   });
-  it('renders correctly', () => {
-    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
-      wrappingComponent: TestProviders,
+}
+
+function addRelatedIntegrationRow(): Promise<void> {
+  return act(async () => {
+    fireEvent.click(screen.getByText('Add integration'));
+  });
+}
+
+function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  fireEvent.click(comboBoxToggleButton);
+
+  return waitFor(() => {
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+}
+
+function selectEuiComboBoxOption({
+  comboBoxToggleButton,
+  optionIndex,
+}: {
+  comboBoxToggleButton: HTMLElement;
+  optionIndex: number;
+}): Promise<void> {
+  return act(async () => {
+    await showEuiComboBoxOptions(comboBoxToggleButton);
+
+    fireEvent.click(within(screen.getByRole('listbox')).getAllByRole('option')[optionIndex]);
+  });
+}
+
+function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
+  return act(async () => {
+    fireEvent.input(input, {
+      target: { value },
     });
-
-    expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
   });
-
-  const kqlQuery = {
-    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
-    queryBar: {
-      filters: [],
-      query: {
-        query: 'host.name:*',
-        language: 'kuery',
-      },
-      saved_id: null,
-    },
-  };
-
-  const eqlQuery = {
-    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
-    queryBar: {
-      filters: [],
-      query: {
-        query: 'process where true',
-        language: 'eql',
-      },
-      saved_id: null,
-    },
-    eqlOptions: {
-      eventCategoryField: 'cool.field',
-      tiebreakerField: 'another.field',
-      timestampField: 'cool.@timestamp',
-      query: 'process where true',
-      size: 77,
-    },
-  };
-  it('handleSetRuleFromTimeline correctly updates the query', () => {
-    mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
-      handleSetRuleFromTimeline(kqlQuery);
-      return { onOpenTimeline, loading: false };
-    });
-    const { getAllByTestId } = render(
-      <TestProviders>
-        <TestComp setFormRef={() => {}} />
-      </TestProviders>
-    );
-    expect(getAllByTestId('query-bar')[0].textContent).toEqual(
-      `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
-    );
-  });
-  it('handleSetRuleFromTimeline correctly updates eql query', async () => {
-    mockUseRuleFromTimeline
-      .mockImplementationOnce(() => ({ onOpenTimeline, loading: false }))
-      .mockImplementationOnce((handleSetRuleFromTimeline) => {
-        handleSetRuleFromTimeline(eqlQuery);
-        return { onOpenTimeline, loading: false };
-      });
-    const { getByTestId } = render(
-      <TestProviders>
-        <TestComp setFormRef={() => {}} ruleType="eql" />
-      </TestProviders>
-    );
-    expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);
-    fireEvent.click(getByTestId(`eql-settings-trigger`));
-
-    expect(within(getByTestId(`eql-event-category-field`)).queryByRole('combobox')).toHaveValue(
-      eqlQuery.eqlOptions.eventCategoryField
-    );
-    expect(within(getByTestId(`eql-tiebreaker-field`)).queryByRole('combobox')).toHaveValue(
-      eqlQuery.eqlOptions.tiebreakerField
-    );
-    expect(within(getByTestId(`eql-timestamp-field`)).queryByRole('combobox')).toHaveValue(
-      eqlQuery.eqlOptions.timestampField
-    );
-  });
-});
+}

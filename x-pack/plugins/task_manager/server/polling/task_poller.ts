@@ -72,7 +72,7 @@ export function createTaskPoller<T, H>({
     if (running) {
       // Set the next runCycle call
       timeoutId = setTimeout(
-        runCycle,
+        () => runCycle().catch(() => {}),
         Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
       );
       // Reset delay, it's designed to shuffle only once
@@ -111,7 +111,7 @@ export function createTaskPoller<T, H>({
     start: () => {
       if (!running) {
         running = true;
-        runCycle();
+        runCycle().catch(() => {});
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
         setTimeout(() => subscribe(), 0);

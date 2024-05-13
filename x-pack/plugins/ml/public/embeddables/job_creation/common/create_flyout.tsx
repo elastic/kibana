@@ -31,10 +31,9 @@ export function createFlyout(
 ): Promise<void> {
   const {
     http,
-    theme,
-    i18n,
     overlays,
     application: { currentAppId$ },
+    ...startServices
   } = coreStart;
 
   return new Promise(async (resolve, reject) => {
@@ -63,7 +62,7 @@ export function createFlyout(
               }}
             />
           </KibanaContextProvider>,
-          { theme, i18n }
+          startServices
         ),
         {
           'data-test-subj': 'mlFlyoutLayerSelector',

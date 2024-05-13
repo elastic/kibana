@@ -12,7 +12,7 @@ import { LinksInput } from './types';
 describe('linksFactory', () => {
   test('returns an empty object when not given proper meta information', () => {
     const linksFactory = new LinksFactoryDefinition();
-    const settings = linksFactory.getPanelPlacementSettings({} as unknown as LinksInput, {});
+    const settings = linksFactory.getLegacyPanelPlacementSettings({} as unknown as LinksInput, {});
     expect(settings.height).toBeUndefined();
     expect(settings.width).toBeUndefined();
     expect(settings.strategy).toBeUndefined();
@@ -20,7 +20,7 @@ describe('linksFactory', () => {
 
   test('returns a horizontal layout', () => {
     const linksFactory = new LinksFactoryDefinition();
-    const settings = linksFactory.getPanelPlacementSettings({} as unknown as LinksInput, {
+    const settings = linksFactory.getLegacyPanelPlacementSettings({} as unknown as LinksInput, {
       layout: 'horizontal',
       links: [],
     });
@@ -31,7 +31,7 @@ describe('linksFactory', () => {
 
   test('returns a vertical layout with the appropriate height', () => {
     const linksFactory = new LinksFactoryDefinition();
-    const settings = linksFactory.getPanelPlacementSettings({} as unknown as LinksInput, {
+    const settings = linksFactory.getLegacyPanelPlacementSettings({} as unknown as LinksInput, {
       layout: 'vertical',
       links: [
         { type: 'dashboardLink', destination: 'superDashboard1' },

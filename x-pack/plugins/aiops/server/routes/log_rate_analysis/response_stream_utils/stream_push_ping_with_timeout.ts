@@ -11,7 +11,6 @@ import {
   pingAction,
   type AiopsLogRateAnalysisApiAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';
@@ -24,9 +23,9 @@ const PING_FREQUENCY = 10000;
  * This is implemented as a factory that receives the necessary dependencies
  * which then returns the actual helper function.
  */
-export const streamPushPingWithTimeoutFactory = <T extends ApiVersion>(
+export const streamPushPingWithTimeoutFactory = (
   stateHandler: StateHandler,
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push'],
   logDebugMessage: LogDebugMessage
 ) => {
   return function pushPingWithTimeout() {

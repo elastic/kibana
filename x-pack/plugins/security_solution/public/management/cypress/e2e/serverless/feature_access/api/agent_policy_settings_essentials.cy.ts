@@ -18,7 +18,7 @@ import { login } from '../../../../tasks/login';
 describe(
   'Agent policy settings API operations on Essentials',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

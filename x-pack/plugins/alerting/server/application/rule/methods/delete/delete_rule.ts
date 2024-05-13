@@ -43,17 +43,17 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
   let attributes: RuleAttributes;
 
   try {
-    const decryptedAlert = await getDecryptedRuleSo({
+    const decryptedRule = await getDecryptedRuleSo({
       encryptedSavedObjectsClient: context.encryptedSavedObjectsClient,
       id,
       savedObjectsGetOptions: {
         namespace: context.namespace,
       },
     });
-    apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
-    apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
-    taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
-    attributes = decryptedAlert.attributes;
+    apiKeyToInvalidate = decryptedRule.attributes.apiKey;
+    apiKeyCreatedByUser = decryptedRule.attributes.apiKeyCreatedByUser;
+    taskIdToRemove = decryptedRule.attributes.scheduledTaskId;
+    attributes = decryptedRule.attributes;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
@@ -61,12 +61,12 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     );
 
     // Still attempt to load the scheduledTaskId using SOC
-    const alert = await getRuleSo({
+    const rule = await getRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
-    taskIdToRemove = alert.attributes.scheduledTaskId;
-    attributes = alert.attributes;
+    taskIdToRemove = rule.attributes.scheduledTaskId;
+    attributes = rule.attributes;
   }
 
   try {

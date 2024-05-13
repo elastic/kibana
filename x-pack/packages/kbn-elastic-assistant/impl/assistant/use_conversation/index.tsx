@@ -55,7 +55,7 @@ interface UseConversation {
     apiConfig,
   }: SetApiConfigProps) => Promise<Conversation | undefined>;
   createConversation: (conversation: Partial<Conversation>) => Promise<Conversation | undefined>;
-  getConversation: (conversationId: string) => Promise<Conversation | undefined>;
+  getConversation: (conversationId: string, silent?: boolean) => Promise<Conversation | undefined>;
   updateConversationTitle: ({
     conversationId,
     updatedTitle,
@@ -66,8 +66,12 @@ export const useConversation = (): UseConversation => {
   const { allSystemPrompts, http, toasts } = useAssistantContext();
 
   const getConversation = useCallback(
-    async (conversationId: string) => {
-      return getConversationById({ http, id: conversationId, toasts });
+    async (conversationId: string, silent?: boolean) => {
+      return getConversationById({
+        http,
+        id: conversationId,
+        toasts: !silent ? toasts : undefined,
+      });
     },
     [http, toasts]
   );

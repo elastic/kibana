@@ -11,6 +11,7 @@ import React, {
   useMemo,
   useState,
   type FC,
+  type PropsWithChildren,
   type Dispatch,
   type SetStateAction,
 } from 'react';
@@ -65,7 +66,9 @@ interface LogRateAnalysisStateProviderProps {
  * including children components to be wrapped by the Provider.
  * @returns A context provider wrapping children with access to log rate analysis state.
  */
-export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = (props) => {
+export const LogRateAnalysisStateProvider: FC<
+  PropsWithChildren<LogRateAnalysisStateProviderProps>
+> = (props) => {
   const { children, initialAnalysisStart: incomingInitialAnalysisStart } = props;
 
   const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);

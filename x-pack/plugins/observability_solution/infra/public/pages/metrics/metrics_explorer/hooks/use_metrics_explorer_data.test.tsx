@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
@@ -36,7 +36,7 @@ const queryClient = new QueryClient({
 });
 
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper: FC<PropsWithChildren<any>> = ({ children }) => {
     const services = {
       http: {
         post: mockedFetch,

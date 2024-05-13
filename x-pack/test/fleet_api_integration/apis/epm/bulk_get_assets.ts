@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -44,37 +43,30 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should get the assets based on the required objects', async () => {
+        const packageInfo = await supertest
+          .get(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+          .expect(200);
+        const packageSOAttributes = packageInfo.body.item.savedObject.attributes;
         const { body }: { body: GetBulkAssetsResponse } = await supertest
           .post(`/api/fleet/epm/bulk_assets`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             assetIds: [
-              {
-                type: 'dashboard',
-                id: 'sample_dashboard',
-              },
-              {
-                id: 'sample_visualization',
-                type: 'visualization',
-              },
+              ...packageSOAttributes.installed_es,
+              ...packageSOAttributes.installed_kibana,
             ],
           })
           .expect(200);
-        const asset1 = body.items[0];
-        expect(asset1.id).to.equal('sample_dashboard');
-        expect(asset1.type).to.equal('dashboard');
-        expect(asset1.attributes).to.eql({
-          title: '[Logs Sample] Overview ECS',
-          description: 'Sample dashboard',
-        });
 
-        const asset2 = body.items[1];
-        expect(asset2.id).to.equal('sample_visualization');
-        expect(asset2.type).to.equal('visualization');
-        expect(asset2.attributes).to.eql({
-          title: 'sample vis title',
-          description: 'sample visualization update',
-        });
+        // check overall list of assets and app links
+        expectSnapshot(
+          body.items.map((item) => ({
+            type: item.type,
+            id: item.id,
+            appLink: item.appLink,
+            attributes: item.attributes,
+          }))
+        ).toMatch();
       });
     });
   });

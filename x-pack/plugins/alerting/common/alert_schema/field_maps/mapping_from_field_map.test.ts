@@ -261,6 +261,9 @@ describe('mappingFromFieldMap', () => {
                     },
                     execution: {
                       properties: {
+                        timestamp: {
+                          type: 'date',
+                        },
                         uuid: {
                           type: 'keyword',
                         },

@@ -34,6 +34,7 @@ Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -91,6 +92,7 @@ Object {
             "description": "No description",
           },
         },
+        "summary": "",
       },
     },
   },
@@ -137,6 +139,7 @@ Object {
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -155,6 +158,11 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "description": "deprecated foo",
+                    "type": "string",
+                  },
                   "foo": Object {
                     "type": "string",
                   },
@@ -187,35 +195,28 @@ Object {
               "application/json; Elastic-Api-Version=oas-test-version-1": Object {
                 "schema": Object {
                   "additionalProperties": false,
+                  "description": "fooResponse",
                   "properties": Object {
-                    "fooResponse": Object {
+                    "fooResponseWithDescription": Object {
                       "type": "string",
                     },
                   },
                   "required": Array [
-                    "fooResponse",
+                    "fooResponseWithDescription",
                   ],
                   "type": "object",
                 },
               },
-              "application/json; Elastic-Api-Version=oas-test-version-2": Object {
+              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
                 "schema": Object {
-                  "additionalProperties": false,
-                  "properties": Object {
-                    "fooResponse": Object {
-                      "type": "string",
-                    },
-                  },
-                  "required": Array [
-                    "fooResponse",
-                  ],
+                  "description": "stream response",
                   "type": "object",
                 },
               },
             },
-            "description": "No description",
           },
         },
+        "summary": "versioned route",
       },
     },
     "/foo/{id}": Object {
@@ -223,6 +224,7 @@ Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -234,7 +236,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "id",
             "in": "path",
             "name": "id",
             "required": true,
@@ -244,7 +246,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "page",
             "in": "query",
             "name": "page",
             "required": false,
@@ -262,6 +264,7 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "any": Object {},
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -326,6 +329,7 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "any",
                 ],
                 "type": "object",
               },
@@ -343,9 +347,122 @@ Object {
                 },
               },
             },
+            "description": "route",
+          },
+        },
+        "summary": "route",
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;
+
+exports[`generateOpenApiDocument unknown schema/validation produces the expected output 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {},
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "/foo/{id}#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {},
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {},
+              },
+            },
             "description": "No description",
           },
         },
+        "summary": "",
+      },
+    },
+    "/test": Object {
+      "get": Object {
+        "operationId": "/test#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "123",
+              "enum": Array [
+                "123",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=123": Object {
+              "schema": Object {},
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=123": Object {
+                "schema": Object {},
+              },
+            },
+          },
+        },
+        "summary": "",
       },
     },
   },

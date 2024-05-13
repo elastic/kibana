@@ -24,11 +24,13 @@ import {
   EuiFlyoutFooter,
   EuiTextColor,
   EuiFlyout,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
@@ -58,6 +60,7 @@ export const ImportExceptionListFlyout = React.memo(
     const [overwrite, setOverwrite] = useState(false);
     const [asNewList, setAsNewList] = useState(false);
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
+    const [endpointListImporting, setEndpointListImporting] = useState(false);
 
     const resetForm = useCallback(() => {
       if (filePickerRef.current?.fileInput) {
@@ -66,6 +69,7 @@ export const ImportExceptionListFlyout = React.memo(
       }
       setFiles(null);
       setAlreadyExistingItem(false);
+      setEndpointListImporting(false);
       setAsNewList(false);
       setOverwrite(false);
     }, []);
@@ -128,6 +132,13 @@ export const ImportExceptionListFlyout = React.memo(
             importExceptionListState?.result?.errors.forEach((err) => {
               if (err.error.message.includes('already exists')) {
                 setAlreadyExistingItem(true);
+                if (
+                  err.error.message.includes(
+                    `Found that list_id: "${ENDPOINT_LIST_ID}" already exists`
+                  )
+                ) {
+                  setEndpointListImporting(true);
+                }
               }
               errorsToDisplay.push(err);
             });
@@ -190,16 +201,22 @@ export const ImportExceptionListFlyout = React.memo(
                   setAsNewList(false);
                 }}
               />
-              <EuiCheckbox
-                id={'createNewListCheckbox'}
-                label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
-                data-test-subj="importExceptionListCreateNewCheckbox"
-                checked={asNewList}
-                onChange={(e) => {
-                  setAsNewList(!asNewList);
-                  setOverwrite(false);
-                }}
-              />
+              <EuiToolTip
+                position="bottom"
+                content={endpointListImporting ? i18n.IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING : ''}
+              >
+                <EuiCheckbox
+                  id={'createNewListCheckbox'}
+                  label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
+                  data-test-subj="importExceptionListCreateNewCheckbox"
+                  checked={asNewList}
+                  disabled={endpointListImporting}
+                  onChange={(e) => {
+                    setAsNewList(!asNewList);
+                    setOverwrite(false);
+                  }}
+                />
+              </EuiToolTip>
             </>
           )}
         </EuiFlyoutBody>

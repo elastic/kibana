@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+export * from './get_all_integrations/get_all_integrations_route';
+
 export * from './get_installed_integrations/get_installed_integrations_route';
 export * from './urls';
 
+export * from './model/integrations';
 export * from './model/installed_integrations';
