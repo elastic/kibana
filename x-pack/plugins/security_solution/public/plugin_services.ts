@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
@@ -31,6 +31,7 @@ import type {
 export class PluginServices {
   private readonly telemetry: TelemetryService = new TelemetryService();
   private readonly queryService: QueryService = new QueryService();
+  private readonly timelineQueryService: QueryService = new QueryService();
   private readonly storage = new Storage(localStorage);
   private readonly sessionStorage = new Storage(sessionStorage);
 
@@ -69,7 +70,13 @@ export class PluginServices {
       { prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion }
     );
 
-    this.queryService?.setup({
+    this.queryService.setup({
+      uiSettings: coreSetup.uiSettings,
+      storage: this.storage,
+      nowProvider: new NowProvider(),
+    });
+
+    this.timelineQueryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
@@ -92,6 +99,7 @@ export class PluginServices {
 
   public stop() {
     this.queryService.stop();
+    this.timelineQueryService.stop();
     licenseService.stop();
   }
 
@@ -105,12 +113,23 @@ export class PluginServices {
 
     const { savedObjectsTaggingOss, ...plugins } = startPlugins;
 
-    const query = this.queryService.start({
-      uiSettings: coreStart.uiSettings,
-      storage: this.storage,
-      http: coreStart.http,
-    });
-    const customDataService = this.startCustomDataService(query, startPlugins.data);
+    const customDataService = this.startCustomDataService(
+      this.queryService.start({
+        uiSettings: coreStart.uiSettings,
+        storage: this.storage,
+        http: coreStart.http,
+      }),
+      startPlugins.data
+    );
+
+    const timelineDataService = this.startTimelineDataService(
+      this.timelineQueryService.start({
+        uiSettings: coreStart.uiSettings,
+        storage: this.storage,
+        http: coreStart.http,
+      }),
+      startPlugins.data
+    );
 
     return {
       ...coreStart,
@@ -128,8 +147,8 @@ export class PluginServices {
       contentManagement: startPlugins.contentManagement,
       telemetry: this.telemetry.start(),
       customDataService,
+      timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      timelineFilterManager: new FilterManager(coreStart.uiSettings),
     };
   }
 
@@ -149,5 +168,13 @@ export class PluginServices {
     // @ts-expect-error
     customDataService.query.filterManager._name = 'customFilterManager';
     return customDataService;
+  };
+
+  private startTimelineDataService = (query: QueryStart, data: DataPublicPluginStart) => {
+    // Used in the unified timeline
+    return {
+      ...data,
+      query,
+    };
   };
 }

@@ -532,6 +532,7 @@ examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
+x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
@@ -1027,6 +1028,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
 ### Observability Plugins
+
+# Observability AI Assistant
+x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
+x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.

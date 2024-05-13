@@ -26,7 +26,7 @@ jest.mock('../../../timelines/store', () => ({
 
 describe('createFilterLensAction', () => {
   const mockServices = {
-    timelineFilterManager: 'mockTimelineFilterManager',
+    timelineDataService: { query: { filterManager: 'mockTimelineFilterManager' } },
     data: { query: { filterManager: 'mockFilterManager' } },
     application: { currentAppId$: of('appId') },
     topValuesPopover: {

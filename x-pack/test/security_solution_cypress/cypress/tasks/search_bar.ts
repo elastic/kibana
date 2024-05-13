@@ -52,6 +52,9 @@ export const removeKqlFilter = () => {
 };
 
 export const fillAddFilterForm = ({ key, operator, value }: SearchBarFilter) => {
+  // workaround for field input sometimes not focusing correctly
+  cy.get(ADD_FILTER_FORM_FIELD_INPUT).click();
+  // /workaround
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
 
   cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{downarrow}{enter}`);

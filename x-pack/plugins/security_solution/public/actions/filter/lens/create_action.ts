@@ -46,7 +46,16 @@ export const createFilterLensAction = ({
   services,
   negate,
 }: CreateFilterLensActionParams) => {
-  const { application, notifications, data: dataService, topValuesPopover } = services;
+  const {
+    application,
+    notifications,
+    data: dataService,
+    topValuesPopover,
+    timelineDataService,
+  } = services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   let currentAppId: string | undefined;
   application.currentAppId$.subscribe((appId) => {
@@ -93,7 +102,7 @@ export const createFilterLensAction = ({
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
-        ? services.timelineFilterManager
+        ? timelineFilterManager
         : dataService.query.filterManager;
 
       // If value type is value_count, we want to filter an `Exists` filter instead of a `Term` filter

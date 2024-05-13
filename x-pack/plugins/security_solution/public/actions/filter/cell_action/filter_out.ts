@@ -29,6 +29,9 @@ export const createFilterOutCellActionFactory = ({
 }) => {
   const { filterManager } = services.data.query;
   const { notifications } = services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = services.timelineDataService;
 
   const genericFilterOutActionFactory = createFilterOutActionFactory({
     filterManager,
@@ -65,7 +68,7 @@ export const createFilterOutCellActionFactory = ({
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
-        addFilter({ filterManager: services.timelineFilterManager, fieldName, value, dataViewId });
+        addFilter({ filterManager: timelineFilterManager, fieldName, value, dataViewId });
       } else {
         addFilter({ filterManager, fieldName, value, dataViewId });
       }
