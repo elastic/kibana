@@ -90,8 +90,8 @@ run(
       filterExpressions.length === 0
         ? paths
         : paths.filter((path) => {
-          return filterExpressions.some((expression) => path.includes(expression));
-        });
+            return filterExpressions.some((expression) => path.includes(expression));
+          });
 
     if (pathsFiltered.length === 0) {
       log.warning('No .yml files found to rewrite after filtering.');
@@ -100,11 +100,9 @@ run(
 
     log.info('Applying rewrite to the following paths: \n', pathsFiltered.join('\n'));
 
-    const pathsAfterReplace = replaceToPipelineFiles(pathsFiltered);
-
     const failedRewrites: Array<{ path: string; error: Error }> = [];
 
-    const rewritePromises: Array<Promise<void>> = pathsAfterReplace.map((ymlPath) => {
+    const rewritePromises: Array<Promise<void>> = pathsFiltered.map((ymlPath) => {
       return rewriteFile(ymlPath, log).catch((e) => {
         // eslint-disable-next-line no-console
         console.error('Failed to rewrite: ' + ymlPath, e);
@@ -145,27 +143,17 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   log.info('Loading: ' + ymlPath);
   const doc = yaml.safeLoad(file);
 
-  if (doc.steps) {
-    for (const step of doc.steps as BuildkiteStepPartial[]) {
-      if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
-        log.info('Rewriting: ' + ymlPath, step);
-        file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
-          return yaml
-            .safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) })
-            .split('\n');
-        });
-      }
-    }
+  if (!doc.steps) {
+    log.info('No steps, skipping: ' + ymlPath);
+    return;
   }
 
-  if (doc.agents && doc.agents.queue) {
-    if (typeof doc.agents.queue === 'string' && !doc.agents.queue.startsWith('kb-static')) {
-      log.info('Rewriting: ' + ymlPath, doc.agents);
-      file = editYmlInPlace(file, ['agents:', `queue: ${doc.agents.queue}`], () => {
-        return yaml.safeDump({ agents: getFullAgentTargetingRule(doc.agents.queue) }).split('\n');
+  for (const step of doc.steps as BuildkiteStepPartial[]) {
+    if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
+      log.info('Rewriting: ' + ymlPath, step);
+      file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
+        return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
       });
-    } else {
-      log.info(`Doc agents isn't parseable: ${doc.agents} in ${ymlPath}`);
     }
   }
 
@@ -251,15 +239,4 @@ function removeNullish<T extends object>(obj: T): T {
     }
     return acc;
   }, {} as any);
-}
-
-function replaceToPipelineFiles(paths: string[]) {
-  return paths.flatMap((path) => {
-    const objs = yaml.loadAll(fs.readFileSync(path, 'utf8'));
-    if (objs.some((obj) => obj?.spec?.implementation?.spec?.pipeline_file)) {
-      return objs.map((e) => e?.spec?.implementation?.spec?.pipeline_file);
-    } else {
-      return [path];
-    }
-  });
 }
