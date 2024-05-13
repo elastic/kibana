@@ -17,7 +17,6 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -33,8 +32,6 @@ import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
 import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
-
-const FilterItemsContainer = styled(EuiFlexGroup)``;
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -214,7 +211,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         </EuiFlexItem>
         {filters && filters.length > 0 ? (
           <EuiFlexItem>
-            <FilterItemsContainer
+            <EuiFlexGroup
               data-test-subj="timeline-filters-container"
               direction="row"
               gutterSize="xs"
@@ -226,7 +223,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
                 onFiltersUpdated={onFiltersUpdated}
                 indexPatterns={arrDataView}
               />
-            </FilterItemsContainer>
+            </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
