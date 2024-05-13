@@ -52,7 +52,7 @@ export function createAddChangePointChartAction(
 
       try {
         const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/handle_explicit_input'
+          '../embeddables/change_point_chart/resolve_change_point_config_input'
         );
 
         const initialState = await resolveEmbeddableChangePointUserInput(coreStart, pluginStart);

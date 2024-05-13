@@ -6,10 +6,14 @@
  */
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import {
+  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '@kbn/aiops-change-point-detection/constants';
 import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
 import {
   apiHasExecutionContext,
@@ -22,6 +26,8 @@ import React, { useMemo } from 'react';
 import fastIsEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { cloneDeep } from 'lodash';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import { initializeChangePointControls } from './initialize_change_point_controls';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
@@ -66,7 +72,18 @@ export const getChangePointChartEmbeddableFactory = (
     ChangePointEmbeddableRuntimeState
   > = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    deserializeState: (state) => state.rawState,
+    deserializeState: (state) => {
+      const serializedState = cloneDeep(state.rawState);
+      // inject the reference
+      const dataViewIdRef = state.references?.find(
+        (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
+      );
+      // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
+      if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
+        serializedState.dataViewId = dataViewIdRef?.id;
+      }
+      return serializedState;
+    },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
@@ -118,7 +135,7 @@ export const getChangePointChartEmbeddableFactory = (
           onEdit: async () => {
             try {
               const { resolveEmbeddableChangePointUserInput } = await import(
-                './handle_explicit_input'
+                './resolve_change_point_config_input'
               );
 
               const result = await resolveEmbeddableChangePointUserInput(
@@ -136,6 +153,16 @@ export const getChangePointChartEmbeddableFactory = (
           blockingError,
           dataViews: dataViews$,
           serializeState: () => {
+            const dataViewId = changePointControlsApi.dataViewId.getValue();
+            const references: Reference[] = dataViewId
+              ? [
+                  {
+                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
+                    name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
+                    id: dataViewId,
+                  },
+                ]
+              : [];
             return {
               rawState: {
                 timeRange: undefined,
@@ -143,7 +170,7 @@ export const getChangePointChartEmbeddableFactory = (
                 ...serializeTimeRange(),
                 ...serializeChangePointChartState(),
               },
-              references: [],
+              references,
             };
           },
         },
