@@ -24,11 +24,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerSavedObjectToPanelMethod,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -228,15 +224,18 @@ export class MapsPlugin
       name: APP_NAME,
     });
 
-    registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
-      if (!savedObject.managed) {
-        return { savedObjectId: savedObject.id };
-      }
+    plugins.embeddable.registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
 
-      return {
-        attributes: savedObjectToEmbeddableAttributes(savedObject),
-      };
-    });
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 

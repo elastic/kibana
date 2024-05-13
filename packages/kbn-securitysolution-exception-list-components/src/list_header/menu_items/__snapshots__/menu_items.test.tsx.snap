@@ -10,7 +10,7 @@ Object {
         data-test-subj="Container"
       >
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -77,7 +77,7 @@ Object {
       data-test-subj="Container"
     >
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -201,7 +201,7 @@ Object {
         data-test-subj="Container"
       >
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             class="emotion-EuiTextColor"
@@ -264,7 +264,7 @@ Object {
       data-test-subj="Container"
     >
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="emotion-EuiTextColor"
@@ -384,7 +384,7 @@ Object {
         data-test-subj="Container"
       >
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             class="emotion-EuiTextColor"
@@ -535,7 +535,7 @@ Object {
       data-test-subj="Container"
     >
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="emotion-EuiTextColor"
@@ -655,7 +655,7 @@ Object {
         data-test-subj="Container"
       >
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -812,7 +812,7 @@ Object {
       data-test-subj="Container"
     >
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -936,7 +936,7 @@ Object {
         data-test-subj="Container"
       >
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -1022,7 +1022,7 @@ Object {
       data-test-subj="Container"
     >
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
