@@ -53,17 +53,17 @@ export type AssetType =
 */
 export enum KibanaAssetType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
-  lens = 'lens',
+  mlModule = 'ml_module',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  mlModule = 'ml_module',
-  tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
+  tag = 'tag',
 }
 
 /*
@@ -71,27 +71,27 @@ export enum KibanaAssetType {
 */
 export enum KibanaSavedObjectType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
-  lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
   index = 'index',
+  indexTemplate = 'index_template',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
-  indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
-  transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  transform = 'transform',
   mlModel = 'ml_model',
 }
 export type FleetElasticsearchAssetType = Exclude<
@@ -99,12 +99,7 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType.index
 >;
 
-export type AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform
-];
+export type DisplayedAssetTypes = Array<`${KibanaSavedObjectType | ElasticsearchAssetType}`>;
 
 // Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {
@@ -112,6 +107,7 @@ export interface SimpleSOAssetType {
   type: ElasticsearchAssetType | KibanaSavedObjectType;
   updatedAt?: string;
   attributes: {
+    service?: string;
     title?: string;
     description?: string;
   };

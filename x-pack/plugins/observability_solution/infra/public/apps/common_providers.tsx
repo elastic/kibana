@@ -6,7 +6,7 @@
  */
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -23,13 +23,15 @@ import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
-export const CommonInfraProviders: React.FC<{
-  appName: string;
-  storage: Storage;
-  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+export const CommonInfraProviders: FC<
+  PropsWithChildren<{
+    appName: string;
+    storage: Storage;
+    triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+  }>
+> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const darkMode = useIsDarkMode();
 
   return (
@@ -53,7 +55,7 @@ export interface CoreProvidersProps {
   kibanaEnvironment?: KibanaEnvContext;
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({
+export const CoreProviders: FC<PropsWithChildren<CoreProvidersProps>> = ({
   children,
   core,
   pluginStart,
@@ -86,8 +88,11 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
-  appName,
-  children,
-  storage,
-}) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;
+const DataUIProviders: FC<
+  PropsWithChildren<{
+    appName: string;
+    storage: Storage;
+  }>
+> = ({ appName, children, storage }) => (
+  <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>
+);

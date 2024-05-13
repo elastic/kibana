@@ -6,21 +6,21 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddablePanel,
   IEmbeddable,
   isErrorEmbeddable,
-  reactEmbeddableRegistryHasKey,
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { pluginServices } from '../../../public/services';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
 import {
@@ -46,30 +46,39 @@ const renderReactEmbeddable = ({
   input,
   container,
   handlers,
+  core,
 }: {
   type: string;
   uuid: string;
   input: EmbeddableInput;
   container: CanvasContainerApi;
   handlers: RendererHandlers;
+  core: CoreStart;
 }) => {
   return (
-    <ReactEmbeddableRenderer
-      type={type}
-      maybeId={uuid}
-      parentApi={container as unknown as PresentationContainer}
-      key={`${type}_${uuid}`}
-      state={{ rawState: input }}
-      onAnyStateChange={(newState) => {
-        const newExpression = embeddableInputToExpression(
-          newState.rawState as unknown as EmbeddableInput,
-          type,
-          undefined,
-          true
-        );
-        if (newExpression) handlers.onEmbeddableInputChange(newExpression);
-      }}
-    />
+    <KibanaRenderContextProvider {...core}>
+      <div
+        className={CANVAS_EMBEDDABLE_CLASSNAME}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
+      >
+        <ReactEmbeddableRenderer
+          type={type}
+          maybeId={uuid}
+          parentApi={container as unknown as PresentationContainer}
+          key={`${type}_${uuid}`}
+          state={{ rawState: input }}
+          onAnyStateChange={(newState) => {
+            const newExpression = embeddableInputToExpression(
+              newState.rawState as unknown as EmbeddableInput,
+              type,
+              undefined,
+              true
+            );
+            if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+          }}
+        />
+      </div>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -121,12 +130,13 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+      const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (reactEmbeddableRegistryHasKey(embeddableType)) {
+      if (embeddables.reactEmbeddableRegistryHasKey(embeddableType)) {
         /**
          * Prioritize React embeddables
          */
@@ -137,6 +147,7 @@ export const embeddableRendererFactory = (
             uuid: uniqueId,
             type: embeddableType,
             container: canvasApi,
+            core,
           }),
           domNode,
           () => handlers.done()

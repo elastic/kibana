@@ -342,3 +342,10 @@ export const FROM_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Additional look-back time',
   }
 );
+
+export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
+  {
+    defaultMessage: 'Max alerts per run',
+  }
+);

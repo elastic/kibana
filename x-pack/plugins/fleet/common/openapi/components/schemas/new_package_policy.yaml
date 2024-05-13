@@ -50,6 +50,8 @@ properties:
     type: string
   description:
     type: string
+  overrides:
+    type: object
 required:
   - inputs
   - name

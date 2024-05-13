@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
@@ -16,6 +16,7 @@ export const RIGHT_CONTENT_WIDTH = 513;
 export const useStepContentStyles = () => {
   const { euiTheme } = useEuiTheme();
   const imageShadow = useEuiShadow('s');
+  const descriptionHeader = useEuiFontSize('s');
 
   const customStyles = useMemo(
     () => ({
@@ -44,6 +45,11 @@ export const useStepContentStyles = () => {
 
           '.step-paragraph': {
             marginTop: euiTheme.size.xl,
+          },
+
+          '.euiTitle': {
+            fontSize: `${descriptionHeader.fontSize}`,
+            lineHeight: `${descriptionHeader.lineHeight}`,
           },
         },
       }),
@@ -77,6 +83,8 @@ export const useStepContentStyles = () => {
       euiTheme.size.s,
       euiTheme.size.xl,
       imageShadow,
+      descriptionHeader.fontSize,
+      descriptionHeader.lineHeight,
     ]
   );
 

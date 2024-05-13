@@ -169,7 +169,7 @@ describe('bulkEditRulesRoute', () => {
       }
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   it('ensures the rule type gets validated for the license', async () => {

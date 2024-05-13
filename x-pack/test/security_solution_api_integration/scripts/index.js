@@ -47,5 +47,11 @@ const child = spawn('node', [command, '--config', configPath, ...grepArgs, ...ar
 });
 
 child.on('close', (code) => {
-  console.log(`child process exited with code ${code}`);
+  console.log(`[index.js] child process closed with code ${code}`);
+});
+
+// Listen for process exit
+child.on('exit', (code) => {
+  console.log(`[index.js] child process exited with code ${code}`);
+  process.exit(code);
 });

@@ -7,7 +7,7 @@
 
 import { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { IndicesQuerySourceFields } from '../types';
 
 export const fetchFields = async (
@@ -45,10 +45,23 @@ export const fetchFields = async (
   return parseFieldsCapabilities(fieldCapabilities, indexDocs);
 };
 
+const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
+
+const hasModelField = (field: string, indexDoc: any, nestedField: string | false) => {
+  if (field.match(INFERENCE_MODEL_FIELD_REGEXP)) {
+    const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
+    return has(
+      indexDoc.doc,
+      `_source.${[path.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')]}`
+    );
+  }
+  return false;
+};
+
 const getModelField = (field: string, indexDoc: any, nestedField: string | false) => {
   // If the field is nested, we need to get the first occurrence as its an array
   const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
-  return get(indexDoc.doc, `_source.${[path.replace(/\.predicted_value|\.tokens/, '.model_id')]}`);
+  return get(indexDoc.doc, `_source.${[path.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')]}`);
 };
 
 const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
@@ -83,6 +96,7 @@ export const parseFieldsCapabilities = (
       dense_vector_query_fields: [],
       bm25_query_fields: [],
       source_fields: [],
+      skipped_fields: 0,
     };
     return acc;
   }, {});
@@ -103,28 +117,44 @@ export const parseFieldsCapabilities = (
 
       for (const index of indicesPresentIn) {
         const indexDoc = indexDocs.find((x) => x.index === index);
-        if ('rank_features' in field) {
+        if ('rank_features' in field || 'sparse_vector' in field) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
-          const elserModelField = {
-            field: fieldKey,
-            model_id: getModelField(fieldKey, indexDoc, nestedField),
-            nested: !!isFieldNested(fieldKey, fieldCapsResponse),
-            indices: indicesPresentIn,
-          };
-          acc[index].elser_query_fields.push(elserModelField);
+          if (!nestedField) {
+            const elserModelField = {
+              field: fieldKey,
+              model_id: getModelField(fieldKey, indexDoc, nestedField),
+              nested: !!isFieldNested(fieldKey, fieldCapsResponse),
+              indices: indicesPresentIn,
+            };
+            acc[index].elser_query_fields.push(elserModelField);
+          } else {
+            acc[index].skipped_fields++;
+          }
         } else if ('dense_vector' in field) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
-          const denseVectorField = {
-            field: fieldKey,
-            model_id: getModelField(fieldKey, indexDoc, nestedField),
-            nested: !!nestedField,
-            indices: indicesPresentIn,
-          };
-          acc[index].dense_vector_query_fields.push(denseVectorField);
+
+          // Check if the dense vector field has a model_id associated with it
+          // skip this field if has no model associated with it
+          // and the vectors were embedded outside of stack
+          if (hasModelField(fieldKey, indexDoc, nestedField) && !nestedField) {
+            const denseVectorField = {
+              field: fieldKey,
+              model_id: getModelField(fieldKey, indexDoc, nestedField),
+              nested: !!nestedField,
+              indices: indicesPresentIn,
+            };
+            acc[index].dense_vector_query_fields.push(denseVectorField);
+          } else {
+            acc[index].skipped_fields++;
+          }
         } else if ('text' in field && field.text.searchable && shouldIgnoreField(fieldKey)) {
           acc[index].bm25_query_fields.push(fieldKey);
           acc[index].source_fields.push(fieldKey);
+        } else {
+          if (fieldKey !== '_id' && fieldKey !== '_index' && fieldKey !== '_type') {
+            acc[index].skipped_fields++;
+          }
         }
       }
 

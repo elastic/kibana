@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useContext } from 'react';
+import React, { createContext, FC, PropsWithChildren, useContext } from 'react';
 import { CustomIntegrationsFindService } from './find';
 import { CustomIntegrationsPlatformService } from './platform';
 
@@ -29,10 +29,9 @@ const CustomIntegrationsServicesContext = createContext<CustomIntegrationsServic
  * Within a plugin, you can  use the CustomIntegrations plugin and retrieve a fully-configured
  * context from the `start` contract.
  */
-export const CustomIntegrationsServicesProvider: FC<CustomIntegrationsServices> = ({
-  children,
-  ...services
-}) => (
+export const CustomIntegrationsServicesProvider: FC<
+  PropsWithChildren<CustomIntegrationsServices>
+> = ({ children, ...services }) => (
   <CustomIntegrationsServicesContext.Provider value={services}>
     {children}
   </CustomIntegrationsServicesContext.Provider>

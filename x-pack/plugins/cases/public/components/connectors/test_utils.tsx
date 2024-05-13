@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton } from '@elastic/eui';
@@ -13,7 +14,7 @@ interface MockFormWrapperComponentProps {
   fields?: Record<string, unknown>;
 }
 
-export const MockFormWrapperComponent: React.FC<MockFormWrapperComponentProps> = ({
+export const MockFormWrapperComponent: FC<PropsWithChildren<MockFormWrapperComponentProps>> = ({
   children,
   fields = {},
 }) => {

@@ -27,7 +27,7 @@ import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_sta
  * 1. Registers routes
  * 2. Registers routes handler context
  */
-export async function setupRoutes({
+export function setupRoutes({
   core,
   logger,
   isPluginInitialized,

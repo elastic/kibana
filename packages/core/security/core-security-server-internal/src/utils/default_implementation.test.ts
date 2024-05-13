@@ -22,4 +22,19 @@ describe('getDefaultSecurityImplementation', () => {
       expect(user).toBeNull();
     });
   });
+
+  describe('audit.asScoped', () => {
+    it('returns null', async () => {
+      const logger = implementation.audit.asScoped({} as any);
+      expect(logger.log({ message: 'something' })).toBeUndefined();
+    });
+  });
+
+  describe('audit.withoutRequest', () => {
+    it('does not log', async () => {
+      const logger = implementation.audit.withoutRequest;
+      expect(logger.enabled).toBe(false);
+      expect(logger.log({ message: 'no request' })).toBeUndefined();
+    });
+  });
 });

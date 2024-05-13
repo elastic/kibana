@@ -84,7 +84,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Insights view displayed in the document details expandable flyout left section
  */
-export const InsightsTab: React.FC = memo(() => {
+export const InsightsTab = memo(() => {
   const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;

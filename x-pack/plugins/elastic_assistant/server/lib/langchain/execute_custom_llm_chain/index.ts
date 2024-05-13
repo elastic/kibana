@@ -116,23 +116,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
-  );
+
+  const tools: ToolInterface[] = assistantTools
+    .filter((tool) =>
+      isStream
+        ? tool.id !== 'esql-knowledge-base-tool'
+        : tool.id !== 'esql-knowledge-base-structured-tool'
+    )
+    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
+  const executorArgs = {
+    memory,
+    verbose: false,
+    handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+  };
   // isStream check is not on agentType alone because typescript doesn't like
   const executor = isStream
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
-        memory,
-        verbose: false,
+        ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'chat-conversational-react-description',
-        memory,
-        verbose: false,
+        ...executorArgs,
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
@@ -162,7 +170,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             traceId: streamingSpan?.ids?.['trace.id'],
           },
           isError
-        );
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;

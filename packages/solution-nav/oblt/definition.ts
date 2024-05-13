@@ -312,6 +312,7 @@ const navTree: NavigationTreeDefinition = {
                 { link: 'management:objects' },
                 { link: 'management:tags' },
                 { link: 'management:search_sessions' },
+                { link: 'management:aiAssistantManagementSelection' },
                 { link: 'management:spaces' },
                 { link: 'management:settings' },
               ],

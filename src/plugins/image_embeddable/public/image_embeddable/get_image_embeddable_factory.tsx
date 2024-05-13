@@ -14,7 +14,7 @@ import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/p
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
@@ -34,9 +34,7 @@ export const getImageEmbeddableFactory = ({
     ImageEmbeddableApi
   > = {
     type: IMAGE_EMBEDDABLE_TYPE,
-    deserializeState: (state) => {
-      return state.rawState as ImageEmbeddableSerializedState;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
@@ -86,7 +84,9 @@ export const getImageEmbeddableFactory = ({
         },
         {
           ...titleComparators,
-          ...(dynamicActionsApi?.dynamicActionsComparator ?? {}),
+          ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+            enhancements: getUnchangingComparator(),
+          }),
           imageConfig: [
             imageConfig$,
             (value) => imageConfig$.next(value),

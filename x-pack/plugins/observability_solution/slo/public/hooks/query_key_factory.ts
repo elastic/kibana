@@ -46,6 +46,8 @@ export const sloKeys = {
   definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
     [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
+    [...sloKeys.all, 'health', list] as const,
   burnRates: (
     sloId: string,
     instanceId: string | undefined,

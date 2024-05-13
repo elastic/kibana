@@ -11,6 +11,7 @@
     "@kbn/utility-types",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": [
     "target/**/*",

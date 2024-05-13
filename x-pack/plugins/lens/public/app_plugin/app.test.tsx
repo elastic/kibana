@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -107,9 +107,7 @@ describe('Lens App', () => {
     services?: jest.Mocked<LensAppServices>;
     preloadedState?: Partial<LensAppState>;
   }) {
-    const wrappingComponent: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => {
+    const wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       return (
         <I18nProvider>
           <KibanaContextProvider services={services}>{children}</KibanaContextProvider>

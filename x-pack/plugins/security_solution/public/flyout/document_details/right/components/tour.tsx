@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
@@ -25,7 +24,7 @@ import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyo
 /**
  * Guided tour for the right panel in details flyout
  */
-export const RightPanelTour: FC = memo(() => {
+export const RightPanelTour = memo(() => {
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, getFieldsData } = useRightPanelContext();
 

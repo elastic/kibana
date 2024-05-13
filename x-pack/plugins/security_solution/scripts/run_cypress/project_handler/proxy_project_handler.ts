@@ -28,14 +28,17 @@ export class ProxyHandler extends ProjectHandler {
   // Method to invoke the create project API for serverless.
   async createSecurityProject(
     projectName: string,
-    productTypes: ProductType[],
-    commit: string
+    productTypes?: ProductType[],
+    commit?: string
   ): Promise<Project | undefined> {
     const body: CreateProjectRequestBody = {
       name: projectName,
       region_id: DEFAULT_REGION,
-      product_types: productTypes,
     };
+
+    if (productTypes) {
+      body.product_types = productTypes;
+    }
 
     if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
       const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;

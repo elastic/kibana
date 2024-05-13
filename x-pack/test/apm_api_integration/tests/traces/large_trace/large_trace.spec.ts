@@ -26,7 +26,7 @@ const environment = 'long_trace_scenario';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
 
   // FLAKY: https://github.com/elastic/kibana/issues/177660
@@ -37,14 +37,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start,
           end,
           rootTransactionName,
-          synthtraceEsClient,
+          apmSynthtraceEsClient,
           repeaterFactor: 10,
           environment,
         });
       });
 
       after(async () => {
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
 
       describe('when maxTraceItems is 5000 (default)', () => {

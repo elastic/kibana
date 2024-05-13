@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
+import { asyncForEach } from '@kbn/std';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import {
@@ -23,9 +25,20 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete backfill', () => {
+    let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
+    const start = moment().utc().startOf('day').subtract(31, 'days').toISOString();
+    const end = moment().utc().startOf('day').subtract(1, 'day').toISOString();
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
+          .set('kbn-xsrf', 'foo');
+      });
+      backfillIds = [];
+      await objectRemover.removeAll();
+    });
 
     function getRule(overwrites = {}) {
       return getTestRuleData({
@@ -70,25 +83,18 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
+            // set a long time range so the backfill doesn't finish running and get deleted
             .send([
-              {
-                // set a long time range so the backfill doesn't finish running and get deleted
-                rule_id: ruleId1,
-                start: '2023-10-19T12:00:00.000Z',
-                end: '2023-11-19T12:00:00.000Z',
-              },
-              {
-                // set a long time range so the backfill doesn't finish running and get deleted
-                rule_id: ruleId2,
-                start: '2023-10-19T12:00:00.000Z',
-                end: '2023-11-19T12:00:00.000Z',
-              },
+              { rule_id: ruleId1, start, end },
+              { rule_id: ruleId2, start, end },
             ]);
 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(2);
           const backfillId1 = scheduleResult[0].id;
           const backfillId2 = scheduleResult[1].id;
+          backfillIds.push({ id: backfillId1, spaceId: apiOptions.spaceId });
+          backfillIds.push({ id: backfillId2, spaceId: apiOptions.spaceId });
 
           // ensure backfills exist
           await supertest
@@ -246,7 +252,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           }
         });
 
-        it('should not get backfill from another space', async () => {
+        it('should not delete backfill from another space', async () => {
           // create rule
           const rresponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -260,17 +266,12 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
-            .send([
-              {
-                rule_id: ruleId,
-                start: '2023-10-19T12:00:00.000Z',
-                end: '2023-10-25T12:00:00.000Z',
-              },
-            ]);
+            .send([{ rule_id: ruleId, start, end }]);
 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(1);
           const backfillId = scheduleResult[0].id;
+          backfillIds.push({ id: backfillId, spaceId: apiOptions.spaceId });
 
           // delete backfill as current user
           const response = await supertestWithoutAuth

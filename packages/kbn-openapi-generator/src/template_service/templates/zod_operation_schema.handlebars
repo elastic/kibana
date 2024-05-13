@@ -17,11 +17,14 @@ import {
 {{/each}}
 
 {{#each components.schemas}}
-{{#description}}
+{{#if description}}
 /**
-  * {{{.}}}
+  * {{{description}}}
+  {{#if deprecated}}
+  * @deprecated
+  {{/if}}
   */
-{{/description}}
+{{/if}}
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};
 {{#if enum}}

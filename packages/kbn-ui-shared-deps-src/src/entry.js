@@ -39,6 +39,7 @@ export const Rxjs = require('rxjs');
 export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
+export const ElasticEuiLibComponentsUseIsNestedEuiProvider = require('@elastic/eui/optimize/es/components/provider/nested');
 export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');

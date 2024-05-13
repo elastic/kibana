@@ -11,7 +11,7 @@ In this tutorial we'll use the {kib} sample web logs in Discover and Lens to exp
 [[prerequisite]]
 === Prerequisite 
 
-To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+To be able to select **Try {esql}** from the Data views menu the `enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
 
 [float]
 [[tutorial-try-esql]]

@@ -254,7 +254,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         return valuesBadges;
       },
       sortable: false,
-      textOnly: true,
+      truncateText: true,
       valign: 'top',
     },
     {
