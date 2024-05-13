@@ -52,20 +52,18 @@ export const TooltipButton = ({
   }, [clearTimer]);
 
   return (
-    <>
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {displayText}{' '}
       <EuiPopover
         button={
-          <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-            <EuiIcon
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-              onFocus={onMouseEnter}
-              onBlur={onMouseLeave}
-              type={iconType}
-              tabIndex={0}
-            />
-          </ColumnHeaderTruncateContainer>
+          <EuiIcon
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onFocus={onMouseEnter}
+            onBlur={onMouseLeave}
+            type={iconType}
+            tabIndex={0}
+          />
         }
         isOpen={isPopoverOpen}
         anchorPosition="upCenter"
@@ -75,6 +73,6 @@ export const TooltipButton = ({
         <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
         {children}
       </EuiPopover>
-    </>
+    </ColumnHeaderTruncateContainer>
   );
 };
