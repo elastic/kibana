@@ -49,7 +49,7 @@ const getAgentRule = (queueName: string = 'n2-4-spot') => {
     return {
       provider: 'gcp',
       image: 'family/kibana-ubuntu-2004',
-      imageProject: 'elastic-images-qa',
+      imageProject: 'elastic-images-prod',
       machineType: `${kind}-standard-${cores}`,
       ...additionalProps,
     };
