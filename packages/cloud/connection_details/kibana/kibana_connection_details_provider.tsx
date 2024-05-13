@@ -68,7 +68,16 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         };
       },
       hasPermission: security
-        ? async () => (await security.authz.getCurrentUserApiKeyPrivileges()).canManageOwnApiKeys
+        ? async () => {
+            try {
+              return (await security.authz.getCurrentUserApiKeyPrivileges()).canManageOwnApiKeys;
+            } catch (error) {
+              if (error instanceof Error && error.message === 'Forbidden') {
+                return false;
+              }
+              throw error;
+            }
+          }
         : async () => true,
       ...options?.apiKeys,
     },
