@@ -11,7 +11,7 @@ import type { DataViewFieldBase } from '@kbn/es-query';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
-import * as ruleDetailsI18n from '../../../rule_management/components/rule_details/translations';
+import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import { RequiredFieldRow } from './required_fields_row';
 import * as i18n from './translations';
 
@@ -164,13 +164,17 @@ const RequiredFieldsList = ({
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        label={ruleDetailsI18n.REQUIRED_FIELDS_FIELD_LABEL}
+        label={
+          <>
+            {i18n.REQUIRED_FIELDS_LABEL}
+            <RequiredFieldsHelpInfo />
+          </>
+        }
         labelAppend={
           <EuiText color="subdued" size="xs">
             {i18n.OPTIONAL}
           </EuiText>
         }
-        helpText={i18n.REQUIRED_FIELDS_HELP_TEXT}
         hasChildLabel={false}
         labelType="legend"
       >

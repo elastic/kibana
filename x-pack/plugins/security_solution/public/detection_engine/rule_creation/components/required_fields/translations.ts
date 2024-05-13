@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const REQUIRED_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.requiredFieldsLabel',
+  {
+    defaultMessage: 'Required fields',
+  }
+);
+
 export const FIELD_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldNameLabel',
   {
@@ -18,13 +25,6 @@ export const FIELD_TYPE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldTypeLabel',
   {
     defaultMessage: 'Field type',
-  }
-);
-
-export const REQUIRED_FIELDS_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText',
-  {
-    defaultMessage: 'Fields required for this Rule to function.',
   }
 );
 
