@@ -38,6 +38,9 @@ describe('conversational chain', () => {
               _id: '1',
               _source: {
                 body_content: 'value2',
+                metadata: {
+                  source: 'value3',
+                },
               },
             },
           ],
@@ -148,7 +151,7 @@ describe('conversational chain', () => {
     );
   });
 
-  it('should be able to create a conversational chain with field as array type', async () => {
+  it('should be able to create a conversational chain with nested field', async () => {
     await createTestChain(
       ['the final answer'],
       [
@@ -163,7 +166,7 @@ describe('conversational chain', () => {
         {
           documents: [
             { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value3' },
           ],
           type: 'retrieved_docs',
         },
@@ -180,7 +183,7 @@ describe('conversational chain', () => {
         },
       ],
       // @ts-ignore
-      { index: ['field'], website: ['body_content'] }
+      { index: 'field', website: 'metadata.source' }
     );
   });
 
