@@ -2605,7 +2605,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       ssl_enabled: {
         default_value: false,
@@ -3147,7 +3147,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       fetch_size: {
         default_value: 50,
@@ -4284,7 +4284,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       use_text_extraction_service: {
         default_value: false,

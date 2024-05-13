@@ -56,12 +56,7 @@ interface ExpressionRowProps {
   setRuleParams(id: number, params: MetricExpression): void;
 }
 
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 -4px;
-`;
+const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
 
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
@@ -227,7 +222,12 @@ export const ExpressionRow = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
+          <EuiFlexGroup
+            component={NegativeHorizontalMarginDiv}
+            gutterSize={aggType !== 'custom' ? 'l' : 'm'}
+            alignItems="center"
+            wrap
+          >
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
@@ -272,7 +272,7 @@ export const ExpressionRow = ({
             {!displayWarningThreshold && (
               <>
                 <EuiSpacer size={'xs'} />
-                <StyledExpressionRow>
+                <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                   <EuiButtonEmpty
                     data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
@@ -286,13 +286,13 @@ export const ExpressionRow = ({
                       defaultMessage="Add warning threshold"
                     />
                   </EuiButtonEmpty>
-                </StyledExpressionRow>
+                </EuiFlexGroup>
               </>
             )}
-          </StyledExpressionRow>
+          </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <StyledExpressionRow>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {criticalThresholdExpression}
                 <StyledHealth color="danger">
                   <FormattedMessage
@@ -300,8 +300,8 @@ export const ExpressionRow = ({
                     defaultMessage="Alert"
                   />
                 </StyledHealth>
-              </StyledExpressionRow>
-              <StyledExpressionRow>
+              </EuiFlexGroup>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {warningThresholdExpression}
                 <StyledHealth color="warning">
                   <FormattedMessage
@@ -322,13 +322,13 @@ export const ExpressionRow = ({
                   iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
-              </StyledExpressionRow>
+              </EuiFlexGroup>
             </>
           )}
           {aggType === Aggregators.CUSTOM && (
             <>
               <EuiSpacer size={'m'} />
-              <StyledExpressionRow>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 <CustomEquationEditor
                   expression={expression}
                   fields={normalizedFields}
@@ -336,7 +336,7 @@ export const ExpressionRow = ({
                   onChange={handleCustomMetricChange}
                   errors={errors}
                 />
-              </StyledExpressionRow>
+              </EuiFlexGroup>
               <EuiSpacer size={'s'} />
             </>
           )}
