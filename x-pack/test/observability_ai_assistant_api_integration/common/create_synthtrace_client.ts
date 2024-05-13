@@ -10,8 +10,6 @@ import {
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(
@@ -31,20 +29,4 @@ export async function getApmSynthtraceEsClient(
   });
 
   return esClient;
-}
-
-export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
-  const kibanaServerUrlWithAuth = url
-    .format({
-      ...url.parse(kibanaServerUrl),
-      auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-    })
-    .slice(0, -1);
-
-  const kibanaClient = new ApmSynthtraceKibanaClient({
-    target: kibanaServerUrlWithAuth,
-    logger: createLogger(LogLevel.debug),
-  });
-
-  return kibanaClient;
 }
