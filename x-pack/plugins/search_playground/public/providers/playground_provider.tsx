@@ -23,8 +23,8 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
-      doc_size: 5,
-      source_fields: [],
+      doc_size: 3,
+      source_fields: {},
       indices: defaultValues?.indices || [],
     },
   });

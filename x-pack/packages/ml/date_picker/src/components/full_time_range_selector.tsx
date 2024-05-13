@@ -239,6 +239,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             id={'mlFullTimeRangeSelectorOption'}
             button={
               <EuiButtonIcon
+                data-test-subj="mlDatePickerButtonDataTierOptions"
                 display="base"
                 size="m"
                 iconType="boxesVertical"

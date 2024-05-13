@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { createFunctionResponseMessage } from './create_function_response_message';
+import { errors } from '@elastic/elasticsearch';
+import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 
-export function createFunctionResponseError({
+export function createServerSideFunctionResponseError({
   name,
   error,
   message,
@@ -16,11 +17,22 @@ export function createFunctionResponseError({
   error: Error;
   message?: string;
 }) {
+  const isElasticsearchError = error instanceof errors.ElasticsearchClientError;
+
+  const sanitizedError: Record<string, unknown> = JSON.parse(
+    'toJSON' in error && typeof error.toJSON === 'function' ? error.toJSON() : JSON.stringify(error)
+  );
+
+  if (isElasticsearchError) {
+    // remove meta key which is huge and noisy
+    delete sanitizedError.meta;
+  }
+
   return createFunctionResponseMessage({
     name,
     content: {
       error: {
-        ...error,
+        ...sanitizedError,
         name: error.name,
         message: error.message,
         cause: error.cause,

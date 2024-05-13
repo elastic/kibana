@@ -455,13 +455,14 @@ export const useESQLOverallStatsData = (
             title: fieldStatsErrorTitle,
           });
         }
+        setQueryHistoryStatus(false);
         // Log error to console for better debugging
         // eslint-disable-next-line no-console
         console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runRequest, toasts, JSON.stringify({ fieldStatsRequest }), onError]
+    [JSON.stringify({ fieldStatsRequest })]
   );
 
   // auto-update

@@ -35,6 +35,10 @@ export class SearchCursorScroll extends SearchCursor {
   private async scan(searchBody: SearchRequest) {
     const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
+
     const searchParamsScan = {
       params: {
         body: searchBody,
@@ -42,7 +46,7 @@ export class SearchCursorScroll extends SearchCursor {
         scroll: scroll.duration(taskInstanceFields),
         size: scroll.size,
         ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 

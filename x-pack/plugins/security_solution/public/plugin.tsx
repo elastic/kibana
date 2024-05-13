@@ -338,9 +338,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const subPlugins = await this.createSubPlugins();
     return {
       alerts: subPlugins.alerts.start(storage),
-      attackDiscovery: subPlugins.attackDiscovery.start(
-        this.experimentalFeatures.attackDiscoveryEnabled
-      ),
+      attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
@@ -533,7 +531,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "actions" */
+      /* webpackChunkName: "lazy_assistant_settings_management" */
       './lazy_assistant_settings_management'
     );
   }

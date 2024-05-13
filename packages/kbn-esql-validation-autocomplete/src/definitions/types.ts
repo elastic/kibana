@@ -9,7 +9,7 @@
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'grouping';
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
@@ -39,6 +39,17 @@ export interface FunctionDefinition {
        * matches one of the options prior to runtime.
        */
       literalOptions?: string[];
+      /**
+       * Must only be included _in addition to_ literalOptions.
+       *
+       * If provided this is the list of suggested values that
+       * will show up in the autocomplete. If omitted, the literalOptions
+       * will be used as suggestions.
+       *
+       * This is useful for functions that accept
+       * values that we don't want to show as suggestions.
+       */
+      literalSuggestions?: string[];
     }>;
     minParams?: number;
     returnType: string;

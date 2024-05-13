@@ -52,6 +52,7 @@ export interface ObservabilityAIAssistantChatService {
     connectorId: string;
     messages: Message[];
     persist: boolean;
+    disableFunctions: boolean;
     signal: AbortSignal;
     responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;

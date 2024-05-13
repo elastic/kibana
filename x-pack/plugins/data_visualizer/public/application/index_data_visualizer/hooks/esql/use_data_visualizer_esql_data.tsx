@@ -591,23 +591,26 @@ export const useESQLDataVisualizerData = (
     [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = async (q?: AggregateQuery) => {
-    // When user submits a new query
-    // resets all current requests and other data
-    if (cancelOverallStatsRequest) {
-      cancelOverallStatsRequest();
-    }
-    if (cancelFieldStatsRequest) {
-      cancelFieldStatsRequest();
-    }
-    // Reset field stats to fetch state
-    setFieldStatFieldsToFetch(undefined);
-    setMetricConfigs(defaults.metricConfigs);
-    setNonMetricConfigs(defaults.nonMetricConfigs);
-    if (isESQLQuery(q) && setQuery) {
-      setQuery(q);
-    }
-  };
+  const onQueryUpdate = useCallback(
+    async (q?: AggregateQuery) => {
+      // When user submits a new query
+      // resets all current requests and other data
+      if (cancelOverallStatsRequest) {
+        cancelOverallStatsRequest();
+      }
+      if (cancelFieldStatsRequest) {
+        cancelFieldStatsRequest();
+      }
+      // Reset field stats to fetch state
+      setFieldStatFieldsToFetch(undefined);
+      setMetricConfigs(defaults.metricConfigs);
+      setNonMetricConfigs(defaults.nonMetricConfigs);
+      if (isESQLQuery(q) && setQuery) {
+        setQuery(q);
+      }
+    },
+    [cancelFieldStatsRequest, cancelOverallStatsRequest, setQuery]
+  );
 
   return {
     totalCount,
