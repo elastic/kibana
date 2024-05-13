@@ -1,5 +1,4 @@
 #!/bin/bash
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 KIBANA_CURRENT_COMMIT=${KIBANA_BASE_IMAGE}:sec-sol-qg-${BUILDKITE_COMMIT:0:12}
