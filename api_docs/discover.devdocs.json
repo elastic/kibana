@@ -2623,14 +2623,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
               },
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
