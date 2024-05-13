@@ -26,7 +26,7 @@ export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, OAMDefinition>(
     {
-      path: '/api/oam/defintion',
+      path: '/api/oam/definition',
       validate: {
         body: (body, res) => {
           try {
