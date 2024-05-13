@@ -5,107 +5,27 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
-import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
-import { ReloadContextProvider } from '../hooks/use_reload';
+import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
+import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
 import {
   type ChangePointAnnotation,
-  ChangePointDetectionControlsContextProvider,
   type ChangePointDetectionRequestParams,
-} from '../components/change_point_detection/change_point_detection_context';
-import type {
-  EmbeddableChangePointChartInput,
-  EmbeddableChangePointChartOutput,
-} from './embeddable_change_point_chart';
-import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { FilterQueryContextProvider, useFilterQueryUpdates } from '../hooks/use_filters_query';
-import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { createMergedEsQuery } from '../application/utils/search_utils';
-import { useChangePointResults } from '../components/change_point_detection/use_change_point_agg_request';
-import { ChartsGrid } from '../components/change_point_detection/charts_grid';
-import { NoChangePointsWarning } from '../components/change_point_detection/no_change_points_warning';
+} from '../../components/change_point_detection/change_point_detection_context';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
+import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
+import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
+import { NoChangePointsWarning } from '../../components/change_point_detection/no_change_points_warning';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
   direction: 'asc',
-};
-
-export interface EmbeddableInputTrackerProps {
-  input$: Observable<EmbeddableChangePointChartInput>;
-  initialInput: EmbeddableChangePointChartInput;
-  reload$: Observable<number>;
-  onOutputChange: (output: Partial<EmbeddableChangePointChartOutput>) => void;
-  onRenderComplete: () => void;
-  onLoading: (isLoading: boolean) => void;
-  onError: (error: Error) => void;
-}
-
-export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
-  input$,
-  initialInput,
-  reload$,
-  onOutputChange,
-  onRenderComplete,
-  onLoading,
-  onError,
-}) => {
-  const input = useObservable(input$, initialInput);
-
-  const [manualReload$] = useState<BehaviorSubject<number>>(
-    new BehaviorSubject<number>(initialInput.lastReloadRequestTime ?? Date.now())
-  );
-
-  useEffect(
-    function updateManualReloadSubject() {
-      if (
-        input.lastReloadRequestTime === initialInput.lastReloadRequestTime ||
-        !input.lastReloadRequestTime
-      )
-        return;
-      manualReload$.next(input.lastReloadRequestTime);
-    },
-    [input.lastReloadRequestTime, initialInput.lastReloadRequestTime, manualReload$]
-  );
-
-  const resultObservable$ = useMemo<Observable<number>>(() => {
-    return combineLatest([reload$, manualReload$]).pipe(
-      map(([reload, manualReload]) => Math.max(reload, manualReload)),
-      distinctUntilChanged()
-    );
-  }, [manualReload$, reload$]);
-
-  return (
-    <ReloadContextProvider reload$={resultObservable$}>
-      <DataSourceContextProvider dataViewId={input.dataViewId}>
-        <FilterQueryContextProvider timeRange={input.timeRange}>
-          <ChangePointDetectionControlsContextProvider>
-            <ChartGridEmbeddableWrapper
-              viewType={input.viewType}
-              timeRange={input.timeRange}
-              fn={input.fn}
-              metricField={input.metricField}
-              splitField={input.splitField}
-              maxSeriesToPlot={input.maxSeriesToPlot}
-              dataViewId={input.dataViewId}
-              partitions={input.partitions}
-              onLoading={onLoading}
-              onRenderComplete={onRenderComplete}
-              onError={onError}
-              onChange={input.onChange}
-              emptyState={input.emptyState}
-            />
-          </ChangePointDetectionControlsContextProvider>
-        </FilterQueryContextProvider>
-      </DataSourceContextProvider>
-    </ReloadContextProvider>
-  );
 };
 
 /**
@@ -119,13 +39,7 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
  * @param partitions
  * @constructor
  */
-export const ChartGridEmbeddableWrapper: FC<
-  EmbeddableChangePointChartProps & {
-    onRenderComplete: () => void;
-    onLoading: (isLoading: boolean) => void;
-    onError: (error: Error) => void;
-  }
-> = ({
+export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   fn,
   metricField,
