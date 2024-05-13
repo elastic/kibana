@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PerformanceContextProvider } from './context/performance_context';
+import { dynamic } from '@kbn/shared-ux-utility';
+
 export { usePerformanceContext } from './context/use_performance_context';
 export { perfomanceMarkers } from './performance_markers';
+export const PerformanceContextProvider = dynamic(() => import('./context/performance_context'));

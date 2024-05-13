@@ -7,4 +7,5 @@
  */
 
 export * from './src/performance_metrics';
+
 export * from './src/performance_metric_events';

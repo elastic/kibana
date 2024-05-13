@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
 import { perfomanceMarkers } from '../performance_markers';
+import { PerformanceContext } from './use_performance_context';
 
 function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
@@ -33,12 +34,6 @@ function measureInteraction() {
     },
   };
 }
-
-export interface PerformanceApi {
-  onPageReady(): void;
-}
-
-export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isRendered, setIsRendered] = useState(false);
@@ -68,3 +63,5 @@ export function PerformanceContextProvider({ children }: { children: React.React
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;
 }
+
+export default PerformanceContextProvider;

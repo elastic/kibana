@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useContext } from 'react';
+import { createContext, useContext } from 'react';
 
-import { PerformanceContext } from './performance_context';
+export interface PerformanceApi {
+  onPageReady(): void;
+}
+
+export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
+
 export function usePerformanceContext() {
   const api = useContext(PerformanceContext);
 
