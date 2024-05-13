@@ -3,7 +3,7 @@
     "output": "src/platform/telemetry/schema/oss_plugins.json",
     "root": "src/platform/",
     "exclude": [
-      "src/plugins/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
+      "src/platform/internal/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
     ]
   },
   {

@@ -915,6 +915,7 @@ module.exports = {
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
+        'src/platform/internal/ai_assistant_management/**/*.tsx',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -924,6 +925,7 @@ module.exports = {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/internal/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1708,7 +1710,7 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
+        'src/platform/internal/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
@@ -1763,7 +1765,7 @@ module.exports = {
       files: [
         'packages/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
+        'src/platform/internal/kibana_usage_collection/**',
         'src/platform/usage_collection/**',
         'src/platform/telemetry/**',
         'src/platform/telemetry_collection_manager/**',
@@ -1787,7 +1789,7 @@ module.exports = {
         'src/platform/saved_objects_management/**',
         'packages/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
+        'src/platform/internal/kibana_usage_collection/**',
         'src/platform/usage_collection/**',
         'src/platform/telemetry/**',
         'src/platform/telemetry_collection_manager/**',

@@ -3085,7 +3085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
+"@kbn/ai-assistant-management-plugin@link:src/platform/internal/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
 

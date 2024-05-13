@@ -32,7 +32,8 @@
         "built_assets",
         ".eslintcache",
         ".node_binaries",
-        "src/plugins/*/target"
+        "src/plugins/*/target",
+        "src/platform/*/target"
       ]
     }
   },
@@ -140,7 +141,7 @@
     "@kbn/actions-types": "link:packages/kbn-actions-types",
     "@kbn/advanced-settings-plugin": "link:src/platform/internal/advanced_settings",
     "@kbn/ai-assistant-management-observability-plugin": "link:src/plugins/ai_assistant_management/observability",
-    "@kbn/ai-assistant-management-plugin": "link:src/plugins/ai_assistant_management/selection",
+    "@kbn/ai-assistant-management-plugin": "link:src/platform/internal/ai_assistant_management/selection",
     "@kbn/aiops-components": "link:x-pack/packages/ml/aiops_components",
     "@kbn/aiops-plugin": "link:x-pack/plugins/aiops",
     "@kbn/aiops-test-utils": "link:x-pack/packages/ml/aiops_test_utils",
