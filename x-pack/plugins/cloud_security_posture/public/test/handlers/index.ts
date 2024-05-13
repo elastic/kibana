@@ -7,10 +7,16 @@
 import { http, HttpResponse } from 'msw';
 import { defaultStatusInstalled } from './cspm_status_handlers';
 import { defaultBenchmarks } from './benchmark_handlers';
+import { defaultRulesGetStates } from './rules_handlers';
+import { defaultApiLicensingInfo } from './api/licensing_handler';
+import { defaultDataViewFindHandler } from './data_views/find';
 
 export const defaultHandlers = [
   defaultStatusInstalled,
   defaultBenchmarks,
+  defaultRulesGetStates,
+  defaultApiLicensingInfo,
+  defaultDataViewFindHandler,
   http.get('http://localhost/api/licensing/info', () => {
     return HttpResponse.json(
       {

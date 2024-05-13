@@ -14,23 +14,16 @@ import {
   cspmStatusCspmNotDeployed,
 } from '../test/handlers/cspm_status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../test/mock_server';
+import { jestSetup } from '../test/setup_server.test';
 
-const server = setupMockServiceWorker();
+const server = setupMockServiceWorker(true);
 
 const renderWrapper = (children: React.ReactNode) => {
   return render(<TestProvider {...getMockServerServicesSetup()}>{children}</TestProvider>);
 };
 
 describe('NoFindingsStates', () => {
-  beforeAll(() =>
-    server.listen({
-      onUnhandledRequest: 'warn',
-    })
-  );
-  beforeEach(() => {
-    server.resetHandlers();
-  });
-  afterAll(() => server.close());
+  jestSetup(server);
 
   describe('Posture Type CSPM', () => {
     it('renders the not-installed component', async () => {

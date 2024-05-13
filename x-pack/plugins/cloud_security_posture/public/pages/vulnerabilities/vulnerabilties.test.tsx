@@ -19,31 +19,23 @@ import {
   cspmStatusCspmNotDeployed,
   cspmStatusIndexingTimeout,
   cspmStatusUnprivileged,
+  cnvmStatusIndexed,
 } from '../../test/handlers/cspm_status_handlers';
-import { getMockServerCoreSetup, setupMockServiceWorker } from '../../test/mock_server';
+import { getMockServerServicesSetup, setupMockServiceWorker } from '../../test/mock_server';
+import { jestSetup } from '../../test/setup_server.test';
 
-const server = setupMockServiceWorker();
+const server = setupMockServiceWorker(true);
 
 const renderVulnerabilitiesPage = () => {
-  const core = getMockServerCoreSetup();
-
   return render(
-    <TestProvider core={core}>
+    <TestProvider {...getMockServerServicesSetup()}>
       <Vulnerabilities />
     </TestProvider>
   );
 };
 
 describe('<Vulnerabilities />', () => {
-  beforeAll(() =>
-    server.listen({
-      onUnhandledRequest: 'warn',
-    })
-  );
-  beforeEach(() => {
-    server.resetHandlers();
-  });
-  afterAll(() => server.close());
+  jestSetup(server);
 
   it('No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ', async () => {
     server.use(cspmStatusCspmNotDeployed);
@@ -139,5 +131,16 @@ describe('<Vulnerabilities />', () => {
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
+  });
+
+  it.only('renders the success state component when "latest vulnerabilities findings" DataView exists and request status is "success"', async () => {
+    server.use(cnvmStatusIndexed);
+
+    const { getByText, getByTestId, debug } = renderVulnerabilitiesPage();
+
+    await expect(getByText('Loading...')).toBeInTheDocument();
+    await expect(getByText('Loading...')).not.toBeInTheDocument();
+    debug();
+    await waitFor(() => expect(getByTestId('latest_vulnerabilities_table')).toBeInTheDocument());
   });
 });

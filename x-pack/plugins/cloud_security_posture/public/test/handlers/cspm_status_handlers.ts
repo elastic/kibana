@@ -264,3 +264,47 @@ export const cspmStatusUnprivileged = http.get(
     });
   }
 );
+
+export const cnvmStatusIndexed = http.get(
+  'http://localhost/internal/cloud_security_posture/status',
+  () => {
+    return HttpResponse.json({
+      cspm: {
+        status: 'indexed',
+        healthyAgents: 0,
+        installedPackagePolicies: 1,
+      },
+      kspm: {
+        status: 'not-installed',
+        healthyAgents: 0,
+        installedPackagePolicies: 0,
+      },
+      vuln_mgmt: {
+        status: 'indexed',
+        healthyAgents: 0,
+        installedPackagePolicies: 0,
+      },
+      indicesDetails: [
+        {
+          index: 'logs-cloud_security_posture.findings_latest-default',
+          status: 'not-empty',
+        },
+        {
+          index: 'logs-cloud_security_posture.findings-default*',
+          status: 'empty',
+        },
+        {
+          index: 'logs-cloud_security_posture.scores-default',
+          status: 'not-empty',
+        },
+        {
+          index: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+          status: 'not-empty',
+        },
+      ],
+      isPluginInitialized: true,
+      latestPackageVersion: '1.8.1',
+      installedPackageVersion: '1.8.1',
+    });
+  }
+);
