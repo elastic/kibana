@@ -53,7 +53,7 @@ export const ExternalLinkComponent = ({
       className={'linksPanelLink'}
       showToolTip={Boolean(link.error)}
       toolTipProps={{
-        content: link.error,
+        content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
