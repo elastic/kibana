@@ -8,9 +8,9 @@
 #
 
 # Set default values for optional arguments if not provided
-kibana_url="https://telemetry-v2-staging.elastic.dev"
+kibana_url="https://dac92c18e1014fc592c05bcabd0ad677.us-west1.gcp.cloud.es.io:9243"
 space_id="securitysolution"
-data_view_name="security-solution-ebt-kibana-browser"
+data_view_name="security-sample-dv"
 
 # Parse named arguments
 while [ "$#" -gt 0 ]; do

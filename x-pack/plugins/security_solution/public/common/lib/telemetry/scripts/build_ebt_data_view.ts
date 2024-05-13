@@ -7,6 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
+import { telemetryEvents } from '../events/telemetry_events';
 
 const logger = new ToolingLog({
   level: 'info',
@@ -52,12 +53,51 @@ async function cli(): Promise<void> {
 
   try {
     logger.info(`Fetching data view "${dataViewName}"...`);
-    const dataViews = await axios.get(dataViewApiUrl, {
+    const {
+      data: { data_view: dataViews },
+    } = await axios.get(dataViewApiUrl, {
       headers: requestHeaders,
     });
-    console.log('dataViews', dataViews);
+    const ourDataView = dataViews.find(
+      (dataView: { id: string; name: string }) => dataView.name === dataViewName
+    );
+    if (!ourDataView) {
+      throw new Error(
+        `Data view "${dataViewName}" not found, check your data view is spelled correctly and is defined in the ${spaceId} space`
+      );
+    }
 
-    logger.info(`Data view "" has been fetched`);
+    logger.info(`Data view "${dataViewName}" has been fetched`);
+    const runtimeFields: Record<string, string> = {};
+    const manualRuntimeFields: Record<string, string> = {};
+    const valueMap: Record<string, string> = {
+      // actual allowed values
+      boolean: 'boolean',
+      composite: 'composite',
+      date: 'date',
+      double: 'double',
+      geo_point: 'geo_point',
+      ip: 'ip',
+      keyword: 'keyword',
+      long: 'long',
+      lookup: 'lookup',
+      // custom mapped
+      text: 'keyword',
+      integer: 'long',
+    };
+    const allowedValues = Object.keys(valueMap);
+    telemetryEvents.forEach((event) => {
+      const newProps = flattenSchema(event.schema);
+      Object.entries(newProps).forEach(([key, value]) => {
+        if (!runtimeFields[key] && allowedValues.includes(value)) {
+          runtimeFields[key] = valueMap[value];
+        } else if (!allowedValues.includes(value) && !manualRuntimeFields[key]) {
+          manualRuntimeFields[key] = value;
+        }
+      });
+    });
+    console.log('runtimeFields', JSON.stringify(runtimeFields, null, 2));
+    console.log('manualRuntimeFields', JSON.stringify(manualRuntimeFields, null, 2));
   } catch (e) {
     logger.error(`Error fetching data view "${dataViewName}" - ${e}`);
     throw e;
@@ -91,4 +131,36 @@ function removeTrailingSlash(url: string) {
   } else {
     return url;
   }
+}
+interface NestedObject {
+  [key: string]: { type?: string; properties?: NestedObject };
+}
+
+function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
+  const result: { [key: string]: string } = {};
+  const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
+  while (queue.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { obj, prefix } = queue.shift()!;
+    for (const key in obj) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if ('type' in obj[key]) {
+          const newKey = `${prefix}${key}`;
+          // @ts-ignore
+          result[newKey] = obj[key].type;
+        } else if (obj[key].properties) {
+          const nestedObj = obj[key].properties;
+          const nestedPrefix = `${prefix}${key}.`;
+          // @ts-ignore
+          queue.push({ obj: nestedObj, prefix: nestedPrefix });
+        } else if (obj[key]) {
+          const nestedObj = obj[key];
+          const nestedPrefix = `${prefix}${key}.`;
+          // @ts-ignore
+          queue.push({ obj: nestedObj, prefix: nestedPrefix });
+        }
+      }
+    }
+  }
+  return result;
 }
