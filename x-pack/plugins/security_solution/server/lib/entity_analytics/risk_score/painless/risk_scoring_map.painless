@@ -10,8 +10,6 @@ fields.put('category', category);
 fields.put('index', doc['_index'].value);
 fields.put('id', doc['kibana.alert.uuid'].value);
 fields.put('score', score);
-
-//${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
 fields.put('weighted_score', weighted_score);
 
 state.inputs.add(fields);
