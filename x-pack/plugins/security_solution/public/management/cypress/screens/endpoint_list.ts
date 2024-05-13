@@ -30,7 +30,7 @@ const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementP
 
 export const visitEndpointList = (): Cypress.Chainable => {
   cy.visit(pageById.endpointList.url);
-  return cy.getBySel('globalLoadingIndicator').should('not.exist');
+  return cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
 };
 
 /**
