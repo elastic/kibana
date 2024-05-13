@@ -8,107 +8,136 @@
  */
 
 import { Container } from 'inversify';
+import type { interfaces } from 'inversify';
+import { chain } from 'lodash';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { ContainerModule, ReadonlyContainer } from '@kbn/core-di-common';
-import {
-  pluginOpaqueIdServiceId,
-  pluginNameServiceId,
-  pluginManifestServiceId,
-} from '@kbn/core-di-common-internal';
+import { Global } from '@kbn/core-di-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { requestServiceId } from '@kbn/core-di-server';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './internal_contracts';
-import { createModule } from './utils';
+
+interface Reference<T = unknown> {
+  id: PluginOpaqueId;
+  index?: number;
+  service: interfaces.ServiceIdentifier<T>;
+}
 
 /** @internal */
 export class CoreInjectionService {
-  private rootContainer: Container;
-  private pluginContainers: Map<PluginOpaqueId, Container> = new Map();
-  private requestContainers: Map<string, Container> = new Map();
-  private internalPluginModules: ContainerModule[] = [];
-  private requestScopedModules: ContainerModule[] = [];
+  private static readonly Context = Symbol(
+    'Context'
+  ) as interfaces.ServiceIdentifier<interfaces.Container>;
+  private static readonly Id = Symbol('Id') as interfaces.ServiceIdentifier<symbol>;
+  private static readonly Scope = Symbol(
+    'Scope'
+  ) as interfaces.ServiceIdentifier<interfaces.Container>;
 
-  // private blockInternalRegistration: false; // TODO: use
+  private static getReference<T>({ id, index, service }: Reference<T>): interfaces.DynamicValue<T> {
+    return ({ container }) => {
+      const scope = container
+        .get(CoreInjectionService.Context)
+        .getNamed(CoreInjectionService.Scope, id);
+
+      if (index == null) {
+        return scope.get(service);
+      }
+
+      return scope.getAll(service)[index];
+    };
+  }
+
+  private static bindGlobals(target: interfaces.Container, source: interfaces.Container) {
+    const id = source.get(this.Id);
+
+    if (!source.isBound(Global)) {
+      return;
+    }
+
+    chain(source.getAll(Global))
+      .groupBy()
+      .flatMap((services) =>
+        services.map((service, index) => ({
+          id,
+          service,
+          index: services.length === 1 ? undefined : index,
+        }))
+      )
+      .forEach((reference) => {
+        target
+          .bind(reference.service)
+          .toDynamicValue(this.getReference(reference))
+          .inRequestScope();
+      });
+  }
+
+  private root = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
 
   constructor(private readonly coreContext: CoreContext) {
-    this.rootContainer = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
+    this.getContainer = this.getContainer.bind(this);
+    this.fork = this.fork.bind(this);
+    this.load = this.load.bind(this);
+  }
+
+  protected getContainer(id: PluginOpaqueId) {
+    if (!this.root.isBoundNamed(CoreInjectionService.Scope, id)) {
+      const scope = this.root.createChild();
+
+      scope.bind(CoreInjectionService.Id).toConstantValue(id);
+      this.root.bind(CoreInjectionService.Scope).toConstantValue(scope).whenTargetNamed(id);
+    }
+
+    return this.root.getNamed(CoreInjectionService.Scope, id);
+  }
+
+  protected load(id: PluginOpaqueId, module: interfaces.ContainerModule): void {
+    this.getContainer(id).load(module);
+  }
+
+  protected fork(root: interfaces.Container = this.root) {
+    const fork = root.createChild();
+
+    root
+      .getAll(CoreInjectionService.Scope)
+      .map((scope) => scope.get(CoreInjectionService.Id))
+      .forEach((id) => {
+        fork
+          .bind(CoreInjectionService.Scope)
+          .toDynamicValue(({ container }) =>
+            container.parent!.getNamed(CoreInjectionService.Scope, id).createChild()
+          )
+          .inSingletonScope()
+          .onActivation(({ container }, scope) => {
+            scope.bind(CoreInjectionService.Context).toConstantValue(container);
+            CoreInjectionService.bindGlobals(scope, container);
+
+            return scope;
+          })
+          .whenTargetNamed(id);
+      });
+
+    return fork;
   }
 
   public setup(): InternalCoreDiServiceSetup {
     return {
-      configurePluginModule: (pluginId, callback) => {
-        const pluginContainer = this.pluginContainers.get(pluginId)!;
-        const modules = callback(pluginContainer, { createModule });
-        if (modules.global) {
-          this.rootContainer.load(modules.global);
-        }
-        if (modules.request) {
-          this.requestScopedModules.push(modules.request);
-        }
-      },
-
-      createPluginContainer: (pluginId, pluginManifest) => {
-        // TODO: check if already exists
-        const pluginContainer = this.rootContainer.createChild();
-        this.pluginContainers.set(pluginId, pluginContainer);
-        pluginContainer.bind(pluginOpaqueIdServiceId).toConstantValue(pluginId);
-        pluginContainer.bind(pluginNameServiceId).toConstantValue(pluginManifest.id);
-        pluginContainer.bind(pluginManifestServiceId).toConstantValue(pluginManifest);
-        this.internalPluginModules.forEach((pluginModule) => {
-          pluginContainer.load(pluginModule);
-        });
-        return pluginContainer;
-      },
-
-      registerPluginModule: (module) => {
-        this.internalPluginModules.push(module);
-      },
-      registerGlobalModule: (module) => {
-        this.rootContainer.load(module);
-      },
-      registerRequestModule: (module) => {
-        this.requestScopedModules.push(module);
-      },
+      load: this.load,
     };
   }
 
   public start(): InternalCoreDiServiceStart {
+    this.root
+      .bind(CoreInjectionService.Context)
+      .toDynamicValue(({ container }) => container)
+      .inRequestScope();
+
+    if (this.root.isBound(CoreInjectionService.Scope)) {
+      this.root
+        .getAll(CoreInjectionService.Scope)
+        .forEach((scope) => CoreInjectionService.bindGlobals(this.root, scope));
+    }
+
     return {
-      getPluginContainer: (pluginId: PluginOpaqueId) => {
-        const pluginContainer = this.pluginContainers.get(pluginId)!;
-        return toReadonly(pluginContainer);
-      },
-      createRequestContainer: (request, callerId) => {
-        const parentContainer =
-          callerId === this.coreContext.coreId
-            ? this.rootContainer
-            : this.pluginContainers.get(callerId)!;
-
-        const requestContainer = parentContainer.createChild();
-        this.requestContainers.set(request.uuid, requestContainer);
-
-        requestContainer.bind(requestServiceId).toConstantValue(request);
-        this.requestScopedModules.forEach((requestModule) => {
-          requestContainer.load(requestModule);
-        });
-
-        return requestContainer;
-      },
-      disposeRequestContainer: (request) => {
-        const requestContainer = this.requestContainers.get(request.uuid);
-        if (!requestContainer) {
-          return false;
-        }
-        requestContainer.unbindAll();
-        this.requestContainers.delete(request.uuid);
-        return true;
-      },
+      getContainer: this.getContainer,
+      fork: this.fork,
     };
   }
 }
-
-const toReadonly = (container: Container): ReadonlyContainer => {
-  return {
-    get: (id) => container.get(id),
-  };
-};

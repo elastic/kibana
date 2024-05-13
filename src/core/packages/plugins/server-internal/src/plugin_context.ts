@@ -305,7 +305,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
     injection: {
-      setupModule: (callback) => deps.injection.configurePluginModule(plugin.opaqueId, callback),
+      load: deps.injection.load.bind(deps.injection, plugin.opaqueId),
     },
   };
 }
@@ -401,7 +401,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     userProfile: deps.userProfile,
     injection: {
-      container: deps.injection.getPluginContainer(plugin.opaqueId),
+      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
     },
   };
 }
