@@ -501,8 +501,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "actions" */
-      './actions'
+      /* webpackChunkName: "lazy_actions" */
+      './lazy_actions'
     );
   }
 
