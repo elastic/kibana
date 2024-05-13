@@ -134,7 +134,7 @@ export function extractReferences({
 /**
  * @deprecated Use deserializeReferences
  */
-export function injectReferences(savedObject: VisSavedObject, references: Reference[]) {
+export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
   if (savedObject.searchSourceFields) {
     savedObject.searchSourceFields = injectSearchSourceReferences(
       savedObject.searchSourceFields as any,
