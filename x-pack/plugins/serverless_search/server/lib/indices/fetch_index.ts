@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
@@ -14,13 +15,15 @@ export async function fetchIndex(
   client: ElasticsearchClient,
   indexName: string
 ): Promise<FetchIndexResult | undefined> {
-  const [indexDataResult, indexStatsResult, indexCountResult, connectorResult] =
+  const [indexDataResult, indexStatsResult, indexCatResult, indexCountResult, connectorResult] =
     await Promise.allSettled([
       client.indices.get({ index: indexName }),
       client.indices.stats({ index: indexName }),
+      client.cat.indices({ index: indexName, format: 'json' }),
       client.count({ index: indexName }),
       fetchConnectorByIndexName(client, indexName),
     ]);
+
   if (indexDataResult.status === 'rejected') {
     throw indexDataResult.reason;
   }
@@ -34,12 +37,17 @@ export async function fetchIndex(
     indexStatsResult.status === 'fulfilled'
       ? indexStatsResult.value.indices?.[indexName]
       : undefined;
+  const cat = indexCatResult.status === 'fulfilled' ? indexCatResult.value : undefined;
+  const indexCat: Record<string, CatIndicesResponse | undefined> =
+    indexCatResult.status === 'fulfilled' ? Object.assign({}, ...indexCatResult.value) : {};
+
   return {
     index: {
       ...index,
       count,
       connector,
       stats,
+      indexCat,
     },
   };
 }

@@ -88,6 +88,8 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
   }
 
   const indexData = data.index;
+  const dataSize = indexData?.indexCat['dataset.size'] ?? 0;
+
   return (
     <>
       {aliasesFlyoutOpen && (
@@ -218,11 +220,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
             >
               <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <IndexOverviewPanelStat>
-                    {numeral(
-                      indexData.stats?.primaries?.store?.total_data_set_size_in_bytes ?? 0
-                    ).format('0 b')}
-                  </IndexOverviewPanelStat>
+                  <IndexOverviewPanelStat>{numeral(dataSize).format('0 b')}</IndexOverviewPanelStat>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued">
@@ -236,9 +234,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <IndexOverviewPanelStat>
-                    {numeral(
-                      indexData.stats?.total?.store?.total_data_set_size_in_bytes ?? 0
-                    ).format('0 b')}
+                    {numeral(parseFloat(dataSize.toString()) * 2).format('0 b')}
                   </IndexOverviewPanelStat>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
