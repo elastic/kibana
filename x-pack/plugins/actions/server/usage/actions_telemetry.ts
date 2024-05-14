@@ -595,8 +595,7 @@ export async function getExecutionsPerDayCount(
 
     const aggsExecutions = getActionExecutions(
       // @ts-expect-error aggegation type is not specified
-      actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId
-        .buckets as ByActionTypeIdAgg[]
+      actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId.buckets
     );
 
     // convert nanoseconds to milliseconds
@@ -608,7 +607,7 @@ export async function getExecutionsPerDayCount(
     const aggsFailedExecutions = getActionExecutions(
       // @ts-expect-error aggegation type is not specified
       actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs?.byConnectorTypeId
-        .buckets as ByActionTypeIdAgg[]
+        .buckets
     );
 
     const avgDurationByType =
