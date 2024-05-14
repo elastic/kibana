@@ -779,14 +779,18 @@ const AssistantComponent: React.FC<Props> = ({
         textAlign="center"
         color={euiThemeVars.euiColorMediumShade}
         size="xs"
-        css={css`
-          margin: ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
-        `}
+        css={
+          isFlyoutMode
+            ? css`
+                margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+              `
+            : {}
+        }
       >
         {i18n.DISCLAIMER}
       </EuiText>
     ),
-    []
+    [isFlyoutMode]
   );
 
   const flyoutBodyContent = useMemo(() => {
