@@ -70,6 +70,8 @@ export function createAddSingleMetricViewerPanelAction(
 
         const initialState = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
+          context.embeddable,
+          context.embeddable.uuid,
           { data, share },
           mlApiServices
         );

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
@@ -18,18 +18,16 @@ import type { MlApiServices } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
+  parentApi: unknown,
+  focusedPanelId: string,
   services: { data: DataPublicPluginStart; share?: SharePluginStart },
   mlApiServices: MlApiServices,
   input?: Partial<SingleMetricViewerEmbeddableInput>
 ): Promise<SingleMetricViewerEmbeddableUserInput> {
-  const {
-    http,
-    overlays,
-    application: { currentLocation$ },
-    ...startServices
-  } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
   const { data, share } = services;
   const timefilter = data.query.timefilter.timefilter;
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -51,10 +49,12 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
               onCreate={(explicitInput) => {
                 flyoutSession.close();
                 resolve(explicitInput);
+                overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
                 flyoutSession.close();
                 reject();
+                overlayTracker?.clearOverlays();
               }}
             />
           </KibanaContextProvider>,
@@ -71,11 +71,11 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
         }
       );
       // Close the flyout when user navigates out of the current plugin
-      currentLocation$
-        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutSession.close();
+      if (tracksOverlays(parentApi)) {
+        parentApi.openOverlay(flyoutSession, {
+          focusedPanelId,
         });
+      }
     } catch (error) {
       reject(error);
     }

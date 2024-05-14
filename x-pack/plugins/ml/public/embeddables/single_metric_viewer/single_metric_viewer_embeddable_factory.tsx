@@ -101,6 +101,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
               const [coreStart, { data, share }, { mlApiServices }] = services;
               const result = await resolveEmbeddableSingleMetricViewerUserInput(
                 coreStart,
+                parentApi,
+                uuid,
                 { data, share },
                 mlApiServices,
                 {
