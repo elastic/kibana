@@ -13,7 +13,9 @@ import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../types';
 import type { SuppressionTerm } from '../../utils/suppression_utils';
 /**
- * generates id for ES|QL alert
+ * Generates id for ES|QL alert.
+ * Id is generated as hash of event properties and rule/space config identifiers.
+ * This would allow to deduplicate alerts, generated from the same event.
  */
 export const generateAlertId = ({
   event,
