@@ -16,6 +16,20 @@ import type { RequiredFieldInput } from '../../../../../common/api/detection_eng
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
 const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      docLinks: {
+        links: {
+          securitySolution: {
+            ruleUiAdvancedParams: 'http://link-to-docs',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 describe('RequiredFields form part', () => {
   it('displays the required fields label', () => {
     render(<TestForm />);
