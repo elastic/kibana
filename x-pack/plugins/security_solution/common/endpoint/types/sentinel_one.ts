@@ -19,7 +19,6 @@ export interface SentinelOneActivityEsDoc<TData = unknown> {
         id: string;
       };
       updated_at: string;
-      created_at: string;
       description: {
         primary: string;
         secondary?: string;
