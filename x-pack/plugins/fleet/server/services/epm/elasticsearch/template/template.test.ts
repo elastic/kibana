@@ -346,7 +346,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithIndexFalseMapping);
   });
 
-  it('tests processing long field with index false', () => {
+  it('tests processing text field with store true', () => {
     const textWithStoreTrueYml = `
 - name: someTextId
   type: text
@@ -1360,7 +1360,7 @@ describe('EPM template', () => {
             path_match: 'messages.*',
             mapping: {
               type: 'text',
-              store: true
+              store: true,
             },
           },
         },
