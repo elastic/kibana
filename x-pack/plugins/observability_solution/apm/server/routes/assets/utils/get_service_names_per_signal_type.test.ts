@@ -18,11 +18,17 @@ describe('getServiceNamesPerSignalType', () => {
   it('returns service names for assets with traces signal types', () => {
     const serviceAssets: AssetService[] = [
       {
-        asset: { signalTypes: { 'asset.traces': true }, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.traces': true, 'asset.logs': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service1' },
       },
       {
-        asset: { signalTypes: {}, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.traces': false, 'asset.logs': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service2' },
       },
     ];
@@ -33,11 +39,17 @@ describe('getServiceNamesPerSignalType', () => {
   it('returns service names for assets with logs signal types', () => {
     const serviceAssets: AssetService[] = [
       {
-        asset: { signalTypes: { 'asset.logs': true }, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.logs': true, 'asset.traces': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service1' },
       },
       {
-        asset: { signalTypes: {}, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.logs': false, 'asset.traces': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service2' },
       },
     ];
@@ -48,11 +60,17 @@ describe('getServiceNamesPerSignalType', () => {
   it('returns empty arrays when there are no assets with signal types', () => {
     const serviceAssets: AssetService[] = [
       {
-        asset: { signalTypes: {}, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.logs': false, 'asset.traces': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service1' },
       },
       {
-        asset: { signalTypes: {}, identifyingMetadata: [] },
+        asset: {
+          signalTypes: { 'asset.logs': false, 'asset.traces': false },
+          identifyingMetadata: [],
+        },
         service: { name: 'Service2' },
       },
     ];
