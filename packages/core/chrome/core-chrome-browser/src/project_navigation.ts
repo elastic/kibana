@@ -8,7 +8,7 @@
 
 import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
-import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
@@ -438,3 +438,16 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
 export interface SolutionNavigationDefinitions {
   [id: string]: SolutionNavigationDefinition;
 }
+
+/**
+ * This helper type is there to help with having maintaining both the legacy side navigation
+ * and the new ones. The legacy uses EuiSideNavItemType and its properties are not fully compatible
+ * with our NodeDefinition. Solution used to declare their navigation using the legacy EuiSideNavItemType.
+ * Converting those to NodeDefinition require some prop to be slightly different (e.g. a ReactNode that can only
+ * be a string in the new nav).
+ */
+export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>, 'items'> & {
+  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>;
+  iconToString?: string;
+  nameToString?: string;
+};

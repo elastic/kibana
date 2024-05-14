@@ -9,7 +9,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
+import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -43,7 +44,7 @@ export const useEnterpriseSearchNav = () => {
   const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled) return undefined;
 
-  const navItems: Array<EuiSideNavItemType<unknown>> = [
+  const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
     {
       id: 'home',
       name: (
@@ -264,6 +265,7 @@ export const useEnterpriseSearchApplicationNav = (
               }),
             },
             {
+              iconToString: hasSchemaConflicts ? 'warning' : undefined,
               id: 'enterpriseSearchApplicationsContent',
               name: (
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -272,6 +274,13 @@ export const useEnterpriseSearchApplicationNav = (
                   })}
                   {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
                 </EuiFlexGroup>
+              ),
+              // Required for the new side nav
+              nameToString: i18n.translate(
+                'xpack.enterpriseSearch.nav.searchApplication.contentTitle',
+                {
+                  defaultMessage: 'Content',
+                }
               ),
               ...generateNavLink({
                 shouldNotCreateHref: true,

@@ -12,11 +12,13 @@ import type {
   SolutionNavigationDefinition,
   NavigationTreeDefinition,
   NodeDefinition,
+  EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 export interface DynamicSideNavItems {
   indices?: Array<EuiSideNavItemType<unknown>>;
+  searchApps?: Array<EuiSideNavItemType<unknown>>;
 }
 
 const title = i18n.translate(
@@ -30,21 +32,20 @@ const icon = 'logoElasticsearch';
 const euiItemTypeToNodeDefinition = ({
   items,
   href,
+  iconToString,
   id,
   isSelected = false,
   name,
+  nameToString,
   onClick,
-}: EuiSideNavItemType<unknown>): NodeDefinition => {
-  if (typeof name !== 'string') {
-    throw new Error(`[Item ${id}] Expected item name to be a string`);
-  }
-
+}: EuiSideNavItemTypeEnhanced<unknown>): NodeDefinition => {
   const isAccordion = items !== undefined;
 
   const node: NodeDefinition = {
     children: isAccordion ? items.map(euiItemTypeToNodeDefinition) : undefined,
     getIsActive: () => isSelected,
     href,
+    icon: iconToString,
     id: `${id}`,
     onClick: onClick
       ? (e) => {
@@ -52,7 +53,7 @@ const euiItemTypeToNodeDefinition = ({
           onClick(e);
         }
       : undefined,
-    title: name,
+    title: typeof name === 'string' ? name : nameToString,
     ...(isAccordion ? { isCollapsible: false, renderAs: 'accordion' } : {}),
   };
 
@@ -70,7 +71,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices }) => {
+      map(({ indices, searchApps }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             { type: 'recentlyAccessed' },
@@ -150,39 +151,21 @@ export const getNavigationTreeDefinition = ({
                       link: 'enterpriseSearchApplications:playground',
                     },
                     {
-                      // TODO: Build the children dynamically
-                      // https://github.com/elastic/kibana/issues/179751
-                      // renderAs: 'accordion',
-                      // children: [
-                      //   {
-                      //     title: i18n.translate(
-                      //       'navigation.searchNav.build.searchApplications.docsExplorer',
-                      //       {
-                      //         defaultMessage: 'Docs explorer',
-                      //       }
-                      //     ),
-                      //     link: 'home',
-                      //   },
-                      //   {
-                      //     title: i18n.translate('xpack.enterpriseSearch.searchNav.build.searchApplications.content', {
-                      //       defaultMessage: 'Content',
-                      //     }),
-                      //     link: 'home',
-                      //   },
-                      //   {
-                      //     title: i18n.translate('xpack.enterpriseSearch.searchNav.build.searchApplications.connect', {
-                      //       defaultMessage: 'Connect',
-                      //     }),
-                      //     link: 'home',
-                      //   },
-                      // ],
                       link: 'enterpriseSearchApplications:searchApplications',
+                      renderAs: 'item',
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.build.searchApplications',
                         {
                           defaultMessage: 'Search applications',
                         }
                       ),
+                      ...(searchApps
+                        ? {
+                            children: searchApps.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                     {
                       link: 'enterpriseSearchAnalytics',

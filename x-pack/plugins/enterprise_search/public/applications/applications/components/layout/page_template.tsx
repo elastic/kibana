@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect } from 'react';
 
 import { useValues } from 'kea';
+
+import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -45,7 +47,24 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
     pageTemplateProps.isEmptyState,
     hasSchemaConflicts
   );
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, updateSideNavDefinition } = useValues(KibanaLogic);
+
+  const getSelectedAppItems = useCallback(
+    (
+      items?: Array<EuiSideNavItemTypeEnhanced<unknown>>
+    ): Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined => {
+      if (!items) return undefined;
+
+      const buildGroup = items.find((item) => item.id === 'build');
+      if (!buildGroup || !buildGroup.items) return undefined;
+
+      const searchAppsGroup = buildGroup.items.find((item) => item.id === 'searchApplications');
+
+      return searchAppsGroup?.items;
+    },
+    []
+  );
+
   useLayoutEffect(() => {
     const docAction = {
       playground: PlaygroundHeaderDocsAction,
@@ -57,6 +76,17 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
       renderHeaderActions();
     };
   }, []);
+
+  useEffect(() => {
+    updateSideNavDefinition({ searchApps: getSelectedAppItems(navItems) });
+  }, [navItems, getSelectedAppItems, updateSideNavDefinition]);
+
+  useEffect(() => {
+    return () => {
+      updateSideNavDefinition({ searchApps: undefined });
+    };
+  }, [updateSideNavDefinition]);
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
