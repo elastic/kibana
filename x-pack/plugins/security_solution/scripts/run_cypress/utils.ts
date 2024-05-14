@@ -101,7 +101,7 @@ export const parseTestFileConfig = (
       'devConfig',
     ]);
 
-    if (!ftrConfig || !devConfig) {
+    if (!ftrConfig && !devConfig) {
       return {
         ftrConfig: {},
         devConfig: false,
@@ -115,7 +115,7 @@ export const parseTestFileConfig = (
       const ftrConfigJson = new Function(`return ${ftrConfigCode}`)();
       return {
         ftrConfig: TestFileFtrConfigSchema.validate(ftrConfigJson),
-        devConfig: devConfig.value.value,
+        devConfig: devConfig?.value?.value || false,
       };
     } catch (err) {
       throw new Error(

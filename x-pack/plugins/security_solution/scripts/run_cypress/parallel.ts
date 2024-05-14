@@ -7,7 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
-import _, { xor } from 'lodash';
+import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -338,7 +338,7 @@ ${JSON.stringify(
                       ? ['--dev']
                       : []
                     : // if test spec file contains devConfig: true
-                      xor(
+                      _.xor(
                         ['--dev', '--no-dev-config', '--no-dev-credentials'],
                         specFileFTRConfig.devConfig ? ['--no-dev-config'] : []
                       ),
@@ -455,8 +455,8 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
                   }
-                } catch (error) {
-                  result = error;
+                } catch (_e) {
+                  /* empty */
                 }
               }
 

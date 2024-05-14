@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable-file @kbn/imports/no_unresolvable_imports */
+/* eslint @kbn/imports/no_unresolvable_imports: 0 */
 
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
