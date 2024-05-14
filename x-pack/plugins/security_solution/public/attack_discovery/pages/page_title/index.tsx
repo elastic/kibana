@@ -25,10 +25,11 @@ const PageTitleComponent: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiBetaBadge
           label={i18n.BETA}
-          size="s"
+          tooltipContent={i18n.BETA_TOOLTIP}
+          size="m"
           css={css`
             color: ${euiTheme.colors.text};
-            margin-top: ${euiTheme.size.m};
+            margin-top: ${euiTheme.size.s};
             margin-left: ${euiTheme.size.m};
           `}
         />

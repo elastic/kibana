@@ -773,24 +773,26 @@ const AssistantComponent: React.FC<Props> = ({
   ]);
 
   const disclaimer = useMemo(
-    () => (
-      <EuiText
-        data-test-subj="assistant-disclaimer"
-        textAlign="center"
-        color={euiThemeVars.euiColorMediumShade}
-        size="xs"
-        css={
-          isFlyoutMode
-            ? css`
-                margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
-              `
-            : {}
-        }
-      >
-        {i18n.DISCLAIMER}
-      </EuiText>
-    ),
-    [isFlyoutMode]
+    () =>
+      isNewConversation && (
+        <EuiText
+          data-test-subj="assistant-disclaimer"
+          textAlign="center"
+          color={euiThemeVars.euiColorMediumShade}
+          size="xs"
+          css={
+            isFlyoutMode
+              ? css`
+                  margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM}
+                    ${euiThemeVars.euiSizeL};
+                `
+              : {}
+          }
+        >
+          {i18n.DISCLAIMER}
+        </EuiText>
+      ),
+    [isFlyoutMode, isNewConversation]
   );
 
   const flyoutBodyContent = useMemo(() => {
