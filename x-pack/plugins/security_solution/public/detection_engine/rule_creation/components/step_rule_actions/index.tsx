@@ -83,7 +83,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   form,
 }) => {
   const {
-    services: { application },
+    services: { application, triggersActionsUi },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
 

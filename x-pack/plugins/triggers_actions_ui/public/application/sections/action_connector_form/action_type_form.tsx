@@ -408,8 +408,9 @@ export const ActionTypeForm = ({
     />
   );
 
+  if (!actionTypeRegistry.has(actionConnector.actionTypeId)) return null;
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
-  if (!actionTypeRegistered) return null;
+
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
   const showActionGroupErrorIcon = (): boolean => {

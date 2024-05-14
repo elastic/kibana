@@ -17,14 +17,14 @@ export class TypeRegistry<T extends BaseObjectType> {
   /**
    * Returns if the object type registry has the given type registered
    */
-  public has(id: string) {
+  public has(id: string): boolean {
     return this.objectTypes.has(id);
   }
 
   /**
    * Registers an object type to the type registry
    */
-  public register(objectType: T) {
+  public register(objectType: T): void {
     if (this.has(objectType.id)) {
       throw new Error(
         i18n.translate(
@@ -60,5 +60,26 @@ export class TypeRegistry<T extends BaseObjectType> {
 
   public list() {
     return Array.from(this.objectTypes).map(([id, objectType]) => objectType);
+  }
+
+  /**
+   * Removes an object type, throw error if not registered
+   * Used for security solution serverless
+   */
+  public delete(id: string): boolean {
+    if (!this.has(id)) {
+      throw new Error(
+        i18n.translate(
+          'xpack.triggersActionsUI.typeRegistry.delete.missingActionTypeErrorMessage',
+          {
+            defaultMessage: 'Object type "{id}" is not registered.',
+            values: {
+              id,
+            },
+          }
+        )
+      );
+    }
+    return this.objectTypes.delete(id)!;
   }
 }

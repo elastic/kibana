@@ -6,7 +6,17 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+// import {
+//   IndexConnectorTypeId,
+//   SlackWebhookConnectorTypeId,
+//   EmailConnectorTypeId,
+// } from '@kbn/stack-connectors-plugin/server/connector_types';
 
+// import {
+//   getIndexConnectorType,
+//   getSlackWebhookConnectorType,
+//   getEmailConnectorType,
+// } from '@kbn/stack-connectors-plugin/public/common';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -24,6 +34,12 @@ import {
 } from '../common/experimental_features';
 import { getCloudUrl, getProjectFeaturesUrl } from './navigation/util';
 import { setOnboardingSettings } from './onboarding';
+
+// const INTERNAL_RULE_ACTIONS = [
+//   IndexConnectorTypeId,
+//   SlackWebhookConnectorTypeId,
+//   EmailConnectorTypeId,
+// ];
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -64,6 +80,11 @@ export class SecuritySolutionServerlessPlugin
   ): SecuritySolutionServerlessPluginStart {
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
+
+    // startDeps.triggersActionsUi.actionTypeRegistry
+    //   .list()
+    //   .filter((action) => !['.index', '.slack', '.email'].includes(action.id))
+    //   .map((action) => startDeps.triggersActionsUi.actionTypeRegistry.delete(action.id));
 
     const services = createServices(core, startDeps, this.experimentalFeatures);
 

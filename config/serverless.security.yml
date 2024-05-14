@@ -16,14 +16,14 @@ xpack.cloud.serverless.project_type: security
 xpack.securitySolutionServerless.enabled: true
 xpack.securitySolutionServerless.productTypes:
   [
-    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'security', product_tier: 'essentials' },
     { product_line: 'endpoint', product_tier: 'complete' },
     { product_line: 'cloud', product_tier: 'complete' },
   ]
 
 xpack.securitySolution.offeringSettings: {
-  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
-}
+    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+  }
 
 newsfeed.enabled: true
 

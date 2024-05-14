@@ -97,6 +97,12 @@ export function NotificationAction({
   const connector = connectors.find(({ id }) => id === action.id);
   const connectorName = connector?.name ?? '';
 
+  // checkActionTypeEnabled
+
+  if (!actionTypeRegistry.has(action.actionTypeId)) {
+    return <EuiFlexItem>{`${action.actionTypeId} not available`}</EuiFlexItem>;
+  }
+
   const iconType = actionTypeRegistry.get(action.actionTypeId)?.iconClass ?? 'apps';
 
   return (
