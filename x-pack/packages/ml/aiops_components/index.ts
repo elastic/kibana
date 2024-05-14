@@ -18,3 +18,14 @@ export type {
   BrushSelectionUpdateHandler,
   DocumentCountChartProps,
 } from './src/document_count_chart';
+<<<<<<< HEAD
+=======
+export {
+  useLogRateAnalysisStateContext,
+  LogRateAnalysisStateProvider,
+  type GroupTableItem,
+  type GroupTableItemGroup,
+  type TableItemAction,
+} from './src/log_rate_analysis_state_provider';
+export { SimpleAnalysisResultsTable, NARROW_COLUMN_WIDTH } from './src/results_table';
+>>>>>>> 49b1d08606e3 (aiops_components: simple analysis results table)
