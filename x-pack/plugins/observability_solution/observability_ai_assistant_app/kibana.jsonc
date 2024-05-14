@@ -26,7 +26,7 @@
       "alerting",
       "features"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

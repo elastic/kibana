@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   // This is necessary to fix a race condition issue.
@@ -17,14 +17,17 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, storageUpdate, defaultValue]);
 
-  const saveToStorage = (value: T) => {
-    if (value === undefined) {
-      window.localStorage.removeItem(key);
-    } else {
-      window.localStorage.setItem(key, JSON.stringify(value));
-      setStorageUpdate(storageUpdate + 1);
-    }
-  };
+  const saveToStorage = useCallback(
+    (value: T) => {
+      if (value === undefined) {
+        window.localStorage.removeItem(key);
+      } else {
+        window.localStorage.setItem(key, JSON.stringify(value));
+        setStorageUpdate(storageUpdate + 1);
+      }
+    },
+    [key, storageUpdate]
+  );
 
   useEffect(() => {
     function onUpdate(event: StorageEvent) {
@@ -38,7 +41,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     };
   }, [key, setStorageUpdate, storageUpdate]);
 
-  return [item, saveToStorage] as const;
+  return useMemo(() => [item, saveToStorage] as const, [item, saveToStorage]);
 }
 
 function getFromStorage<T>(keyName: string, defaultValue: T) {

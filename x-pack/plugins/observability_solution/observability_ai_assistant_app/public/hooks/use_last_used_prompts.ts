@@ -6,6 +6,7 @@
  */
 
 import { uniq } from 'lodash';
+import { useCallback, useMemo } from 'react';
 import { useLocalStorage } from './use_local_storage';
 
 const AI_ASSISTANT_LAST_USED_PROMPT_STORAGE = 'kibana.ai-assistant.last-used-prompts';
@@ -16,7 +17,13 @@ export function useLastUsedPrompts() {
     []
   );
 
-  const addPrompt = (prompt: string) => setPrompt(uniq([prompt, ...lastUsedPrompts]).slice(0, 5));
+  const addLastUsedPrompt = useCallback(
+    (prompt: string) => setPrompt(uniq([prompt, ...lastUsedPrompts]).slice(0, 5)),
+    [lastUsedPrompts, setPrompt]
+  );
 
-  return { lastUsedPrompts, addPrompt };
+  return useMemo(
+    () => ({ lastUsedPrompts, addLastUsedPrompt }),
+    [addLastUsedPrompt, lastUsedPrompts]
+  );
 }

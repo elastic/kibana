@@ -50,7 +50,7 @@ export function PromptEditor({
 
   const [hasFocus, setHasFocus] = useState(false);
 
-  const { lastUsedPrompts, addPrompt } = useLastUsedPrompts();
+  const { lastUsedPrompts, addLastUsedPrompt } = useLastUsedPrompts();
 
   const initialInnerMessage = initialRole
     ? {
@@ -100,13 +100,13 @@ export function PromptEditor({
     }
   };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (loading || !innerMessage) {
       return;
     }
 
     if (innerMessage.content) {
-      addPrompt(innerMessage.content);
+      addLastUsedPrompt(innerMessage.content);
     }
 
     const oldMessage = innerMessage;
@@ -130,7 +130,7 @@ export function PromptEditor({
       setInnerMessage(oldMessage);
       setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
-  }, [addPrompt, innerMessage, loading, onSendTelemetry, onSubmit]);
+  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit]);
 
   // Submit on Enter
   useEffect(() => {
