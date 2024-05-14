@@ -60,7 +60,7 @@ jest.mock('../../../services/index_stats', () => {
     indexStatsService: {
       getIndicesDocCounts: jest.fn().mockImplementation(() => {
         return {
-          perIndexStats: {
+          docsCountPerDataStream: {
             'logs-elastic_agent-default': 100,
             'logs-elastic_agent.filebeat-default': 200,
             'logs-elastic_agent.fleet_server-default': 0,
