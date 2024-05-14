@@ -191,7 +191,7 @@ export function initializeReduxSync({
       reload: () => {
         store.dispatch<any>(
           setQuery({
-            forceRefresh: true
+            forceRefresh: true,
           })
         );
       },

@@ -55,7 +55,7 @@ export type MapSerializedState = SerializedTitles &
     // Configuration item that are never persisted
     // Putting in state as a temporary work around
     isSharable?: boolean;
-    tooltipRenderer?: RenderToolTipContent
+    tooltipRenderer?: RenderToolTipContent;
   };
 
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &

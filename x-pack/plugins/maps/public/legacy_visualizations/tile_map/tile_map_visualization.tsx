@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { first } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { TileMapVisConfig } from './types';
@@ -21,6 +23,7 @@ interface Props {
 }
 
 export function TileMapVisualization(props: Props) {
+  const isMounted = useMountedState();
   const initialMapCenter = useMemo(() => {
     return {
       lat: props.visConfig.mapCenter[0],
@@ -45,7 +48,13 @@ export function TileMapVisualization(props: Props) {
       mapCenter={initialMapCenter}
       isLayerTOCOpen={true}
       layerList={initialLayerList}
-      onInitialRenderComplete={props.onInitialRenderComplete}
+      onApiAvailable={(api) => {
+        api.onRenderComplete$.pipe(first()).subscribe(() => {
+          if (isMounted()) {
+            props.onInitialRenderComplete();
+          }
+        });
+      }}
       isSharable={false}
     />
   );

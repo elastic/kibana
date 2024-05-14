@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, first } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { MapApi, MapSerializedState } from './types';
@@ -31,7 +31,6 @@ export interface Props {
   hideFilterActions?: boolean;
   isLayerTOCOpen?: boolean;
   mapCenter?: MapCenterAndZoom;
-  onInitialRenderComplete?: () => void;
   getTooltipRenderer?: () => RenderToolTipContent;
   onApiAvailable?: (api: MapApi) => void;
   /*
@@ -111,14 +110,6 @@ export function MapRenderer(props: Props) {
 
           if (props.onApiAvailable) {
             props.onApiAvailable(api);
-          }
-
-          if (props.onInitialRenderComplete) {
-            api.onRenderComplete$.pipe(first()).subscribe(() => {
-              if (props.onInitialRenderComplete && isMounted()) {
-                props.onInitialRenderComplete();
-              }
-            });
           }
         }}
         hidePanelChrome={true}
