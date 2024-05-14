@@ -143,7 +143,7 @@ export function TraceList({ response }: Props) {
     if (status === FETCH_STATUS.SUCCESS) {
       onPageReady();
     }
-  }, [status]);
+  }, [status, onPageReady]);
 
   return (
     <ManagedTable

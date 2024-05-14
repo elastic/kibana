@@ -21,19 +21,23 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
 
         if (isDevMode) {
           if (!target) {
+            // eslint-disable-next-line no-console
             console.error(`Failed to report the performance entry. Measure name is undefined`);
           }
 
           if (!duration) {
+            // eslint-disable-next-line no-console
             console.error(
               `Failed to report the performance entry. Duration for the measure: ${target} is undefined`
             );
           }
 
+          // eslint-disable-next-line no-console
           console.log(`The measure ${target} completed in ${duration / 1000}s`);
         }
 
         if (droppedEntriesCount > 0) {
+          // eslint-disable-next-line no-console
           console.warn(
             `${droppedEntriesCount} performance entries got dropped due to the buffer being full.`
           );

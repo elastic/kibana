@@ -63,5 +63,6 @@ export function PerformanceContextProvider({ children }: { children: React.React
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;
 }
-
+// dynamic import
+// eslint-disable-next-line import/no-default-export
 export default PerformanceContextProvider;

@@ -290,7 +290,7 @@ export function ServiceInventory() {
     ) {
       onPageReady();
     }
-  }, [mainStatisticsStatus, comparisonFetch.status]);
+  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
 
   const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,

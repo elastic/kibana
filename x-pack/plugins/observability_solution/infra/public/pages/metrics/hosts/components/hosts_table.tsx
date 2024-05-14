@@ -41,7 +41,7 @@ export const HostsTable = () => {
     if (!loading && !hostCountLoading) {
       onPageReady();
     }
-  }, [loading, hostCountLoading]);
+  }, [loading, hostCountLoading, onPageReady]);
 
   return (
     <>
