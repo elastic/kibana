@@ -30,7 +30,7 @@ export const RuleDetailsSandbox = () => {
         </EuiTitle>
         <EuiCodeBlock>{JSON.stringify(formValues, null, 2)}</EuiCodeBlock>
       </div>
-      <RuleDetails formValues={formValues} onChange={onChange} />;
+      <RuleDetails formValues={formValues} onChange={onChange} />
     </>
   );
 };
