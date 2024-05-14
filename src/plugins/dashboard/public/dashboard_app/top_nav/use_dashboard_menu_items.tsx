@@ -107,16 +107,16 @@ export const useDashboardMenuItems = ({
    * Show the dashboard's save modal
    */
   const saveDashboardAs = useCallback(() => {
-    dashboard.runSaveAs().then((result) => maybeRedirect(result));
+    dashboard.runInteractiveSave('edit').then((result) => maybeRedirect(result));
   }, [maybeRedirect, dashboard]);
 
   /**
    * Duplicate the dashboard
    */
-  const duplicate = useCallback(() => {
+  const duplicateInViewMode = useCallback(() => {
     setIsSaveInProgress(true);
 
-    dashboard.runClone().then((result) => {
+    dashboard.runInteractiveSave('view').then((result) => {
       setIsSaveInProgress(false);
       maybeRedirect(result);
     });
@@ -237,7 +237,7 @@ export const useDashboardMenuItems = ({
         id: 'duplicate',
         testId: 'dashboardDuplication',
         disableButton: disableTopNav,
-        run: () => duplicate(),
+        run: () => duplicateInViewMode(),
       } as TopNavMenuData,
     };
   }, [
@@ -254,7 +254,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     saveDashboardAs,
     resetChanges,
-    duplicate,
+    duplicateInViewMode,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
