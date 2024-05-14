@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChat, AssistantAvatar } from '@kbn/elastic-assistant';
+import { css } from '@emotion/css';
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -50,16 +51,32 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   }
 
   return (
-    <NewChat
-      category="detection-rules"
-      conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-      description={i18n.ASK_ASSISTANT_DESCRIPTION}
-      getPromptContext={getPromptContext}
-      suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-      tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-    >
-      {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-    </NewChat>
+    <>
+      <NewChat
+        category="detection-rules"
+        conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+        description={i18n.ASK_ASSISTANT_DESCRIPTION}
+        getPromptContext={getPromptContext}
+        suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+        tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+        iconType={null}
+      >
+        <AssistantAvatar
+          size="xxs"
+          css={css`
+            margin-right: 10px;
+          `}
+        />
+        {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+      </NewChat>
+      <span
+        css={css`
+          vertical-align: middle;
+        `}
+      >
+        {'to help resolve this error.'}
+      </span>
+    </>
   );
 };
 
