@@ -158,7 +158,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
-    "@kbn/reporting-server",
     "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
     "@kbn/logs-explorer-plugin",
