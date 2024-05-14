@@ -33,7 +33,6 @@ import {
   fillMaxSignals,
   fillNote,
   fillReferenceUrls,
-  fillRelatedIntegrations,
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
