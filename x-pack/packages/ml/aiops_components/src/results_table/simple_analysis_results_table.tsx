@@ -20,7 +20,7 @@ interface TableItem {
   type: 'metadata' | 'log message pattern';
   documentCount: number;
   baselineCount: number;
-  logIncrease: string;
+  logRateChange: string;
 }
 
 interface SimpleAnalysisResultsTableProps {
@@ -41,7 +41,7 @@ export const SimpleAnalysisResultsTable: FC<SimpleAnalysisResultsTableProps> = (
       pValue: 0,
       normalizedScore: 0,
       type: item.type === 'metadata' ? 'keyword' : 'log_pattern',
-      changeDescription: item.logIncrease,
+      changeDescription: item.logRateChange,
     };
   });
 

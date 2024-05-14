@@ -70,7 +70,7 @@ export const getChangeDescriptionColumn = (): EuiBasicTableColumn<SignificantIte
     'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnChangeDescription',
     field: 'changeDescription',
     name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.changeDescriptionLabel', {
-      defaultMessage: 'Increase',
+      defaultMessage: 'Log rate change',
     }),
     sortable: true,
     valign: 'middle',

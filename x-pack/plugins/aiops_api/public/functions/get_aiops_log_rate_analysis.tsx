@@ -34,7 +34,7 @@ export function registerLogRateAnalysisRenderFunction({
     response,
   }) => {
     if (typeof response.content === 'string') {
-      return null;
+      return <p>{response.content}</p>;
     }
 
     return (
@@ -53,7 +53,7 @@ export function registerLogRateAnalysisRenderFunction({
           }}
         />
         <EuiSpacer size="s" />
-        <SimpleAnalysisResultsTable tableItems={response.content.significantItems} />
+        <SimpleAnalysisResultsTable tableItems={response.data.significantItems} />
         <EuiSpacer size="s" />
         <p>
           <small>

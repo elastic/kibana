@@ -84,23 +84,20 @@ export function registerGetAiopsLogRateAnalysisFunction({
         }
       ),
       description: dedent(`
-        Log rate analysis is an Elastic AIOps feature to identify causes of spike/dips in time series of log rates. The analysis returns significant field/value pairs found in the log rate change sorted by logIncrease descending.
+        Log rate analysis is an AIOps feature to identify causes of spike/dips in log rate time series. If a spike gets detected, the significant items are the log patterns that are more frequent in the spike compared to the baseline. If a dip gets detected, the significant items are the log patterns that are more frequent in the baseline and are reduced or missing in the dip.
 
-        Users will see a UI with a chart of the log rate over time, with the log rate change highlighted. The UI will also include a table with all identified significant field/value pairs.
+        Your task is the following:
 
-        Your task is to summarize the provided data and provide context about the given data on display in the UI:
-
-        - Infer and explain the environment the data was obtained from, summarize the most contributing field/value pairs and provide some field/value pair examples.
-        - If the data hints at a security or performance issue, explain the root cause and 1-2 steps to remediate the problem.
-
-        Your output should be very concise, non-repeating, to-the-point. Your audience are technical users like SREs or Security Analysts using Elasticsearch and Kibana.
+        - Briefly infer the environment based on all data available and summarize field/value pairs with up to 3 individual examples. Summary hint: Items with the same logRateChange might be related.
+        - Evaluate if the log rate change could be results of regular operations or if the data hints at a security or performance issue, if applicable briefly explain the root cause with concrete steps to remediate the problem.
+        - Your output should be brief and very concise. Your audience are technical users like SREs or Security Analysts using Elasticsearch and Kibana.
+        - Limit overall output to 300 words.
       `),
       parameters,
     },
     async ({ arguments: args }, abortSignal): Promise<GetAiopsLogRateAnalysisFunctionResponse> => {
       const debugStartTime = Date.now();
       const { esClient } = resources;
-      console.log('args', args);
 
       // CHANGE POINT DETECTION
 
@@ -112,9 +109,25 @@ export function registerGetAiopsLogRateAnalysisFunction({
         return { content: 'Could not parse time range.', data: {} };
       }
       const delta = latestMs - earliestMs;
+
       const dayMs = 86400 * 1000;
-      const threshold = dayMs * 22;
-      const intervalMs = delta > threshold ? dayMs : Math.round(delta / barTarget);
+      const dayThreshold = dayMs * 22;
+
+      const weekMs = dayMs * 7;
+      const weekThreshold = weekMs * 22;
+
+      const monthMs = dayMs * 30;
+      const monthThreshold = monthMs * 22;
+
+      let intervalMs = Math.round(delta / barTarget);
+
+      if (delta > monthThreshold) {
+        intervalMs = monthMs;
+      } else if (delta > weekThreshold) {
+        intervalMs = weekMs;
+      } else if (delta > dayThreshold) {
+        intervalMs = dayMs;
+      }
 
       const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
         eventRate: {
@@ -167,9 +180,6 @@ export function registerGetAiopsLogRateAnalysisFunction({
         }
       );
 
-      console.log('eventRate', histogram.aggregations.eventRate);
-      console.log('change_point_request', histogram.aggregations.change_point_request);
-
       if (histogram.aggregations.change_point_request.bucket === undefined) {
         return { content: 'No log rate change detected.', data: [] };
       }
@@ -188,17 +198,12 @@ export function registerGetAiopsLogRateAnalysisFunction({
       }
 
       const extendedChangePoint = getExtendedChangePoint(buckets, changePointTs);
-      console.log('extendedChangePoint', extendedChangePoint);
-      const logRateType = Object.keys(histogram.aggregations.change_point_request.type)[0];
-      const logRateAttributeName = `${logRateType}LogRate`;
+      let logRateType = Object.keys(histogram.aggregations.change_point_request.type)[0];
 
       // FIELD CANDIDATES
 
       const fieldCandidates: string[] = [];
-      let fieldCandidatesCount = fieldCandidates.length;
       const textFieldCandidates: string[] = [];
-      let totalDocCount = 0;
-      let zeroDocsFallback = false;
       const changePoint = {
         ...extendedChangePoint,
         key: changePointTs,
@@ -212,7 +217,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
         changePoint
       );
 
-      const params: AiopsLogRateAnalysisSchema = {
+      const indexInfoParams: AiopsLogRateAnalysisSchema = {
         index: args.index,
         start: earliestMs,
         end: latestMs,
@@ -223,25 +228,42 @@ export function registerGetAiopsLogRateAnalysisFunction({
 
       const indexInfo = await fetchIndexInfo(
         esClient,
-        params,
+        indexInfoParams,
         ['message', 'error.message'],
         abortSignal
       );
-      console.log('indexInfo', indexInfo);
+
+      const baselineNumBuckets = (wp.baselineMax - wp.baselineMin) / intervalMs;
+      const baselinePerBucket = indexInfo.baselineTotalDocCount / baselineNumBuckets;
+
+      const deviationNumBuckets = (wp.deviationMax - wp.deviationMin) / intervalMs;
+      const deviationPerBucket = indexInfo.deviationTotalDocCount / deviationNumBuckets;
+
+      const analysisWindowParameters =
+        deviationPerBucket > baselinePerBucket
+          ? wp
+          : {
+              baselineMin: wp.deviationMin,
+              baselineMax: wp.deviationMax,
+              deviationMin: wp.baselineMin,
+              deviationMax: wp.baselineMax,
+            };
+
+      logRateType = deviationPerBucket > baselinePerBucket ? 'spike' : 'dip';
+      const logRateAttributeName = `${logRateType}LogRate`;
+
+      const params: AiopsLogRateAnalysisSchema = {
+        ...indexInfoParams,
+        ...analysisWindowParameters,
+      };
 
       fieldCandidates.push(...indexInfo.fieldCandidates);
-      fieldCandidatesCount = fieldCandidates.length;
       textFieldCandidates.push(...indexInfo.textFieldCandidates);
-      totalDocCount = indexInfo.deviationTotalDocCount;
-      zeroDocsFallback = indexInfo.zeroDocsFallback;
       const sampleProbability = getSampleProbability(
         indexInfo.deviationTotalDocCount + indexInfo.baselineTotalDocCount
       );
-      console.log('sampleProbability', sampleProbability);
 
       // SIGNIFICANT ITEMS
-
-      fieldCandidatesCount = fieldCandidates.length;
 
       // This will store the combined count of detected significant log patterns and keywords
       let fieldValuePairsCount = 0;
@@ -315,6 +337,28 @@ export function registerGetAiopsLogRateAnalysisFunction({
         extendedChangePoint,
       };
 
+      const significantItems = [...significantTerms, ...significantCategories]
+        .filter(({ bg_count, doc_count }) => {
+          return doc_count > bg_count;
+        })
+        .map(({ fieldName, fieldValue, type, doc_count, bg_count }) => ({
+          field: fieldName,
+          value: fieldValue,
+          type: type === 'keyword' ? 'metadata' : 'log message pattern',
+          documentCount: doc_count,
+          baselineCount: bg_count,
+          logRateChangeSort: bg_count > 0 ? doc_count / bg_count : doc_count,
+          logRateChange:
+            bg_count > 0
+              ? logRateType === 'spike'
+                ? `${Math.round((doc_count / bg_count) * 100) / 100}x increase`
+                : `${Math.round((bg_count / doc_count) * 100) / 100}x decrease`
+              : logRateType === 'spike'
+              ? `${doc_count} docs up from 0 in baseline`
+              : `0 docs down from ${doc_count} in baseline`,
+        }))
+        .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort);
+
       return {
         content: {
           logRateChange: {
@@ -328,23 +372,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
               ? { documentSamplingFactorForAnalysis: sampleProbability }
               : {}),
           },
-          significantItems: [...significantTerms, ...significantCategories]
-            .filter(({ bg_count, doc_count }) => {
-              return doc_count > bg_count;
-            })
-            .map(({ fieldName, fieldValue, type, doc_count, bg_count }) => ({
-              field: fieldName,
-              value: fieldValue,
-              type: type === 'keyword' ? 'metadata' : 'log message pattern',
-              documentCount: doc_count,
-              baselineCount: bg_count,
-              logIncreaseSort: bg_count > 0 ? doc_count / bg_count : doc_count,
-              logIncrease:
-                bg_count > 0
-                  ? `${Math.round((doc_count / bg_count) * 100) / 100}x increase`
-                  : `${doc_count} docs up from 0 in baseline`,
-            }))
-            .sort((a, b) => b.logIncreaseSort - a.logIncreaseSort),
+          significantItems: significantItems.slice(0, 100),
         },
         data: {
           dateHistogram: buckets,
@@ -361,6 +389,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
             },
           })}`,
           logRateChange,
+          significantItems: significantItems.slice(0, 100),
         },
       };
     }
