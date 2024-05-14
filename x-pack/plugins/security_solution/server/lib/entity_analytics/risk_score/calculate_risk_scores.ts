@@ -39,11 +39,7 @@ import type {
   CalculateScoresResponse,
   RiskScoreBucket,
 } from '../types';
-import {
-  RISK_SCORING_INPUTS_COUNT_MAX,
-  RISK_SCORING_SUM_MAX,
-  RISK_SCORING_SUM_VALUE,
-} from './constants';
+import { RISK_SCORING_SUM_MAX, RISK_SCORING_SUM_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
 
 const formatForResponse = ({
@@ -152,10 +148,9 @@ const buildIdentifierTypeAggregation = ({
               map_script: scriptedMetricPainless.map,
               combine_script: scriptedMetricPainless.combine,
               params: {
-                max_risk_inputs_per_identity: RISK_SCORING_INPUTS_COUNT_MAX,
                 p: RISK_SCORING_SUM_VALUE,
                 risk_cap: RISK_SCORING_SUM_MAX,
-                global_identifier_type_weight: globalIdentifierTypeWeight,
+                global_identifier_type_weight: globalIdentifierTypeWeight || 1,
               },
               reduce_script: scriptedMetricPainless.reduce,
             },
