@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import runCommonTests from './playground_overview.common';
 import { createOpenAIConnector } from './utils/create_openai_connector';
+import { FtrProviderContext } from '../../../../test_serverless/functional/ftr_provider_context';
+import { RoleCredentials } from '../../../../test_serverless/shared/services';
 
 export default function (ftrContext: FtrProviderContext) {
   const pageObjects = ftrContext.getPageObjects(['svlCommonPage', 'svlCommonNavigation']);
@@ -15,8 +16,8 @@ export default function (ftrContext: FtrProviderContext) {
   const svlUserManager = ftrContext.getService('svlUserManager');
   const configService = ftrContext.getService('config');
   const supertestWithoutAuth = ftrContext.getService('supertestWithoutAuth');
-  let openAIConnectorGen;
-  let roleAuthc;
+  let openAIConnectorGen: AsyncGenerator<() => Promise<void>>;
+  let roleAuthc: RoleCredentials;
 
   describe('Serverless Playground Overview', () => {
     let closeOpenAIConnector: () => Promise<void> | undefined;

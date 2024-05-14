@@ -13,7 +13,7 @@ import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 export default function (ftrContext: FtrProviderContext) {
   const pageObjects = ftrContext.getPageObjects(['common']);
   const configService = ftrContext.getService('config');
-  const commonAPI = MachineLearningCommonAPIProvider(context);
+  const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = ftrContext.getService('supertest');
   const openAIConnectorGen = createOpenAIConnector({
     configService,

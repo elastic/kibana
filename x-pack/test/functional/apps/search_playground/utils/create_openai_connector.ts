@@ -19,7 +19,7 @@ export async function* createOpenAIConnector({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
-}): Generator<() => Promise<void>, { id: string }> {
+}): AsyncGenerator<() => Promise<void>> {
   const simulator = new OpenAISimulator({
     returnError: false,
     proxy: {
@@ -33,7 +33,7 @@ export async function* createOpenAIConnector({
     apiUrl: await simulator.start(),
   };
   // eslint-disable-next-line prefer-const
-  let connector;
+  let connector: { id: string } | undefined;
 
   yield async () => {
     if (connector) {
@@ -62,6 +62,4 @@ export async function* createOpenAIConnector({
       })
       .expect(200)
   ).body;
-
-  return connector;
 }
