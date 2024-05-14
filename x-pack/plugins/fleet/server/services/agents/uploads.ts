@@ -226,33 +226,37 @@ export async function deleteAgentUploadFile(
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html#data-streams-append-only
 
     // Delete the file from the file storage data stream
-    const { deleted: filesDeleted } = await esClient.deleteByQuery({
+    const filesDeleteResponse = await esClient.deleteByQuery({
       index: FILE_STORAGE_DATA_AGENT_INDEX,
       body: {
         query: {
           match: {
-            _id: id,
+            bid: id, // Use `bid` instead of `_id` because `_id` has additional suffixes
           },
         },
       },
     });
 
-    // Delete the metadata from the metadata data stream
-    const { deleted: metadataDeleted } = await esClient.deleteByQuery({
-      index: FILE_STORAGE_METADATA_AGENT_INDEX,
-      body: {
-        query: {
-          match: {
-            _id: id,
+    if (!!(filesDeleteResponse.deleted || 0 > 0 || filesDeleteResponse.total === 0)) {
+      // Delete the metadata from the metadata data stream if file delete was successful
+      const metadataDeleteResponse = await esClient.deleteByQuery({
+        index: FILE_STORAGE_METADATA_AGENT_INDEX,
+        body: {
+          query: {
+            match: {
+              _id: id,
+            },
           },
         },
-      },
-    });
+      });
 
-    return {
-      id,
-      deleted: filesDeleted === 1 && metadataDeleted === 1,
-    };
+      return {
+        id,
+        deleted: !!(metadataDeleteResponse.deleted || 0 > 0 || metadataDeleteResponse.total === 0),
+      };
+    } else {
+      return { id, deleted: false };
+    }
   } catch (error) {
     appContextService.getLogger().error(error);
     throw error;
