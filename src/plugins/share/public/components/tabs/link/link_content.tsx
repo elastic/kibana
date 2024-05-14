@@ -118,17 +118,20 @@ export const LinkContent = ({
       <EuiForm>
         <EuiSpacer size="m" />
         {isDirty && objectType === 'lens' && (
-          <EuiCallOut
-            color="warning"
-            title={
-              <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
-            }
-          >
-            <FormattedMessage
-              id="share.link.warning.lens"
-              defaultMessage="There are unsaved changes. Before you generate a link, save the lens visualization."
-            />
-          </EuiCallOut>
+          <>
+            <EuiCallOut
+              color="warning"
+              title={
+                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+              }
+            >
+              <FormattedMessage
+                id="share.link.warning.lens"
+                defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
         )}
         <EuiText size="s">
           <FormattedMessage
