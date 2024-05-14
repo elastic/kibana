@@ -14,24 +14,30 @@ import {
 } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, InMemoryConnector } from '../types';
+import {
+  getInMemoryActions,
+  getActions,
+  getActionExecutions,
+  getActionsCount,
+} from './lib/actions_telemetry_util';
 
-interface InMemoryAggRes {
+export interface InMemoryAggRes {
   total: number;
   actionRefs: Record<string, { actionRef: string; actionTypeId: string }>;
 }
 
-interface ByActionTypeIdAgg {
+export interface ByActionTypeIdAgg {
   key: string;
   doc_count: number;
 }
 
-interface ActionRefIdsAgg {
+export interface ActionRefIdsAgg {
   key: string[];
   key_as_string: string;
   doc_count: number;
 }
 
-interface ConnectorAggRes {
+export interface ConnectorAggRes {
   total: number;
   connectorTypes: Record<string, number>;
 }
@@ -80,10 +86,7 @@ export async function getTotalCount(
       },
     });
 
-    const aggs: Record<string, number> = {};
-    for (const bucket of searchResult.aggregations?.byActionTypeId.buckets ?? []) {
-      aggs[bucket.key] = bucket.doc_count;
-    }
+    const aggs = getActionsCount(searchResult.aggregations?.byActionTypeId.buckets);
     const { countGenAiProviderTypes, countByType } = getCounts(aggs);
 
     if (inMemoryConnectors && inMemoryConnectors.length) {
@@ -281,33 +284,14 @@ export async function getInUseTotalCount(
       },
     });
 
-    const preconfiguredActionsAggs: InMemoryAggRes = { total: 0, actionRefs: {} };
-    const systemActionsAggs: InMemoryAggRes = { total: 0, actionRefs: {} };
-    for (const bucket of actionResults.aggregations?.actions?.actionRefIds?.buckets ?? []) {
-      const actionRef = bucket.key[0];
-      const actionTypeId = bucket.key[1];
-      if (actionRef.startsWith('preconfigured:')) {
-        preconfiguredActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        preconfiguredActionsAggs.total++;
-      }
-      if (actionRef.startsWith('system_action:')) {
-        systemActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        systemActionsAggs.total++;
-      }
-    }
+    const { preconfiguredActionsAggs, systemActionsAggs } = getInMemoryActions(
+      actionResults.aggregations?.actions?.actionRefIds?.buckets
+    );
+
     const totalInMemoryActions =
       (preconfiguredActionsAggs?.total ?? 0) + (systemActionsAggs?.total ?? 0);
 
-    const aggs: { total: number; connectorIds: Record<string, string> } = {
-      total: 0,
-      connectorIds: {},
-    };
-    for (const bucket of actionResults.aggregations?.refs?.actionRefIds?.buckets ?? []) {
-      const connectorId = bucket.key[0];
-      const actionRef = bucket.key[1];
-      aggs.connectorIds[connectorId] = actionRef;
-      aggs.total++;
-    }
+    const aggs = getActions(actionResults.aggregations?.refs?.actionRefIds?.buckets);
 
     const { hits: actions } = await esClient.search<{
       action: ActionResult;
@@ -609,26 +593,23 @@ export async function getExecutionsPerDayCount(
       },
     });
 
-    const aggsExecutions: ConnectorAggRes = { total: 0, connectorTypes: {} };
-    // @ts-expect-error aggegation type is not specified
-    for (const bucket of actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId
-      .buckets ?? []) {
-      aggsExecutions.connectorTypes[bucket.key] = bucket.doc_count;
-      aggsExecutions.total += bucket.doc_count;
-    }
+    const aggsExecutions = getActionExecutions(
+      // @ts-expect-error aggegation type is not specified
+      actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId
+        .buckets as ByActionTypeIdAgg[]
+    );
+
     // convert nanoseconds to milliseconds
     const aggsAvgExecutionTime = Math.round(
       // @ts-expect-error aggegation type is not specified
       actionResults.aggregations.avgDuration.value / (1000 * 1000)
     );
 
-    const aggsFailedExecutions: ConnectorAggRes = { total: 0, connectorTypes: {} };
-    // @ts-expect-error aggegation type is not specified
-    for (const bucket of actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs
-      ?.byConnectorTypeId.buckets ?? []) {
-      aggsFailedExecutions.connectorTypes[bucket.key] = bucket.doc_count;
-      aggsFailedExecutions.total += bucket.doc_count;
-    }
+    const aggsFailedExecutions = getActionExecutions(
+      // @ts-expect-error aggegation type is not specified
+      actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs?.byConnectorTypeId
+        .buckets as ByActionTypeIdAgg[]
+    );
 
     const avgDurationByType =
       // @ts-expect-error aggegation type is not specified
