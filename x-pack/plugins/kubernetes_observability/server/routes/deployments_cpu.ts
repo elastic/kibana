@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
-import { calulcateAllPodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
+import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_CPU_ROUTE,
@@ -75,53 +75,60 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
         const esResponsePods = await client.search(dsl);
         // console.log(esResponsePods.hits);
         if (esResponsePods.hits.hits.length > 0) {
+          var pod_reasons = new Array();
+          var pod_messages = new Array();
+          var pods_memory_medium = new Array();
+          var pods_memory_high = new Array();
+          var pods_deviation_high = new Array();
+          var messages = '';
+          var reasons = '';
+          var cpu = '';
           const hitsPods = esResponsePods.hits.hits[0];
-          const { fields = {} } = hitsPods;
+          const { fields = {} } = hitsPods
           const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
           // console.log(hitsPods);
           // console.log(hitsPodsAggs);
           const time = extractFieldValue(fields['@timestamp']);
-          var messages = '';
-          var reasons = '';
-          var pod_reasons = new Array();
-          var pod_messages = new Array();
-          var pods_medium = new Array();
-          var pods_high = new Array();
-          var cpu = '';
-          for (const entries of hitsPodsAggs) {
+          for (var entries of hitsPodsAggs) {
             const podName = entries.key;
-            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
-            const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
+            const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
+            const esResponsePods = await client.search(dslPods);
+            const [reason, message] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
             pod_reasons.push(reason);
             pod_messages.push(message);
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
-              if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name);
-              } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name);
+              //Check for memory pod_reason.reason[0]
+              if (pod_reason.reason[0].value == "Medium") {
+                pods_memory_medium.push(pod_reason.pod);
+              } else if (pod_reason.reason[0].value == "High") {
+                pods_memory_high.push(pod_reason.pod);
+              }
+
+              //Check for memory_usage_median_absolute_deviation pod_reason.reason[1]
+              if (pod_reason.reason[1].value == "High") {
+                pods_deviation_high.push(pod_reason.pod);
               }
             }
-            if (pods_medium.length > 0) {
-              messages = `${resource} has Medium ${type} utilisation in following Pods:` + pods_medium.join(" , ");
-            }
-            if (pods_high.length > 0) {
-              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_high.join(" , ");
+
+            if (pods_memory_high.length > 0) {
+              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_memory_high.join(" , ");
+              cpu = "High";
+              reasons = "High " + type + " utilisation";
+            } else if (pods_memory_medium.length > 0) {
+              messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_memory_medium.join(" , ");
+              cpu = "Medium";
+              reasons = "Medium " + type + " utilisation";
             } else {
               messages = `${resource} has Low ${type} utilisation in all Pods`;
+              cpu = "Low";
+              reasons = "Low " + type + " utilisation";
             }
 
-            if (pods_medium.length > 0 && pods_high.length > 0) {
-              cpu = "Medium";
-              reasons = "Medium "+type+" utilisation";
-            }
-            if (pods_high.length > 0) {
-              cpu = "High";
-              reasons = "High "+type+" utilisation";
-            } else {
-              cpu = "Low";
-              reasons = "Low "+type+" utilisation";
+            if (pods_deviation_high.length > 0) {
+              messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+              cpu = cpu + ` , ` + "High memory_usage_median_absolute_deviation";
+              reasons = reasons + ` , ` + "High memory_usage_median_absolute_deviation";
             }
             //End of Create overall message for deployment
           }

@@ -8,6 +8,10 @@ const limits: Limits = {
     high: 0.9,
 };
 
+// Define the global Deviation limit to categorise cpu_utlization_median_absolute_deviation
+const deviation = 0.30 // We define that deviations more than 30% should be looked by the user
+
+
 export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: string, client: ElasticsearchClient) {
     const mustsPodsCpu = [
         {
@@ -46,62 +50,67 @@ export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: 
                 filter: filter,
             },
         },
+        aggs: {
+            cpu_utilization: { stats: { field: 'metrics.k8s.pod.cpu.utilization' } },
+            review_variability_cpu_utilization: {
+                median_absolute_deviation: {
+                    field: 'metrics.k8s.pod.cpu.utilization'
+                }
+            }
+        },
     };
     return dslPodsCpu;
 }
 
 
-export function calulcateAllPodsCpuUtilisation(podName: string, namespace: string, esResponsePodsCpu: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
+export function calulcatePodsCpuUtilisation(podName: string, namespace: string, esResponsePods: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
     var message = {};
     var reason = {};
     var alarm = '';
     var cpu_utilization = undefined;
-    var cpu_utilization_median = undefined;
-    var pods = new Array();
-    var cpu_utilizations = new Array();
-    if (esResponsePodsCpu.hits.hits.length > 0) {
-        const hitsall = esResponsePodsCpu.hits.hits;
+
+    if (Object.keys(esResponsePods.aggregations).length > 0) {
+        const hitsall = esResponsePods.aggregations;
         //console.log(hitpodcpu);
 
-        for (const [_, hit] of toEntries(hitsall)) {
-            //console.log(hit);
-            var pod = {} as Pod;
-            const { fields = {} } = hit;
-            const name = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-            const namespace = extractFieldValue(fields['resource.attributes.k8s.namespace.name']);
-            const podCpuUtilization = round(extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']), 3);
 
-            pod = {
-                'name': name,
-                'namespace': namespace,
-                'memory_availabe': undefined,
-                'memory_usage': undefined,
-                'cpu_utilization': podCpuUtilization,
-            };
-            pods.push(pod);
-        }
+        var pod = {} as Pod;
+        var cpu_utilization_median_absolute_deviation = hitsall?.review_variability_cpu_utilization.value;
+        let cpu_utilization_min = hitsall?.cpu_utilization.min;
+        let cpu_utilization_max = hitsall?.cpu_utilization.min;
+        let cpu_utilization_avg = hitsall?.cpu_utilization.avg;
 
-        for (var pod1 of pods) {
-            console.log("Name: " + pod1.name, "Available: " + pod1.cpu_utilization);
-            cpu_utilizations.push(pod1.cpu_utilization);
-        }
-        const total_cpu_utilization = cpu_utilizations.reduce((accumulator, currentValue) => accumulator + currentValue);
+        pod = {
+            'name': podName,
+            'namespace': namespace,
+            'memory_available': {
+                'avg': undefined,
+            },
+            'memory_usage': {
+                'min': undefined,
+                'max': undefined,
+                'avg': undefined,
+                'median_absolute_deviation': undefined,
+            },
+            'cpu_utilization': {
+                'min': cpu_utilization_min,
+                'max': cpu_utilization_max,
+                'avg': cpu_utilization_avg,
+                'median_absolute_deviation': cpu_utilization_median_absolute_deviation
+            }
+        };
+       
 
-        // console.log("Sum" + total_cpu_utilization)
-
-        cpu_utilization = total_cpu_utilization / pods.length;
-        cpu_utilization_median = median(cpu_utilizations);
-        cpu_utilization = round(cpu_utilization, 3);
-        if (cpu_utilization < limits["medium"]) {
+        if (cpu_utilization_avg < limits.medium) {
             alarm = "Low";
-        } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
+        } else if (cpu_utilization_avg >= limits.medium && cpu_utilization_avg < limits.high) {
             alarm = "Medium";
         } else {
             alarm = "High";
         }
         reason = { 'pod': podName, 'value': alarm, 'desc': ' Cpu utilisation' };
-        message = { 'pod': podName, 'cpu_utilization': cpu_utilization, 'cpu_utilization_median': cpu_utilization_median, 'Desc': '% - Percentage of Cpu utilisation' };
+        message = { 'pod': podName, 'cpu_utilization': pod.cpu_utilization,  'Desc': '% - Percentage of Cpu utilisation' };
     }
 
-    return [reason, message, cpu_utilization, cpu_utilization_median];
+    return [reason, message, cpu_utilization, cpu_utilization_median_absolute_deviation];
 }

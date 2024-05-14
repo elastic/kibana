@@ -28,8 +28,13 @@ export type Pod = {
         avg: number | undefined
         median_absolute_deviation: number | undefined;
     } 
-    cpu_utilization: number | undefined;
-};
+    cpu_utilization: {
+        min: number | undefined;
+        max: number | undefined
+        avg: number | undefined
+        median_absolute_deviation: number | undefined;
+    } 
+}
 
 export type Node = {
     name: string;

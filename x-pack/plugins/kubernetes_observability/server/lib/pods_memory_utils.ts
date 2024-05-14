@@ -4,9 +4,12 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise memory utilisation
 const limits: Limits = {
-    medium: 0.003,
+    medium: 0.7,
     high: 0.9,
 };
+
+// Define the global Deviation limit to categorise memory memory_usage_median_absolute_deviation
+const deviation = 5e+7 // We define that deviations more than 50Megabytes should be looked by the user
 
 export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespace: string, client: ElasticsearchClient) {
     const mustsPodsCpu = [
@@ -64,77 +67,10 @@ export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespac
     return dslPodsCpu;
 }
 
-// export function calulcateAllPodsMemoryUtilisation(podName: string, namespace: string, esResponsePodsCpu: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
-//     var message = undefined;
-//     var reason = undefined;
-//     var alarm = '';
-//     var memory_available = undefined;
-//     var memory_usage = undefined;
-//     var memory_utilization = undefined;
-//     var memory_usage_median = undefined;
-//     var pods = new Array();
-//     var memories_usage = new Array();
-//     var memories_available = new Array();
-//     if (esResponsePodsCpu.hits.hits.length > 0) {
-//         const hitsall = esResponsePodsCpu.hits.hits;
-//         //console.log(hitpodcpu);
-
-//         for (const [_, hit] of toEntries(hitsall)) {
-//             console.log(hit);
-//             var pod = {} as Pod;
-//             const { fields = {} } = hit;
-//             const name = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-//             const namespace = extractFieldValue(fields['resource.attributes.k8s.namespace.name']);
-//             const memory_available = extractFieldValue(fields['metrics.k8s.pod.memory.available']);
-//             const memory_usage = extractFieldValue(fields['metrics.k8s.pod.memory.usage']);
-
-//             pod = {
-//                 'name': name,
-//                 'namespace': namespace,
-//                 'memory_usage': memory_usage,
-//                 'memory_usage_min': undefined,
-//                 'memory_usage_max': undefined,
-//                 'cpu_utilization': undefined
-//             };
-//             pods.push(pod);
-//         }
-
-//         for (var pod1 of pods) {
-//             console.log("Name: " + pod1.name, "Available: " + pod1.memory_available + ", Usage: " + pod1.memory_usage);
-//             memories_usage.push(pod1.memory_usage);
-//             memories_available.push(pod1.memory_available);
-//         }
-//         const total_memory_usage = memories_usage.reduce((accumulator, currentValue) => accumulator + currentValue);
-//         memory_usage = total_memory_usage / pods.length;
-//         memory_usage_median = median(memories_usage);
-//         const total_memory_available = memories_available.reduce((accumulator, currentValue) => accumulator + currentValue);
-
-//         if (isNaN(total_memory_available)) {
-//             reason = { 'pod': podName, 'value': undefined, 'desc': ' No memory limit defined ' };
-//             message = { 'pod': podName, 'memory_usage': memory_usage, 'memory_usage_median': memory_usage_median, 'desc': ' Pod Memory usage in  Bytes' };
-//         } else {
-//             memory_available = total_memory_available / pods.length;
-//             memory_utilization = round(memory_usage / memory_available, 3);
-
-//             if (memory_utilization < limits["medium"]) {
-//                 alarm = "Low";
-//             } else if (memory_utilization >= limits["medium"] && memory_utilization < limits["high"]) {
-//                 alarm = "Medium";
-//             } else {
-//                 alarm = "High";
-//             }
-//             reason = { 'pod': podName, 'value': alarm, 'desc': ' Memory utilisation' };
-//             message = { 'pod': podName, 'memory_available': memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median': memory_usage_median, 'Desc': '% - Percentage of Memory utilisation' };
-
-//         }
-//     }
-//     return [reason, message, memory_usage, memory_usage_median, memory_available, memory_utilization];
-// }
-
 
 export function calulcatePodsMemoryUtilisation(podName: string, namespace: string, esResponsePods: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
     var message = undefined;
-    var reason = undefined;
+    var reasons = undefined;
     var alarm = '';
     var memory_available = undefined;
     var memory_usage = undefined;
@@ -157,22 +93,36 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
             'name': podName,
             'namespace': namespace,
             'memory_available': {
-             'avg':   memory_available_avg,
+                'avg': memory_available_avg,
             },
             'memory_usage': {
-             'min' :   memory_usage_min,
-             'max' :   memory_usage_max,
-             'avg' :   memory_usage_avg,
-             'median_absolute_deviation': memory_usage_median_absolute_deviation, 
+                'min': memory_usage_min,
+                'max': memory_usage_max,
+                'avg': memory_usage_avg,
+                'median_absolute_deviation': memory_usage_median_absolute_deviation,
             },
-            'cpu_utilization': undefined
+            'cpu_utilization': {
+                'min': undefined,
+                'max': undefined,
+                'avg': undefined,
+                'median_absolute_deviation': undefined,
+            },
         };
 
+        var deviation_alarm = "Low"
+        if (memory_usage_median_absolute_deviation >= deviation) {
+            var deviation_alarm = "High"
+        }
+
         if (memory_available_count == 0) {
-            reason = { 'pod': podName, 'value': undefined, 'desc': ' No memory limit defined ' };
+            reasons = {
+                'pod': podName, reason: [
+                    { 'value': undefined, 'desc': ' No memory available value defined ' },
+                    { 'value': deviation_alarm, 'desc': ' Memory usage median absolute deviation ' }],
+            };
             message = { 'pod': podName, 'memory_usage': pod.memory_usage, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'desc': ' Pod Memory usage in  Bytes' };
         } else {
-            memory_utilization = round(memory_usage_avg /( memory_available_avg + memory_usage_avg), 3);
+            memory_utilization = round(memory_usage_avg / (memory_available_avg + memory_usage_avg), 3);
 
             if (memory_utilization < limits.medium) {
                 alarm = "Low";
@@ -181,10 +131,14 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
             } else {
                 alarm = "High";
             }
-            reason = { 'pod': podName, 'value': alarm, 'desc': ' Memory utilisation' };
+            reasons = {
+                'pod': podName, reason: [
+                    { 'value': alarm, 'desc': ' Memory utilisation' },
+                    { 'value': deviation_alarm, 'desc': ' Memory usage median absolute deviation ' }]
+            };
             message = { 'pod': podName, 'memory_available': pod.memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'Desc': '% - Percentage of Memory utilisation' };
 
         }
     }
-    return [reason, message, memory_usage, memory_usage_median_absolute_deviation , memory_available, memory_utilization];
+    return [reasons, message, memory_usage, memory_usage_median_absolute_deviation, memory_available, memory_utilization];
 }

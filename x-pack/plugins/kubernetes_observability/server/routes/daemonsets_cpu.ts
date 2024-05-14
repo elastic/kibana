@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
-import { calulcateAllPodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
+import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -97,7 +97,7 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
             console.log(podName);
             const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
+            const [reason, message] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);
             pod_messages.push(message);
             //Create overall message for daemonset
