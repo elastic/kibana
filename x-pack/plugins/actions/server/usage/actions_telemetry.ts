@@ -284,14 +284,14 @@ export async function getInUseTotalCount(
       },
     });
 
+    const aggs = getActions(actionResults.aggregations?.refs?.actionRefIds?.buckets);
+
     const { preconfiguredActionsAggs, systemActionsAggs } = getInMemoryActions(
       actionResults.aggregations?.actions?.actionRefIds?.buckets
     );
 
     const totalInMemoryActions =
       (preconfiguredActionsAggs?.total ?? 0) + (systemActionsAggs?.total ?? 0);
-
-    const aggs = getActions(actionResults.aggregations?.refs?.actionRefIds?.buckets);
 
     const { hits: actions } = await esClient.search<{
       action: ActionResult;
