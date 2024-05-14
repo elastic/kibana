@@ -25,7 +25,6 @@ export {
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
-  getReactEmbeddableSavedObjects,
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,

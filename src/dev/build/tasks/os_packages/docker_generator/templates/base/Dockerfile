@@ -44,8 +44,33 @@ RUN tar \
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-{{#cloud}}
 
+# Add an init process, check the checksum to make sure it's a match
+RUN set -e ; \
+    TINI_BIN="" ; \
+    case "$(arch)" in \
+        aarch64) \
+            TINI_BIN='tini-arm64' ; \
+            ;; \
+        x86_64) \
+            TINI_BIN='tini-amd64' ; \
+            ;; \
+        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+    esac ; \
+  TINI_VERSION='v0.19.0' ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  sha256sum -c "${TINI_BIN}.sha256sum" ; \
+  rm "${TINI_BIN}.sha256sum" ; \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
+{{^serverless}}
+RUN mkdir -p /usr/share/fonts/local && \
+  curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
+  echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+{{/serverless}}
+
+{{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
@@ -79,7 +104,7 @@ RUN for iter in {1..10}; do \
       {{packageManager}} update  && \
       {{packageManager}} upgrade -y  && \
       {{packageManager}} install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
+       fontconfig libnss3 ca-certificates  && \
       {{packageManager}} clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
@@ -87,36 +112,17 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 
-# Add an init process, check the checksum to make sure it's a match
-RUN set -e ; \
-    TINI_BIN="" ; \
-    case "$(arch)" in \
-        aarch64) \
-            TINI_BIN='tini-arm64' ; \
-            ;; \
-        x86_64) \
-            TINI_BIN='tini-amd64' ; \
-            ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
-    esac ; \
-  TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
-  mv "${TINI_BIN}" /bin/tini ; \
-  chmod +x /bin/tini
-
-RUN mkdir /usr/share/fonts/local
-RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
-RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
-RUN fc-cache -v
-
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+COPY --from=builder --chown=0:0 /bin/tini /bin/tini
 {{#cloud}}
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
+{{^serverless}}
+# Load reporting fonts
+COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
+RUN fc-cache -v
+{{/serverless}}
 WORKDIR /usr/share/kibana
 {{#fips}}
 
@@ -127,26 +133,28 @@ WORKDIR /usr/share/kibana
 # https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
 # https://www.openssl.org/docs/man3.0/man7/fips_module.html
 
-# Ideally we would handle this in the builder step, but make is installing over the OS version
-# of OpenSSL and requires linking of many submodules.
+# Ideally we would handle this in the builder step, but OpenSSL requires linking of many submodules.
 RUN set -e ; \
- curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
- curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256  ; \
- echo "$(cat openssl-3.0.8.tar.gz.sha256) openssl-3.0.8.tar.gz" | sha256sum -c ; \
- tar -zxf openssl-3.0.8.tar.gz  ; \
- rm -rf openssl-3.0.8.tar*  ; \
- cd /usr/share/kibana/openssl-3.0.8   ; \
- ./Configure enable-fips  ; \
- make -j $(nproc)  ; \
- make install  ; \
- ldconfig /usr/local/lib64/  ; \
- chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
+ OPENSSL_VERSION='3.0.8'; \
+ OPENSSL_PATH=/usr/share/kibana/openssl ; \
+ mkdir "${OPENSSL_PATH}"; \
+ curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" ; \
+ curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz.sha256" ; \
+ echo "$(cat openssl-${OPENSSL_VERSION}.tar.gz.sha256) openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c ; \
+ tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
+ rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
+ cd "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
+ ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
+ make -j $(nproc) > /dev/null ; \
+ make install > /dev/null ; \
+ rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
+ chown -R 1000:0 "${OPENSSL_PATH}";
 
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
 RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
-RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
-COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
-ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
+RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
+ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
 
 {{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana

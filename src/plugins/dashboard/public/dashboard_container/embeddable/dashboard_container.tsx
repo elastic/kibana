@@ -695,6 +695,7 @@ export class DashboardContainer
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
+      this.setExpandedPanelId(undefined);
     });
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
