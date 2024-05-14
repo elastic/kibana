@@ -64,6 +64,9 @@
                     },
                     "timestamp": {
                       "type": "date"
+                    },
+                    "contribution_score": {
+                      "type": "float"
                     }
                   }
                 },
@@ -130,6 +133,9 @@
                     },
                     "timestamp": {
                       "type": "date"
+                    },
+                    "contribution_score": {
+                      "type": "float"
                     }
                   }
                 },
@@ -222,6 +228,9 @@
                         },
                         "timestamp": {
                           "type": "date"
+                        },
+                        "contribution_score": {
+                          "type": "float"
                         }
                       }
                     },
@@ -279,6 +288,9 @@
                         },
                         "timestamp": {
                           "type": "date"
+                        },
+                        "contribution_score": {
+                          "type": "float"
                         }
                       }
                     },

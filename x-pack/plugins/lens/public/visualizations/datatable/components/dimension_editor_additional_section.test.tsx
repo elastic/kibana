@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { render, screen } from '@testing-library/react';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   DatasourcePublicAPI,
   FramePublicAPI,
@@ -15,10 +17,7 @@ import {
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;
@@ -79,53 +78,25 @@ describe('data table dimension editor additional section', () => {
 
   it('should set the summary row function default to "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'none', label: 'None' }]);
-
-    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+    render(<TableDimensionEditorAdditionalSection {...props} />);
+    expect(screen.getByRole('combobox')).toHaveValue('None');
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_label')).not.toBeInTheDocument();
   });
 
   it('should show the summary row label input ony when summary row is different from "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].summaryRow = 'sum';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
-
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('Sum');
+    render(<TableDimensionEditorAdditionalSection {...props} />);
+    expect(screen.getByRole('combobox')).toHaveValue('Sum');
+    expect(screen.getByTestId('lnsDatatable_summaryrow_label')).toHaveValue('Sum');
   });
 
   it("should show the correct summary row name when user's changes summary label", () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].summaryRow = 'sum';
     state.columns[0].summaryLabel = 'MySum';
-    const instance = mountWithIntl(<TableDimensionEditorAdditionalSection {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
-
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('MySum');
+    render(<TableDimensionEditorAdditionalSection {...props} />);
+    expect(screen.getByRole('combobox')).toHaveValue('Sum');
+    expect(screen.getByTestId('lnsDatatable_summaryrow_label')).toHaveValue('MySum');
   });
 });

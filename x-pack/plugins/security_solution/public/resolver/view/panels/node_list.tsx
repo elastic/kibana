@@ -84,7 +84,6 @@ export const NodeList = memo(({ id }: { id: string }) => {
   const processTableView: ProcessTableView[] = useSelector(
     useCallback(
       (state: State) => {
-        // console.log('lol WAT');
         const { processNodePositions } = selectors.layout(state.analyzer[id]);
         const view: ProcessTableView[] = [];
         for (const treeNode of processNodePositions.keys()) {

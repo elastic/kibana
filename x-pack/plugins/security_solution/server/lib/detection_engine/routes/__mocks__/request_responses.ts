@@ -31,7 +31,7 @@ import {
   PREBUILT_RULES_URL,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  getPerformBulkActionSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
@@ -131,11 +131,11 @@ export const getPatchBulkRequest = () =>
     body: [getCreateRulesSchemaMock()],
   });
 
-export const getBulkActionRequest = () =>
+export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
-    body: getPerformBulkActionSchemaMock(),
+    body: getBulkDisableRuleActionSchemaMock(),
   });
 
 export const getBulkActionEditRequest = () =>

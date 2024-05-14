@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -81,10 +80,27 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV1Enabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously as well as support
-   * for more response actions.
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: false,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: false,
+
+  /**
+   * 8.15
+   * Enables use of agent status service to get agent status information
+   * for endpoint and third-party agents.
+   */
+  agentStatusClientEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -104,12 +120,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
    */
-  expandableTimelineFlyoutEnabled: false,
+  expandableTimelineFlyoutEnabled: true,
   /*
 
   /**
@@ -176,7 +192,9 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 
@@ -184,6 +202,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
@@ -228,6 +251,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   *  Enables Security AI Assistant's Flyout mode
+   */
+  aiAssistantFlyoutMode: true,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the new rule's bulk action to manage custom highlighted fields
+   */
+  bulkCustomHighlightedFieldsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
-import {
-  Filter,
-  CustomLink,
-} from '../../../../../../common/custom_link/custom_link_types';
+import { Filter, CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 
 export async function saveCustomLink({
@@ -60,16 +57,12 @@ export async function saveCustomLink({
       title: i18n.translate('xpack.apm.settings.customLink.create.failed', {
         defaultMessage: 'Link could not be saved!',
       }),
-      text: i18n.translate(
-        'xpack.apm.settings.customLink.create.failed.message',
-        {
-          defaultMessage:
-            'Something went wrong when saving the link. Error: "{errorMessage}"',
-          values: {
-            errorMessage: error.message,
-          },
-        }
-      ),
+      text: i18n.translate('xpack.apm.settings.customLink.create.failed.message', {
+        defaultMessage: 'Something went wrong when saving the link. Error: "{errorMessage}"',
+        values: {
+          errorMessage: error.message,
+        },
+      }),
     });
   }
 }

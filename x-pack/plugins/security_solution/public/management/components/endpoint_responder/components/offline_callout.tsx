@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -24,8 +24,13 @@ interface OfflineCalloutProps {
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
   const isEndpointAgent = agentType === 'endpoint';
   const isSentinelOneAgent = agentType === 'sentinel_one';
+  const getAgentStatus = useAgentStatusHook();
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
+  );
+
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
   );
 
   const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
@@ -33,7 +38,9 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
     enabled: isEndpointAgent,
   });
 
-  const { data } = useGetSentinelOneAgentStatus([endpointId]);
+  const { data } = getAgentStatus([endpointId], agentType, {
+    enabled: sentinelOneManualHostActionsEnabled && isSentinelOneAgent,
+  });
 
   // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(

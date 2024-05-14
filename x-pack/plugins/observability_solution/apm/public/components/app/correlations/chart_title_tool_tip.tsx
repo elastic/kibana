@@ -12,13 +12,10 @@ import { i18n } from '@kbn/i18n';
 export function ChartTitleToolTip() {
   return (
     <EuiIconTip
-      content={i18n.translate(
-        'xpack.apm.correlations.latencyCorrelations.titleHelp',
-        {
-          defaultMessage:
-            'This chart uses logarithmic scales on both axes to avoid distortion from outliers.',
-        }
-      )}
+      content={i18n.translate('xpack.apm.correlations.latencyCorrelations.titleHelp', {
+        defaultMessage:
+          'This chart uses logarithmic scales on both axes to avoid distortion from outliers.',
+      })}
       position="right"
     />
   );

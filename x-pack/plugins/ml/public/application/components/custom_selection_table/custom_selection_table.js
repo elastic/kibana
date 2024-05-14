@@ -325,7 +325,7 @@ export function CustomSelectionTable({
         <EuiTableRow
           key={item[tableItemId]}
           isSelected={isItemSelected(item[tableItemId])}
-          isSelectable={true}
+          hasSelection={true}
           hasActions={true}
           data-test-subj={`mlCustomSelectionTableRow row-${item[tableItemId]}`}
         >

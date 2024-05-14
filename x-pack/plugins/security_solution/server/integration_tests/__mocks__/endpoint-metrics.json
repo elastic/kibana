@@ -4,7 +4,7 @@
       "build": {
         "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
       },
-      "id": "123",
+      "id": "456",
       "type": "endpoint",
       "version": "8.6.0"
     },

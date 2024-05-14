@@ -12,16 +12,27 @@ import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase } from 'lodash';
+import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { SuggestionRawDefinition } from './types';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { FunctionArgSignature } from '../definitions/types';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-    name: `${type}Field`,
+  ...[
+    'string',
+    'number',
+    'date',
+    'boolean',
+    'ip',
+    'geo_point',
+    'geo_shape',
+    'cartesian_point',
+    'cartesian_shape',
+  ].map((type) => ({
+    name: `${camelCase(type)}Field`,
     type,
   })),
   { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
@@ -71,21 +82,38 @@ const policies = [
  */
 function getFunctionSignaturesByReturnType(
   command: string,
-  expectedReturnType: string,
+  _expectedReturnType: string | string[],
   {
     agg,
+    grouping,
     evalMath,
     builtin,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
-  }: { agg?: boolean; evalMath?: boolean; builtin?: boolean; skipAssign?: boolean } = {},
+  }: {
+    agg?: boolean;
+    grouping?: boolean;
+    evalMath?: boolean;
+    builtin?: boolean;
+    skipAssign?: boolean;
+  } = {},
   paramsTypes?: string[],
-  ignored?: string[]
+  ignored?: string[],
+  option?: string
 ) {
+  const expectedReturnType = Array.isArray(_expectedReturnType)
+    ? _expectedReturnType
+    : [_expectedReturnType];
+
   const list = [];
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
+    // right now all grouping functions are agg functions too
+    list.push(...groupingFunctionDefinitions);
+  }
+  if (grouping) {
+    list.push(...groupingFunctionDefinitions);
   }
   // eval functions (eval is a special keyword in JS)
   if (evalMath) {
@@ -94,16 +122,20 @@ function getFunctionSignaturesByReturnType(
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
-  return list
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, name }) => {
+
+  const deduped = Array.from(new Set(list));
+
+  return deduped
+    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command)) {
+      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
         return false;
       }
       const filteredByReturnType = signatures.filter(
-        ({ returnType }) => expectedReturnType === 'any' || returnType === expectedReturnType
+        ({ returnType }) =>
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -129,6 +161,7 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map(({ type, name, signatures }) => {
       if (type === 'builtin') {
         return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
@@ -137,18 +170,20 @@ function getFunctionSignaturesByReturnType(
     });
 }
 
-function getFieldNamesByType(requestedType: string) {
+function getFieldNamesByType(_requestedType: string | string[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
-    .filter(({ type }) => requestedType === 'any' || type === requestedType)
+    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-function getLiteralsByType(type: string) {
-  if (type === 'time_literal') {
+function getLiteralsByType(_type: string | string[]) {
+  const type = Array.isArray(_type) ? _type : [_type];
+  if (type.includes('time_literal')) {
     // return only singular
     return timeLiterals.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
-  if (type === 'chrono_literal') {
+  if (type.includes('chrono_literal')) {
     return chronoLiterals.map(({ name }) => name);
   }
   return [];
@@ -201,14 +236,14 @@ function getPolicyFields(policyName: string) {
 describe('autocomplete', () => {
   type TestArgs = [
     string,
-    Array<string | Partial<SuggestionRawDefinition>>,
+    string[],
     (string | number)?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
   const testSuggestionsFn = (
     statement: string,
-    expected: Array<string | Partial<SuggestionRawDefinition>>,
+    expected: string[],
     triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
@@ -238,27 +273,23 @@ describe('autocomplete', () => {
           statement,
           offset,
           context,
-          async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
-        const suggestionInertTextSorted = suggestions
-          // simulate the editor behaviour for sorting suggestions
-          .sort((a, b) => (a.sortText || '').localeCompare(b.sortText || ''));
-        for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
-          if (typeof expected[index] === 'string') {
-            expect(receivedSuggestion.text).toEqual(expected[index]);
-          } else {
-            // check all properties that are defined in the expected suggestion
-            for (const [key, value] of Object.entries(expected[index])) {
-              expect(receivedSuggestion[key as keyof SuggestionRawDefinition]).toEqual(value);
-            }
-          }
-        }
+
+        const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
+        const sortedExpected = expected.sort();
+
+        expect(sortedSuggestions).toEqual(sortedExpected);
       }
     );
   };
 
   // Enrich the function to work with .only and .skip as regular test function
+  //
+  // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
+  // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+  //
   const testSuggestions = Object.assign(testSuggestionsFn, {
     skip: (...args: TestArgs) => {
       const paddingArgs = ['', [undefined, undefined, undefined]].slice(args.length - 2);
@@ -525,7 +556,10 @@ describe('autocomplete', () => {
   }
 
   describe('sort', () => {
-    testSuggestions('from a | sort ', getFieldNamesByType('any'));
+    testSuggestions('from a | sort ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('sort', 'any', { evalMath: true }),
+    ]);
     testSuggestions('from a | sort stringField ', ['asc', 'desc', ',', '|']);
     testSuggestions('from a | sort stringField desc ', ['nulls first', 'nulls last', ',', '|']);
     // @TODO: improve here
@@ -574,29 +608,48 @@ describe('autocomplete', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
       agg: true,
     });
-    const allEvaFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
-      evalMath: true,
-    });
+    const allEvaFunctions = getFunctionSignaturesByReturnType(
+      'stats',
+      'any',
+      {
+        evalMath: true,
+        grouping: false,
+      },
+      undefined,
+      undefined,
+      'by'
+    );
+    const allGroupingFunctions = getFunctionSignaturesByReturnType(
+      'stats',
+      'any',
+      {
+        grouping: true,
+      },
+      undefined,
+      undefined,
+      'by'
+    );
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a ', [
-      { text: '= $0', asSnippet: true, command: TRIGGER_SUGGESTION_COMMAND },
-    ]);
+    testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=max(b) BY ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=c by d ', [',', '|']);
     testSuggestions('from a | stats a=c by d, ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=max(b), ', [
       'var0 =',
@@ -606,8 +659,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min()',
       [
-        ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('stats', 'number', {
+        ...getFieldNamesByType(['number', 'date']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
           evalMath: true,
         }),
       ],
@@ -618,6 +671,7 @@ describe('autocomplete', () => {
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', [
@@ -628,8 +682,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min(b), b=max()',
       [
-        ...getFieldNamesByType('number'),
-        ...getFunctionSignaturesByReturnType('stats', 'number', {
+        ...getFieldNamesByType(['number', 'date']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
           evalMath: true,
         }),
       ],
@@ -660,26 +714,40 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('number'),
       '`avg(b)`',
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by var0 = ', [
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by c, ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by c, var0 = ', [
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
+
+    // expect "bucket" NOT to be suggested for its own parameter
+    testSuggestions(
+      'from a | stats by bucket(',
+      [
+        ...getFieldNamesByType(['number', 'date']),
+        ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
+      ].map((field) => `${field},`)
+    );
+
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
     testSuggestions(
       'from a | stats round(',
       [
-        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
+        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
         ...getFieldNamesByType('number'),
         ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
           'round',
@@ -755,6 +823,10 @@ describe('autocomplete', () => {
         'dateField',
         'booleanField',
         'ipField',
+        'geoPointField',
+        'geoShapeField',
+        'cartesianPointField',
+        'cartesianShapeField',
         'any#Char$Field',
         'kubernetes.something.something',
       ]);
@@ -1051,47 +1123,76 @@ describe('autocomplete', () => {
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
-      if (fn.name !== 'auto_bucket') {
+      if (fn.name !== 'bucket') {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
-            if (i < signature.params.length - 1) {
+            if (i < signature.params.length) {
               const canHaveMoreArgs =
-                signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
+                i + 1 < (signature.minParams ?? 0) ||
+                signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
+
+              const allParamDefs = fn.signatures.map((s) => s.params[i]);
+
+              // get all possible types for this param
+              const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
+                allParamDefs,
+                (p) => p.constantOnly || /_literal/.test(param.type)
+              );
+
+              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+                Array.from(new Set(paramDefs.map((p) => p.type)));
+
+              const suggestedConstants = param.literalSuggestions || param.literalOptions;
+
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-                [
-                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType(
-                    'eval',
-                    param.type,
-                    { evalMath: true },
-                    undefined,
-                    [fn.name]
-                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
-                ]
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
+                        canHaveMoreArgs ? `${d},` : d
+                      ),
+                    ]
               );
               testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
-                [
-                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType(
-                    'eval',
-                    param.type,
-                    { evalMath: true },
-                    undefined,
-                    [fn.name]
-                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
-                ]
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
+                        canHaveMoreArgs ? `${d},` : d
+                      ),
+                    ]
               );
             }
           });
         }
       }
     }
+
+    testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
 
     describe('date math', () => {
       const dateSuggestions = timeLiterals.map(({ name }) => name);
@@ -1147,7 +1248,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
@@ -1163,7 +1264,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
@@ -1179,7 +1280,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
     }

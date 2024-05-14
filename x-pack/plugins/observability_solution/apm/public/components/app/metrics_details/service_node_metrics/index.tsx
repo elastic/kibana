@@ -23,10 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import { ApmDocumentType } from '../../../../../common/document_type';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../../common/service_nodes';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
@@ -159,12 +156,9 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleSize="s"
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.serviceName',
-                  {
-                    defaultMessage: 'Service name',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.serviceName', {
+                  defaultMessage: 'Service name',
+                })}
                 title={
                   <EuiToolTip content={serviceName}>
                     <Truncate>{serviceName}</Truncate>
@@ -176,12 +170,9 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
               <EuiStat
                 titleSize="s"
                 isLoading={isLoading}
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.host',
-                  {
-                    defaultMessage: 'Host',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
+                  defaultMessage: 'Host',
+                })}
                 title={
                   <EuiToolTip content={host}>
                     <Truncate>{host}</Truncate>
@@ -193,12 +184,9 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
               <EuiStat
                 titleSize="s"
                 isLoading={isLoading}
-                description={i18n.translate(
-                  'xpack.apm.serviceNodeMetrics.containerId',
-                  {
-                    defaultMessage: 'Container ID',
-                  }
-                )}
+                description={i18n.translate('xpack.apm.serviceNodeMetrics.containerId', {
+                  defaultMessage: 'Container ID',
+                })}
                 title={
                   <EuiToolTip content={containerId}>
                     <Truncate>{containerId}</Truncate>
@@ -230,12 +218,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel hasBorder={true}>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    fetchStatus={status}
-                  />
+                  <MetricsChart start={start} end={end} chart={chart} fetchStatus={status} />
                 </EuiPanel>
               </EuiFlexItem>
             ))}

@@ -145,4 +145,8 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: customFieldsSolutionTelemetrySchema,
     main: customFieldsSolutionTelemetrySchema,
   },
+  casesSystemAction: {
+    totalCasesCreated: long,
+    totalRules: long,
+  },
 };

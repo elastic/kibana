@@ -41,8 +41,8 @@ describe('getAddPanelActionMenuItems', () => {
         id: 'TEST_ACTION_02',
         type: 'TEST_ACTION_02',
         getDisplayName: () => 'Action name',
-        getIconType: () => 'pencil',
         getDisplayNameTooltip: () => 'Action tooltip',
+        getIconType: () => undefined,
         isCompatible: () => Promise.resolve(true),
         execute: jest.fn(),
         grouping: [
@@ -83,7 +83,7 @@ describe('getAddPanelActionMenuItems', () => {
           },
           {
             'data-test-subj': 'create-action-Action name',
-            icon: 'pencil',
+            icon: 'empty',
             name: 'Action name',
             onClick: expect.any(Function),
             toolTipContent: 'Action tooltip',

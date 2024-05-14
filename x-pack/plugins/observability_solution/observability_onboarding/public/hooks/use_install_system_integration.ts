@@ -28,11 +28,7 @@ export interface SystemIntegrationError {
   message: string;
 }
 
-type IntegrationInstallStatus =
-  | 'installed'
-  | 'installing'
-  | 'install_failed'
-  | 'not_installed';
+type IntegrationInstallStatus = 'installed' | 'installing' | 'install_failed' | 'not_installed';
 
 export const useInstallSystemIntegration = ({
   onIntegrationCreationSuccess,

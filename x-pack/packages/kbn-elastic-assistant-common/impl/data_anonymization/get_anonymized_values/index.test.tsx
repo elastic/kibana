@@ -11,8 +11,7 @@ import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 describe('getAnonymizedValues', () => {
   it('returns empty anonymizedValues and replacements when provided with empty raw data', () => {
     const result = getAnonymizedValues({
-      allowReplacementSet: new Set(),
-      allowSet: new Set(),
+      anonymizationFields: [],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: jest.fn(),
@@ -31,8 +30,9 @@ describe('getAnonymizedValues', () => {
     };
 
     const result = getAnonymizedValues({
-      allowReplacementSet: new Set(['test.field']),
-      allowSet: new Set(['test.field']),
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: true },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -48,8 +48,9 @@ describe('getAnonymizedValues', () => {
     };
 
     const result = getAnonymizedValues({
-      allowReplacementSet: new Set(['test.field']),
-      allowSet: new Set(['test.field']),
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: true },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -68,8 +69,9 @@ describe('getAnonymizedValues', () => {
     };
 
     const result = getAnonymizedValues({
-      allowReplacementSet: new Set(), // does NOT include `test.field`
-      allowSet: new Set(['test.field']),
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: false },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -85,8 +87,9 @@ describe('getAnonymizedValues', () => {
     };
 
     const result = getAnonymizedValues({
-      allowReplacementSet: new Set(['test.field']),
-      allowSet: new Set(), // does NOT include `test.field`
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: false, anonymized: true },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,

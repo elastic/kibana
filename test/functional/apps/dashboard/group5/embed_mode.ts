@@ -90,8 +90,7 @@ export default function ({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168648
-    describe.skip('non-default URL params', () => {
+    describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');

@@ -86,6 +86,10 @@ describe('CoreUsageDataService', () => {
     service = new CoreUsageDataService(coreContext);
   });
 
+  afterEach(() => {
+    service.stop();
+  });
+
   describe('setup', () => {
     it('creates internal repository', async () => {
       const http = httpServiceMock.createInternalSetupContract();
@@ -373,9 +377,12 @@ describe('CoreUsageDataService', () => {
             },
             "environment": Object {
               "memory": Object {
+                "arrayBuffersBytes": 1,
+                "externalBytes": 1,
                 "heapSizeLimit": 1,
                 "heapTotalBytes": 1,
                 "heapUsedBytes": 1,
+                "residentSetSizeBytes": 1,
               },
             },
             "services": Object {

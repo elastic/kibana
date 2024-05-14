@@ -11,6 +11,7 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: http://KIBANA_HOST:5601/api/fleet
+    description: Public and supported Fleet API
 paths:
   /health_check:
     post:
@@ -115,6 +116,34 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: update-settings
+  /settings/enrollment:
+    servers:
+      - url: http://KIBANA_HOST:5601/internal/fleet
+        description: Used for Fleet internals and not supported
+    get:
+      summary: Get enrollment settings
+      tags:
+        - Fleet internals
+      parameters:
+        - in: query
+          name: agentPolicyId
+          required: false
+          schema:
+            type: string
+          description: >-
+            An agent policy ID to scope the enrollment settings to. For example,
+            that policy's Fleet Server host, its proxy, download location, etc.
+            If not provided, the default Fleet Server policy is used (if any).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fleet_settings_enrollment_response'
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-enrollment-settings
   /service-tokens:
     post:
       summary: Create service token
@@ -379,7 +408,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -541,7 +570,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -728,7 +757,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -3260,6 +3289,11 @@ paths:
                   type: boolean
                 is_internal:
                   type: boolean
+                proxy_id:
+                  description: >-
+                    The ID of the proxy to use for this fleet server host. See
+                    the proxies API for more information.
+                  type: string
                 host_urls:
                   type: array
                   items:
@@ -3332,6 +3366,12 @@ paths:
                   type: boolean
                 is_internal:
                   type: boolean
+                proxy_id:
+                  description: >-
+                    The ID of the proxy to use for this fleet server host. See
+                    the proxies API for more information.
+                  type: string
+                  nullable: true
                 host_urls:
                   type: array
                   items:
@@ -3787,6 +3827,118 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
+    fleet_server_host:
+      title: Fleet Server Host
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        is_default:
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        proxy_id:
+          type: string
+        host_urls:
+          type: array
+          items:
+            type: string
+      required:
+        - fleet_server_hosts
+        - id
+        - is_default
+        - is_preconfigured
+        - host_urls
+    proxies:
+      title: Fleet Proxy
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+        proxy_headers:
+          type: object
+        certificate_authorities:
+          type: string
+        certificate:
+          type: string
+        certificate_key:
+          type: string
+      required:
+        - name
+        - url
+    download_sources:
+      title: Download Source
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        host:
+          type: string
+        proxy_id:
+          description: >-
+            The ID of the proxy to use for this download source. See the proxies
+            API for more information.
+          type: string
+          nullable: true
+      required:
+        - is_default
+        - name
+        - host
+    fleet_settings_enrollment_response:
+      title: Fleet settings response
+      type: object
+      properties:
+        fleet_server:
+          type: object
+          properties:
+            policies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  is_managed:
+                    type: boolean
+                  is_default_fleet_server:
+                    type: boolean
+                  has_fleet_server:
+                    type: boolean
+                  fleet_server_host_id:
+                    type: string
+                  download_source_id:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - is_managed
+            has_active:
+              type: boolean
+            host:
+              $ref: '#/components/schemas/fleet_server_host'
+            host_proxy:
+              $ref: '#/components/schemas/proxies'
+          required:
+            - agent_policies
+            - has_active
+        download_source:
+          $ref: '#/components/schemas/download_sources'
+      required:
+        - fleet_server
     saved_object_type:
       title: Saved Object type
       oneOf:
@@ -3819,26 +3971,26 @@ components:
       type: object
       deprecated: true
       properties:
-        response:
+        items:
           type: array
           items:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                type:
-                  $ref: '#/components/schemas/saved_object_type'
-                updatedAt:
-                  type: string
-                attributes:
-                  type: object
-                  properties:
-                    title:
-                      type: string
-                    description:
-                      type: string
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                $ref: '#/components/schemas/saved_object_type'
+              updatedAt:
+                type: string
+              attributes:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+              appLink:
+                type: string
       required:
         - items
     get_categories_response:
@@ -4631,6 +4783,8 @@ components:
           type: string
         description:
           type: string
+        overrides:
+          type: object
       required:
         - inputs
         - name
@@ -4710,6 +4864,8 @@ components:
           type: number
         agents:
           type: number
+        unprivileged_agents:
+          type: number
         agent_features:
           type: array
           items:
@@ -4734,6 +4890,17 @@ components:
             settings cannot be overridden. The override option should be used
             only in unusual circumstances and not as a routine procedure.
           nullable: true
+        advanced_settings:
+          type: object
+          description: >-
+            Advanced settings stored in the agent policy, e.g.
+            agent_limits_go_max_procs
+          nullable: true
+        supports_agentless:
+          type: boolean
+          description: >-
+            Indicates whether the agent policy supports agentless integrations.
+            Only allowed in a serverless environment.
       required:
         - id
         - status
@@ -5129,6 +5296,16 @@ components:
                       description: >-
                         Stream level variable (see integration documentation for
                         more information)
+        overrides:
+          type: object
+          properties:
+            inputs:
+              type: object
+          description: >-
+            Override settings that are defined in the package policy. The
+            override option should be used only in unusual circumstances and not
+            as a routine procedure.
+          nullable: true
         force:
           type: boolean
           description: >-
@@ -5871,72 +6048,5 @@ components:
           elasticsearch: '#/components/schemas/output_update_request_elasticsearch'
           kafka: '#/components/schemas/output_update_request_kafka'
           logstash: '#/components/schemas/output_update_request_logstash'
-    download_sources:
-      title: Download Source
-      type: object
-      properties:
-        id:
-          type: string
-        is_default:
-          type: boolean
-        name:
-          type: string
-        host:
-          type: string
-        proxy_id:
-          description: >-
-            The ID of the proxy to use for this download source. See the proxies
-            API for more information.
-          type: string
-          nullable: true
-      required:
-        - is_default
-        - name
-        - host
-    fleet_server_host:
-      title: Fleet Server Host
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        is_default:
-          type: boolean
-        is_internal:
-          type: boolean
-        is_preconfigured:
-          type: boolean
-        host_urls:
-          type: array
-          items:
-            type: string
-      required:
-        - fleet_server_hosts
-        - id
-        - is_default
-        - is_preconfigured
-        - host_urls
-    proxies:
-      title: Fleet Proxy
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        url:
-          type: string
-        proxy_headers:
-          type: object
-        certificate_authorities:
-          type: string
-        certificate:
-          type: string
-        certificate_key:
-          type: string
-      required:
-        - name
-        - url
 security:
   - basicAuth: []

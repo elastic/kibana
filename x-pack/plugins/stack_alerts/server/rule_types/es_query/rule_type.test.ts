@@ -28,7 +28,7 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
-const ruleType = getRuleType(coreSetup);
+let ruleType = getRuleType(coreSetup, false);
 const mockNow = jest.getRealSystemTime();
 
 describe('ruleType', () => {
@@ -38,6 +38,7 @@ describe('ruleType', () => {
   });
   beforeEach(() => {
     jest.clearAllMocks();
+    ruleType = getRuleType(coreSetup, false);
   });
   afterAll(() => {
     jest.useRealTimers();
@@ -158,6 +159,49 @@ describe('ruleType', () => {
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
         `"[threshold]: must have two elements for the \\"between\\" comparator"`
+      );
+    });
+
+    it('validator succeeds with valid es query params (serverless)', async () => {
+      ruleType = getRuleType(coreSetup, true);
+      const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+        searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
+      };
+
+      expect(ruleType.validate.params.validate(params)).toBeTruthy();
+    });
+
+    it('validator fails with invalid es query params - size (serverless)', async () => {
+      ruleType = getRuleType(coreSetup, true);
+      const paramsSchema = ruleType.validate.params;
+      if (!paramsSchema) throw new Error('params validator not set');
+
+      const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 104,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+        searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
+      };
+
+      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"[size]: must be less than or equal to 100"`
       );
     });
 
@@ -589,6 +633,7 @@ describe('ruleType', () => {
       toSpec: () => {
         return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
       },
+      getTimeField: () => dataViewMock.fields[1],
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -657,12 +702,12 @@ describe('ruleType', () => {
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
-          return { dataViewMock, timeFieldName: undefined };
+          return { dataViewMock, getTimeField: () => undefined, id: 1234 };
         }
       });
 
       await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
-        'Invalid data view without timeFieldName.'
+        'Data view with ID 1234 no longer contains a time field.'
       );
     });
 
@@ -673,6 +718,7 @@ describe('ruleType', () => {
       (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         toSpec: () => dataViewMock.toSpec(),
+        getTimeField: () => dataViewMock.fields[1],
         toMinimalSpec: () => dataViewMock.toSpec(),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
@@ -861,6 +907,7 @@ async function invokeExecutor({
   return await ruleType.executor({
     executionId: uuidv4(),
     startedAt: new Date(),
+    startedAtOverridden: false,
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
       EsQueryRuleState,

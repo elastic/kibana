@@ -18,23 +18,28 @@ export const useDatasetQualityFlyout = () => {
 
   const {
     dataset: dataStreamStat,
+    datasetSettings: dataStreamSettings,
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
-  } = useSelector(service, (state) => state.context.flyout);
+    breakdownField,
+  } = useSelector(service, (state) => state.context.flyout) ?? {};
+
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(
-    service,
-    (state) =>
-      state.matches('datasets.loaded.flyoutOpen.fetching') ||
-      state.matches('flyout.initializing.dataStreamDetails.fetching')
-  );
+  const loadingState = useSelector(service, (state) => ({
+    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
+    datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
+  }));
 
   return {
     dataStreamStat,
+    dataStreamSettings,
     dataStreamDetails,
-    dataStreamDetailsLoading,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
+    breakdownField,
+    loadingState,
+    flyoutLoading: !dataStreamStat,
   };
 };

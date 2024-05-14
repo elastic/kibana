@@ -10,8 +10,6 @@
       "xpack",
       "licensing"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

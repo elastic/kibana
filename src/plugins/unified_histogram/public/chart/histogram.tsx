@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type {
@@ -220,6 +220,7 @@ export function Histogram({
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
         data-request-data={requestData}
+        data-suggestion-type={visContext.suggestionType}
         css={chartCss}
         ref={chartRef}
       >

@@ -8,19 +8,14 @@
 import { getResponseTimeTickFormatter, getMaxY } from './helper';
 
 import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
-import {
-  getDurationFormatter,
-  toMicroseconds,
-} from '../../../../../common/utils/formatters';
+import { getDurationFormatter, toMicroseconds } from '../../../../../common/utils/formatters';
 
 describe('transaction chart helper', () => {
   describe('getResponseTimeTickFormatter', () => {
     it('formattes time tick in minutes', () => {
       const formatter = getDurationFormatter(toMicroseconds(11, 'minutes'));
       const timeTickFormatter = getResponseTimeTickFormatter(formatter);
-      expect(timeTickFormatter(toMicroseconds(60, 'seconds'))).toEqual(
-        '1.0 min'
-      );
+      expect(timeTickFormatter(toMicroseconds(60, 'seconds'))).toEqual('1.0 min');
     });
 
     it('formattes time tick in seconds', () => {
@@ -36,9 +31,9 @@ describe('transaction chart helper', () => {
     });
 
     it('returns zero for invalid y coordinate', () => {
-      const timeSeries = [
-        { data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] },
-      ] as unknown as Array<TimeSeries<Coordinate>>;
+      const timeSeries = [{ data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] }] as unknown as Array<
+        TimeSeries<Coordinate>
+      >;
       expect(getMaxY(timeSeries)).toEqual(0);
     });
 

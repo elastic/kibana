@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('heatmap chart', function indexPatternCreation() {
+  // FLAKY: https://github.com/elastic/kibana/issues/181884
+  describe.skip('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
     let isNewChartsLibraryEnabled = false;
 

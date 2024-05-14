@@ -7,7 +7,10 @@
 
 import { set } from 'lodash';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import {
+  AntivirusRegistrationModes,
+  ProtectionModes,
+} from '../../../../../../common/endpoint/types';
 
 interface TestSubjGenerator {
   (suffix?: string): string;
@@ -143,8 +146,10 @@ export const getPolicySettingsFormTestSubjects = (
     },
     antivirusRegistration: {
       card: antivirusTestSubj(),
-      enableDisableSwitch: antivirusTestSubj('switch'),
-      switchLabel: antivirusTestSubj('label'),
+      radioButtons: antivirusTestSubj('radioButtons'),
+      disabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.disabled),
+      enabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.enabled),
+      syncRadioButton: antivirusTestSubj(AntivirusRegistrationModes.sync),
       osValueContainer: antivirusTestSubj('osValueContainer'),
     },
     advancedSection: {
@@ -225,4 +230,23 @@ export const setMalwareMode = (
     set(policy, 'mac.malware.on_write_scan', enableValue);
     set(policy, 'linux.malware.on_write_scan', enableValue);
   }
+};
+
+export const setMalwareModeToDetect = (policy: PolicyConfig) => {
+  set(policy, 'windows.malware.mode', ProtectionModes.detect);
+  set(policy, 'mac.malware.mode', ProtectionModes.detect);
+  set(policy, 'linux.malware.mode', ProtectionModes.detect);
+
+  set(policy, 'windows.popup.malware.enabled', false);
+  set(policy, 'mac.popup.malware.enabled', false);
+  set(policy, 'linux.popup.malware.enabled', false);
+};
+
+export const setAntivirusRegistration = (
+  policy: PolicyConfig,
+  mode: AntivirusRegistrationModes,
+  enabled: boolean
+) => {
+  policy.windows.antivirus_registration.mode = mode;
+  policy.windows.antivirus_registration.enabled = enabled;
 };

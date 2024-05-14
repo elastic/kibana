@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { useUpsellingComponent } from '../../../../../common/hooks/use_upselling';
 
-export const EndpointAgentTamperProtectionExtension = memo(({ children }) => {
-  const Component = useUpsellingComponent('endpoint_agent_tamper_protection');
-  if (!Component) {
-    return <>{children}</>;
+export const EndpointAgentTamperProtectionExtension = memo<PropsWithChildren<unknown>>(
+  ({ children }) => {
+    const Component = useUpsellingComponent('endpoint_agent_tamper_protection');
+    if (!Component) {
+      return <>{children}</>;
+    }
+    return <Component />;
   }
-  return <Component />;
-});
+);
 
 EndpointAgentTamperProtectionExtension.displayName = 'EndpointAgentTamperProtectionExtension';

@@ -45,12 +45,11 @@ export const actionAlertsFilterSchema = schema.object({
 });
 
 export const actionSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
   group: schema.maybe(schema.string()),
   id: schema.string(),
-  actionTypeId: schema.maybe(schema.string()),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   frequency: schema.maybe(actionFrequencySchema),
+  uuid: schema.maybe(schema.string()),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
   use_alert_data_for_template: schema.maybe(schema.boolean()),
 });

@@ -20,10 +20,7 @@ export enum PalleteColors {
   YellowtoRed = 'Yellow to Red',
 }
 
-export function getLayerStyle(
-  fieldName: string,
-  color: PalleteColors
-): VectorStyleDescriptor {
+export function getLayerStyle(fieldName: string, color: PalleteColors): VectorStyleDescriptor {
   return {
     type: 'VECTOR',
     properties: {

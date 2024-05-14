@@ -60,11 +60,9 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
-  setChromeStyle = jest.fn(),
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
-  setChromeStyle?: () => void;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
@@ -87,7 +85,6 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
-    setChromeStyle,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -1006,44 +1003,18 @@ describe('solution navigations', () => {
     }
   });
 
-  it('should throw if the active solution navigation is not registered', async () => {
-    const { projectNavigation } = setup();
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-
-    expect(() => {
-      projectNavigation.changeActiveSolutionNavigation('3');
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Solution navigation definition with id \\"3\\" does not exist."`
-    );
-  });
-
-  it('should set the Chrome style when the active solution navigation changes', async () => {
-    const setChromeStyle = jest.fn();
-    const { projectNavigation } = setup({ setChromeStyle });
-
-    expect(setChromeStyle).not.toHaveBeenCalled();
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-    expect(setChromeStyle).not.toHaveBeenCalled();
-
-    projectNavigation.changeActiveSolutionNavigation('2');
-    expect(setChromeStyle).toHaveBeenCalledWith('project'); // We have an active solution nav, we should switch to project style
-
-    projectNavigation.changeActiveSolutionNavigation(null);
-    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution, we should switch back to classic Kibana
-  });
-
   it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService } = setup({
+    const { projectNavigation, navLinksService, application } = setup({
       locationPathName: '/app/app3', // we are on app3 which only exists in solution3
       navLinkIds: ['app1', 'app2', 'app3'],
     });
 
-    const getActiveDefinition = () =>
-      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
+    navLinksService.get.mockReturnValue({ url: '/app/app3', href: '/app/app3' } as any);
 
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
+    const getActiveDefinition = () =>
+      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
+
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
 
     {
       const definition = await getActiveDefinition();
@@ -1051,20 +1022,12 @@ describe('solution navigations', () => {
     }
 
     // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('2');
+    projectNavigation.changeActiveSolutionNavigation('solution2');
 
     {
       const definition = await getActiveDefinition();
       expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
+      expect(application.navigateToUrl).toHaveBeenCalled(); // Redirect
     }
-
-    navLinksService.get.mockReturnValue({ url: '/app/app2', href: '/app/app2' } as any);
-    projectNavigation.changeActiveSolutionNavigation('2', { redirect: true }); // We ask to redirect to the home page of solution 2
-    {
-      const definition = await getActiveDefinition();
-      expect(definition?.id).toBe('solution2');
-    }
-
-    navLinksService.get.mockReset();
   });
 });

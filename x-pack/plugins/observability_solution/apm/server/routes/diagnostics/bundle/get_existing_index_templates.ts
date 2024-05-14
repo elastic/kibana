@@ -9,10 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
 import { getIndexTemplate } from './get_index_template';
 
-export type ApmIndexTemplateStates = Record<
-  string,
-  { exists: boolean; name?: string | undefined }
->;
+export type ApmIndexTemplateStates = Record<string, { exists: boolean; name?: string | undefined }>;
 
 // Check whether the default APM index templates exist
 export async function getExistingApmIndexTemplates({

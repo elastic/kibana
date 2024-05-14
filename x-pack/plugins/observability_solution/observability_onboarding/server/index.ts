@@ -6,10 +6,7 @@
  */
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 const configSchema = schema.object({
   ui: schema.object({

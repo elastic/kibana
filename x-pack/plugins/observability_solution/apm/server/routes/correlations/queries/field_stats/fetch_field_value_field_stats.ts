@@ -68,26 +68,23 @@ export const fetchFieldValueFieldStats = async ({
       },
     };
   }
-  const { aggregations } = await apmEventClient.search(
-    'get_field_value_field_stats',
-    {
-      apm: {
-        events: [eventType],
-      },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: getCommonCorrelationsQuery({
-          start,
-          end,
-          environment,
-          kuery,
-          query,
-        }),
-        aggs,
-      },
-    }
-  );
+  const { aggregations } = await apmEventClient.search('get_field_value_field_stats', {
+    apm: {
+      events: [eventType],
+    },
+    body: {
+      size: 0,
+      track_total_hits: false,
+      query: getCommonCorrelationsQuery({
+        start,
+        end,
+        environment,
+        kuery,
+        query,
+      }),
+      aggs,
+    },
+  });
 
   const results = (
     shouldSample
@@ -105,8 +102,7 @@ export const fetchFieldValueFieldStats = async ({
   const stats = {
     fieldName: field.fieldName,
     topValues,
-    topValuesSampleSize:
-      (aggregations?.sample as AggregationsSamplerAggregate)?.doc_count ?? 0,
+    topValuesSampleSize: (aggregations?.sample as AggregationsSamplerAggregate)?.doc_count ?? 0,
   };
 
   return stats;

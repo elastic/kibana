@@ -9,7 +9,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
   type PublishingSubject,
   apiPublishesPanelTitle,
@@ -26,7 +26,6 @@ import {
   embeddableInputToSubject,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
-  reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
@@ -34,8 +33,8 @@ import {
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { TrackContentfulRender } from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -57,14 +56,16 @@ import {
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
+  PanelPlacementStrategy,
 } from '../../dashboard_constants';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
-import { placePanel } from '../component/panel_placement';
-import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
+import { placePanel } from '../panel_placement';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
+import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
@@ -122,7 +123,7 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi
+  implements DashboardExternallyAccessibleApi, TrackContentfulRender
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -140,10 +141,14 @@ export class DashboardContainer
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
+  public lastReloadRequestTime$ = new BehaviorSubject<string | undefined>(undefined);
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
+  public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+
+  public readonly executionContext: KibanaExecutionContext;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -155,14 +160,23 @@ export class DashboardContainer
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+  private hadContentfulRender = false;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
   private analyticsService: DashboardAnalyticsService;
   private showWriteControls: DashboardCapabilitiesService['showWriteControls'];
-  private theme$;
+  private i18n: I18nStart;
+  private theme;
   private chrome;
   private customBranding;
+
+  public trackContentfulRender() {
+    if (!this.hadContentfulRender && this.analyticsService) {
+      this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
+    }
+    this.hadContentfulRender = true;
+  }
 
   private trackPanelAddMetric:
     | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
@@ -199,9 +213,7 @@ export class DashboardContainer
 
     ({
       analytics: this.analyticsService,
-      settings: {
-        theme: { theme$: this.theme$ },
-      },
+      settings: { theme: this.theme, i18n: this.i18n },
       chrome: this.chrome,
       customBranding: this.customBranding,
       dashboardCapabilities: { showWriteControls: this.showWriteControls },
@@ -238,6 +250,11 @@ export class DashboardContainer
         this.savedObjectId.next(this.getDashboardSavedObjectId());
       })
     );
+    this.publishingSubscription.add(
+      this.savedObjectId.subscribe(() => {
+        this.hadContentfulRender = false;
+      })
+    );
 
     this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.publishingSubscription.add(
@@ -246,6 +263,7 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
+
     this.startAuditingReactEmbeddableChildren();
 
     this.settings = {
@@ -265,10 +283,21 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
+    this.timeRestore$ = embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+      this.publishingSubscription,
+      this,
+      'timeRestore'
+    );
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput
     >(this.publishingSubscription, this, 'timeslice');
+    this.lastReloadRequestTime$ = embeddableInputToSubject<
+      string | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'lastReloadRequestTime');
+
+    this.executionContext = initialInput.executionContext;
   }
 
   public getAppContext() {
@@ -325,17 +354,19 @@ export class DashboardContainer
     this.domNode.className = 'dashboardContainer';
 
     ReactDOM.render(
-      <I18nProvider>
+      <KibanaRenderContextProvider
+        analytics={this.analyticsService}
+        i18n={this.i18n}
+        theme={this.theme}
+      >
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
         >
-          <KibanaThemeProvider theme$={this.theme$}>
-            <DashboardContainerContext.Provider value={this}>
-              <DashboardViewport />
-            </DashboardContainerContext.Provider>
-          </KibanaThemeProvider>
+          <DashboardContainerContext.Provider value={this}>
+            <DashboardViewport />
+          </DashboardContainerContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
-      </I18nProvider>,
+      </KibanaRenderContextProvider>,
       dom
     );
   }
@@ -450,7 +481,7 @@ export class DashboardContainer
   ) {
     const {
       notifications: { toasts },
-      embeddable: { getEmbeddableFactory },
+      embeddable: { getEmbeddableFactory, reactEmbeddableRegistryHasKey },
     } = pluginServices.getServices();
 
     const onSuccess = (id?: string, title?: string) => {
@@ -468,10 +499,20 @@ export class DashboardContainer
     }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
-      const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
-        currentPanels: this.getInput().panels,
-        height: DEFAULT_PANEL_HEIGHT,
+
+      const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
+        height: DEFAULT_PANEL_HEIGHT,
+        strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        ...getDashboardPanelPlacementSetting(panelPackage.panelType)?.(panelPackage.initialState),
+      };
+
+      const { width, height, strategy } = placementSettings;
+
+      const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(strategy, {
+        currentPanels: this.getInput().panels,
+        height,
+        width,
       });
       const newPanel: DashboardPanelState = {
         type: panelPackage.panelType,
@@ -486,7 +527,7 @@ export class DashboardContainer
       };
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
-      return;
+      return await this.untilReactEmbeddableLoaded<ApiType>(newId);
     }
 
     const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
@@ -527,6 +568,9 @@ export class DashboardContainer
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
@@ -536,7 +580,6 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
-        version: serialized.version,
       };
     }
     return panel;
@@ -639,6 +682,7 @@ export class DashboardContainer
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
+      this.setExpandedPanelId(undefined);
     });
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
@@ -690,6 +734,9 @@ export class DashboardContainer
   };
 
   public async getPanelTitles(): Promise<string[]> {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
@@ -773,6 +820,9 @@ export class DashboardContainer
   };
 
   public removePanel(id: string) {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
     if (reactEmbeddableRegistryHasKey(type)) {
@@ -821,12 +871,4 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
-
-  public getFilters() {
-    return this.getInput().filters;
-  }
-
-  public getQuery(): Query | undefined {
-    return this.getInput().query;
-  }
 }

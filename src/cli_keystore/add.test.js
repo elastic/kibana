@@ -31,7 +31,7 @@ import { PassThrough } from 'stream';
 import { Keystore } from '../cli/keystore';
 import { add } from './add';
 import { Logger } from '../cli/logger';
-import * as prompt from './utils/prompt';
+import * as prompt from '../cli/keystore/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {

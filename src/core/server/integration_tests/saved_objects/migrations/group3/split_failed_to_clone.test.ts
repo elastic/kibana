@@ -132,14 +132,14 @@ describe.skip('when splitting .kibana into multiple indices and one clone fails'
     });
 
     // cause a failure when cloning .kibana_slow_clone_* indices
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
 
     await expect(runMigrationsWhichFailsWhenCloning()).rejects.toThrowError(
       /cluster_shard_limit_exceeded/
     );
 
     // remove the failure
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
 
     const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
     await runMigrations2ndTime();

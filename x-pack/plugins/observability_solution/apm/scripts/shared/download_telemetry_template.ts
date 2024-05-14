@@ -7,11 +7,7 @@
 
 import { Octokit } from '@octokit/rest';
 
-export async function downloadTelemetryTemplate({
-  githubToken,
-}: {
-  githubToken: string;
-}) {
+export async function downloadTelemetryTemplate({ githubToken }: { githubToken: string }) {
   const octokit = new Octokit({
     auth: githubToken,
   });

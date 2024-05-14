@@ -16,6 +16,7 @@ import {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -33,6 +34,7 @@ import type {
 } from '../../../common/openai/types';
 import {
   DEFAULT_OPENAI_MODEL,
+  DEFAULT_TIMEOUT_MS,
   OpenAiProviderType,
   SUB_ACTION,
 } from '../../../common/openai/constants';
@@ -76,7 +78,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             },
           })
         : new OpenAI({
-            baseURL: this.config.apiUrl,
+            baseURL: removeEndpointFromUrl(this.config.apiUrl),
             apiKey: this.secrets.apiKey,
             defaultHeaders: {
               ...this.config.headers,
@@ -154,7 +156,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async runApi({ body }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi({ body, signal, timeout }: RunActionParams): Promise<RunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
@@ -167,8 +169,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
+      signal,
       // give up to 2 minutes for response
-      timeout: 120000,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
       ...axiosOptions,
       headers: {
         ...this.config.headers,
@@ -186,7 +189,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body request body for the API request
    * @param stream flag indicating whether it is a streaming request or not
    */
-  public async streamApi({ body, stream, signal }: StreamActionParams): Promise<RunActionResponse> {
+  public async streamApi({
+    body,
+    stream,
+    signal,
+    timeout,
+  }: StreamActionParams): Promise<RunActionResponse> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -208,6 +216,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         ...this.config.headers,
         ...axiosOptions.headers,
       },
+      timeout,
     });
     return stream ? pipeStreamingResponse(response) : response.data;
   }
@@ -256,12 +265,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body - the OpenAI Invoke request body
    */
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
-    const { signal, ...rest } = body;
+    const { signal, timeout, ...rest } = body;
 
     const res = (await this.streamApi({
       body: JSON.stringify(rest),
       stream: true,
       signal,
+      timeout, // do not default if not provided
     })) as unknown as IncomingMessage;
 
     return res.pipe(new PassThrough());
@@ -281,7 +291,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
-      const { signal, ...rest } = body;
+      const { signal, timeout, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
@@ -293,6 +303,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       };
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
+        timeout, // do not default if not provided
       });
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
@@ -312,7 +323,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @returns an object with the response string and the usage object
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({ body: JSON.stringify(body) });
+    const { signal, timeout, ...rest } = body;
+    const res = await this.runApi({ body: JSON.stringify(rest), signal, timeout });
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();

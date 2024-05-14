@@ -8,12 +8,7 @@
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  EmbeddablePanel,
-  reactEmbeddableRegistryHasKey,
-  ReactEmbeddableRenderer,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { PhaseEvent } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -101,6 +96,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       : undefined;
 
     const renderedEmbeddable = useMemo(() => {
+      const {
+        embeddable: { reactEmbeddableRegistryHasKey },
+      } = pluginServices.getServices();
       const references = getReferencesForPanelId(id, container.savedObjectReferences);
 
       const panelProps = {
@@ -120,7 +118,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
             key={`${type}_${id}`}
             panelProps={panelProps}
             onApiAvailable={(api) => container.registerChildApi(api)}
-            state={{ rawState: panel.explicitInput as object, version: panel.version, references }}
+            state={{ rawState: panel.explicitInput as object, references }}
           />
         );
       }
@@ -134,16 +132,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           {...panelProps}
         />
       );
-    }, [
-      id,
-      container,
-      type,
-      index,
-      useMargins,
-      onPanelStatusChange,
-      panel.explicitInput,
-      panel.version,
-    ]);
+    }, [id, container, useMargins, type, index, onPanelStatusChange, panel.explicitInput]);
 
     return (
       <div

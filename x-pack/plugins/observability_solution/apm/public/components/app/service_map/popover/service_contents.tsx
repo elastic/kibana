@@ -7,12 +7,7 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import {
-  EuiButton,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NodeDataDefinition } from 'cytoscape';
@@ -26,20 +21,14 @@ import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-type ServiceNodeReturn =
-  APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
+type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 
 const INITIAL_STATE: ServiceNodeReturn = {
   currentPeriod: {},
   previousPeriod: undefined,
 };
 
-export function ServiceContents({
-  onFocusClick,
-  elementData,
-  environment,
-  kuery,
-}: ContentsProps) {
+export function ServiceContents({ onFocusClick, elementData, environment, kuery }: ContentsProps) {
   const nodeData = elementData as NodeDataDefinition;
   const apmRouter = useApmRouter();
 
@@ -49,11 +38,7 @@ export function ServiceContents({
     '/mobile-services/{serviceName}/service-map'
   );
 
-  if (
-    !('rangeFrom' in query && 'rangeTo' in query) ||
-    !query.rangeFrom ||
-    !query.rangeTo
-  ) {
+  if (!('rangeFrom' in query && 'rangeTo' in query) || !query.rangeFrom || !query.rangeTo) {
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
@@ -67,23 +52,17 @@ export function ServiceContents({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi(
-          'GET /internal/apm/service-map/service/{serviceName}',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                start,
-                end,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
+        return callApmApi('GET /internal/apm/service-map/service/{serviceName}', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              start,
+              end,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             },
-          }
-        );
+          },
+        });
       }
     },
     [environment, serviceName, start, end, offset, comparisonEnabled]
@@ -122,10 +101,7 @@ export function ServiceContents({
       <EuiFlexItem>
         {serviceAnomalyStats && (
           <>
-            <AnomalyDetection
-              serviceName={serviceName}
-              serviceAnomalyStats={serviceAnomalyStats}
-            />
+            <AnomalyDetection serviceName={serviceName} serviceAnomalyStats={serviceAnomalyStats} />
             <EuiHorizontalRule margin="xs" />
           </>
         )}

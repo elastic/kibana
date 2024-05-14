@@ -334,6 +334,43 @@ describe('AgentUpgradeAgentModal', () => {
         expect(el).not.toBeDisabled();
       });
     });
+
+    it('should enable submit button for a single fleet-server when version is greater than maxFleetServerVersion', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'fleet-server',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.9.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).toBeEnabled();
+      });
+    });
   });
 
   describe('restart upgrade', () => {

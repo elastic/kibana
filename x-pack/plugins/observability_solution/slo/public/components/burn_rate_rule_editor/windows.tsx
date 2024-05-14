@@ -17,7 +17,7 @@ import {
   EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
-import { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
+import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
@@ -36,7 +36,7 @@ import { WindowResult } from './validation';
 import { BudgetConsumed } from './budget_consumed';
 
 interface WindowProps extends WindowSchema {
-  slo?: SLOResponse;
+  slo?: SLODefinitionResponse;
   onChange: (windowDef: WindowSchema) => void;
   onDelete: (id: string) => void;
   disableDelete: boolean;
@@ -53,7 +53,7 @@ const ACTION_GROUP_OPTIONS = [
 
 export const calculateMaxBurnRateThreshold = (
   longWindow: Duration,
-  slo?: SLOResponse | CreateSLOInput
+  slo?: SLODefinitionResponse | CreateSLOInput
 ) => {
   return slo
     ? Math.floor(toMinutes(toDuration(slo.timeWindow.duration)) / toMinutes(longWindow))
@@ -246,7 +246,7 @@ const getErrorBudgetExhaustionText = (
         },
       });
 export const createNewWindow = (
-  slo?: SLOResponse | CreateSLOInput,
+  slo?: SLODefinitionResponse | CreateSLOInput,
   partialWindow: Partial<WindowSchema> = {}
 ): WindowSchema => {
   const longWindow = partialWindow.longWindow || { value: 1, unit: 'h' };
@@ -264,7 +264,7 @@ export const createNewWindow = (
 interface WindowsProps {
   windows: WindowSchema[];
   onChange: (windows: WindowSchema[]) => void;
-  slo?: SLOResponse;
+  slo?: SLODefinitionResponse;
   errors: WindowResult[];
   totalNumberOfWindows?: number;
 }

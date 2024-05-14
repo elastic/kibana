@@ -746,7 +746,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -754,6 +755,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -774,7 +776,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -785,7 +788,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 
@@ -1044,13 +1048,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the current index pattern of the data panel
-     */
-    async getDataPanelIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
-    },
-
-    /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {
@@ -1144,7 +1141,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1156,7 +1153,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
       const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1235,7 +1232,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click(`lns_colorEditing_trigger`);
         // wait for the UI to settle
         await PageObjects.common.sleep(100);
-        await testSubjects.existOrFail('lns-indexPattern-SettingWithSiblingFlyout', {
+        await testSubjects.existOrFail('lns-palettePanelFlyout', {
           timeout: 2500,
         });
       });
@@ -1335,7 +1332,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1496,17 +1493,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
-    },
-
-    async clickAddField() {
-      await testSubjects.click('lns-dataView-switch-link');
-      await testSubjects.existOrFail('indexPattern-add-field');
-      await testSubjects.click('indexPattern-add-field');
-    },
-
-    async createAdHocDataView(name: string, hasTimeField?: boolean) {
-      await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1821,7 +1807,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return parent.getAttribute('data-test-subj');
+          return (await parent.getAttribute('data-test-subj')) ?? '';
         })
       );
     },
@@ -1886,6 +1872,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
+      if (!url) {
+        throw Error('No data-share-url attribute found');
+      }
       return url;
     },
 

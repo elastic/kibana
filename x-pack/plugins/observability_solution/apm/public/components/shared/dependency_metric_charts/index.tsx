@@ -20,15 +20,7 @@ export function DependencyMetricCharts() {
 
   const {
     query,
-    query: {
-      dependencyName,
-      rangeFrom,
-      rangeTo,
-      kuery,
-      environment,
-      comparisonEnabled,
-      offset,
-    },
+    query: { dependencyName, rangeFrom, rangeTo, kuery, environment, comparisonEnabled, offset },
   } = useAnyOfApmParams('/dependencies/overview', '/dependencies/operation');
 
   const spanName = 'spanName' in query ? query.spanName : undefined;
@@ -45,10 +37,7 @@ export function DependencyMetricCharts() {
   };
 
   return (
-    <EuiFlexGroup
-      direction={largeScreenOrSmaller ? 'column' : 'row'}
-      gutterSize="s"
-    >
+    <EuiFlexGroup direction={largeScreenOrSmaller ? 'column' : 'row'} gutterSize="s">
       <EuiFlexItem>
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
@@ -65,10 +54,9 @@ export function DependencyMetricCharts() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.dependencyDetailThroughputChartTitle',
-                { defaultMessage: 'Throughput' }
-              )}
+              {i18n.translate('xpack.apm.dependencyDetailThroughputChartTitle', {
+                defaultMessage: 'Throughput',
+              })}
             </h2>
           </EuiTitle>
           <DependencyThroughputChart height={200} {...props} />
@@ -78,10 +66,9 @@ export function DependencyMetricCharts() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.dependencyDetailFailedTransactionRateChartTitle',
-                { defaultMessage: 'Failed transaction rate' }
-              )}
+              {i18n.translate('xpack.apm.dependencyDetailFailedTransactionRateChartTitle', {
+                defaultMessage: 'Failed transaction rate',
+              })}
             </h2>
           </EuiTitle>
           <DependencyFailedTransactionRateChart height={200} {...props} />

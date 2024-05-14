@@ -18,7 +18,7 @@ export class QueryBarService extends FtrService {
   private readonly find = this.ctx.getService('find');
 
   async getQueryString(): Promise<string> {
-    return await this.testSubjects.getAttribute('queryInput', 'value');
+    return (await this.testSubjects.getAttribute('queryInput', 'value')) ?? '';
   }
 
   public async setQuery(query: string): Promise<void> {

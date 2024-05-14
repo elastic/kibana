@@ -56,6 +56,7 @@ export interface IntegrationCardItem {
   showLabels?: boolean;
   extraLabelsBadges?: React.ReactNode[];
   onCardClick?: () => void;
+  isCollectionCard?: boolean;
 }
 
 export const mapToCard = ({

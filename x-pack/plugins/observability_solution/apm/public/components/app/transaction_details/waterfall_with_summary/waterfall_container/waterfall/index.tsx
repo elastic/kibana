@@ -17,10 +17,7 @@ import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import {
-  IWaterfall,
-  IWaterfallItem,
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
   transition: 0.1s padding ease;
@@ -86,11 +83,7 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
 // level starts with 0
 const maxLevelOpen = 2;
 
-export function Waterfall({
-  waterfall,
-  waterfallItemId,
-  showCriticalPath,
-}: Props) {
+export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -160,15 +153,12 @@ export function Waterfall({
               duration={duration}
               waterfall={waterfall}
               timelineMargins={timelineMargins}
-              onClickWaterfallItem={(
-                item: IWaterfallItem,
-                flyoutDetailTab: string
-              ) => toggleFlyout({ history, item, flyoutDetailTab })}
+              onClickWaterfallItem={(item: IWaterfallItem, flyoutDetailTab: string) =>
+                toggleFlyout({ history, item, flyoutDetailTab })
+              }
               showCriticalPath={showCriticalPath}
               maxLevelOpen={
-                waterfall.traceDocsTotal > 500
-                  ? maxLevelOpen
-                  : waterfall.traceDocsTotal
+                waterfall.traceDocsTotal > 500 ? maxLevelOpen : waterfall.traceDocsTotal
               }
             />
           )}

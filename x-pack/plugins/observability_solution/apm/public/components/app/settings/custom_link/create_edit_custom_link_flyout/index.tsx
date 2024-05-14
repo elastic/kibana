@@ -57,9 +57,7 @@ export function CreateEditCustomLinkFlyout({
   const isFormValid = !!label && !!url;
 
   const onSubmit = async (
-    event:
-      | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
+    event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
     setIsSaving(true);
@@ -94,24 +92,16 @@ export function CreateEditCustomLinkFlyout({
                   'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
               })}{' '}
               <Documentation
-                label={i18n.translate(
-                  'xpack.apm.settings.customLink.flyout.label.doc',
-                  {
-                    defaultMessage: 'documentation.',
-                  }
-                )}
+                label={i18n.translate('xpack.apm.settings.customLink.flyout.label.doc', {
+                  defaultMessage: 'documentation.',
+                })}
               />
             </p>
           </EuiText>
 
           <EuiSpacer size="l" />
 
-          <LinkSection
-            label={label}
-            onChangeLabel={setLabel}
-            url={url}
-            onChangeUrl={setUrl}
-          />
+          <LinkSection label={label} onChangeLabel={setLabel} url={url} onChangeUrl={setUrl} />
 
           <EuiSpacer size="l" />
 

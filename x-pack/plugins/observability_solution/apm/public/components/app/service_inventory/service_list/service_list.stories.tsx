@@ -32,10 +32,9 @@ const stories: Meta<Args> = {
   component: ServiceList,
   decorators: [
     (StoryComponent) => {
-      mockApmApiCallResponse(
-        'GET /internal/apm/fallback_to_transactions',
-        () => ({ fallbackToTransactions: false })
-      );
+      mockApmApiCallResponse('GET /internal/apm/fallback_to_transactions', () => ({
+        fallbackToTransactions: false,
+      }));
       return (
         <MockApmPluginStorybook
           apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}

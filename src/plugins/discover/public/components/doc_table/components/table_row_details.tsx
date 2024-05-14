@@ -63,7 +63,7 @@ export const TableRowDetails = ({
                   {isPlainRecord && (
                     <FormattedMessage
                       id="discover.grid.tableRow.textBasedDetailHeading"
-                      defaultMessage="Expanded row"
+                      defaultMessage="Expanded result"
                     />
                   )}
                   {!isPlainRecord && (

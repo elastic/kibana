@@ -19,9 +19,7 @@ describe('convertComputeUsageToGbSec', () => {
       { computeUsageBytesMs: 1, countInvocations: undefined },
       { computeUsageBytesMs: 1, countInvocations: null },
     ].forEach(({ computeUsageBytesMs, countInvocations }) => {
-      expect(
-        convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations })
-      ).toBeUndefined();
+      expect(convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations })).toBeUndefined();
     });
   });
 
@@ -29,9 +27,9 @@ describe('convertComputeUsageToGbSec', () => {
     const totalMemory = 536870912; // 0.5gb
     const billedDuration = 4000;
     const computeUsageBytesMs = totalMemory * billedDuration;
-    expect(
-      convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations: 1 })
-    ).toBe(computeUsageBytesMs / 1024 ** 3 / 1000);
+    expect(convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations: 1 })).toBe(
+      computeUsageBytesMs / 1024 ** 3 / 1000
+    );
   });
 });
 describe('calcMemoryUsed', () => {

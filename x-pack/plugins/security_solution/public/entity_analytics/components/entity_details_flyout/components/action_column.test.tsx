@@ -8,14 +8,14 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { alertDataMock } from '../mocks';
+import { alertInputDataMock } from '../mocks';
 import { ActionColumn } from './action_column';
 
 describe('ActionColumn', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ActionColumn alert={alertDataMock} />
+        <ActionColumn input={alertInputDataMock} />
       </TestProviders>
     );
 
@@ -25,7 +25,7 @@ describe('ActionColumn', () => {
   it('toggles the popover when button is clicked', () => {
     const { getByRole } = render(
       <TestProviders>
-        <ActionColumn alert={alertDataMock} />
+        <ActionColumn input={alertInputDataMock} />
       </TestProviders>
     );
 

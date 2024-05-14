@@ -194,9 +194,7 @@ describe('Error', () => {
   matchSnapshot(errorDoc);
 });
 
-function matchSnapshot(
-  obj: AllowUnknownProperties<Span | Transaction | APMError>
-) {
+function matchSnapshot(obj: AllowUnknownProperties<Span | Transaction | APMError>) {
   Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

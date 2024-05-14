@@ -23,7 +23,7 @@ const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
  * release date we only allow one public version temporarily.
  * @internal
  */
-const ALLOWED_PUBLIC_VERSION = '2023-10-31';
+export const ALLOWED_PUBLIC_VERSION = '2023-10-31';
 
 export function isAllowedPublicVersion(version: string): undefined | string {
   if (ALLOWED_PUBLIC_VERSION !== version) {

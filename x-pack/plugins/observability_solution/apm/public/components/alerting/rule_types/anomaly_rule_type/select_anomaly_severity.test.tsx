@@ -18,10 +18,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('SelectAnomalySeverity', () => {
   it('shows the correct text for each item', async () => {
     const result = render(
-      <SelectAnomalySeverity
-        onChange={() => {}}
-        value={ML_ANOMALY_SEVERITY.CRITICAL}
-      />,
+      <SelectAnomalySeverity onChange={() => {}} value={ML_ANOMALY_SEVERITY.CRITICAL} />,
       { wrapper: Wrapper }
     );
 
@@ -31,13 +28,9 @@ describe('SelectAnomalySeverity', () => {
 
     button.click();
 
-    const options = await result.findAllByTestId(
-      'SelectAnomalySeverity option text'
-    );
+    const options = await result.findAllByTestId('SelectAnomalySeverity option text');
 
-    expect(
-      options.map((option) => (option.firstChild as HTMLElement)?.innerHTML)
-    ).toEqual([
+    expect(options.map((option) => (option.firstChild as HTMLElement)?.innerHTML)).toEqual([
       'score critical ', // Trailing space is intentional here, to keep the i18n simple
       'score major and above',
       'score minor and above',

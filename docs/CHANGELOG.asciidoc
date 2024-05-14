@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.13.4>>
+* <<release-notes-8.13.3>>
 * <<release-notes-8.13.2>>
 * <<release-notes-8.13.1>>
 * <<release-notes-8.13.0>>
@@ -63,6 +65,50 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.13.4]]
+== {kib} 8.13.4
+
+The 8.13.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.13.4]]
+=== Bug Fixes
+Lens & Visualizations::
+* Fixes table sorting when changing the interval on the time picker in *Lens* ({kibana-pull}182173[#182173]).
+Dashboards::
+* Fixes a bug with drilldowns where the control group on a source dashboard could be replaced by the control group from the destination dashboard ({kibana-pull}179485[#179485]).
+
+[[release-notes-8.13.3]]
+== {kib} 8.13.3
+
+The 8.13.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.13.3]]
+=== Bug Fixes
+
+Alerting::
+* Manage loading fields at initialization ({kibana-pull}180412[#180412]).
+Elastic Security::
+For the Elastic Security 8.13.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes managed agent policy preconfiguration update ({kibana-pull}181624[#181624]).
+* Use lowercase dataset in template names ({kibana-pull}180887[#180887]).
+* Fixes KQL/kuery for getting Fleet Server agent count ({kibana-pull}180650[#180650]).
+Index Management::
+* Fixes `allow_auto_create` field in the Index Template form ({kibana-pull}178321[#178321]).
+Lens & Visualizations::
+* Fixes controls on fields with custom label ({kibana-pull}180615[#180615]).
+Machine Learning::
+* Fixes deep link for Index data visualizer & ES|QL data visualizer ({kibana-pull}180389[#180389]).
+Observability::
+* Make anomalyDetectorTypes optional ({kibana-pull}180717[#180717]).
+SharedUX::
+* Revert change to shared UX markdown component for dashboard vis ({kibana-pull}180906[#180906]).
+Sharing::
+* Default to saved object description when panel description is not provided ({kibana-pull}181177[#181177]).
+
 [[release-notes-8.13.2]]
 == {kib} 8.13.2
 
@@ -73,6 +119,7 @@ The 8.13.2 release includes the following bug fixes.
 === Bug Fixes
 Canvas::
 * Fixes text settings to be honored in Canvas markdown elements ({kibana-pull}179948[#179948]).
+* Fixes custom styling for Canvas markdown Workpads ({kibana-pull}180070[#180070]).
 Discover::
 * Fixes keyboard navigation for search input on the document viewer flyout ({kibana-pull}180022[#180022]).
 Elastic Security::
@@ -81,6 +128,8 @@ Fleet::
 * Fixes having to wait ten minutes after agent upgrade if agent cleared watching state ({kibana-pull}179917[#179917]).
 Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
 * Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
+Lens & Visualizations::
+* Fixes custom styling for TSVB markdown visualizations ({kibana-pull}180053[#180053]).
 Machine Learning::
 * Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
 * AIOps: Fixes text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
@@ -139,6 +188,15 @@ For information about the {kib} 8.13.0 release, review the following information
 ====
 *Details* +
 In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
+====
+
+[discrete]
+[[known-177938-8.13]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
 ====
 
 [float]
@@ -528,6 +586,19 @@ Security::
 == {kib} 8.12.0
 
 For information about the {kib} 8.12.0 release, review the following information.
+
+[float]
+[[known-issues-8.12.0]]
+=== Known issues
+
+[discrete]
+[[known-177938-8.12]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
+====
 
 [float]
 [[breaking-changes-8.12.0]]

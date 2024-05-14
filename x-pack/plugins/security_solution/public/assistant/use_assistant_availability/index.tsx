@@ -18,12 +18,16 @@ export interface UseAssistantAvailability {
   hasConnectorsAllPrivilege: boolean;
   // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
   hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
 }
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const capabilities = useKibana().services.application.capabilities;
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
+  const hasUpdateAIAssistantAnonymization =
+    capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -40,5 +44,6 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
+    hasUpdateAIAssistantAnonymization,
   };
 };

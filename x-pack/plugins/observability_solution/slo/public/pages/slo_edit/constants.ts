@@ -17,7 +17,7 @@ import {
   KQLCustomIndicator,
   MetricCustomIndicator,
   TimesliceMetricIndicator,
-  TimeWindow,
+  TimeWindowType,
 } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -78,7 +78,7 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
   },
 ];
 
-export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }> = [
+export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindowType; text: string }> = [
   {
     value: 'rolling',
     text: i18n.translate('xpack.slo.sloEdit.timeWindow.rolling', {

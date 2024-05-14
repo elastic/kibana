@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiBadge } from '@elastic/eui';
 import React from 'react';
 
 export function DefaultDiscoveryRule() {

@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core-http-server';
+import { Router } from '../router';
 
-export function createRouter(): jest.Mocked<IRouter> {
+interface CreateMockRouterOptions {
+  pluginId?: symbol;
+}
+export function createRouter(opts: CreateMockRouterOptions = {}) {
   return {
     delete: jest.fn(),
     get: jest.fn(),
@@ -19,5 +22,6 @@ export function createRouter(): jest.Mocked<IRouter> {
     patch: jest.fn(),
     routerPath: '',
     versioned: {} as any,
-  };
+    pluginId: opts.pluginId,
+  } as unknown as jest.Mocked<Router>;
 }

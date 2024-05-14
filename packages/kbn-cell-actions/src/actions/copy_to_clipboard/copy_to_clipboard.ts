@@ -10,7 +10,7 @@ import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import { isString } from 'lodash/fp';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
 import {

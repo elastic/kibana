@@ -36,10 +36,10 @@ const constructValidationError = (error: Error) => {
 };
 
 /**
- * checks whether query has [metadata _id] operator
+ * checks whether query has metadata _id operator
  */
 export const computeHasMetadataOperator = (esqlQuery: string) => {
-  return /(?<!\|[\s\S.]*)\[\s*metadata[\s\S.]*_id[\s\S.]*\]/i.test(esqlQuery);
+  return /(?<!\|[\s\S.]*)\s*metadata[\s\S.]*_id[\s\S.]*/i.test(esqlQuery?.split('|')?.[0]);
 };
 
 /**
@@ -63,7 +63,7 @@ export const esqlValidator = async (
 
     const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
 
-    // non-aggregating query which does not have [metadata], is not a valid one
+    // non-aggregating query which does not have metadata, is not a valid one
     if (!isEsqlQueryAggregating && !computeHasMetadataOperator(query)) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
@@ -71,16 +71,16 @@ export const esqlValidator = async (
       };
     }
 
-    const data = await securitySolutionQueryClient.fetchQuery(
-      getEsqlQueryConfig({ esqlQuery: query, expressions: services.expressions })
+    const columns = await securitySolutionQueryClient.fetchQuery(
+      getEsqlQueryConfig({ esqlQuery: query, search: services.data.search.search })
     );
 
-    if (data && 'error' in data) {
-      return constructValidationError(data.error);
+    if (columns && 'error' in columns) {
+      return constructValidationError(columns.error);
     }
 
     // check whether _id field is present in response
-    const isIdFieldPresent = (data?.columns ?? []).find(({ id }) => '_id' === id);
+    const isIdFieldPresent = (columns ?? []).find(({ id }) => '_id' === id);
     // for non-aggregating query, we want to disable queries w/o _id property returned in response
     if (!isEsqlQueryAggregating && !isIdFieldPresent) {
       return {

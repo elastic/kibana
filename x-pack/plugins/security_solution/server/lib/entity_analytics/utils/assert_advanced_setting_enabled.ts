@@ -14,6 +14,10 @@ export const assertAdvancedSettingsEnabled = async (
   const isAdvancedSettingsEnabled = await core.uiSettings.client.get<boolean>(settingId);
 
   if (!isAdvancedSettingsEnabled) {
-    throw new Error(`Advanced Settings ${settingId} is disabled.`);
+    const err: Error & { statusCode?: number } = new Error(
+      `Advanced Settings ${settingId} is disabled.`
+    );
+    err.statusCode = 403;
+    throw err;
   }
 };

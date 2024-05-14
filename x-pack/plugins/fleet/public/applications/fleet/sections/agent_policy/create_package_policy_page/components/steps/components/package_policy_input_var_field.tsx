@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, memo, useMemo, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
@@ -30,16 +29,14 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useStartServices } from '../../../../../../../../hooks';
-
-import { ExperimentalFeaturesService } from '../../../../../../services';
+import { useFleetStatus, useStartServices } from '../../../../../../../../hooks';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
-import { DatasetComboBox } from './dataset_combo';
+import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -51,11 +48,11 @@ const FormRow = styled(EuiFormRow)`
   }
 
   .euiFormRow__fieldWrapper > .euiPanel {
-    padding: ${(props) => props.theme.eui.euiSizeXS};
+    padding: ${(props) => props.theme.eui?.euiSizeXS};
   }
 `;
 
-interface InputFieldProps {
+export interface InputFieldProps {
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
@@ -90,6 +87,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
   }) => {
+    const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
@@ -99,11 +97,26 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
-    const { secretsStorage: secretsStorageEnabled } = ExperimentalFeaturesService.get();
+    const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
+    const useSecretsUi = secretsStorageEnabled && varDef.secret;
+
+    if (name === DATASET_VAR_NAME && packageType === 'input') {
+      return (
+        <DatasetComponent
+          pkgName={packageName}
+          datastreams={datastreams}
+          value={value}
+          onChange={onChange}
+          isDisabled={isEditPage}
+          fieldLabel={fieldLabel}
+          description={description}
+        />
+      );
+    }
 
     let field: JSX.Element;
 
-    if (secretsStorageEnabled && varDef.secret) {
+    if (useSecretsUi) {
       field = (
         <SecretInputField
           varDef={varDef}
@@ -127,10 +140,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         value,
         onChange,
         frozen,
-        packageName,
-        packageType,
-        datastreams,
-        isEditPage,
         isInvalid,
         fieldLabel,
         fieldTestSelector,
@@ -143,7 +152,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       <FormRow
         isInvalid={isInvalid}
         error={errors}
-        label={varDef.secret ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
+        hasChildLabel={!varDef.multi}
+        label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
           isOptional ? (
             <EuiText size="xs" color="subdued">
@@ -161,7 +171,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return varDef.secret ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
   }
 );
 
@@ -170,16 +180,12 @@ function getInputComponent({
   value,
   onChange,
   frozen,
-  packageName,
-  packageType,
-  datastreams = [],
-  isEditPage,
   isInvalid,
   fieldLabel,
   fieldTestSelector,
   setIsDirty,
 }: InputComponentProps) {
-  const { multi, type, name, options } = varDef;
+  const { multi, type, options } = varDef;
   if (multi) {
     return (
       <MultiTextInput
@@ -189,17 +195,6 @@ function getInputComponent({
         onBlur={() => setIsDirty(true)}
         isDisabled={frozen}
         data-test-subj={`multiTextInput-${fieldTestSelector}`}
-      />
-    );
-  }
-  if (name === DATASET_VAR_NAME && packageType === 'input') {
-    return (
-      <DatasetComboBox
-        pkgName={packageName}
-        datastreams={datastreams}
-        value={value}
-        onChange={onChange}
-        isDisabled={isEditPage}
       />
     );
   }

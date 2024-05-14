@@ -28,6 +28,7 @@ interface CspAppDeps {
   core: CoreStart;
   deps: Partial<CspClientPluginStartDeps>;
   params: AppMountParameters;
+  children: React.ReactNode;
 }
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
@@ -46,6 +47,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   children,
 } = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
+
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>

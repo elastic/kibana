@@ -40,7 +40,7 @@ async function mountApp(
   const setBreadcrumbs = jest.fn();
 
   const startServices = await coreMock.createSetup().getStartServices();
-  const [{ application }] = startServices;
+  const [{ application, theme }] = startServices;
   application.capabilities = {
     ...application.capabilities,
     role_mappings: {
@@ -57,7 +57,8 @@ async function mountApp(
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
-        theme$: themeServiceMock.createTheme$(),
+        theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
   });
 

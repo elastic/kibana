@@ -17,10 +17,7 @@ import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
 import { lookupServices, LookupServicesResponse } from './lookup_services';
-import {
-  validateServiceGroupKuery,
-  SavedServiceGroup,
-} from '../../../common/service_groups';
+import { validateServiceGroupKuery, SavedServiceGroup } from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceGroupAlerts } from './get_service_group_alerts';
@@ -31,9 +28,7 @@ const serviceGroupsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
+  handler: async (resources): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
@@ -91,9 +86,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
-    const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(
-      params.body.kuery
-    );
+    const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(params.body.kuery);
     if (!(isValidFields && isValidSyntax)) {
       throw Boom.badRequest(message);
     }
@@ -167,13 +160,12 @@ const serviceGroupCountsRoute = createApmServerRoute({
 
     const spacesPluginStart = await plugins.spaces?.start();
 
-    const [serviceGroups, apmAlertsClient, apmEventClient, activeSpace] =
-      await Promise.all([
-        getServiceGroups({ savedObjectsClient }),
-        getApmAlertsClient(resources),
-        getApmEventClient(resources),
-        await spacesPluginStart?.spacesService.getActiveSpace(request),
-      ]);
+    const [serviceGroups, apmAlertsClient, apmEventClient, activeSpace] = await Promise.all([
+      getServiceGroups({ savedObjectsClient }),
+      getApmAlertsClient(resources),
+      getApmEventClient(resources),
+      await spacesPluginStart?.spacesService.getActiveSpace(request),
+    ]);
 
     const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
       getServicesCounts({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { ContentClient } from './content_client';
 
@@ -18,10 +18,11 @@ export const useContentClient = (): ContentClient => {
   return contentClient;
 };
 
-export const ContentClientProvider: React.FC<{ contentClient: ContentClient }> = ({
-  contentClient,
-  children,
-}) => {
+export const ContentClientProvider: FC<
+  PropsWithChildren<{
+    contentClient: ContentClient;
+  }>
+> = ({ contentClient, children }) => {
   return (
     <ContentClientContext.Provider value={contentClient}>
       <QueryClientProvider client={contentClient.queryClient}>{children}</QueryClientProvider>

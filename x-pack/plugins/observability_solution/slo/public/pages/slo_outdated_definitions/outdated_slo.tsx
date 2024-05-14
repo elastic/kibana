@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiButton } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
-import { SloDeleteConfirmationModal } from '../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloTimeWindowBadge } from '../slos/components/badges/slo_time_window_badge';
-import { SloIndicatorTypeBadge } from '../slos/components/badges/slo_indicator_type_badge';
-import { useDeleteSlo } from '../../hooks/use_delete_slo';
-import { useResetSlo } from '../../hooks/use_reset_slo';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
+import React, { useState } from 'react';
+import { SloDeleteModal } from '../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useResetSlo } from '../../hooks/use_reset_slo';
+import { SloIndicatorTypeBadge } from '../slos/components/badges/slo_indicator_type_badge';
+import { SloTimeWindowBadge } from '../slos/components/badges/slo_time_window_badge';
 
 interface OutdatedSloProps {
-  slo: SLOResponse;
+  slo: SLODefinitionResponse;
   onReset: () => void;
   onDelete: () => void;
 }
 
 export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutateAsync: deleteSlo, isLoading: isDeleteLoading } = useDeleteSlo();
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
@@ -33,7 +31,6 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
 
   const handleDeleteConfirm = async () => {
     setDeleteConfirmationModalOpen(false);
-    await deleteSlo({ id: slo.id, name: slo.name });
     onDelete();
   };
 
@@ -54,6 +51,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
   const handleResetCancel = () => {
     setResetConfirmationModalOpen(false);
   };
+
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -95,7 +93,6 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
             data-test-subj="o11ySlosOutdatedDefinitionsDeleteButton"
             color="danger"
             fill
-            isLoading={isDeleteLoading}
             onClick={handleDelete}
           >
             <FormattedMessage
@@ -106,11 +103,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
       ) : null}
       {isResetConfirmationModalOpen ? (
         <SloResetConfirmationModal

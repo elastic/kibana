@@ -676,6 +676,28 @@
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-common.CoreSetup.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -963,6 +985,28 @@
                 "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-common.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-common.CoreStart.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",

@@ -27,3 +27,9 @@
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'
+- 'ci:project-deploy-observability':
+    - 'packages/kbn-apm-*/**/*.*'
+    - 'x-pack/plugins/observability_solution/**/*.*'
+    - 'x-pack/plugins/serverless_observability/**/*.*'
+    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/test/observability_*/**/*.*'

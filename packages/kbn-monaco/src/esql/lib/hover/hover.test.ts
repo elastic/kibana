@@ -124,7 +124,7 @@ describe('hover', () => {
           model,
           position,
           token,
-          async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
         expect(contents.map(({ value }) => value)).toEqual(expected);

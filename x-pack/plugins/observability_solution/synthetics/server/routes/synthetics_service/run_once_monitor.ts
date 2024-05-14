@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor';
+import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';

@@ -22,7 +22,7 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
 
-type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
+export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
 };
 export interface RiskScoreService {
@@ -44,6 +44,7 @@ export interface RiskScoreServiceFactoryParams {
   riskEngineDataClient: RiskEngineDataClient;
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
+  refresh?: 'wait_for';
 }
 
 export const riskScoreServiceFactory = ({

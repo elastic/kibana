@@ -12,7 +12,7 @@ export const EDITOR_INITIAL_HEIGHT_EXPANDED = 140;
 export const EDITOR_MIN_HEIGHT = 40;
 export const EDITOR_MAX_HEIGHT = 400;
 
-export const textBasedLanguagedEditorStyles = (
+export const textBasedLanguageEditorStyles = (
   euiTheme: EuiThemeComputed,
   isCompactFocused: boolean,
   editorHeight: number,

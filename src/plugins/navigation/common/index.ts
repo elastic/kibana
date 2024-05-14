@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
-} from './constants';
+export { SOLUTION_NAV_FEATURE_FLAG_NAME, ENABLE_SOLUTION_NAV_UI_SETTING_ID } from './constants';

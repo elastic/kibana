@@ -42,7 +42,7 @@ export function createEditSingleMetricViewerPanelAction(
         throw new IncompatibleActionError();
       }
 
-      const [coreStart, pluginStart] = await getStartServices();
+      const [coreStart, { data }] = await getStartServices();
 
       try {
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
@@ -57,7 +57,7 @@ export function createEditSingleMetricViewerPanelAction(
 
         const result = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
-          pluginStart,
+          data,
           mlApiServices,
           {
             jobIds: jobIds.getValue(),
@@ -67,7 +67,7 @@ export function createEditSingleMetricViewerPanelAction(
           } as SingleMetricViewerEmbeddableInput
         );
 
-        context.embeddable.updateUserInput(result);
+        context.embeddable.updateUserInput(result as SingleMetricViewerEmbeddableInput);
         context.embeddable.setPanelTitle(result.panelTitle);
       } catch (e) {
         return Promise.reject();
@@ -76,7 +76,7 @@ export function createEditSingleMetricViewerPanelAction(
     async isCompatible(context: EmbeddableApiContext) {
       return (
         isSingleMetricViewerEmbeddableContext(context) &&
-        context.embeddable.viewMode?.getValue() === 'edit'
+        context.embeddable.parentApi?.viewMode?.getValue() === 'edit'
       );
     },
   };

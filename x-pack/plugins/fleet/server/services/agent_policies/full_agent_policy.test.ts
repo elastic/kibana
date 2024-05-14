@@ -714,6 +714,24 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
     });
   });
+
+  it('should return a policy with advanced settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_limits_go_max_procs: 2,
+        agent_logging_level: 'debug',
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        limits: { go_max_procs: 2 },
+        logging: { level: 'debug' },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {

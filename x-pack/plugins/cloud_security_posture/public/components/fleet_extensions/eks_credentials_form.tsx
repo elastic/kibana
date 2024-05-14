@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
@@ -119,7 +119,10 @@ type AwsOptions = Record<
   {
     label: string;
     info: React.ReactNode;
-    fields: Record<string, { label: string; type?: 'password' | 'text' }>;
+    fields: Record<
+      string,
+      { label: string; type?: 'password' | 'text'; isSecret?: boolean; dataTestSubj: string }
+    >;
     testId: string;
   }
 >;
@@ -135,6 +138,7 @@ const options: AwsOptions = {
         label: i18n.translate('xpack.csp.eksIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
+        dataTestSubj: 'roleArnInput',
       },
     },
     testId: 'assumeRoleTestId',
@@ -145,8 +149,13 @@ const options: AwsOptions = {
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
-      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'directAccessKeyId' },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'directAccessSecretKey',
+        isSecret: true,
+      },
     },
     testId: 'directAccessKeyTestId',
   },
@@ -156,12 +165,21 @@ const options: AwsOptions = {
       defaultMessage: 'Temporary keys',
     }),
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
-      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+      access_key_id: {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'temporaryKeysAccessKeyId',
+      },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestSubj: 'temporaryKeysSecretAccessKey',
+        isSecret: true,
+      },
       session_token: {
         label: i18n.translate('xpack.csp.eksIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
+        dataTestSubj: 'temporaryKeysSessionToken',
       },
     },
     testId: 'temporaryKeyTestId',
@@ -176,11 +194,13 @@ const options: AwsOptions = {
         label: i18n.translate('xpack.csp.eksIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
+        dataTestSubj: 'sharedCredentialFile',
       },
       credential_profile_name: {
         label: i18n.translate('xpack.csp.eksIntegration.credentialProfileNameLabel', {
           defaultMessage: 'Credential Profile Name',
         }),
+        dataTestSubj: 'credentialProfileName',
       },
     },
     testId: 'sharedCredentialsTestId',
@@ -197,6 +217,7 @@ const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
 
 interface Props {
   newPolicy: NewPackagePolicy;
+  packageInfo: PackageInfo;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
@@ -213,14 +234,16 @@ const getInputVarsFields = (
         id,
         label: field.label,
         type: field.type || 'text',
+        dataTestSubj: field.dataTestSubj,
         value: inputVar.value,
+        isSecret: field?.isSecret,
       } as const;
     });
 
 const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
   input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
+export const EksCredentialsForm = ({ input, newPolicy, packageInfo, updatePolicy }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value so we default to the first option.
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
@@ -248,6 +271,7 @@ export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <EuiSpacer />
       <AwsInputVarFields
         fields={fields}
+        packageInfo={packageInfo}
         onChange={(key, value) =>
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
         }

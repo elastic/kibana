@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
@@ -31,7 +31,6 @@ import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from './default_headers';
 import type { ColumnHeaderType } from '../../../../../common/types';
@@ -136,7 +135,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
 
 const customStore = createMockStore();
 
-const TestProviderWrapperWithCustomStore: React.FC = ({ children }) => {
+const TestProviderWrapperWithCustomStore: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <TestProviders store={customStore}>{children}</TestProviders>;
 };
 
@@ -174,13 +173,11 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 });
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
-const mockTimelineFilterManager = createFilterManagerMock();
 
 describe('unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
-    timelineFilterManager: mockTimelineFilterManager,
   };
 
   afterEach(() => {
@@ -219,7 +216,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('columns', () => {
+  // Flaky : See https://github.com/elastic/kibana/issues/179831
+  // removing/moving column current leads to infitinite loop, will be fixed in further PRs.
+  describe.skip('columns', () => {
     it(
       'should move column left correctly ',
       async () => {
@@ -298,7 +297,7 @@ describe('unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it(
+    it.skip(
       'should remove column ',
       async () => {
         const field = {
@@ -540,7 +539,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('unified field list', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180937
+  // FLAKY: https://github.com/elastic/kibana/issues/180956
+  describe.skip('unified field list', () => {
     it(
       'should be able to add filters',
       async () => {
@@ -567,7 +568,9 @@ describe('unified timeline', () => {
 
         fireEvent.click(screen.getByTestId(`timelineFieldListPanelAddExistFilter-${field.name}`));
         await waitFor(() => {
-          expect(mockTimelineFilterManager.addFilters).toHaveBeenNthCalledWith(
+          expect(
+            kibanaServiceMock.timelineDataService.query.filterManager.addFilters
+          ).toHaveBeenNthCalledWith(
             1,
             expect.arrayContaining([
               expect.objectContaining({

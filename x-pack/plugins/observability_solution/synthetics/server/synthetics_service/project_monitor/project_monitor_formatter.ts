@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { InvalidLocationError } from './normalizers/common_fields';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
@@ -35,6 +36,7 @@ import {
   validateProjectMonitor,
   validateMonitor,
   ValidationResult,
+  INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
 
@@ -227,9 +229,13 @@ export class ProjectMonitorFormatter {
       return decodedMonitor;
     } catch (e) {
       this.server.logger.error(e);
+
+      const reason =
+        e instanceof InvalidLocationError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
+
       this.failedMonitors.push({
+        reason,
         id: monitor.id,
-        reason: FAILED_TO_UPDATE_MONITOR,
         details: e.message,
         payload: monitor,
       });
@@ -252,8 +258,7 @@ export class ProjectMonitorFormatter {
       );
     }
 
-    // no need to wait for it
-    finder.close();
+    finder.close().catch(() => {});
 
     return hits;
   };

@@ -7,10 +7,7 @@
 
 type Method = 'get' | 'post' | 'put' | 'delete';
 
-export function parseEndpoint(
-  endpoint: string,
-  pathParams: Record<string, any> = {}
-) {
+export function parseEndpoint(endpoint: string, pathParams: Record<string, any> = {}) {
   const [method, rawPathname] = endpoint.split(' ');
 
   // replace template variables with path params

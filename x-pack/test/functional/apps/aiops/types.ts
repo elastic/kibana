@@ -54,6 +54,7 @@ interface TestDataExpectedWithoutSampleProbability {
 export interface TestData {
   suiteTitle: string;
   analysisType: LogRateAnalysisType;
+  autoRun: boolean;
   dataGenerator: LogRateAnalysisDataGenerator;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;

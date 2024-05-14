@@ -34,7 +34,7 @@ export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
-  security: SecurityPluginStart;
+  getSecurity: () => Promise<SecurityPluginStart>;
 }
 
 export class ServerlessSearchPlugin
@@ -49,7 +49,6 @@ export class ServerlessSearchPlugin
   // @ts-ignore config is not used for now
   private readonly config: ServerlessSearchConfig;
   private readonly logger: Logger;
-  private security?: SecurityPluginStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ServerlessSearchConfig>();
@@ -82,25 +81,23 @@ export class ServerlessSearchPlugin
     { serverless, usageCollection }: SetupDependencies
   ) {
     const router = http.createRouter();
-    getStartServices().then(([, { security }]) => {
-      this.security = security;
-      const dependencies = {
-        http,
-        logger: this.logger,
-        router,
-        security: this.security,
-      };
+    const dependencies = {
+      http,
+      logger: this.logger,
+      router,
+      getSecurity: async () => {
+        const [, { security }] = await getStartServices();
+        return security;
+      },
+    };
 
-      registerApiKeyRoutes(dependencies);
-      registerConnectorsRoutes(dependencies);
-      registerIndicesRoutes(dependencies);
-      registerMappingRoutes(dependencies);
-    });
+    registerApiKeyRoutes(dependencies);
+    registerConnectorsRoutes(dependencies);
+    registerIndicesRoutes(dependencies);
+    registerMappingRoutes(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(() => {
-        registerTelemetryUsageCollector(usageCollection, this.logger);
-      });
+      registerTelemetryUsageCollector(usageCollection, this.logger);
     }
 
     serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
@@ -108,7 +105,7 @@ export class ServerlessSearchPlugin
   }
 
   public start(core: CoreStart, { dataViews }: StartDependencies) {
-    this.createDefaultDataView(core, dataViews);
+    this.createDefaultDataView(core, dataViews).catch(() => {});
     return {};
   }
 

@@ -163,6 +163,9 @@ describe('AI Assistant Service', () => {
       (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
         () => conversationsDataClient
       );
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
     });
 
     test('should create new AIAssistantConversationsDataClient', async () => {
@@ -325,6 +328,7 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
+
       clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
@@ -775,6 +779,9 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
 
       const assistantService = new AIAssistantService({
         logger,

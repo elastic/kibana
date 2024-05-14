@@ -11,7 +11,8 @@ import { RuleNotifyWhen, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
@@ -32,7 +33,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    for (const scenario of UserAtSpaceScenarios) {
+    for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle bulk edit of rules appropriately', async () => {
@@ -114,6 +115,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].actions).to.eql([
                 {
                   id: createdAction.id,
@@ -191,6 +193,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               response.body.rules.forEach((rule: SanitizedRule) =>
                 expect(rule.tags).to.eql([`multiple-rules-edit-${scenario.id}`, 'tag-A'])
               );
@@ -264,6 +267,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
               break;
@@ -327,6 +331,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -394,6 +399,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -428,6 +434,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -466,6 +473,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -504,6 +512,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -543,6 +552,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -582,6 +592,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'superuser at space1':
             case 'global_read at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
@@ -596,6 +607,90 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle bulk edit rules with system actions', async () => {
+          const connectorId = 'system-connector-test.system-action-kibana-privileges';
+          const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
+
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestRuleData())
+            .expect(200);
+
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              ids: [createdRule.id],
+              operations: [
+                {
+                  operation: 'add',
+                  field: 'actions',
+                  value: [
+                    {
+                      id: connectorId,
+                      params: { index: ES_TEST_INDEX_NAME, reference },
+                    },
+                  ],
+                },
+              ],
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to find rules for any rule types',
+                statusCode: 403,
+              });
+
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([
+                {
+                  message: 'Unauthorized to execute actions',
+                  rule: { id: createdRule.id, name: createdRule.name },
+                },
+              ]);
+
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([
+                {
+                  message: 'Unauthorized to get actions',
+                  rule: { id: createdRule.id, name: createdRule.name },
+                },
+              ]);
+
+              break;
+            case 'superuser at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

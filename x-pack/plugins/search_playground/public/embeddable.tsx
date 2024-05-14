@@ -23,6 +23,10 @@ export const PlaygroundProvider = dynamic(async () => ({
   default: (await import('./providers/playground_provider')).PlaygroundProvider,
 }));
 
+export const PlaygroundHeaderDocs = dynamic(async () => ({
+  default: (await import('./components/playground_header_docs')).PlaygroundHeaderDocs,
+}));
+
 export const getPlaygroundProvider =
   (core: CoreStart, services: AppPluginStartDependencies) =>
   (props: React.ComponentProps<typeof PlaygroundProvider>) =>

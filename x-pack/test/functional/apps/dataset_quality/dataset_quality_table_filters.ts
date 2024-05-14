@@ -152,5 +152,40 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
     });
+
+    it('filters for quality', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const expectedQuality = 'Poor';
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          isMalformed: true,
+        })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      // Get default quality
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQuality = cols['Dataset Quality'];
+      const datasetQualityCellTexts = await datasetQuality.getCellTexts();
+      expect(datasetQualityCellTexts).to.contain(expectedQuality);
+
+      // Filter for Poor quality
+      await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
+
+      const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQualityAfterFilter = colsAfterFilter['Dataset Quality'];
+      const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
+
+      expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);
+    });
   });
 }

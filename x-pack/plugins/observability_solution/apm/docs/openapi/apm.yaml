@@ -1,0 +1,169 @@
+openapi: 3.0.0
+info:
+  title: APM UI
+  version: 1.0.0
+paths:
+  /api/apm/agent_keys:
+    post:
+      summary: Create an APM agent key
+      description: Create a new agent key for APM.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                privileges:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - event:write
+                      - config_agent:read
+      responses:
+        "200":
+          description: Agent key created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+                  expiration:
+                    type: integer
+                    format: int64
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  encoded:
+                    type: string
+  /api/apm/services/{serviceName}/annotation/search:
+    get:
+      summary: Search for annotations
+      description: Search for annotations related to a specific service.
+      parameters:
+        - name: serviceName
+          in: path
+          required: true
+          description: The name of the service
+          schema:
+            type: string
+        - name: environment
+          in: query
+          required: false
+          description: The environment to filter annotations by
+          schema:
+            type: string
+        - name: start
+          in: query
+          required: false
+          description: The start date for the search
+          schema:
+            type: string
+        - name: end
+          in: query
+          required: false
+          description: The end date for the search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  annotations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                            - version
+                        id:
+                          type: string
+                        "@timestamp":
+                          type: number
+                        text:
+                          type: string
+  /api/apm/services/{serviceName}/annotation:
+    post:
+      summary: Create a service annotation
+      description: Create a new annotation for a specific service.
+      parameters:
+        - name: serviceName
+          in: path
+          required: true
+          description: The name of the service
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '@timestamp':
+                  type: string
+                service:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    environment:
+                      type: string
+                message:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        '200':
+          description: Annotation created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  _index:
+                    type: string
+                  _source:
+                    type: object
+                    properties:
+                      annotation:
+                        type: string
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                      message:
+                        type: string
+                      service:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          environment:
+                            type: string
+                          version:
+                            type: string
+                      event:
+                        type: object
+                        properties:
+                          created:
+                            type: string
+                      '@timestamp':
+                        type: string

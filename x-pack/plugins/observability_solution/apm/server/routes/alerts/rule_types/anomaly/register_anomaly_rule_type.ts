@@ -14,16 +14,11 @@ import {
   RuleTypeState,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import {
-  getAlertUrl,
-  observabilityPaths,
-  ProcessorEvent,
-} from '@kbn/observability-plugin/common';
+import { getAlertUrl, observabilityPaths, ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -63,10 +58,7 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import {
-  anomalyParamsSchema,
-  ApmRuleParamsType,
-} from '../../../../../common/rules/schema';
+import { anomalyParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,
@@ -91,9 +83,7 @@ export function registerAnomalyRuleType({
   ruleDataClient,
 }: RegisterRuleDependencies) {
   if (!alerting) {
-    throw new Error(
-      'Cannot register anomaly rule type. The alerting plugin needs to be enabled.'
-    );
+    throw new Error('Cannot register anomaly rule type. The alerting plugin needs to be enabled.');
   }
 
   alerting.registerType({
@@ -139,8 +129,7 @@ export function registerAnomalyRuleType({
       }
 
       const { params, services, spaceId, startedAt, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } =
-        services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -149,14 +138,8 @@ export function registerAnomalyRuleType({
 
       const ruleParams = params;
       const request = {} as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(
-        request,
-        savedObjectsClient
-      );
-      const anomalyDetectors = ml.anomalyDetectorsProvider(
-        request,
-        savedObjectsClient
-      );
+      const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
+      const anomalyDetectors = ml.anomalyDetectorsProvider(request, savedObjectsClient);
 
       const mlJobs = await getMLJobs(anomalyDetectors, ruleParams.environment);
 
@@ -267,9 +250,7 @@ export function registerAnomalyRuleType({
             const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
             if (!job) {
-              logger.warn(
-                `Could not find matching job for job id ${latest.job_id}`
-              );
+              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
               return undefined;
             }
 
@@ -278,17 +259,13 @@ export function registerAnomalyRuleType({
               transactionType: latest.by_field_value as string,
               environment: job.environment,
               score: latest.record_score as number,
-              detectorType: getAnomalyDetectorType(
-                latest.detector_index as number
-              ),
+              detectorType: getAnomalyDetectorType(latest.detector_index as number),
               timestamp: Date.parse(latest.timestamp as string),
               bucketSpan: latest.bucket_span as number,
               bucketKey: bucket.key,
             };
           })
-          .filter((anomaly) =>
-            anomaly ? anomaly.score >= threshold : false
-          ) ?? [];
+          .filter((anomaly) => (anomaly ? anomaly.score >= threshold : false)) ?? [];
 
       await asyncForEach(compact(anomalies), async (anomaly) => {
         const {
@@ -381,10 +358,7 @@ export function registerAnomalyRuleType({
 
       return { state: {} };
     },
-    alerts: {
-      ...ApmRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<AnomalyAlert>,
+    alerts: ApmRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

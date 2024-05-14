@@ -14,9 +14,11 @@ jest.mock('./use_load_connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 
-const mockConnectors = {
-  [LLMs.openai]: { id: 'connectorId1', title: 'OpenAI Connector' },
-};
+const mockConnectors = [
+  { id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai },
+  { id: 'connectorId2', title: 'OpenAI Azure Connector', type: LLMs.openai_azure },
+  { id: 'connectorId2', title: 'Bedrock Connector', type: LLMs.bedrock },
+];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
 };
@@ -33,98 +35,85 @@ describe('useLLMsModels Hook', () => {
 
     expect(result.current).toEqual([
       {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'Azure OpenAI',
-        value: undefined,
-      },
-      {
         connectorId: 'connectorId1',
+        connectorName: undefined,
+        connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo',
+        id: 'connectorId1gpt-3.5-turbo ',
+        name: 'gpt-3.5-turbo ',
+        showConnectorName: false,
         value: 'gpt-3.5-turbo',
+        promptTokenLimit: 16385,
       },
       {
         connectorId: 'connectorId1',
+        connectorName: undefined,
+        connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-1106',
-        value: 'gpt-3.5-turbo-1106',
+        id: 'connectorId1gpt-4o ',
+        name: 'gpt-4o ',
+        showConnectorName: false,
+        value: 'gpt-4o',
+        promptTokenLimit: 128000,
       },
       {
         connectorId: 'connectorId1',
+        connectorName: undefined,
+        connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k',
-        value: 'gpt-3.5-turbo-16k',
+        id: 'connectorId1gpt-4-turbo ',
+        name: 'gpt-4-turbo ',
+        showConnectorName: false,
+        value: 'gpt-4-turbo',
+        promptTokenLimit: 128000,
       },
       {
-        connectorId: 'connectorId1',
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        connectorType: LLMs.openai_azure,
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k-0613',
-        value: 'gpt-3.5-turbo-16k-0613',
+        id: 'connectorId2Azure OpenAI ',
+        name: 'Azure OpenAI ',
+        showConnectorName: false,
+        value: undefined,
+        promptTokenLimit: undefined,
       },
       {
-        connectorId: 'connectorId1',
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-instruct',
-        value: 'gpt-3.5-turbo-instruct',
+        id: 'connectorId2Claude 3 Haiku',
+        name: 'Claude 3 Haiku',
+        showConnectorName: false,
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
+      },
+      {
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        connectorType: LLMs.bedrock,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId2Claude 3 Sonnet',
+        name: 'Claude 3 Sonnet',
+        showConnectorName: false,
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
       },
     ]);
   });
 
-  it('returns LLMModels as disabled when no connectors are available', () => {
-    mockUseLoadConnectors({});
+  it('returns emptyd when connectors not available', () => {
+    mockUseLoadConnectors([]);
 
     const { result } = renderHook(() => useLLMsModels());
 
-    expect(result.current).toEqual([
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'Azure OpenAI',
-        value: undefined,
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo',
-        value: 'gpt-3.5-turbo',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-1106',
-        value: 'gpt-3.5-turbo-1106',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k',
-        value: 'gpt-3.5-turbo-16k',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k-0613',
-        value: 'gpt-3.5-turbo-16k-0613',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-instruct',
-        value: 'gpt-3.5-turbo-instruct',
-      },
-    ]);
+    expect(result.current).toEqual([]);
   });
 });

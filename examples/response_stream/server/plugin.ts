@@ -27,7 +27,7 @@ export class ResponseStreamPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: ResponseStreamSetupPlugins) {
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
-    core.getStartServices().then(([_, depsStart]) => {
+    void core.getStartServices().then(([_, depsStart]) => {
       defineReducerStreamRoute(router, this.logger);
       defineSimpleStringStreamRoute(router, this.logger);
     });

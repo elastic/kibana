@@ -184,7 +184,7 @@ describe('V2 algorithm', () => {
       it('only "picks up" the types that have changed', async () => {
         const logs = await readLog(logFilePath);
         expect(logs).toMatch(
-          'Kibana is performing a compatible upgrade and NO root fields have been updated. Kibana will update the following SO types so that ES can pickup the updated mappings: another-type.'
+          'Documents of the following SO types will be updated, so that ES can pickup the updated mappings: another-type.'
         );
       });
     });
@@ -263,7 +263,7 @@ describe('V2 algorithm', () => {
     it('only "picks up" the types that have changed', async () => {
       const logs = await readLog(logFilePath);
       expect(logs).toMatch(
-        'Kibana is performing a compatible upgrade and NO root fields have been updated. Kibana will update the following SO types so that ES can pickup the updated mappings: another-type.'
+        'Documents of the following SO types will be updated, so that ES can pickup the updated mappings: another-type.'
       );
     });
   });

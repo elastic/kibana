@@ -14,6 +14,7 @@ export * from './os';
 export * from './trusted_apps';
 export * from './utility_types';
 export * from './agents';
+export * from './sentinel_one';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -999,6 +1000,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1129,6 +1131,12 @@ export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
+}
+
+export enum AntivirusRegistrationModes {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  sync = 'sync_with_malware_prevent',
 }
 
 /**

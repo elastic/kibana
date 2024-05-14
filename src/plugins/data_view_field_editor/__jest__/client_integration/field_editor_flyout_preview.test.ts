@@ -92,15 +92,15 @@ describe('Field editor Preview panel', () => {
     expect(getRenderedIndexPatternFields()).toEqual([
       {
         key: 'title',
-        value: mockDocuments[0]._source.title,
+        value: mockDocuments[0].fields.title,
       },
       {
         key: 'subTitle',
-        value: mockDocuments[0]._source.subTitle,
+        value: mockDocuments[0].fields.subTitle,
       },
       {
         key: 'description',
-        value: mockDocuments[0]._source.description,
+        value: mockDocuments[0].fields.description,
       },
     ]);
   });
@@ -141,15 +141,15 @@ describe('Field editor Preview panel', () => {
     expect(getRenderedIndexPatternFields()).toEqual([
       {
         key: 'title',
-        value: mockDocuments[0]._source.title,
+        value: mockDocuments[0].fields.title,
       },
       {
         key: 'subTitle',
-        value: mockDocuments[0]._source.subTitle,
+        value: mockDocuments[0].fields.subTitle,
       },
       {
         key: 'description',
-        value: mockDocuments[0]._source.description,
+        value: mockDocuments[0].fields.description,
       },
     ]);
   });
@@ -172,7 +172,7 @@ describe('Field editor Preview panel', () => {
     const fieldsRendered = getWrapperRenderedIndexPatternFields();
 
     expect(fieldsRendered).not.toBe(null);
-    expect(fieldsRendered!.length).toBe(Object.keys(doc1._source).length);
+    expect(fieldsRendered!.length).toBe(Object.keys(doc1.fields).length);
     // make sure that the last one if the "description" field
     expect(fieldsRendered!.at(2).text()).toBe('descriptionFirst doc - description');
 
@@ -528,14 +528,17 @@ describe('Field editor Preview panel', () => {
   });
 
   describe('Cluster document load and navigation', () => {
+    const docContent = {
+      title: 'loaded doc - title',
+      subTitle: 'loaded doc - subTitle',
+      description: 'loaded doc - description',
+    };
+
     const customLoadedDoc: EsDoc = {
       _id: '123456',
       _index: 'otherIndex',
-      _source: {
-        title: 'loaded doc - title',
-        subTitle: 'loaded doc - subTitle',
-        description: 'loaded doc - description',
-      },
+      fields: docContent,
+      _source: docContent,
     };
 
     test('should update the field list when the document changes', async () => {
@@ -547,39 +550,39 @@ describe('Field editor Preview panel', () => {
 
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc1._source.title,
+        value: doc1.fields.title,
       });
 
       await goToNextDocument();
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc2._source.title,
+        value: doc2.fields.title,
       });
 
       await goToNextDocument();
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc3._source.title,
+        value: doc3.fields.title,
       });
 
       // Going next we circle back to the first document of the list
       await goToNextDocument();
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc1._source.title,
+        value: doc1.fields.title,
       });
 
       // Let's go backward
       await goToPreviousDocument();
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc3._source.title,
+        value: doc3.fields.title,
       });
 
       await goToPreviousDocument();
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc2._source.title,
+        value: doc2.fields.title,
       });
     });
 
@@ -617,7 +620,7 @@ describe('Field editor Preview panel', () => {
       // and the preview value rendered.
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
-        value: doc1._source.title,
+        value: doc1.fields.title,
       });
       expect(getRenderedFieldsPreview()).toEqual([
         { key: 'myRuntimeField', value: 'mockedScriptValue' },

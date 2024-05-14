@@ -123,13 +123,15 @@ components:
         references:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
 
-        # maxSignals not used in ML rules but probably should be used
         max_signals:
           $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
         threat:
           $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
         setup:
           $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
+
+        related_integrations:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
 
     BaseCreateProps:
       x-inline: true
@@ -163,6 +165,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
         immutable:
           $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
+        rule_source:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleSource'
         updated_at:
           type: string
           format: date-time
@@ -176,13 +180,11 @@ components:
         revision:
           type: integer
           minimum: 0
-        # NOTE: For now, Related Integrations and Required Fields are
+        # NOTE: For now, Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would
         # become a part of the request schema as optional fields. This is why we add them
         # here, in order to add them only to the response schema.
-        related_integrations:
-          $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
         required_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
         execution_summary:
@@ -278,6 +280,8 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
         timestamp_field:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     EqlRuleCreateFields:
       allOf:
@@ -737,6 +741,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     NewTermsRuleDefaultableFields:
       type: object

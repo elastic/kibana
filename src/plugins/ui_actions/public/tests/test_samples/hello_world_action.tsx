@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ActionDefinition } from '../../actions';
 
 const MenuItem: React.FC = () => {
@@ -25,7 +25,10 @@ const MenuItem: React.FC = () => {
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): ActionDefinition {
+export function createHelloWorldAction(
+  coreStart: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
+): ActionDefinition {
+  const { overlays, ...startServices } = coreStart;
   return {
     id: ACTION_HELLO_WORLD,
     type: ACTION_HELLO_WORLD,
@@ -33,7 +36,10 @@ export function createHelloWorldAction(overlays: CoreStart['overlays']): ActionD
     MenuItem,
     execute: async () => {
       overlays.openFlyout(
-        toMountPoint(<EuiFlyoutBody>Hello World, I am a hello world action!</EuiFlyoutBody>),
+        toMountPoint(
+          <EuiFlyoutBody>Hello World, I am a hello world action!</EuiFlyoutBody>,
+          startServices
+        ),
         {
           'data-test-subj': 'helloWorldAction',
           ownFocus: true,

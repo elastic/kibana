@@ -601,6 +601,21 @@ describe('SavedObjectsService', () => {
       );
     });
 
+    it('returns the information about the time spent migrating', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+
+      migratorInstanceMock.runMigrations.mockImplementation(async () => {
+        await new Promise((r) => setTimeout(r, 5));
+        return [];
+      });
+
+      await soService.setup(createSetupDeps());
+      const startContract = await soService.start(createStartDeps());
+
+      expect(startContract.metrics.migrationDuration).toBeGreaterThan(0);
+    });
+
     describe('#getTypeRegistry', () => {
       it('returns the internal type registry of the service', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
