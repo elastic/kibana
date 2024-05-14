@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './src/performance_metrics';
-
-export * from './src/performance_metric_events';
+// Time To First Meaningful Paint (ttfmp)
+export const perfomanceMarkers = {
+  startPageChange: 'start::pageChange',
+  endPageReady: 'end::pageReady',
+};
