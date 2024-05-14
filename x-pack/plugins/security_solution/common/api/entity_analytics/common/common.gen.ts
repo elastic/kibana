@@ -37,7 +37,7 @@ export const DataViewId = z.string();
  * An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
  */
 export type Filter = z.infer<typeof Filter>;
-export const Filter = z.object({});
+export const Filter = z.object({}).catchall(z.unknown());
 
 /**
  * Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
@@ -70,19 +70,19 @@ export const RiskScoreInput = z.object({
   /**
    * The unique identifier (`_id`) of the original source document
    */
-  id: z.string().optional(),
+  id: z.string(),
   /**
    * The unique index (`_index`) of the original source document
    */
-  index: z.string().optional(),
+  index: z.string(),
   /**
    * The risk category of the risk input document.
    */
-  category: z.string().optional(),
+  category: z.string(),
   /**
    * A human-readable description of the risk input document.
    */
-  description: z.string().optional(),
+  description: z.string(),
   /**
    * The weighted risk score of the risk input document.
    */
@@ -96,6 +96,11 @@ export const RiskScoreInput = z.object({
 
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
 export const RiskScoreCategories = z.literal('category_1');
+
+export type EntityRiskLevels = z.infer<typeof EntityRiskLevels>;
+export const EntityRiskLevels = z.enum(['Unknown', 'Low', 'Moderate', 'High', 'Critical']);
+export type EntityRiskLevelsEnum = typeof EntityRiskLevels.enum;
+export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
 
 export type EntityRiskScore = z.infer<typeof EntityRiskScore>;
 export const EntityRiskScore = z.object({
@@ -114,7 +119,7 @@ export const EntityRiskScore = z.object({
   /**
    * Lexical description of the entity's risk.
    */
-  calculated_level: z.string(),
+  calculated_level: EntityRiskLevels,
   /**
    * The raw numeric value of the given entity's risk score.
    */

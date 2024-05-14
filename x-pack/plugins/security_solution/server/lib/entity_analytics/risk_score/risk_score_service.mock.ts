@@ -6,14 +6,14 @@
  */
 
 import type { RiskScoreService } from './risk_score_service';
-import { RiskLevels } from '../../../../common/entity_analytics/risk_engine';
 import type { EntityRiskScore } from '../../../../common/api/entity_analytics/common';
+import { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
 
 const createRiskScoreMock = (overrides: Partial<EntityRiskScore> = {}): EntityRiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
   id_field: 'host.name',
   id_value: 'hostname',
-  calculated_level: RiskLevels.high,
+  calculated_level: EntityRiskLevels.enum.High,
   calculated_score: 149,
   calculated_score_norm: 85.332,
   category_1_score: 85,

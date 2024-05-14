@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
 import type { EntityRiskScore } from '../../../../common/api/entity_analytics/common';
+import { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
@@ -68,7 +69,7 @@ const buildResponseMock = (
         id_value: 'hostname',
         criticality_level: 'high_impact',
         criticality_modifier: 1.5,
-        calculated_level: RiskLevels.unknown,
+        calculated_level: EntityRiskLevels.enum.Unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { RiskLevels } from './types';
+import { EntityRiskLevels } from '../../api/entity_analytics/common';
 
 export const RISK_LEVEL_RANGES = {
-  [RiskLevels.unknown]: { start: 0, stop: 20 },
-  [RiskLevels.low]: { start: 20, stop: 40 },
-  [RiskLevels.moderate]: { start: 40, stop: 70 },
-  [RiskLevels.high]: { start: 70, stop: 90 },
-  [RiskLevels.critical]: { start: 90, stop: 100 },
+  [EntityRiskLevels.enum.Unknown]: { start: 0, stop: 20 },
+  [EntityRiskLevels.enum.Low]: { start: 20, stop: 40 },
+  [EntityRiskLevels.enum.Moderate]: { start: 40, stop: 70 },
+  [EntityRiskLevels.enum.High]: { start: 70, stop: 90 },
+  [EntityRiskLevels.enum.Critical]: { start: 90, stop: 100 },
 };
 
-export const getRiskLevel = (riskScore: number): RiskLevels => {
-  if (riskScore >= RISK_LEVEL_RANGES[RiskLevels.critical].start) {
-    return RiskLevels.critical;
-  } else if (riskScore >= RISK_LEVEL_RANGES[RiskLevels.high].start) {
-    return RiskLevels.high;
-  } else if (riskScore >= RISK_LEVEL_RANGES[RiskLevels.moderate].start) {
-    return RiskLevels.moderate;
-  } else if (riskScore >= RISK_LEVEL_RANGES[RiskLevels.low].start) {
-    return RiskLevels.low;
+export const getRiskLevel = (riskScore: number): EntityRiskLevels => {
+  if (riskScore >= RISK_LEVEL_RANGES[EntityRiskLevels.enum.Critical].start) {
+    return EntityRiskLevels.enum.Critical;
+  } else if (riskScore >= RISK_LEVEL_RANGES[EntityRiskLevels.enum.High].start) {
+    return EntityRiskLevels.enum.High;
+  } else if (riskScore >= RISK_LEVEL_RANGES[EntityRiskLevels.enum.Moderate].start) {
+    return EntityRiskLevels.enum.Moderate;
+  } else if (riskScore >= RISK_LEVEL_RANGES[EntityRiskLevels.enum.Low].start) {
+    return EntityRiskLevels.enum.Low;
   } else {
-    return RiskLevels.unknown;
+    return EntityRiskLevels.enum.Unknown;
   }
 };

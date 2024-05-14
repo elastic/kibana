@@ -32,7 +32,7 @@ export const RiskScoresCalculationRequest = z.object({
   /**
    * Used to calculate a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
    */
-  after_keys: AfterKeys,
+  after_keys: AfterKeys.optional(),
   /**
    * The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
    */

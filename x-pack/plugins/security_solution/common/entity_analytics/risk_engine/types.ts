@@ -32,11 +32,3 @@ export interface EcsRiskScore {
 }
 
 export type RiskInputs = RiskScoreInput[];
-
-export enum RiskLevels {
-  unknown = 'Unknown',
-  low = 'Low',
-  moderate = 'Moderate',
-  high = 'High',
-  critical = 'Critical',
-}

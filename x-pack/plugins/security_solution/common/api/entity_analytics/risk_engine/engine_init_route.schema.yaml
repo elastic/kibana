@@ -38,14 +38,6 @@ paths:
 
 components:
   schemas:
-    RiskEngineInitResponse:
-      type: object
-      required:
-        - result
-      properties:
-        result:
-          $ref: "#/components/schemas/RiskEngineInitResult"
-
     RiskEngineInitResult:
       type: object
       required:
@@ -67,6 +59,15 @@ components:
           type: array
           items:
             type: string
+
+    RiskEngineInitResponse:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          $ref: "#/components/schemas/RiskEngineInitResult"
+
     RiskEngineInitErrorResponse:
       type: object
       required:

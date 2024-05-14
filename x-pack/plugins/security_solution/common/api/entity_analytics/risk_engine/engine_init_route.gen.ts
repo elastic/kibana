@@ -16,11 +16,6 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
-export type RiskEngineInitResponse = z.infer<typeof RiskEngineInitResponse>;
-export const RiskEngineInitResponse = z.object({
-  result: RiskEngineInitResult,
-});
-
 export type RiskEngineInitResult = z.infer<typeof RiskEngineInitResult>;
 export const RiskEngineInitResult = z.object({
   risk_engine_enabled: z.boolean(),
@@ -28,6 +23,11 @@ export const RiskEngineInitResult = z.object({
   risk_engine_configuration_created: z.boolean(),
   legacy_risk_engine_disabled: z.boolean(),
   errors: z.array(z.string()),
+});
+
+export type RiskEngineInitResponse = z.infer<typeof RiskEngineInitResponse>;
+export const RiskEngineInitResponse = z.object({
+  result: RiskEngineInitResult,
 });
 
 export type RiskEngineInitErrorResponse = z.infer<typeof RiskEngineInitErrorResponse>;
