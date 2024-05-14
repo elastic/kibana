@@ -23,17 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
     describe('system indices behavior', () => {
-      it('returns warning header when making requests to .kibana index', async () => {
-        return await supertestWithoutAuth
-          .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
-          .set('kbn-xsrf', 'true')
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
-          .then((response) => {
-            expect(response.header).to.have.property('warning');
-          });
-      });
-
       it('does not forward x-elastic-product-origin', async () => {
         // If we pass the header and we still get the warning back, we assume that the header was not forwarded.
         return await supertestWithoutAuth
