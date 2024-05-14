@@ -15,23 +15,20 @@ import {
   CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
+  ControlGroupChainingSystem,
 } from '@kbn/controls-plugin/common';
+import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { OverlayStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
+
 import { ControlRenderer } from '../control_renderer';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  DefaultControlApi,
-} from '../types';
+import { DefaultControlApi } from '../types';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
-import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
 export const getControlGroupEmbeddableFactory = (services: {
   overlays: OverlayStart;
@@ -45,7 +42,6 @@ export const getControlGroupEmbeddableFactory = (services: {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-      console.log('initialState', initialState);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
       const width = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);

@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  ControlGroupChainingSystem,
-  ControlsPanels,
-} from '@kbn/controls-plugin/common/control_group/types';
-import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
-import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
+import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
-  HasSerializableState,
-  PresentationContainer,
-  PublishesLastSavedState,
-} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -28,53 +17,14 @@ import {
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilter,
-  PublishesFilters,
   PublishesPanelTitle,
   PublishesTimeslice,
-  PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import {
-  PublishesDataView,
-  PublishesDataViews,
-} from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-
-export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState> &
-  HasSerializableState &
-  PublishesFilters &
-  // PublishesSettings & // published so children can use it... Might be unnecessary?
-  PublishesDataViews &
-  HasEditCapabilities & // editing for control group settings - this will be a custom action
-  PublishesDataLoading & // loading = true if any children loading
-  // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
-  PublishesDefaultControlDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
-
-export interface ControlGroupRuntimeState {
-  chainingSystem: ControlGroupChainingSystem;
-  defaultControlWidth?: ControlWidth;
-  defaultControlGrow?: boolean;
-  controlStyle: ControlStyle;
-  panels: ControlsPanels;
-  showApplySelections?: boolean;
-  ignoreParentSettings?: ParentIgnoreSettings;
-}
-
-export type ControlGroupSerializedState = Omit<
-  ControlGroupRuntimeState,
-  'panels' | 'ignoreParentSettings'
-> & {
-  panelsJSON: string;
-  ignoreParentSettingsJSON: string;
-};
-
-export interface PublishesDefaultControlDisplaySettings {
-  grow: PublishingSubject<boolean>;
-  width: PublishingSubject<ControlWidth>;
-}
+import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { ControlGroupApi } from './control_group/types';
 
 export interface PublishesControlDisplaySettings {
   grow: PublishingSubject<boolean | undefined>;
@@ -148,9 +98,3 @@ export interface DataControlFactory<State extends object = object>
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{ stateManager: unknown }>; // internal api manages state
 }
-
-export const isDataControlFactory = <State extends object = object>(
-  factory: ControlFactory<State, any>
-): factory is DataControlFactory<State> => {
-  return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
-};

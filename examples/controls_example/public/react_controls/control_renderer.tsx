@@ -15,22 +15,18 @@ import { ControlWidth } from '@kbn/controls-plugin/common';
 import { OverlayStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { startTrackingEmbeddableUnsavedChanges } from '@kbn/embeddable-plugin/public';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { getControlFactory } from './control_factory_registry';
 import { ControlPanel } from './control_panel';
-import { initializeDataControl } from './initialize_data_control';
 import {
   ControlApiRegistration,
-  ControlGroupApi,
   ControlStateRegistration,
-  DataControlApi,
   DefaultControlApi,
   DefaultControlState,
-  DefaultDataControlState,
-  isDataControlFactory,
 } from './types';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { ControlGroupApi } from './control_group/types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
