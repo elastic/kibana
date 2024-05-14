@@ -273,7 +273,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled, attackDiscoveryEnabled } =
+  const { assistantModelEvaluation: modelEvaluatorEnabled } =
     capabilities ?? defaultAssistantFeatures;
 
   const value = useMemo(
@@ -282,7 +282,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       alertsIndexPattern,
       assistantAvailability,
       assistantTelemetry,
-      attackDiscoveryEnabled,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
@@ -322,7 +321,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       alertsIndexPattern,
       assistantAvailability,
       assistantTelemetry,
-      attackDiscoveryEnabled,
       augmentMessageCodeBlocks,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
