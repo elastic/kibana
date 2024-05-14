@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { Response } from 'supertest';
