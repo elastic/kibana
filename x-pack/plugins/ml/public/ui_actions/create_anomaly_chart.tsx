@@ -11,10 +11,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
-import {
-  ANOMALY_EXPLORER_CHARTS_REACT_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-} from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 
@@ -46,7 +43,7 @@ export function createAddAnomalyChartsPanelAction(
     ],
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
-        defaultMessage: '@TODO: Anomaly chart',
+        defaultMessage: 'Anomaly chart',
       }),
     getDisplayNameTooltip: () =>
       i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.description', {
@@ -60,10 +57,6 @@ export function createAddAnomalyChartsPanelAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       const [coreStart, pluginStart] = await getStartServices();
-
-      console.log('coreStart', coreStart);
-      console.log('pluginStart', pluginStart);
-
       try {
         const { resolveEmbeddableAnomalyChartsUserInput } = await import(
           '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
@@ -75,25 +68,16 @@ export function createAddAnomalyChartsPanelAction(
           context.embeddable.uuid
         );
 
-        console.log('initialState', initialState);
-
-        // const { resolveAnomalySwimlaneUserInput } = await import(
-        //   '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        // );
-
-        // const initialState = await resolveEmbeddableAnomalyChartsUserInput({
-        //   ...coreStart,
-        //   ...pluginStart,
-        // });
-
         presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_EXPLORER_CHARTS_REACT_EMBEDDABLE_TYPE,
+          panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
           initialState: {
             ...initialState,
             title: initialState.panelTitle,
           },
         });
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
         return Promise.reject();
       }
     },

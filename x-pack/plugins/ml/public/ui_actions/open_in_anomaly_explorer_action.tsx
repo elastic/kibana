@@ -97,10 +97,11 @@ export function createOpenInExplorerAction(
         });
       } else if (isAnomalyChartsEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, entityFields } = embeddable;
+        const { jobIds$, entityFields } = embeddable;
 
+        const jobIds = jobIds$?.getValue() ?? [];
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
-        const entityFieldsValue = entityFields.getValue();
+        const entityFieldsValue = entityFields?.getValue();
         if (
           Array.isArray(entityFieldsValue) &&
           entityFieldsValue.length === 1 &&
@@ -132,7 +133,7 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds: jobIds.getValue(),
+            jobIds,
             timeRange: getEmbeddableTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),

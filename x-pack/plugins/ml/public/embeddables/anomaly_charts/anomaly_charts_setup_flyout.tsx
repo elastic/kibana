@@ -12,12 +12,12 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
 import type { AnomalyChartsEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
+import { getDefaultExplorerChartsPanelTitle } from './utils';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,

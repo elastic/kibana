@@ -41,11 +41,14 @@ export function createEditAnomalyChartsPanelAction(
 
         const result = await resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
-          deps.data.dataViews,
-          embeddable.getInput()
+          deps.data.dataViews
+          // embeddable.getInput()
         );
-        embeddable.updateInput(result);
+        // embeddable.updateInput(result);
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+
         return Promise.reject();
       }
     },

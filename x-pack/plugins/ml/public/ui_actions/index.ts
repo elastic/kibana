@@ -15,7 +15,6 @@ import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_a
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
 import { createAddSwimlanePanelAction } from './create_swim_lane';
-import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createEditSingleMetricViewerPanelAction } from './edit_single_metric_viewer_panel_action';
 import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import {
@@ -60,7 +59,7 @@ export function registerMlUiActions(
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
-  const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
+  // const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
   const visToAdJobAction = createVisToADJobAction(core.getStartServices);
   const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
@@ -78,7 +77,7 @@ export function registerMlUiActions(
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAnomalyChartsPanelAction);
 
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
+  // uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);
 

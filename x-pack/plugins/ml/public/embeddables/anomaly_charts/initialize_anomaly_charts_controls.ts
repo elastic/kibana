@@ -21,6 +21,7 @@ export const initializeAnomalyChartsControls = (
   const updateUserInput = (update: AnomalySwimLaneEmbeddableState) => {
     jobIds$.next(update.jobIds);
     maxSeriesToPlot$.next(update.maxSeriesToPlot);
+    titlesApi.setPanelTitle(update.panelTitle);
   };
 
   const updateSeverityThreshold = (v) => severityThreshold$.next(v.severityThreshold);

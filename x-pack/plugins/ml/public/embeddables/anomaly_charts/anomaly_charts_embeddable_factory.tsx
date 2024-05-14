@@ -24,10 +24,7 @@ import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import type { AnomalyChartsEmbeddableServices } from '..';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_EXPLORER_CHARTS_REACT_EMBEDDABLE_TYPE,
-} from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeAnomalyChartsControls } from './initialize_anomaly_charts_controls';
@@ -40,7 +37,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> =
     {
-      type: ANOMALY_EXPLORER_CHARTS_REACT_EMBEDDABLE_TYPE,
+      type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
       deserializeState: (state) => state.rawState,
       buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
         if (!apiHasExecutionContext(parentApi)) {
@@ -152,7 +149,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     ...serializeAnomalyChartsState(),
                   }
                 );
+                anomalyChartsControlsApi.updateUserInput(result);
               } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error(e);
                 return Promise.reject();
               }
             },
@@ -275,108 +275,3 @@ export const getAnomalyChartsReactEmbeddableFactory = (
     };
   return factory;
 };
-
-// @TODO: REMOVE
-// export class AnomalyChartsEmbeddableFactory
-//   implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput>
-// {
-//   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
-
-//   public readonly grouping = [
-//     {
-//       id: PLUGIN_ID,
-//       getDisplayName: () => ML_APP_NAME,
-//       getIconType: () => PLUGIN_ICON,
-//     },
-//   ];
-
-//   constructor(
-//     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
-//   ) {}
-
-//   public async isEditable() {
-//     return true;
-//   }
-
-//   public getDisplayName() {
-//     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
-//       defaultMessage: 'Anomaly chart',
-//     });
-//   }
-
-//   public getDescription() {
-//     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.description', {
-//       defaultMessage: 'View anomaly detection results in a chart.',
-//     });
-//   }
-
-//   public async getExplicitInput(): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-//     const [coreStart, deps] = await this.getServices();
-
-//     try {
-//       const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-//         './anomaly_charts_setup_flyout'
-//       );
-//       return await resolveEmbeddableAnomalyChartsUserInput(coreStart, deps.data.dataViews);
-//     } catch (e) {
-//       return Promise.reject();
-//     }
-//   }
-
-//   private async getServices(): Promise<AnomalyChartsEmbeddableServices> {
-//     const [
-//       [coreStart, pluginsStart],
-//       { AnomalyDetectorService },
-//       { fieldFormatServiceFactory },
-//       { indexServiceFactory },
-//       { mlApiServicesProvider },
-//       { mlResultsServiceProvider },
-//     ] = await Promise.all([
-//       await this.getStartServices(),
-//       await import('../../application/services/anomaly_detector_service'),
-//       await import('../../application/services/field_format_service_factory'),
-//       await import('../../application/util/index_service'),
-//       await import('../../application/services/ml_api_service'),
-//       await import('../../application/services/results_service'),
-//     ]);
-
-//     const httpService = new HttpService(coreStart.http);
-//     const anomalyDetectorService = new AnomalyDetectorService(httpService);
-//     const mlApiServices = mlApiServicesProvider(httpService);
-//     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-//     const anomalyExplorerService = new AnomalyExplorerChartsService(
-//       pluginsStart.data.query.timefilter.timefilter,
-//       mlApiServices,
-//       mlResultsService
-//     );
-
-//     // Note on the following services:
-//     // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
-//     //   but it's not being made available as part of global services. Since it's just
-//     //   some stateless utils `useMlIndexUtils()` should be used from within components.
-//     // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
-//     //   so because of its own state it needs to be made available as a global service.
-//     //   In the long run we should again try to get rid of it here and make it available via
-//     //   its own context or possibly without having a singleton like state at all, since the
-//     //   way this manages its own state right now doesn't consider React component lifecycles.
-//     const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-//     const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
-
-//     return [
-//       coreStart,
-//       pluginsStart as MlDependencies,
-//       {
-//         anomalyDetectorService,
-//         anomalyExplorerService,
-//         mlFieldFormatService,
-//         mlResultsService,
-//       },
-//     ];
-//   }
-
-//   public async create(initialInput: AnomalyChartsEmbeddableInput, parent?: IContainer) {
-//     const services = await this.getServices();
-//     const { AnomalyChartsEmbeddable } = await import('./anomaly_charts_embeddable');
-//     return new AnomalyChartsEmbeddable(initialInput, services, parent);
-//   }
-// }

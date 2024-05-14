@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
+import { getDefaultExplorerChartsPanelTitle } from './utils';
 const defaultOptions = { wrapper: I18nProvider };
 
 describe('AnomalyChartsInitializer', () => {

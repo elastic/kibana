@@ -15,6 +15,7 @@ import { getEmbeddableComponent } from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
 
+// @TODO: detach this from react embeddable
 export function registerAnomalyChartsCasesAttachment(
   cases: CasesPublicSetup,
   coreStart: CoreStart,

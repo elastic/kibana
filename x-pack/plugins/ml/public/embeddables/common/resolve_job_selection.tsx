@@ -89,7 +89,6 @@ export async function resolveJobSelection(
           startServices
         ),
         {
-          // @todo: pass in as functional arg
           ...(pushFlyout ? { type: 'push' } : {}),
           'data-test-subj': 'mlFlyoutJobSelector',
           ownFocus: true,
