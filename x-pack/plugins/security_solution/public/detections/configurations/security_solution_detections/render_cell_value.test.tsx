@@ -29,6 +29,7 @@ jest.mock('../../../common/containers/sourcerer', () => ({
     indicesExist: true,
   }),
 }));
+jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -83,7 +84,7 @@ describe('RenderCellValue', () => {
     expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
   });
 
-  test('it renders a GuidedOnboardingTourStep when left flyout is closed', () => {
+  test('it renders a GuidedOnboardingTourStep', () => {
     const RenderCellValue = getRenderCellValueHook({
       scopeId: SourcererScopeName.default,
       tableId: TableId.test,
@@ -97,26 +98,6 @@ describe('RenderCellValue', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('GuidedOnboardingTourStep').prop('hidden')).toEqual(false);
-  });
-
-  test('it renders a Hidden GuidedOnboardingTourStep when left flyout is open', () => {
-    const RenderCellValue = getRenderCellValueHook({
-      scopeId: SourcererScopeName.default,
-      tableId: TableId.test,
-    });
-    const testProps = {
-      ...props,
-      isLeftExpandableFlyoutExpanded: true,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...testProps} />
-        </DragDropContextWrapper>
-      </TestProviders>
-    );
-
-    expect(wrapper.find('GuidedOnboardingTourStep').prop('hidden')).toEqual(true);
+    expect(wrapper.find('[data-test-subj="GuidedOnboardingTourStep"]').exists()).toEqual(true);
   });
 });

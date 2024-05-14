@@ -7,7 +7,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
@@ -20,7 +19,12 @@ import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
+import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
 
+const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
+jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
+  useHiddenByFlyout: jest.fn(),
+}));
 jest.mock('../guided_onboarding_tour');
 jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
@@ -88,14 +92,6 @@ jest.mock('../../hooks/use_license', () => {
     },
   };
 });
-
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutState: jest.fn(() => ({ left: false })),
-  };
-});
-
-const useExpandableFlyoutStateMock = useExpandableFlyoutState as jest.Mock;
 
 const defaultProps = {
   ariaRowindex: 2,
@@ -212,19 +208,8 @@ describe('Actions', () => {
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
     });
 
-    test('if left expandable flyout is expanded, SecurityTourStep is active', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} {...isTourAnchorConditions} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
-      expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
-    });
-
     test('if left expandable flyout is expanded, SecurityTourStep not active', () => {
-      useExpandableFlyoutStateMock.mockReturnValue({ left: true });
+      useHiddenByFlyoutMock.mockReturnValue(true);
 
       const wrapper = mount(
         <TestProviders>

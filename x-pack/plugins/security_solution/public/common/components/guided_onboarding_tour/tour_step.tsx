@@ -154,7 +154,6 @@ export const GuidedOnboardingTourStep = ({
 }: GuidedOnboardingTourStep) => {
   const { hidden: allStepsHidden } = useTourContext();
   const hiddenByFlyout = useHiddenByFlyout({ tourId: props.tourId, step: props.step });
-
   return isTourAnchor && !allStepsHidden && !hiddenByFlyout ? (
     <SecurityTourStep {...props}>{children}</SecurityTourStep>
   ) : (
