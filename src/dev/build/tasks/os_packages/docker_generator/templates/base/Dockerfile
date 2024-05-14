@@ -41,7 +41,11 @@ RUN tar \
   --exclude=screenshotting-plugin/server/assets \
 {{/serverless}}
   --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz
+  -zxf /tmp/kibana.tar.gz {{#serverless}}&& \
+# Exclude serverless.yml disabled assets
+  rm -rf node_modules/@kbn/screenshotting-plugin/chromium && \
+  rm -rf node_modules/@kbn/screenshotting-plugin/server/assets
+{{/serverless}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -115,7 +119,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#chainguard}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+RUN apk --no-cache add bash fontconfig libstdc++ nss findutils shadow
 {{/chainguard}}
 
 # Bring in Kibana from the initial stage.
