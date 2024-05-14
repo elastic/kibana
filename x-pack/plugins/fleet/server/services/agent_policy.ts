@@ -553,8 +553,6 @@ class AgentPolicyService {
         if (withPackagePolicies) {
           agentPolicy.package_policies =
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
-
-          await this.populateRootIntegrations(soClient, agentPolicy as AgentPolicy);
         }
         return agentPolicy;
       },
