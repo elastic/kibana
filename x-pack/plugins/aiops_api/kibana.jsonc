@@ -8,12 +8,15 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "charts",
+      "data",
+      "fieldFormats",
       "licensing",
       "observabilityAIAssistant"
     ],
     "optionalPlugins": [],
     "requiredBundles": [
-      "charts"
+      "charts",
     ]
   }
 }

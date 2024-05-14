@@ -11,6 +11,7 @@ export {
   documentCountChartOverallSeriesName,
   DocumentCountChart,
   DocumentCountChartRedux,
+  SimpleDocumentCountChart,
   DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID,
   getLogRateAnalysisBarStyleAccessor,
 } from './src/document_count_chart';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import type {
@@ -28,24 +28,20 @@ export class AiopsApiPlugin
 {
   public setup(core: AiopsCoreSetup, { licensing }: AiopsApiPluginSetupDeps) {
     Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
-      ([license, [coreStart, pluginStart]]) => {
-        if (license.hasAtLeast('platinum')) {
-          // Do something here
+      ([license, [coreStart, pluginsStart]]) => {
+        if (license.hasAtLeast('enterprise')) {
+          const service = pluginsStart.observabilityAIAssistant.service;
+
+          service.register(async ({ registerRenderFunction }) => {
+            const { registerFunctions } = await import('./functions');
+
+            await registerFunctions({ coreStart, pluginsStart, registerRenderFunction });
+          });
         }
       }
     );
   }
 
-  public start(core: CoreStart, pluginsStart: AiopsApiPluginStartDeps): AiopsApiPluginStart {
-    console.log('======== REGISTER!!!!');
-    const service = pluginsStart.observabilityAIAssistant.service;
-
-    service.register(async ({ registerRenderFunction }) => {
-      const { registerFunctions } = await import('./functions');
-
-      await registerFunctions({ pluginsStart, registerRenderFunction });
-    });
-  }
-
+  public start() {}
   public stop() {}
 }
