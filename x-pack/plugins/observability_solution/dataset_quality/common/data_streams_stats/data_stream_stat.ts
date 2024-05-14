@@ -21,7 +21,7 @@ export class DataStreamStat {
   size?: DataStreamStatType['size']; // total datastream size
   sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
-  docsCount?: DataStreamStatType['docsCount']; // total datastream docs count
+  totalDocs?: DataStreamStatType['totalDocs']; // total datastream docs count
   integration?: Integration;
   degradedDocs: {
     percentage: number;
@@ -39,7 +39,7 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
-    this.docsCount = dataStreamStat.docsCount;
+    this.totalDocs = dataStreamStat.totalDocs;
     this.integration = dataStreamStat.integration;
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
@@ -61,7 +61,7 @@ export class DataStreamStat {
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
-      docsCount: dataStreamStat.docsCount,
+      totalDocs: dataStreamStat.totalDocs,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
@@ -95,8 +95,8 @@ export class DataStreamStat {
     return new DataStreamStat(dataStreamStatProps);
   }
 
-  public static calculateFilteredSize({ sizeBytes, docsCount, degradedDocs }: DataStreamStat) {
-    const avgDocSize = sizeBytes && docsCount ? sizeBytes / docsCount : 0;
+  public static calculateFilteredSize({ sizeBytes, totalDocs, degradedDocs }: DataStreamStat) {
+    const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
     return avgDocSize * degradedDocs.totalDocs;
   }
 }

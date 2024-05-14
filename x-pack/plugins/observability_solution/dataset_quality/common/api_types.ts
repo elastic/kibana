@@ -16,7 +16,7 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
-    docsCount: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   }),
 ]);
 

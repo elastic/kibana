@@ -41,7 +41,7 @@ export async function getDataStreamsStats({
       size: dataStream.store_size?.toString(),
       sizeBytes: dataStream.store_size_bytes,
       lastActivity: dataStream.maximum_timestamp,
-      docsCount: sizeStatsAvailable
+      totalDocs: sizeStatsAvailable
         ? indicesDocsCountStats!.docsCountPerDataStream[dataStream.data_stream] || 0
         : null,
     };

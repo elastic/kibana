@@ -26,10 +26,10 @@ class IndexStatsService {
       const docsCountPerDataStream = chain(indices || {})
         .map((indexStats, indexName) => ({
           indexName,
-          docsCount: indexStats.total?.docs ? indexStats.total?.docs?.count : 0,
+          totalDocs: indexStats.total?.docs ? indexStats.total?.docs?.count : 0,
         }))
         .groupBy((object) => extractIndexNameFromBackingIndex(object.indexName))
-        .mapValues((group) => sumBy(group, 'docsCount'))
+        .mapValues((group) => sumBy(group, 'totalDocs'))
         .value();
 
       return {
