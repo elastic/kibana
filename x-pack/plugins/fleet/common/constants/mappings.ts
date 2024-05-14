@@ -166,6 +166,9 @@ export const AGENT_MAPPINGS = {
                     },
                   },
                 },
+                unprivileged: {
+                  type: 'boolean',
+                },
               },
             },
           },

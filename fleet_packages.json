@@ -42,12 +42,12 @@
   },
   {
     "name": "profiler_symbolizer",
-    "version": "8.12.0",
+    "version": "8.14.0",
     "forceAlignStackVersion": true
   },
   {
     "name": "profiler_collector",
-    "version": "8.12.0",
+    "version": "8.14.0",
     "forceAlignStackVersion": true
   },
   {
