@@ -15,6 +15,7 @@ export default defineCypressConfig({
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
+  chromeWebSecurity: false,
   defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
