@@ -138,7 +138,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         inputQuery('select * from uptime');
         cy.contains('Query is a required field').should('not.exist');
         cy.contains('Advanced').click();
-        typeInECSFieldInput('{downArrow}{enter}');
+        typeInECSFieldInput('label{downArrow}{enter}');
         cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       })
       .clickOutside();
