@@ -10,16 +10,10 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } fr
 import { UseField } from '../../../../shared_imports';
 import { NameComboBox } from './name_combobox';
 import { TypeComboBox } from './type_combobox';
+import { makeValidateRequiredField } from './make_validate_required_field';
 import * as i18n from './translations';
 
-import type {
-  ArrayItem,
-  ERROR_CODE,
-  FieldConfig,
-  FieldHook,
-  FormData,
-  ValidationFunc,
-} from '../../../../shared_imports';
+import type { ArrayItem, FieldConfig, FieldHook } from '../../../../shared_imports';
 import type {
   RequiredField,
   RequiredFieldInput,
@@ -167,46 +161,3 @@ const RequiredFieldField = ({
     </EuiFormRow>
   );
 };
-
-function makeValidateRequiredField(parentFieldPath: string) {
-  return function validateRequiredField(
-    ...args: Parameters<ValidationFunc<FormData, string, RequiredFieldInput>>
-  ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
-    const [{ value, path, form }] = args;
-
-    const formData = form.getFormData();
-    const parentFieldData: RequiredFieldInput[] = formData[parentFieldPath];
-
-    const isFieldNameUsedMoreThanOnce =
-      parentFieldData.filter((field) => field.name === value.name).length > 1;
-
-    if (isFieldNameUsedMoreThanOnce) {
-      return {
-        code: 'ERR_FIELD_FORMAT',
-        path: `${path}.name`,
-        message: i18n.FIELD_NAME_USED_MORE_THAN_ONCE(value.name),
-      };
-    }
-
-    /* Allow empty rows. They are going to be removed before submission. */
-    if (value.name.trim().length === 0 && value.type.trim().length === 0) {
-      return;
-    }
-
-    if (value.name.trim().length === 0) {
-      return {
-        code: 'ERR_FIELD_MISSING',
-        path: `${path}.name`,
-        message: i18n.FIELD_NAME_REQUIRED,
-      };
-    }
-
-    if (value.type.trim().length === 0) {
-      return {
-        code: 'ERR_FIELD_MISSING',
-        path: `${path}.type`,
-        message: i18n.FIELD_TYPE_REQUIRED,
-      };
-    }
-  };
-}
