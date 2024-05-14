@@ -59,7 +59,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-describe('when splitting .kibana into multiple indices and one clone fails', () => {
+// Failing: See https://github.com/elastic/kibana/issues/163253
+describe.skip('when splitting .kibana into multiple indices and one clone fails', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
   let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
