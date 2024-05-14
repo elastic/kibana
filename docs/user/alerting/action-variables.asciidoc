@@ -385,7 +385,7 @@ You can create the following Mustache template in the email action for your rule
 
 {{context.conditions}}
 
-**documents** _[view in Discover]({{{context.link}}})_ <3>
+**documents** _<{{context.link}}|view in Discover>_ <3>
 
 | provider | action | duration | <4>
 | -------- | ------ | -------- |
