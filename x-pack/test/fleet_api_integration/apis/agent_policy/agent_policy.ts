@@ -1132,6 +1132,7 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           },
+          root_integrations: [],
         });
       });
 
