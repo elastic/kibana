@@ -34,6 +34,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     fleetServerHost,
     fleetProxy,
     enrolledAgentIds,
+    unpriviligedAgentIds,
   } = props;
 
   const core = useStartServices();
@@ -101,7 +102,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       showLoading: true,
       poll: commandCopied,
       rootIntegrations: agentPolicy?.root_integrations ?? [],
-      unprivilegedAgentsCount: agentPolicy?.unprivileged_agents ?? 0,
+      unprivilegedAgentsCount: unpriviligedAgentIds.length,
     })
   );
 

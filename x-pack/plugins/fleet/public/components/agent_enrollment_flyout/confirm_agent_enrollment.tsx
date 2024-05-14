@@ -41,10 +41,14 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns agentIds
  */
-export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
+export const usePollingAgentCount = (
+  policyId: string,
+  opts?: UsePollingAgentCountOptions
+): { enrolledAgentIds: string[]; unpriviligedAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
+  const [unpriviligedAgentIds, setUnpriviligedAgentIds] = useState<string[]>([]);
 
   const lowerTimeLimitKuery = opts?.noLowerTimeLimit
     ? ''
@@ -61,7 +65,15 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
     if (newAgentIds.some((id) => !agentIds.includes(id))) {
       setAgentIds(newAgentIds);
     }
-  }, [agentIds, kuery]);
+
+    const newUnprivilegedAgentIds =
+      request.data?.items
+        .filter((i) => i.local_metadata?.elastic?.agent?.unprivileged || false)
+        .map((i) => i.id) ?? unpriviligedAgentIds;
+    if (newUnprivilegedAgentIds.some((id) => !unpriviligedAgentIds.includes(id))) {
+      setUnpriviligedAgentIds(newUnprivilegedAgentIds);
+    }
+  }, [agentIds, kuery, unpriviligedAgentIds]);
 
   // optionally poll once on first render
   if (!didPollInitially && opts?.pollImmediately) {
@@ -88,8 +100,8 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
     return () => {
       isAborted = true;
     };
-  }, [agentIds, policyId, kuery, getNewAgentIds]);
-  return agentIds;
+  }, [agentIds, policyId, kuery, getNewAgentIds, unpriviligedAgentIds]);
+  return { enrolledAgentIds: agentIds, unpriviligedAgentIds };
 };
 
 export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({

@@ -225,7 +225,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const apiKeyData = apiKey?.data;
   const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
 
-  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
+  const { enrolledAgentIds, unpriviligedAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
 
   const agentVersion = useAgentVersion();
 
@@ -322,7 +322,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
           rootIntegrations: selectedPolicy?.root_integrations ?? [],
-          unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
+          unprivilegedAgentsCount: unpriviligedAgentIds.length,
         })
       );
     }
@@ -359,6 +359,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     onClickViewAgents,
     link,
     enrolledAgentIds,
+    unpriviligedAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
     gcpProjectId,
