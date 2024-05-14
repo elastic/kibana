@@ -116,7 +116,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/search-types",
-    "@kbn/presentation-publishing",
+    "@kbn/ebt-tools",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }
