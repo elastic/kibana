@@ -8,7 +8,7 @@
 import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import qs from 'qs';
 import { i18n } from '@kbn/i18n';
-import { find, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -68,31 +68,32 @@ const defaultFilterOptions: EuiSelectableOption[] = [
   { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
 ];
 
-type ExtendedOption = Omit<EuiSelectableOption, 'checked'> & { checked: 'unset' | 'on' | 'off' };
-type ExtendedOptions = Partial<ExtendedOption>[];
+interface FilterQueryParams {
+  [key: string]: 'unset' | 'on' | 'off',
+}
 
 function serializeFilterOptions(options: EuiSelectableOption[]) {
-  return options.map(option => {
-    const checked = option.checked ?? 'unset';
-    return { key: option.key, checked };
-  }) as ExtendedOptions;
+  return options.reduce((list, option) => {
+    return {
+      ...list,
+      [option.key as string]: option.checked ?? 'unset'
+    }
+  }, {}) as FilterQueryParams;
 }
 
-function deserializeFilterOptions(options: ExtendedOptions) {
-  return options.map(option => {
-    const base = {
-      key: option.key,
-      label: defaultFilterOptions.find(filter => filter.key === option.key)!.label,
+function deserializeFilterOptions(options: FilterQueryParams) {
+  return defaultFilterOptions.map((filter: EuiSelectableOption) => {
+    const filterKey = filter.key ? filter.key : '';
+    return {
+      ...filter,
+      ...(options[filterKey] === 'unset' ? {} : { checked: options[filterKey] }),
     };
-
-    return option.checked === 'unset' ? base : { ...base, checked: option.checked };
-  });
+  }) as EuiSelectableOption[];
 }
 
-function isDefaultFilterOptions(options: ExtendedOptions) {
+function isDefaultFilterOptions(options: FilterQueryParams) {
   return (
-    (find(options, { key: 'managed' })?.checked === 'unset') &&
-    (find(options, { key: 'deprecated' })?.checked === 'off')
+    options['managed'] === 'unset' && options['deprecated'] === 'off'
   );
 }
 
@@ -132,13 +133,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
   // This effect will run once only to update the initial state of the filters
   // and queryText based on whatever is set in the query params.
   useEffect(() => {
-    const { queryText, filterOptions } = qs.parse(history?.location?.search || '', { ignoreQueryPrefix: true });
+    const { queryText, filters } = qs.parse(history?.location?.search || '', { ignoreQueryPrefix: true });
 
     if (queryText) {
       setQueryText(queryText as string);
     }
     if (filterOptions) {
-      setFilterOptions(deserializeFilterOptions(filterOptions as ExtendedOptions));
+      setFilterOptions(deserializeFilterOptions(filters as FilterQueryParams));
     }
   }, []);
 
@@ -153,7 +154,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     } else {
       history.push(history.location.pathname + '?' + qs.stringify({
         ...(!isQueryEmpty ? { queryText } : {}),
-        ...(!isDefaultFilters ? { filterOptions: serializedFilterOptions } : {}),
+        ...(!isDefaultFilters ? { filters: serializedFilterOptions } : {}),
       }, { encode: false }));
     }
   }, [queryText, filterOptions]);
