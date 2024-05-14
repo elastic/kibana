@@ -59,7 +59,6 @@ export function registerMlUiActions(
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
-  // const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
   const visToAdJobAction = createVisToADJobAction(core.getStartServices);
   const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
@@ -77,7 +76,6 @@ export function registerMlUiActions(
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAnomalyChartsPanelAction);
 
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
-  // uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);
 
