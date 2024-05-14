@@ -392,6 +392,44 @@ function generateWhereCommandTestsForFunction(
   }
 }
 
+function generateWhereCommandTestsForAggFunction(
+  { name, alias, signatures, ...defRest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  // statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+  for (const { params, ...signRest } of signatures) {
+    const fieldMapping = getFieldMapping(params);
+
+    testCases.set(
+      `from a_index | where ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      [`WHERE does not support function ${name}`]
+    );
+
+    testCases.set(
+      `from a_index | where ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      } > 0`,
+      [`WHERE does not support function ${name}`]
+    );
+  }
+}
+
 function generateEvalCommandTestsForFunction(
   { name, signatures, alias, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
@@ -579,6 +617,10 @@ function main() {
     generateRowCommandTestsForFunction(definition, testCases);
     generateWhereCommandTestsForFunction(definition, testCases);
     generateEvalCommandTestsForFunction(definition, testCases);
+  }
+
+  for (const definition of statsAggregationFunctionDefinitions) {
+    generateWhereCommandTestsForAggFunction(definition, testCases);
   }
 
   console.log(testCases);

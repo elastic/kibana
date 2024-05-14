@@ -1118,50 +1118,6 @@ describe('validation logic', () => {
 
       // this is a scenario that was failing because "or" didn't accept "null"
       testErrorsAndWarnings('from a_index | where stringField == "a" or null', []);
-
-      // MOVE
-
-      for (const {
-        name,
-        alias,
-        signatures,
-        ...defRest
-      } of statsAggregationFunctionDefinitions.filter(
-        ({ name: fnName, signatures: statsSignatures }) =>
-          statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
-      )) {
-        for (const { params, ...signRest } of signatures) {
-          const fieldMapping = getFieldMapping(params);
-
-          testErrorsAndWarnings(
-            `from a_index | where ${
-              getFunctionSignatures(
-                {
-                  name,
-                  ...defRest,
-                  signatures: [{ params: fieldMapping, ...signRest }],
-                },
-                { withTypes: false }
-              )[0].declaration
-            }`,
-            [`WHERE does not support function ${name}`]
-          );
-
-          testErrorsAndWarnings(
-            `from a_index | where ${
-              getFunctionSignatures(
-                {
-                  name,
-                  ...defRest,
-                  signatures: [{ params: fieldMapping, ...signRest }],
-                },
-                { withTypes: false }
-              )[0].declaration
-            } > 0`,
-            [`WHERE does not support function ${name}`]
-          );
-        }
-      }
     });
 
     describe('eval', () => {
@@ -1790,6 +1746,7 @@ describe('validation logic', () => {
         'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]',
       ]);
 
+      // MOVE
       for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
