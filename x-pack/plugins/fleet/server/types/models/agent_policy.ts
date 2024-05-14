@@ -84,6 +84,14 @@ export const AgentPolicyBaseSchema = {
   ),
   ...getSettingsAPISchema('AGENT_POLICY_ADVANCED_SETTINGS'),
   supports_agentless: schema.maybe(schema.boolean({ defaultValue: false })),
+  global_data_tags: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        value: schema.oneOf([schema.string(), schema.number()]),
+      })
+    )
+  ),
 };
 
 export const NewAgentPolicySchema = schema.object({

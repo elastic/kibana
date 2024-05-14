@@ -167,6 +167,13 @@ export const getSavedObjectTypes = (
           keep_monitoring_alive: { type: 'boolean' },
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          global_data_tags: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              value: { type: 'text' },
+            },
+          },
         },
       },
       migrations: {
