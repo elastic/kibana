@@ -2503,7 +2503,7 @@
         ]
       }
     },
-    "/agents/files@{fileId}@{fileName}": {
+    "/agents/files/{fileId}/{fileName}": {
       "parameters": [
         {
           "schema": {
@@ -2557,6 +2557,53 @@
           }
         },
         "operationId": "get-agent-upload-file"
+      }
+    },
+    "/agents/files/{fileId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "fileId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Delete file uploaded by agent",
+        "tags": [
+          "Agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "deleted": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "delete-agent-upload-file"
       }
     },
     "/agents/{agentId}/reassign": {
