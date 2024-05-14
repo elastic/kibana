@@ -9,6 +9,7 @@
 import {
   copyToClipboard,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -116,6 +117,19 @@ export const LinkContent = ({
     <>
       <EuiForm>
         <EuiSpacer size="m" />
+        {isDirty && objectType === 'lens' && (
+          <EuiCallOut
+            color="warning"
+            title={
+              <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+            }
+          >
+            <FormattedMessage
+              id="share.link.warning.lens"
+              defaultMessage="There are unsaved changes. Before you generate a link, save the lens visualization."
+            />
+          </EuiCallOut>
+        )}
         <EuiText size="s">
           <FormattedMessage
             id="share.link.helpText"
