@@ -30,7 +30,7 @@ import type {
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-// import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
@@ -175,6 +175,8 @@ function useAnomalyChartsData(
 
     return () => {
       subscription.unsubscribe();
+      chartWidth$.complete();
+      severity$.complete();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -201,10 +203,7 @@ function useAnomalyChartsData(
 
 const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
-  // timeRange,
   appliedTimeRange$,
-  // embeddableContext,
-  // severityThreshold,
   initialstate,
   embeddableApi$,
   services,
@@ -247,7 +246,14 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity.val, api.updateSeverityThreshold]);
+  }, [severity.val, api?.updateSeverityThreshold]);
+
+  useEffect(() => {
+    if (api?.updateEntityFields) {
+      api.updateEntityFields(selectedEntities);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEntities, api?.updateEntityFields]);
 
   const renderCallbacks = useMemo(() => {
     return { onRenderComplete, onError, onLoading };
@@ -318,11 +324,10 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
     };
     const uniqueSelectedEntities = [entity];
     setSelectedEntities(uniqueSelectedEntities);
-    // @todo:
-    // uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
-    //   embeddable: embeddableContext,
-    //   data: uniqueSelectedEntities,
-    // });
+    uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
+      embeddable: api,
+      data: uniqueSelectedEntities,
+    });
   };
 
   return (

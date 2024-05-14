@@ -114,10 +114,10 @@ export interface AnomalyChartsEmbeddableCustomInput {
   maxSeriesToPlot: number;
 
   // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange?: TimeRange;
   severityThreshold?: number;
 }
 

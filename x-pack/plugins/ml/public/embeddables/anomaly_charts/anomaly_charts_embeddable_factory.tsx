@@ -141,6 +141,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     ...coreStartServices,
                     ...pluginsStartServices,
                   },
+                  // @TODO: add data view based on job so filter bar
+                  // reflects data view data
                   pluginsStartServices.data.dataViews,
                   parentApi,
                   uuid,
@@ -212,9 +214,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         const onLoading = (v) => dataLoading.next(v);
         const onError = (error) => blockingError.next(error);
 
-        const { uiSettings } = coreStartServices;
-        const { uiActions } = pluginsStartServices;
-
         const contextServices = {
           mlServices: {
             ...anomalyChartsEmbeddableServices[2],
@@ -250,7 +249,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
 
             useUnmount(() => {
               onAnomalyChartsDestroy();
-              onDestroy();
               subscriptions.unsubscribe();
             });
 

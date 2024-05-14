@@ -8,24 +8,21 @@
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { MlEmbeddableBaseApi } from '../types';
-
-export interface AnomalyChartsComponentApi {
-  jobIds: JobId[];
-  maxSeriesToPlot: number;
-}
+import type { AnomalyChartsEmbeddableCustomInput, MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalyChartsEmbeddableOverridableState
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  jobIds: JobId[];
-  maxSeriesToPlot: number;
+  extends Omit<AnomalyChartsEmbeddableCustomInput, 'panelTitle'> {
+  selectedEntities: MlEntityField[] | undefined;
+}
 
-  // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
-  severityThreshold?: number;
+export interface AnomalyChartsComponentApi {
+  jobIds$: Observable<JobId[]>;
+  maxSeriesToPlot$: Observable<JobId[]>;
+  severityThreshold$: Observable<JobId[]>;
+  entityFields$: Observable<JobId[]>;
+  updateUserInput: (state: AnomalyChartsEmbeddableOverridableState) => void;
+  updateSeverityThreshold: (threshold) => void;
+  updateEntityFields: (entityFields: MlEntityField[] | undefined) => void;
 }
 
 /**

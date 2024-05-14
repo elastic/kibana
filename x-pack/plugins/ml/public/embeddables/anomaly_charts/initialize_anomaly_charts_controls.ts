@@ -8,29 +8,32 @@
 import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { AnomalyChartsComponentApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalyChartsComponentApi, AnomalyChartsEmbeddableState } from './types';
 
 export const initializeAnomalyChartsControls = (
-  rawState: AnomalySwimLaneEmbeddableState,
+  rawState: AnomalyChartsEmbeddableState,
   titlesApi: TitlesApi
 ) => {
   const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const maxSeriesToPlot$ = new BehaviorSubject<number>(rawState.maxSeriesToPlot);
   const severityThreshold$ = new BehaviorSubject<number>(rawState.severityThreshold);
+  const entityFields$ = new BehaviorSubject<number>(rawState.selectedEntities);
 
-  const updateUserInput = (update: AnomalySwimLaneEmbeddableState) => {
+  const updateUserInput = (update: AnomalyChartsEmbeddableState) => {
     jobIds$.next(update.jobIds);
     maxSeriesToPlot$.next(update.maxSeriesToPlot);
     titlesApi.setPanelTitle(update.panelTitle);
   };
 
   const updateSeverityThreshold = (v) => severityThreshold$.next(v.severityThreshold);
+  const updateEntityFields = (v) => entityFields$.next(v);
 
-  const serializeAnomalyChartsState = (): AnomalySwimLaneEmbeddableState => {
+  const serializeAnomalyChartsState = (): AnomalyChartsEmbeddableState => {
     return {
       jobIds: jobIds$.value,
       maxSeriesToPlot: maxSeriesToPlot$.value,
       severityThreshold: severityThreshold$.value,
+      entityFields: entityFields$.value,
     };
   };
 
@@ -38,6 +41,7 @@ export const initializeAnomalyChartsControls = (
     jobIds: [jobIds$, (arg) => jobIds$.next(arg), fastIsEqual],
     maxSeriesToPlot: [maxSeriesToPlot$, (arg) => maxSeriesToPlot$.next(arg)],
     severityThreshold: [severityThreshold$, (arg) => severityThreshold$.next(arg)],
+    entityFields: [entityFields$, (arg) => severityThreshold$.next(arg)],
   };
 
   return {
@@ -45,15 +49,18 @@ export const initializeAnomalyChartsControls = (
       jobIds$,
       maxSeriesToPlot$,
       severityThreshold$,
+      entityFields$,
       updateUserInput,
       updateSeverityThreshold,
+      updateEntityFields,
     } as unknown as AnomalyChartsComponentApi,
     serializeAnomalyChartsState,
     anomalyChartsComparators,
     onAnomalyChartsDestroy: () => {
       jobIds$.complete();
-      maxSeriesToPlot.complete();
+      maxSeriesToPlot$.complete();
       severityThreshold$.complete();
+      entityFields$.complete();
     },
   };
 };
