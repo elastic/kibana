@@ -8,24 +8,22 @@
 
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
-import {
-  ConsoleParsedRequestsProvider,
-  getParsedRequestsProvider,
-  monaco,
-  ParsedRequest,
-} from '@kbn/monaco';
+import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
-import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
+import { sendRequest } from '../../../hooks';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
+
 import {
+  AutocompleteType,
   containsUrlParams,
+  getBodyCompletionItems,
   getCurlRequest,
-  getDocumentationLink,
+  getDocumentationLinkFromAutocomplete,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
@@ -33,29 +31,13 @@ import {
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
+  SELECTED_REQUESTS_CLASSNAME,
   stringifyRequest,
   trackSentRequests,
   getAutoIndentedRequests,
 } from './utils';
 
-const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
-
-export interface EditorRequest {
-  method: string;
-  url: string;
-  data: string[];
-}
-
-export interface AdjustedParsedRequest extends ParsedRequest {
-  startLineNumber: number;
-  endLineNumber: number;
-}
-enum AutocompleteType {
-  PATH = 'path',
-  URL_PARAMS = 'url_params',
-  METHOD = 'method',
-  BODY = 'body',
-}
+import type { AdjustedParsedRequest } from './types';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -126,7 +108,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: selectedRequestsClass,
+            className: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);
@@ -256,7 +238,7 @@ export class MonacoEditorActionsProvider {
     }
     const request = requests[0];
 
-    return getDocumentationLink(request, docLinkVersion);
+    return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
   private async getAutocompleteType(
@@ -303,7 +285,11 @@ export class MonacoEditorActionsProvider {
     return AutocompleteType.BODY;
   }
 
-  private async getSuggestions(model: monaco.editor.ITextModel, position: monaco.Position) {
+  private async getSuggestions(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext
+  ) {
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -329,6 +315,23 @@ export class MonacoEditorActionsProvider {
       };
     }
 
+    if (autocompleteType === AutocompleteType.BODY) {
+      // suggestions only when triggered by " or keyboard
+      if (context.triggerCharacter && context.triggerCharacter !== '"') {
+        return { suggestions: [] };
+      }
+      const requests = await this.getRequestsBetweenLines(
+        model,
+        position.lineNumber,
+        position.lineNumber
+      );
+      const requestStartLineNumber = requests[0].startLineNumber;
+      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber);
+      return {
+        suggestions,
+      };
+    }
+
     return {
       suggestions: [],
     };
@@ -339,7 +342,7 @@ export class MonacoEditorActionsProvider {
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
-    return this.getSuggestions(model, position);
+    return this.getSuggestions(model, position, context);
   }
 
   /*

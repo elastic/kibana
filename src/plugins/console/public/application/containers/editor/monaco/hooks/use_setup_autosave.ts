@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSaveCurrentTextObject } from '../../../hooks';
+import { useSaveCurrentTextObject } from '../../../../hooks';
 import { readLoadFromParam } from './use_set_initial_value';
 
 interface SetupAutosaveParams {

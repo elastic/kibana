@@ -18,12 +18,14 @@ import {
   useEditorReadContext,
   useRequestActionContext,
 } from '../../../contexts';
-import { useSetInitialValue } from './use_set_initial_value';
+import {
+  useSetInitialValue,
+  useSetupAutocompletePolling,
+  useSetupAutosave,
+  useResizeCheckerUtils,
+} from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
-import { useSetupAutosave } from './use_setup_autosave';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
-import { useResizeCheckerUtils } from './use_resize_checker_utils';
 
 export interface EditorProps {
   initialTextValue: string;
