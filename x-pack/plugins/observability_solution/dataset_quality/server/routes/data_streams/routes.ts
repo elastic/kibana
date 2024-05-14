@@ -149,6 +149,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
         esClient,
         type,
         datasetQuery: `${dataset}-${namespace}`,
+        sizeStatsAvailable,
       }),
       getDataStreamDetails({ esClient, dataStream, start, end, sizeStatsAvailable }),
     ]);
