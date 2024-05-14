@@ -33,16 +33,16 @@ RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-utility-types",
   "@npm//glob",
-  "@npm//listr",
+  "@npm//listr2",
   "@npm//normalize-path",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-utility-types",
+  "@npm//listr2",
   "@npm//@types/glob",
   "@npm//@types/jest",
-  "@npm//@types/listr",
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
