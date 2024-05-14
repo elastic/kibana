@@ -31,6 +31,11 @@ export function ViewInAPMButton({
 }) {
   const { share } = useApmPluginContext();
   const serviceNavigator = share.url.locators.get(APM_APP_LOCATOR_ID);
+
+  if (!serviceNavigator) {
+    return null;
+  }
+
   return (
     <EuiButtonEmpty
       data-test-subj="apmAlertDetailsPageViewInApp"
