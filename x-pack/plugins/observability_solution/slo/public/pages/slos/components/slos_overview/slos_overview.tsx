@@ -104,7 +104,7 @@ export function SLOsOverview() {
               })}
               titleColor="subdued"
               isLoading={isLoading}
-              query={`summaryUpdatedAt < "now - ${
+              query={`summaryUpdatedAt < "now-${
                 currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS
               }h"`}
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.staleLabel.tooltip', {
