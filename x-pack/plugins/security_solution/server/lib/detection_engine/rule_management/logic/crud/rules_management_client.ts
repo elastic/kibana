@@ -78,210 +78,222 @@ import {
 } from '../../normalization/rule_converters';
 import { readRules } from './read_rules';
 import { PrepackagedRulesError } from '../../../prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
+import { transformAlertToRuleAction } from '@kbn/security-solution-plugin/common/detection_engine/transform_actions';
 
-interface ClientProps {
-  rulesClient: RulesClient;
+interface CreateRuleOptions {
+  immutable?: boolean;
+  defaultEnabled?: boolean;
 }
-
-interface CreateCustomRuleProps extends ClientProps {
+interface CreateCustomRuleProps {
   params: RuleCreateProps;
 }
-interface CreatePrebuiltRuleProps extends ClientProps {
+interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-interface UpdateRuleProps extends ClientProps {
+interface UpdateRuleProps {
   existingRule: RuleAlertType | null;
   ruleUpdate: RuleUpdateProps;
 }
 
-interface PatchRuleProps extends ClientProps {
-  existingRule: RuleAlertType | null;
+interface _PatchRuleProps {
+  existingRule: RuleAlertType;
   nextParams: PatchRuleRequestBody;
 }
+
+type PatchRuleProps = _PatchRuleProps;
 
 interface DeleteRuleProps {
   ruleId: RuleObjectId;
 }
 
-interface UpgradePrebuiltRuleProps extends ClientProps {
+interface UpgradePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
 // TODOs:
 // 1. Refactor `convertCreateAPIToInternalSchema` to take a first argument of input/params and then options object
 
-export const getRulesManagementClient = () => {
-  return {
-    // 1.  CREATE CUSTOM RULE
-    // Need to pass enabled flag?
-    createCustomRule: async (
-      createCustomRulePayload: CreateCustomRuleProps
-    ): Promise<RuleAlertType> => {
-      const { rulesClient, params } = createCustomRulePayload;
+export class RulesManagementClient {
+  private readonly rulesClient: RulesClient;
 
-      const internalRule = convertCreateAPIToInternalSchema(params, { immutable: false });
-      const rule = await rulesClient.create<RuleParams>({
-        data: internalRule,
-      });
+  constructor(rulesClient: RulesClient) {
+    this.rulesClient = rulesClient;
+  }
 
-      // TODO: Remove
-      // const normalizedRule = normalizeRule(rule);
+  // 1.  CREATE CUSTOM RULE
+  // Need to pass enabled flag?
+  public createCustomRule = async (
+    createCustomRulePayload: CreateCustomRuleProps
+  ): Promise<RuleAlertType> => {
+    const { params } = createCustomRulePayload;
 
-      return rule;
-    },
+    const rule = await this._createRule(params, { immutable: false });
 
-    // 2.  BULK CREATE CUSTOM RULES
-    bulkCreateCustomRules: () => {
-      // API handler loops over istances of createCustomRule
-    },
+    return rule;
+  };
 
-    // 9. INSTALL NEW PREBUILT RULES
-    createPrebuiltRule: async (
-      createPrebuiltRulePayload: CreatePrebuiltRuleProps
-    ): Promise<RuleAlertType> => {
-      const { rulesClient, ruleAsset } = createPrebuiltRulePayload;
+  // 9. INSTALL NEW PREBUILT RULES
+  public createPrebuiltRule = async (
+    createPrebuiltRulePayload: CreatePrebuiltRuleProps
+  ): Promise<RuleAlertType> => {
+    const { ruleAsset } = createPrebuiltRulePayload;
 
-      const internalRule = convertCreateAPIToInternalSchema(ruleAsset, {
+    const rule = await this._createRule(ruleAsset, { immutable: true, defaultEnabled: false });
+
+    return rule;
+  };
+
+  // 3.  UPDATE RULE
+  public updateRule = async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType | null> => {
+    const { ruleUpdate, existingRule } = updateRulePayload;
+
+    if (existingRule == null) {
+      return null;
+    }
+
+    const newInternalRule = convertUpdateAPIToInternalSchema({
+      existingRule,
+      ruleUpdate,
+    });
+
+    const update = await this.rulesClient.update({
+      id: existingRule.id,
+      data: newInternalRule,
+    });
+
+    const enabled = ruleUpdate.enabled ?? true;
+    await this._toggleRuleEnabledOnUpdate(existingRule, ruleUpdate.enabled ?? false);
+
+    return { ...update, enabled };
+  };
+
+  // 5.  PATCH RULE
+  public patchRule = async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType | null> => {
+    const { nextParams, existingRule } = patchRulePayload;
+    const update = await this._patchRule(patchRulePayload);
+
+    await this._toggleRuleEnabledOnUpdate(existingRule, nextParams.enabled ?? false);
+
+    if (nextParams.enabled != null) {
+      return { ...update, enabled: nextParams.enabled };
+    } else {
+      return update;
+    }
+  };
+
+  // 7.  DELETE RULE
+  public deleteRule = async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
+    const { ruleId } = deleteRulePayload;
+    await this.rulesClient.delete({ id: ruleId });
+  };
+
+  // 10. AND 11. UPGRADE PREBUILT RULE
+  public upgradePrebuiltRule = async (
+    upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
+  ): Promise<RuleAlertType> => {
+    const { ruleAsset } = upgradePrebuiltRulePayload;
+    const existingRule = await readRules({
+      rulesClient: this.rulesClient,
+      ruleId: ruleAsset.rule_id,
+      id: undefined,
+    });
+
+    if (!existingRule) {
+      throw new PrepackagedRulesError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
+    }
+
+    // If we're trying to change the type of a prepackaged rule, we need to delete the old one
+    // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
+    // and exception lists from the old rule
+    if (ruleAsset.type !== existingRule.params.type) {
+      await this.rulesClient.delete({ id: ruleAsset.rule_id });
+
+      return createRules({
+        rulesClient,
         immutable: true,
-        defaultEnabled: false,
-      });
-      const rule = await rulesClient.create<RuleParams>({
-        data: internalRule,
-      });
-
-      // TODO: Remove
-      // const normalizedRule = normalizeRule(rule);
-
-      return rule;
-    },
-
-    // 3.  UPDATE RULE
-    updateRule: async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType | null> => {
-      const { rulesClient, ruleUpdate, existingRule } = updateRulePayload;
-
-      if (existingRule == null) {
-        return null;
-      }
-
-      const newInternalRule = convertUpdateAPIToInternalSchema({
-        existingRule,
-        ruleUpdate,
-      });
-
-      const update = await rulesClient.update({
         id: existingRule.id,
-        data: newInternalRule,
-      });
-
-      const enabled = ruleUpdate.enabled ?? true;
-
-      if (existingRule.enabled && enabled === false) {
-        await rulesClient.disable({ id: existingRule.id });
-      } else if (!existingRule.enabled && enabled === true) {
-        await rulesClient.enable({ id: existingRule.id });
-      }
-      return { ...update, enabled };
-    },
-
-    // 5.  PATCH RULE
-    patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType | null> => {
-      const { rulesClient, nextParams, existingRule } = patchRulePayload;
-
-      if (existingRule == null) {
-        return null;
-      }
-
-      const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
-
-      const update = await rulesClient.update({
-        id: existingRule.id,
-        data: patchedRule,
-      });
-
-      if (existingRule.enabled && nextParams.enabled === false) {
-        await rulesClient.disable({ id: existingRule.id });
-      } else if (!existingRule.enabled && nextParams.enabled === true) {
-        await rulesClient.enable({ id: existingRule.id });
-      } else {
-        // enabled is null or undefined and we do not touch the rule
-      }
-
-      if (nextParams.enabled != null) {
-        return { ...update, enabled: nextParams.enabled };
-      } else {
-        return update;
-      }
-    },
-
-    // 7.  DELETE RULE
-    deleteRule: async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
-      const { rulesClient, ruleId } = deleteRulePayload;
-      await rulesClient.delete({ id: ruleId });
-    },
-
-    // 10. AND 11. UPGRADE PREBUILT RULE
-    upgradePrebuiltRule: async (
-      upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
-    ): Promise<RuleAlertType> => {
-      const { rulesClient, ruleAsset } = upgradePrebuiltRulePayload;
-      const existingRule = await readRules({
-        rulesClient,
-        ruleId: ruleAsset.rule_id,
-        id: undefined,
-      });
-
-      if (!existingRule) {
-        throw new PrepackagedRulesError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
-      }
-
-      // If we're trying to change the type of a prepackaged rule, we need to delete the old one
-      // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
-      // and exception lists from the old rule
-      if (ruleAsset.type !== existingRule.params.type) {
-        await rulesClient.delete({ id: ruleAsset.rule_id });
-
-        return createRules({
-          rulesClient,
-          immutable: true,
-          id: existingRule.id,
-          params: {
-            ...rule,
-            // Force the prepackaged rule to use the enabled state from the existing rule,
-            // regardless of what the prepackaged rule says
-            enabled: existingRule.enabled,
-            exceptions_list: existingRule.params.exceptionsList,
-            actions: existingRule.actions.map(transformAlertToRuleAction),
-            timeline_id: existingRule.params.timelineId,
-            timeline_title: existingRule.params.timelineTitle,
-          },
-        });
-      }
-
-      await patchRules({
-        rulesClient,
-        existingRule,
-        nextParams: {
-          ...rule,
-          // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
-          enabled: undefined,
+        params: {
+          ...ruleAsset,
+          // Force the prepackaged rule to use the enabled state from the existing rule,
+          // regardless of what the prepackaged rule says
+          enabled: existingRule.enabled,
+          exceptions_list: existingRule.params.exceptionsList,
+          actions: existingRule.actions.map(transformAlertToRuleAction),
+          timeline_id: existingRule.params.timelineId,
+          timeline_title: existingRule.params.timelineTitle,
         },
       });
+    }
 
-      const updatedRule = await readRules({
-        rulesClient,
-        ruleId: rule.rule_id,
-        id: undefined,
-      });
+    await patchRules({
+      rulesClient,
+      existingRule,
+      nextParams: {
+        ...rule,
+        // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
+        enabled: undefined,
+      },
+    });
 
-      if (!updatedRule) {
-        throw new PrepackagedRulesError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
-      }
+    const updatedRule = await readRules({
+      rulesClient,
+      ruleId: rule.rule_id,
+      id: undefined,
+    });
 
-      return updatedRule;
-    },
+    if (!updatedRule) {
+      throw new PrepackagedRulesError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
+    }
+
+    return updatedRule;
   };
-};
+
+  private _createRule = async (params: RuleCreateProps, options: CreateRuleOptions) => {
+    const internalRule = convertCreateAPIToInternalSchema(params, options);
+    const rule = await this.rulesClient.create<RuleParams>({
+      data: internalRule,
+    });
+
+    return rule;
+  };
+
+  private _patchRule = async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
+    const { nextParams, existingRule } = patchRulePayload;
+    const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+
+    const update = await this.rulesClient.update({
+      id: existingRule.id,
+      data: patchedRule,
+    });
+
+    return update;
+  };
+
+  private _toggleRuleEnabledOnUpdate = async (existingRule: RuleAlertType, enabled: boolean) => {
+    if (existingRule.enabled && enabled === false) {
+      await this.rulesClient.disable({ id: existingRule.id });
+    } else if (!existingRule.enabled && enabled === true) {
+      await this.rulesClient.enable({ id: existingRule.id });
+    }
+  };
+}
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // TODO: Just testing normalization, to remove
 const normalizeRule = (rule: RuleAlertType): RuleAlertType => {

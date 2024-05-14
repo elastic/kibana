@@ -27,6 +27,7 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { rulesToMap } from '../../logic/utils';
+import { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -50,10 +51,12 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
 
         try {
           const rulesClient = (await context.alerting).getRulesClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const validated = await createPrepackagedRules(
             await context.securitySolution,
             rulesClient,
+            rulesManagementClient,
             undefined
           );
           return response.ok({ body: validated ?? {} });
@@ -79,6 +82,7 @@ export class PrepackagedRulesError extends Error {
 export const createPrepackagedRules = async (
   context: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
+  rulesManagementClient: RulesManagementClient,
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse | null> => {
   const config = context.getConfig();
@@ -106,7 +110,7 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  const result = await createPrebuiltRules(rulesClient, rulesToInstall);
+  const result = await createPrebuiltRules(rulesManagementClient, rulesToInstall);
   if (result.errors.length > 0) {
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }

@@ -24,7 +24,7 @@ import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptio
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -57,7 +57,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
           const savedObjectsClient = (await context.core).savedObjects.client;
-          const rulesManagementClient = getRulesManagementClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const mlAuthz = buildMlAuthz({
             license: (await context.licensing).license,
@@ -75,6 +75,15 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             ruleId: params.rule_id,
             id: params.id,
           });
+
+          if (!existingRule) {
+            const error = getIdError({ id: params.id, ruleId: params.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          }
+
           if (existingRule?.params.type) {
             // reject an unauthorized modification of an ML rule
             throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -89,7 +98,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           });
 
           const rule = await rulesManagementClient.patchRule({
-            rulesClient,
             existingRule,
             nextParams: params,
           });
