@@ -30,6 +30,7 @@ const mapLlmToModels: Record<
           model: 'gpt-3.5-turbo',
           limit: 16385,
         },
+        { model: 'gpt-4o', limit: 128000 },
         { model: 'gpt-4-turbo', limit: 128000 },
       ].map((model) => ({
         label: `${model.model} ${includeName ? `(${connectorName})` : ''}`,
