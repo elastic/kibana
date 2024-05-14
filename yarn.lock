@@ -1750,10 +1750,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@94.2.1-backport.0":
-  version "94.2.1-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.2.1-backport.0.tgz#d456759bc29caa78840e45114b0041a3e523c89a"
-  integrity sha512-v/ws+ZKmT9Ei1LImKl4kfPd/tzqYusu8bosxLjPZdyIoraXbtuKr+kiuU8ttAbXwpbkIHdMYmPRJrip8VHD1mQ==
+"@elastic/eui@94.3.0":
+  version "94.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.3.0.tgz#77c07701128b6443e2ea55e2462ef0ccadd64582"
+  integrity sha512-qJTLrQYe11MPTX+8AqifJVYLDyO8VqdFWqPVJRYel11l/FvJOqyQi50x+xQK8I7h73TF50xywtUHCfhfkqpbYg==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -4658,6 +4658,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ast-inspector-plugin@link:examples/esql_ast_inspector":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-ast@link:packages/kbn-esql-ast":
   version "0.0.0"
   uid ""
@@ -6487,6 +6491,10 @@
   uid ""
 
 "@kbn/triggers-actions-ui-types@link:packages/kbn-triggers-actions-ui-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/try-in-console@link:packages/kbn-try-in-console":
   version "0.0.0"
   uid ""
 
