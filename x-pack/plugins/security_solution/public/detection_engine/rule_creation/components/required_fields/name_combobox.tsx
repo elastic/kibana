@@ -76,7 +76,11 @@ export function NameComboBox({
 
       const updatedName = newlySelectedOption?.value || '';
 
-      const updatedType = pickTypeForName(updatedName, value.type, typesByFieldName);
+      const updatedType = pickTypeForName({
+        name: updatedName,
+        type: value.type,
+        typesByFieldName,
+      });
 
       const updatedFieldValue: RequiredFieldInput = {
         name: updatedName,
@@ -92,7 +96,7 @@ export function NameComboBox({
     (newName: string) => {
       const updatedFieldValue: RequiredFieldInput = {
         name: newName,
-        type: pickTypeForName(newName, value.type, typesByFieldName),
+        type: pickTypeForName({ name: newName, type: value.type, typesByFieldName }),
       };
 
       setValue(updatedFieldValue);

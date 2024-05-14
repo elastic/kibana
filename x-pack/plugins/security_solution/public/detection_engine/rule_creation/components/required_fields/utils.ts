@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-export function pickTypeForName(
-  currentName: string,
-  currentType: string,
-  typesByFieldName: Record<string, string[] | undefined>
-) {
-  const typesAvailableForNewName = typesByFieldName[currentName] || [];
-  const isCurrentTypeAvailableForNewName = typesAvailableForNewName.includes(currentType);
+interface PickTypeForNameParameters {
+  name: string;
+  type: string;
+  typesByFieldName?: Record<string, string[] | undefined>;
+}
 
-  /* First try to keep the current type if it's available for the new name */
+export function pickTypeForName({ name, type, typesByFieldName = {} }: PickTypeForNameParameters) {
+  const typesAvailableForName = typesByFieldName[name] || [];
+  const isCurrentTypeAvailableForNewName = typesAvailableForName.includes(type);
+
+  /* First try to keep the type if it's available for the name */
   if (isCurrentTypeAvailableForNewName) {
-    return currentType;
+    return type;
   }
 
   /*
     If current type is not available, pick the first available type.
-    If no type is available, use the currently selected type.
+    If no type is available, use the current type.
   */
-  return typesAvailableForNewName?.[0] ?? currentType;
+  return typesAvailableForName?.[0] ?? type;
 }
