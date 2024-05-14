@@ -201,6 +201,9 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         defaultValue={pipeline as Pipeline}
         isEditing={true}
       />
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
+      ) : null}
     </>
   );
 };

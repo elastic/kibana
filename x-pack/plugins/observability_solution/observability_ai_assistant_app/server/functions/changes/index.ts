@@ -28,7 +28,6 @@ export function registerChangesFunction({
     {
       name: 'changes',
       description: 'Returns change points like spikes and dips for logs and metrics.',
-      contexts: ['core'],
       parameters: changesFunctionParameters,
     },
     async ({

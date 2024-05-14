@@ -20,7 +20,8 @@ let formHookSpy: jest.SpyInstance;
 import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
 
-describe('useSourceIndicesFields Hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/181102
+describe.skip('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -42,6 +43,7 @@ describe('useSourceIndicesFields Hook', () => {
         dense_vector_query_fields: [],
         bm25_query_fields: [],
         source_fields: ['field1'],
+        skipped_fields: 0,
       },
     };
 
@@ -143,6 +145,7 @@ describe('useSourceIndicesFields Hook', () => {
         dense_vector_query_fields: [],
         bm25_query_fields: [],
         source_fields: [],
+        skipped_fields: 0,
       },
     };
 
@@ -179,6 +182,57 @@ describe('useSourceIndicesFields Hook', () => {
           "indices": Array [
             "missing_fields_index",
           ],
+          "prompt": "You are an assistant for question-answering tasks.",
+          "source_fields": Object {
+            "missing_fields_index": Array [],
+          },
+        }
+      `);
+    });
+  });
+
+  it('should not provide any warning message for adding and then removing an index without any fields', async () => {
+    const querySourceFields: IndicesQuerySourceFields = {
+      missing_fields_index: {
+        elser_query_fields: [],
+        dense_vector_query_fields: [],
+        bm25_query_fields: [],
+        source_fields: [],
+        skipped_fields: 0,
+      },
+    };
+
+    postMock.mockResolvedValue(querySourceFields);
+
+    const { result } = renderHook(() => useSourceIndicesFields(), { wrapper });
+    const { getValues } = formHookSpy.mock.results[0].value;
+
+    await act(async () => {
+      result.current.addIndex('missing_fields_index');
+    });
+
+    await act(async () => {
+      result.current.removeIndex('missing_fields_index');
+    });
+
+    expect(postMock).toHaveBeenCalled();
+
+    await act(async () => {
+      expect(result.current.noFieldsIndicesWarning).toBeNull();
+      expect(result.current.loading).toBe(false);
+      expect(getValues()).toMatchInlineSnapshot(`
+        Object {
+          "doc_size": 5,
+          "elasticsearch_query": Object {
+            "retriever": Object {
+              "standard": Object {
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+          },
+          "indices": Array [],
           "prompt": "You are an assistant for question-answering tasks.",
           "source_fields": Object {
             "missing_fields_index": Array [],

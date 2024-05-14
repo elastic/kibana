@@ -101,6 +101,7 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:objects' },
       { link: 'management:tags' },
       { link: 'management:search_sessions' },
+      { link: 'management:aiAssistantManagementSelection' },
       { link: 'management:spaces' },
       { link: 'management:settings' },
     ],

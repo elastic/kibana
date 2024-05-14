@@ -55,19 +55,19 @@ export const createEventFilters = async (
     }
   }
 
-  createNonInteractiveSessionEventFilter(logger, exceptionsClient, packagePolicy);
+  await createNonInteractiveSessionEventFilter(logger, exceptionsClient, packagePolicy);
 };
 
 /**
  * Create an Event Filter for non-interactive sessions and attach it to the policy
  */
-export const createNonInteractiveSessionEventFilter = (
+export const createNonInteractiveSessionEventFilter = async (
   logger: Logger,
   exceptionsClient: ExceptionListClient,
   packagePolicy: PackagePolicy
-): void => {
+): Promise<void> => {
   try {
-    exceptionsClient.createExceptionListItem({
+    await exceptionsClient.createExceptionListItem({
       listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
       description: i18n.translate(
         'xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.description',

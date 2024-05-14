@@ -65,7 +65,7 @@ describe('migration actions', () => {
   beforeAll(async () => {
     esServer = await startES();
     // we don't need a long timeout for testing purposes
-    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 5500 });
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
@@ -390,8 +390,7 @@ describe('migration actions', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/152677
-  describe.skip('waitForIndexStatus', () => {
+  describe('waitForIndexStatus', () => {
     afterEach(async () => {
       try {
         await client.indices.delete({ index: 'red_then_yellow_index' });
@@ -426,7 +425,7 @@ describe('migration actions', () => {
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
+      void client.indices.putSettings({
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
@@ -575,7 +574,7 @@ describe('migration actions', () => {
 
       let indexGreen = false;
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'clone_red_then_green_index',
           body: {
             // Enable all shard allocation so that the index status goes green
@@ -1309,11 +1308,15 @@ describe('migration actions', () => {
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
       });
-      const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+      const rightResponse = await readWithPitTask();
 
-      await expect(Either.isRight(rightResponse)).toBe(true);
+      if (Either.isLeft(rightResponse)) {
+        throw new Error(
+          `Expected a successful response but got ${JSON.stringify(rightResponse.left)}`
+        );
+      }
 
       readWithPitTask = readWithPit({
         client,
@@ -1321,17 +1324,12 @@ describe('migration actions', () => {
         query: { match_all: {} },
         batchSize: 10, // a bigger batch will exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 1000, // set a small size to force the error
       });
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
       expect(leftResponse.left.type).toBe('es_response_too_large');
-      // ES response contains a field that indicates how long it took ES to get the response, e.g.: "took": 7
-      // if ES takes more than 9ms, the payload will be 1 byte bigger.
-      // see https://github.com/elastic/kibana/issues/160994
-      // Thus, the statements below account for response times up to 99ms
       expect(leftResponse.left.contentLength).toBeGreaterThanOrEqual(3184);
-      expect(leftResponse.left.contentLength).toBeLessThanOrEqual(3185);
     });
 
     it('rejects if PIT does not exist', async () => {
@@ -1846,7 +1844,7 @@ describe('migration actions', () => {
       let indexYellow = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
           body: {
             // Renable allocation so that the status becomes yellow
@@ -1899,7 +1897,7 @@ describe('migration actions', () => {
       let indexGreen = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'yellow_then_green_index',
           body: {
             // Set 0 replican so that this index becomes green

@@ -37,6 +37,7 @@ import type {
   RuleAction,
   AlertSuppression,
   ThresholdAlertSuppression,
+  RelatedIntegration,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -101,6 +102,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  maxSignals?: number;
   setup: SetupGuide;
 }
 
@@ -144,7 +146,7 @@ export interface DefineStepRule {
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
   dataViewTitle?: string;
-  relatedIntegrations: RelatedIntegrationArray;
+  relatedIntegrations?: RelatedIntegrationArray;
   requiredFields: RequiredFieldArray;
   ruleType: Type;
   timeline: FieldValueTimeline;
@@ -223,6 +225,7 @@ export interface DefineStepRuleJson {
   event_category_override?: string;
   tiebreaker_field?: string;
   alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
+  related_integrations?: RelatedIntegration[];
 }
 
 export interface AboutStepRuleJson {
@@ -247,6 +250,7 @@ export interface AboutStepRuleJson {
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
   investigation_fields?: InvestigationFields;
+  max_signals?: number;
 }
 
 export interface ScheduleStepRuleJson {

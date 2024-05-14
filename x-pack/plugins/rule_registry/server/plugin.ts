@@ -119,20 +119,23 @@ export class RuleRegistryPlugin
 
     this.ruleDataService.initializeService();
 
-    core.getStartServices().then(([_, depsStart]) => {
-      const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
-        depsStart.data,
-        depsStart.alerting,
-        logger,
-        plugins.security,
-        depsStart.spaces
-      );
+    core
+      .getStartServices()
+      .then(([_, depsStart]) => {
+        const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
+          depsStart.data,
+          depsStart.alerting,
+          logger,
+          plugins.security,
+          depsStart.spaces
+        );
 
-      plugins.data.search.registerSearchStrategy(
-        RULE_SEARCH_STRATEGY_NAME,
-        ruleRegistrySearchStrategy
-      );
-    });
+        plugins.data.search.registerSearchStrategy(
+          RULE_SEARCH_STRATEGY_NAME,
+          ruleRegistrySearchStrategy
+        );
+      })
+      .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();

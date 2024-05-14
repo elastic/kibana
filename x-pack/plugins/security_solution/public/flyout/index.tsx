@@ -8,20 +8,23 @@
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
-  IsolateHostPanel,
   DocumentDetailsIsolateHostPanelKey,
-} from './document_details/isolate_host';
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsRightPanelKey,
+} from './document_details/shared/constants/panel_keys';
+import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { IsolateHostPanel } from './document_details/isolate_host';
 import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
 import type { RightPanelProps } from './document_details/right';
-import { RightPanel, DocumentDetailsRightPanelKey } from './document_details/right';
+import { RightPanel } from './document_details/right';
 import { RightPanelProvider } from './document_details/right/context';
 import type { LeftPanelProps } from './document_details/left';
-import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
+import { LeftPanel } from './document_details/left';
 import { LeftPanelProvider } from './document_details/left/context';
 import type { PreviewPanelProps } from './document_details/preview';
-import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
+import { PreviewPanel } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';

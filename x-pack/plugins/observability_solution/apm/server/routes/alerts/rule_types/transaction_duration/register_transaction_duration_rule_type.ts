@@ -15,7 +15,6 @@ import {
   AlertInstanceState as AlertState,
   RuleTypeState,
   RuleExecutorOptions,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import {
   asDuration,
@@ -328,10 +327,7 @@ export function registerTransactionDurationRuleType({
 
       return { state: {} };
     },
-    alerts: {
-      ...ApmRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<TransactionDurationAlert>,
+    alerts: ApmRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

@@ -381,7 +381,7 @@ export class TagManagementPageObject extends FtrService {
   async clickEdit(tagName: string) {
     const tagRow = await this.getRowByName(tagName);
     if (tagRow) {
-      const editButton = await this.testSubjects.findDescendant('tagsTableAction-edit', tagRow);
+      const editButton = await tagRow.findByTestSubject('tagsTableAction-edit');
       await editButton?.click();
     }
   }

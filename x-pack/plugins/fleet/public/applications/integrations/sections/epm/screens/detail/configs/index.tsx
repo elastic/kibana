@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +27,10 @@ import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hoo
 import { PrereleaseCallout } from '../overview/overview';
 
 import { isPackagePrerelease } from '../../../../../../../../common/services';
+
+const FlexItemWithMaxWidth = styled(EuiFlexItem)`
+  max-width: 1000px;
+`;
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
@@ -57,7 +62,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <FlexItemWithMaxWidth grow={6}>
         {isLoading && !configs ? (
           <EuiSkeletonText lines={10} />
         ) : (
@@ -117,7 +122,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
             </EuiCodeBlock>
           </>
         )}
-      </EuiFlexItem>
+      </FlexItemWithMaxWidth>
     </EuiFlexGroup>
   );
 };

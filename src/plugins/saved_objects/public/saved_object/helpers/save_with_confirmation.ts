@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from '../../constants';
+import type { StartServices } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**
@@ -38,7 +39,8 @@ export async function saveWithConfirmation(
     displayName: string;
   },
   options: SavedObjectsCreateOptions,
-  services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
+  services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart },
+  startServices: StartServices
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
@@ -62,7 +64,7 @@ export async function saveWithConfirmation(
         defaultMessage: 'Overwrite',
       });
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays, startServices)
         .then(() =>
           savedObjectsClient.create(savedObject.getEsType(), source, {
             overwrite: true,

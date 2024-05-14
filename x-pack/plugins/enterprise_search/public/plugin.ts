@@ -55,12 +55,11 @@ import {
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
   CRAWLERS_PATH,
-  PLAYGROUND_PATH,
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
@@ -122,16 +121,17 @@ const contentLinks: AppDeepLink[] = [
       defaultMessage: 'Web crawlers',
     }),
   },
+];
+
+const applicationsLinks: AppDeepLink[] = [
   {
     id: 'playground',
     path: `/${PLAYGROUND_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
       defaultMessage: 'Playground',
     }),
+    visibleIn: ['sideNav', 'globalSearch'],
   },
-];
-
-const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
@@ -141,6 +141,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -359,6 +360,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Applications, kibanaDeps, pluginData);
       },
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({

@@ -304,7 +304,7 @@ export const postActionsConnectorExecuteRoute = (
           });
           const assistantTools = (await context.elasticAssistant)
             .getRegisteredTools(pluginName)
-            .filter((x) => x.id !== 'insights-tool'); // we don't (yet) support asking the assistant for NEW insights from a conversation
+            .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
 
           // get a scoped esClient for assistant memory
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -378,7 +378,7 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            onLlmResponse(error.message, {}, true);
+            await onLlmResponse(error.message, {}, true);
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,

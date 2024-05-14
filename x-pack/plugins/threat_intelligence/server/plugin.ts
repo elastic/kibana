@@ -30,7 +30,7 @@ export class ThreatIntelligencePlugin implements IThreatIntelligencePlugin {
   ) {
     this.logger.debug('setup');
 
-    core.getStartServices().then(([_, { data: dataStartService }]) => {
+    void core.getStartServices().then(([_, { data: dataStartService }]) => {
       const threatIntelligenceSearchStrategy =
         threatIntelligenceSearchStrategyProvider(dataStartService);
 

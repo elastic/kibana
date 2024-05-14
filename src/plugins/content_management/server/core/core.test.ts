@@ -309,7 +309,7 @@ describe('Content Core', () => {
             { title: 'Hello' },
             { id: '1234' } // We send this "id" option to specify the id of the content created
           );
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -327,7 +327,7 @@ describe('Content Core', () => {
 
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
           await fooContentCrud!.update(ctx, '1234', { title: 'changed' });
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -363,7 +363,7 @@ describe('Content Core', () => {
             },
           });
 
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -380,14 +380,14 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: expect.any(Object),
             },
           });
           await fooContentCrud!.delete(ctx, '1234');
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: undefined,

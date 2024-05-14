@@ -39,7 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.experiments.enabled=true',
         '--xpack.cloud_integrations.experiments.launch_darkly.sdk_key=a_string',
         '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',
-        '--xpack.cloud_integrations.experiments.flag_overrides.navigation.solutionNavEnabled=true',
+        '--xpack.cloud_integrations.experiments.flag_overrides.solutionNavEnabled=true',
         '--navigation.solutionNavigation.enabled=true',
         '--navigation.solutionNavigation.defaultSolution=es',
         // Note: the base64 string in the cloud.id config contains the ES endpoint required in the functional tests

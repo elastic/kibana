@@ -17,9 +17,6 @@ KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
@@ -68,8 +65,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
 fi
 
-docker logout docker.elastic.co
-
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Serverless Images
 
@@ -99,19 +94,9 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMM
 gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Validate CDN assets"
-(
-  shopt -s globstar
-  THREADS=$(grep -c ^processor /proc/cpuinfo)
-  i=0
-  cd $CDN_ASSETS_FOLDER
-  for CDN_ASSET in **/*; do
-    ((i=(i+1)%THREADS)) || wait
-    if [[ -f "$CDN_ASSET" ]]; then
-      echo -n "Testing $CDN_ASSET..."
-      curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET"
-    fi
-  done
-)
+ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  "$GCS_SA_CDN_URL" \
+  "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"

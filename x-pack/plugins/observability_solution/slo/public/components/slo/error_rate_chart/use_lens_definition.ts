@@ -12,6 +12,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
+import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 
 export interface TimeRange {
@@ -24,13 +25,21 @@ export interface AlertAnnotation {
   total: number;
 }
 
-export function useLensDefinition(
-  slo: SLOWithSummaryResponse,
-  threshold: number,
-  alertTimeRange?: TimeRange,
-  annotations?: AlertAnnotation[],
-  showErrorRateAsLine?: boolean
-): TypedLensByValueInput['attributes'] {
+export function useLensDefinition({
+  slo,
+  threshold,
+  alertTimeRange,
+  annotations,
+  showErrorRateAsLine,
+  selectedTabId,
+}: {
+  slo: SLOWithSummaryResponse;
+  threshold: number;
+  alertTimeRange?: TimeRange;
+  annotations?: AlertAnnotation[];
+  showErrorRateAsLine?: boolean;
+  selectedTabId?: SloTabId;
+}): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
   const interval = 'auto';
@@ -87,20 +96,24 @@ export function useLensDefinition(
               },
             ],
           },
-          {
-            layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
-            layerType: 'referenceLine',
-            accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
-            yConfig: [
-              {
-                forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-            ],
-          },
+          ...(selectedTabId !== 'history'
+            ? [
+                {
+                  layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
+                  layerType: 'referenceLine',
+                  accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
+                  yConfig: [
+                    {
+                      forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
+                      axisMode: 'left',
+                      textVisibility: true,
+                      color: euiTheme.colors.danger,
+                      iconPosition: 'right',
+                    },
+                  ],
+                },
+              ]
+            : []),
           ...(!!alertTimeRange
             ? [
                 {

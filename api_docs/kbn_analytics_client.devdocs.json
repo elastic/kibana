@@ -827,6 +827,10 @@
                 "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
@@ -949,6 +953,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "observabilityLogsExplorer",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
               },
               {
                 "plugin": "observabilityOnboarding",
@@ -1558,11 +1566,11 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/public/plugin.ts"
+                "path": "src/plugins/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
+                "path": "src/plugins/telemetry/public/plugin.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
-import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { Users } from './users';

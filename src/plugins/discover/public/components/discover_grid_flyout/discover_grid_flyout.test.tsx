@@ -49,6 +49,7 @@ jest.mock('@elastic/eui', () => {
 
       return original.useIsWithinBreakpoints(breakpoints);
     }),
+    useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
   };
 });
 

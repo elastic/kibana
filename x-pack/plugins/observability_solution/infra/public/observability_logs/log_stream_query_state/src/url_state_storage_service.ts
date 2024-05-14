@@ -258,9 +258,6 @@ export const filterStateInUrlRT = rt.partial({
       query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
     }),
     rt.strict({
-      sql: rt.string,
-    }),
-    rt.strict({
       esql: rt.string,
     }),
   ]),
@@ -279,9 +276,6 @@ export const legacyFilterStateInUrlRT = rt.union([
   rt.strict({
     language: rt.string,
     query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-  }),
-  rt.strict({
-    sql: rt.string,
   }),
   rt.strict({
     esql: rt.string,

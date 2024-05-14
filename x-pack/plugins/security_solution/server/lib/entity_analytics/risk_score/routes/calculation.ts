@@ -15,10 +15,11 @@ import {
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { assetCriticalityServiceFactory } from '../../asset_criticality';
-import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { buildRiskScoreServiceForRequest } from './helpers';
 
 export const riskScoreCalculationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -38,29 +39,28 @@ export const riskScoreCalculationRoute = (
         validate: { request: { body: buildRouteValidation(riskScoreCalculationRequestSchema) } },
       },
       async (context, request, response) => {
-        const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const soClient = coreContext.savedObjects.client;
-        const spaceId = securityContext.getSpaceId();
-        const riskEngineDataClient = securityContext.getRiskEngineDataClient();
-        const riskScoreDataClient = securityContext.getRiskScoreDataClient();
-        const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
-        const securityConfig = await securityContext.getConfig();
-        const assetCriticalityService = assetCriticalityServiceFactory({
-          assetCriticalityDataClient,
-          uiSettingsClient: coreContext.uiSettings.client,
+
+        securityContext.getAuditLogger()?.log({
+          message: 'User triggered custom manual scoring',
+          event: {
+            action: RiskScoreAuditActions.RISK_ENGINE_MANUAL_SCORING,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
         });
 
-        const riskScoreService = riskScoreServiceFactory({
-          assetCriticalityService,
-          esClient,
-          logger,
-          riskEngineDataClient,
-          riskScoreDataClient,
-          spaceId,
-        });
+        const siemResponse = buildSiemResponse(response);
+        const coreContext = await context.core;
+        const soClient = coreContext.savedObjects.client;
+        const securityConfig = await securityContext.getConfig();
+
+        const riskScoreService = buildRiskScoreServiceForRequest(
+          securityContext,
+          coreContext,
+          logger
+        );
 
         const {
           after_keys: userAfterKeys,

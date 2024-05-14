@@ -691,7 +691,7 @@
         "label": "DeleteSLOInstancesInput",
         "description": [],
         "signature": [
-          "{ list: { sloId: string; instanceId: string; }[]; }"
+          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -706,7 +706,7 @@
         "label": "DeleteSLOInstancesParams",
         "description": [],
         "signature": [
-          "{ list: { sloId: string; instanceId: string; }[]; }"
+          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -745,7 +745,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; }; groupBy: string | string[]; revision: number; } & { remoteName?: string | undefined; })[]; }"
+          " | undefined; }; groupBy: string | string[]; revision: number; } & { remoteName?: string | undefined; range?: { from: string; to: string; } | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
         "deprecated": false,
@@ -763,6 +763,36 @@
           "{ sloId: string; instanceId: string; data: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }[]"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FetchSLOHealthParams",
+        "type": "Type",
+        "tags": [],
+        "label": "FetchSLOHealthParams",
+        "description": [],
+        "signature": [
+          "{ list: { sloId: string; sloInstanceId: string; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FetchSLOHealthResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FetchSLOHealthResponse",
+        "description": [],
+        "signature": [
+          "{ sloId: string; sloInstanceId: string; sloRevision: number; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"healthy\" | \"unhealthy\"; rollup: \"healthy\" | \"unhealthy\"; summary: \"healthy\" | \"unhealthy\"; }; }[]"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -820,7 +850,7 @@
         "label": "FindSLOGroupsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: string; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
+          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: \"status\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\"; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
         "deprecated": false,
@@ -888,7 +918,7 @@
         "label": "GetPreviewDataResponse",
         "description": [],
         "signature": [
-          "({ date: string; sliValue: number; } & { events?: { good: number; bad: number; total: number; } | undefined; })[]"
+          "({ date: string; sliValue: number | null; } & { events?: { good: number; bad: number; total: number; } | undefined; })[]"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_preview_data.ts",
         "deprecated": false,
@@ -966,6 +996,21 @@
           "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOSuggestionsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOSuggestionsResponse",
+        "description": [],
+        "signature": [
+          "{ tags: { label: string; value: string; count: number; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_suggestions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3181,10 +3226,18 @@
         "signature": [
           "TypeC",
           "<{ from: ",
+          "UnionC",
+          "<[",
           "Type",
-          "<Date, string, unknown>; to: ",
+          "<Date, string, unknown>, ",
+          "StringC",
+          "]>; to: ",
+          "UnionC",
+          "<[",
           "Type",
-          "<Date, string, unknown>; }>"
+          "<Date, string, unknown>, ",
+          "StringC",
+          "]>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
@@ -3221,12 +3274,18 @@
           "<{ list: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ sloId: ",
           "StringC",
           "; instanceId: ",
           "StringC",
-          "; }>>; }>; }>"
+          "; }>, ",
+          "PartialC",
+          "<{ excludeRollup: ",
+          "BooleanC",
+          "; }>]>>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -3398,7 +3457,13 @@
           "PartialC",
           "<{ remoteName: ",
           "StringC",
-          "; }>]>>; }>; }>"
+          "; range: ",
+          "TypeC",
+          "<{ from: ",
+          "StringC",
+          "; to: ",
+          "StringC",
+          "; }>; }>]>>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
         "deprecated": false,
@@ -3459,6 +3524,94 @@
           "; }>; }>]>>; }>>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.fetchSLOHealthParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "fetchSLOHealthParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; sloInstanceId: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; }>>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.fetchSLOHealthResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "fetchSLOHealthResponseSchema",
+        "description": [],
+        "signature": [
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; sloInstanceId: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; sloRevision: ",
+          "NumberC",
+          "; state: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"no_data\">, ",
+          "LiteralC",
+          "<\"indexing\">, ",
+          "LiteralC",
+          "<\"running\">, ",
+          "LiteralC",
+          "<\"stale\">]>; health: ",
+          "TypeC",
+          "<{ overall: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; rollup: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; }>; }>>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4967,8 +5120,18 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "StringC",
-          "; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">, ",
+          "LiteralC",
+          "<\"_index\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -7863,8 +8026,12 @@
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; sliValue: ",
+          "UnionC",
+          "<[",
           "NumberC",
-          "; }>, ",
+          ", ",
+          "NullC",
+          "]>; }>, ",
           "PartialC",
           "<{ events: ",
           "TypeC",
@@ -9503,6 +9670,32 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOSuggestionsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOSuggestionsResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ tags: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ label: ",
+          "StringC",
+          "; value: ",
+          "StringC",
+          "; count: ",
+          "NumberC",
+          "; }>>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.groupBySchema",
         "type": "Object",
         "tags": [],
@@ -9589,6 +9782,26 @@
           "; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.healthStatusSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "healthStatusSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/health.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9959,32 +10172,6 @@
           "; }>; }>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.indicatorDataSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "indicatorDataSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ dateRange: ",
-          "TypeC",
-          "<{ from: ",
-          "Type",
-          "<Date, string, unknown>; to: ",
-          "Type",
-          "<Date, string, unknown>; }>; good: ",
-          "NumberC",
-          "; total: ",
-          "NumberC",
-          "; }>"
-        ],
-        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12176,6 +12363,24 @@
           ", string, unknown>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.putSLOServerlessSettingsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "putSLOServerlessSettingsParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{}>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15218,8 +15423,18 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "StringC",
-          "; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">, ",
+          "LiteralC",
+          "<\"_index\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -15263,6 +15478,22 @@
           "StringC"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.sloServerlessSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "sloServerlessSettingsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{}>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16747,6 +16978,30 @@
           "; }>; }>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.stateSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "stateSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"no_data\">, ",
+          "LiteralC",
+          "<\"indexing\">, ",
+          "LiteralC",
+          "<\"running\">, ",
+          "LiteralC",
+          "<\"stale\">]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/health.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

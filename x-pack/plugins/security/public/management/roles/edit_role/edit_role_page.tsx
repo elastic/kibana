@@ -30,10 +30,8 @@ import type {
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
-  I18nStart,
   NotificationsStart,
   ScopedHistory,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -53,6 +51,7 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
+import type { StartServices } from '../../..';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
@@ -76,7 +75,7 @@ import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
-interface Props {
+export interface Props extends StartServices {
   action: 'edit' | 'clone';
   roleName?: string;
   dataViews?: DataViewsContract;
@@ -94,8 +93,6 @@ interface Props {
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
   buildFlavor: BuildFlavor;
-  i18nStart: I18nStart;
-  theme: ThemeServiceStart;
   cloudOrgUrl?: string;
 }
 
@@ -214,7 +211,7 @@ function useRole(
       ? rolesAPIClient.getRole(roleName)
       : Promise.resolve({
           name: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
@@ -336,9 +333,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
   buildFlavor,
-  i18nStart,
-  theme,
   cloudOrgUrl,
+  ...startServices
 }) => {
   const isDarkMode = useDarkMode();
 
@@ -402,7 +398,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
 
   const getFormTitle = () => {
-    let titleText;
+    let titleText: JSX.Element;
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
@@ -505,7 +501,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       name: e.target.value,
     });
 
-  const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
+  const onNameBlur = (_e: FocusEvent<HTMLInputElement>) => {
     if (!isEditingExistingRole && previousName !== role.name) {
       setPreviousName(role.name);
       doesRoleExist().then((roleExists) => {
@@ -532,6 +528,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
           docLinks={docLinks}
           canUseRemoteIndices={
             buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
+          }
+          canUseRemoteClusters={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
           }
           isDarkMode={isDarkMode}
           buildFlavor={buildFlavor}
@@ -676,7 +675,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>,
-            { i18n: i18nStart, theme }
+            startServices
           ),
         });
       } else {
@@ -738,10 +737,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </>,
-          {
-            i18n: i18nStart,
-            theme,
-          }
+          startServices
         ),
       });
     } else {

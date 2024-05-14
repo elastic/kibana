@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
-import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceModelConfig,
+  InferenceTaskType,
+  TransformGetTransformTransformSummary,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
@@ -580,5 +584,22 @@ export class ModelsProvider {
 
     await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
     return putResponse;
+  }
+  /**
+   * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
+   * @param inferenceId - Inference Endpoint Id
+   * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
+   * @param modelConfig - Model configuration based on service type
+   */
+  async createInferenceEndpoint(
+    inferenceId: string,
+    taskType: InferenceTaskType,
+    modelConfig: InferenceModelConfig
+  ) {
+    return await this._client.asCurrentUser.inference.putModel({
+      inference_id: inferenceId,
+      task_type: taskType,
+      model_config: modelConfig,
+    });
   }
 }

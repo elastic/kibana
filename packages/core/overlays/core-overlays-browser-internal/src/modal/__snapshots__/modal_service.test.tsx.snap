@@ -66,33 +66,118 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -297,66 +382,236 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -586,96 +841,351 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -824,96 +1334,351 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1067,96 +1832,351 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1305,96 +2325,351 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1560,33 +2835,118 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1668,33 +3028,118 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1781,33 +3226,118 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },
@@ -1889,33 +3419,118 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
+                "value": <IntlProvider
+                  defaultLocale="en"
+                  formats={
                     Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
+                      "date": Object {
+                        "full": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "weekday": "long",
+                          "year": "numeric",
+                        },
+                        "long": Object {
+                          "day": "numeric",
+                          "month": "long",
+                          "year": "numeric",
+                        },
+                        "medium": Object {
+                          "day": "numeric",
+                          "month": "short",
+                          "year": "numeric",
+                        },
+                        "short": Object {
+                          "day": "numeric",
+                          "month": "numeric",
+                          "year": "2-digit",
+                        },
+                      },
+                      "number": Object {
+                        "currency": Object {
+                          "style": "currency",
+                        },
+                        "percent": Object {
+                          "style": "percent",
+                        },
+                      },
+                      "relative": Object {
+                        "days": Object {
+                          "units": "day",
+                        },
+                        "hours": Object {
+                          "units": "hour",
+                        },
+                        "minutes": Object {
+                          "units": "minute",
+                        },
+                        "months": Object {
+                          "units": "month",
+                        },
+                        "seconds": Object {
+                          "units": "second",
+                        },
+                        "years": Object {
+                          "units": "year",
+                        },
+                      },
+                      "time": Object {
+                        "full": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "long": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                          "timeZoneName": "short",
+                        },
+                        "medium": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                          "second": "numeric",
+                        },
+                        "short": Object {
+                          "hour": "numeric",
+                          "minute": "numeric",
+                        },
                       },
                     }
                   }
+                  locale="en"
+                  messages={Object {}}
+                  textComponent={Symbol(react.fragment)}
                 >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </IntlProvider>,
               },
             ],
           },

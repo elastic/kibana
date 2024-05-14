@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/grok_debugger'),
       require.resolve('../../common/console'),
       require.resolve('../../common/painless_lab'),
+      require.resolve('../../common/spaces'),
     ],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 1',

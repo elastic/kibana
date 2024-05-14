@@ -51,7 +51,7 @@ export class DateFormat extends FieldFormat {
         const date = moment(value);
 
         if (date.isValid()) {
-          return date.format(pattern);
+          return date.locale(i18n.getLocale()).format(pattern);
         } else {
           return value;
         }

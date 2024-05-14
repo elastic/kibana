@@ -46,6 +46,5 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
         ],
       },
     ]}
-    hasActions
   />
 );

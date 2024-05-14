@@ -21,17 +21,7 @@ import {
 describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
-    tags: ['@ess', '@serverless', '@skipInServerless'],
-    // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForNonSequenceEqlRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     describe('with sequence queries ', () => {
