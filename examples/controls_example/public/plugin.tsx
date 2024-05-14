@@ -14,9 +14,9 @@ import { PANEL_HOVER_TRIGGER, registerReactEmbeddableFactory } from '@kbn/embedd
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
-import { EditControlAction } from './controls/actions/edit_control_action';
-import { registerControlFactory } from './controls/control_factory_registry';
-import { SearchControlState, SEARCH_CONTROL_TYPE } from './controls/search_control/types';
+import { EditControlAction } from './react_controls/actions/edit_control_action';
+import { registerControlFactory } from './react_controls/control_factory_registry';
+import { SearchControlState, SEARCH_CONTROL_TYPE } from './react_controls/search_control/types';
 import img from './control_group_image.png';
 
 interface SetupDeps {
@@ -59,7 +59,7 @@ export class ControlsExamplePlugin
 
     registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
       const { getControlGroupEmbeddableFactory } = await import(
-        './controls/get_control_group_factory'
+        './react_controls/control_group/get_control_group_factory'
       );
       return getControlGroupEmbeddableFactory({
         overlays: core.overlays,
@@ -70,7 +70,7 @@ export class ControlsExamplePlugin
     // core.overlays.
     registerControlFactory<SearchControlState>(SEARCH_CONTROL_TYPE, async () => {
       const { getSearchEmbeddableFactory } = await import(
-        './controls/search_control/get_search_control_factory'
+        './react_controls/search_control/get_search_control_factory'
       );
       return getSearchEmbeddableFactory({ dataViewsService: deps.data.dataViews });
     });

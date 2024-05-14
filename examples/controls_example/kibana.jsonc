@@ -13,7 +13,8 @@
       "embeddable",
       "navigation",
       "presentationUtil",
-      "uiActions"
+      "uiActions",
+      "dataViews"
     ]
   }
 }

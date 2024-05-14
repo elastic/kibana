@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React from 'react';
+import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
+import { ControlGroupApi } from '../react_controls/types';
 
 const toggleViewButtons = [
   {
@@ -46,6 +54,7 @@ export const ReactControlExample = ({
     return await dataViewsService.find('kibana_sample_data_logs');
   }, []);
 
+  const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const viewModeSelected = useStateFromPublishingSubject(viewMode);
 
   if (loading || !dataViews || !dataViews[0].id) return <EuiLoadingSpinner />;
@@ -53,16 +62,31 @@ export const ReactControlExample = ({
   const fakeParentApi = { viewMode };
   return (
     <>
-      <EuiButtonGroup
-        legend="This is a basic group"
-        options={toggleViewButtons}
-        idSelected={`viewModeToggle_${viewModeSelected}`}
-        onChange={(_, value) => {
-          viewMode.next(value);
-        }}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="This is a basic group"
+            options={toggleViewButtons}
+            idSelected={`viewModeToggle_${viewModeSelected}`}
+            onChange={(_, value) => {
+              viewMode.next(value);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={() => {
+              console.log(controlGroupApi?.serializeState());
+            }}
+            size="s"
+          >
+            Serialize control group
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
+        onApiAvailable={(api) => setControlGroupApi(api as ControlGroupApi)}
         hidePanelChrome={true}
         type={CONTROL_GROUP_TYPE}
         parentApi={fakeParentApi} // should be the dashboard
@@ -79,7 +103,7 @@ export const ReactControlExample = ({
           } as object,
           references: [
             {
-              name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:optionsListDataView',
+              name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
               type: 'index-pattern',
               id: dataViews[0].id,
             },

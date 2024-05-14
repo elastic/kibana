@@ -23,13 +23,15 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { ControlRenderer } from './control_renderer';
+import { ControlRenderer } from '../control_renderer';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   DefaultControlApi,
-} from './types';
+} from '../types';
+import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
+import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 
 export const getControlGroupEmbeddableFactory = (services: {
   overlays: OverlayStart;
@@ -41,39 +43,9 @@ export const getControlGroupEmbeddableFactory = (services: {
     ControlGroupRuntimeState
   > = {
     type: CONTROL_GROUP_TYPE,
-    deserializeState: (state) => {
-      const panels = JSON.parse(state.rawState.panelsJSON);
-      const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
-
-      /** Inject data view references into each individual control */
-      const references = state.references ?? [];
-      references.forEach((reference) => {
-        const referenceName = reference.name;
-        const panelId = referenceName.substring(
-          'controlGroup_'.length,
-          referenceName.lastIndexOf(':') // is this too generic?
-        );
-        if (panels[panelId]) {
-          panels[panelId].dataViewId = reference.id;
-        }
-      });
-
-      const flattenedPanels = Object.keys(panels).reduce((prev, panelId) => {
-        const currentPanel = panels[panelId];
-        const currentPanelExplicitInput = panels[panelId].explicitInput;
-        return {
-          ...prev,
-          [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
-        };
-      }, {});
-
-      return {
-        ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
-        panels: flattenedPanels,
-        ignoreParentSettings,
-      };
-    },
+    deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+      console.log('initialState', initialState);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
       const width = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
@@ -81,6 +53,16 @@ export const getControlGroupEmbeddableFactory = (services: {
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const panels$ = new BehaviorSubject<ControlsPanels>(initialState.panels);
+      const controlStyle$ = new BehaviorSubject<ControlStyle>(initialState.controlStyle);
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
+        initialState.chainingSystem
+      );
+      const showApplySelections = new BehaviorSubject<boolean | undefined>(
+        initialState.showApplySelections
+      );
+      const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
+        initialState.ignoreParentSettings
+      );
 
       const embeddable = buildApi(
         {
@@ -92,10 +74,13 @@ export const getControlGroupEmbeddableFactory = (services: {
           isEditingEnabled: () => true,
           getTypeDisplayName: () => 'Control group', // TODO: i18n
           serializeState: () => {
-            // TODO: Serialize the state of all the children
-            return {
-              rawState: {},
-            };
+            return serializeControlGroup({
+              panels: panels$.getValue(),
+              controlStyle: controlStyle$.getValue(),
+              chainingSystem: chainingSystem$.getValue(),
+              showApplySelections: showApplySelections.getValue(),
+              ignoreParentSettings: ignoreParentSettings.getValue(),
+            });
           },
           addNewPanel: (panel) => {
             // TODO: Add a new child control
@@ -124,6 +109,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             <>
               {Object.keys(panels).map((id) => (
                 <ControlRenderer
+                  key={uuid}
                   services={services}
                   type={panels[id].type}
                   state={panels[id]}

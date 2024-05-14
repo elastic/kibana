@@ -69,6 +69,32 @@ export const initializeDataControl = <State extends DefaultDataControlState>(
 
   const onEdit = async () => {
     console.log('on edit');
+
+    //   const flyoutInstance = this.overlays.openFlyout(
+    //     toMountPoint(
+    //       <ControlEditor
+    //         api={embeddable}
+    //         parentApi={embeddable.parentApi}
+    //         stateManager={stateManager}
+    //         closeFlyout={() => {
+    //           setFlyoutRef(undefined);
+    //           flyoutInstance.close();
+    //         }}
+    //       />,
+    //       { theme: this.theme, i18n: this.i18n }
+    //     ),
+    //     {
+    //       'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
+    //       outsideClickCloses: false,
+    //       onClose: (flyout) => {
+    //         setFlyoutRef(undefined);
+    //         flyout.close();
+    //       },
+    //       ownFocus: true,
+    //     }
+    //   );
+    //   setFlyoutRef(flyoutInstance);
+    // }
   };
 
   const dataControlApi: DiffDefaultDataControlApi = {

@@ -17,6 +17,7 @@ export interface ControlPanelState<TEmbeddableInput extends ControlInput = Contr
   order: number;
   width: ControlWidth;
   grow: boolean;
+  dataViewId: string;
 }
 
 export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';

@@ -87,7 +87,7 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    console.log('execute');
+    await embeddable.onEdit();
   }
   //   const selectedDataViewId: string | undefined =
   //     embeddable.dataView.getValue()?.id ??
