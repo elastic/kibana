@@ -49,19 +49,13 @@ export function NameComboBox({
     and trigger a validation error. By using a separate state, we can clear the selected option 
     without clearing the field value.
   */
-  const [selectedNameOptions, setSelectedNameOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(() => {
-    const selectedNameOption = selectableNameOptions.find((option) => option.label === value.name);
-
-    return selectedNameOption ? [selectedNameOption] : [];
-  });
+  const [selectedNameOption, setSelectedNameOption] = useState<
+    EuiComboBoxOptionOption<string> | undefined
+  >(selectableNameOptions.find((option) => option.label === value.name));
 
   useEffect(() => {
     /* Re-computing the new selected name option when the field value changes */
-    const selectedNameOption = selectableNameOptions.find((option) => option.label === value.name);
-
-    setSelectedNameOptions(selectedNameOption ? [selectedNameOption] : []);
+    setSelectedNameOption(selectableNameOptions.find((option) => option.label === value.name));
   }, [value.name, selectableNameOptions]);
 
   const handleNameChange = useCallback(
@@ -70,7 +64,7 @@ export function NameComboBox({
 
       if (!newlySelectedOption) {
         /* This occurs when the user hits backspace in combobox */
-        setSelectedNameOptions([]);
+        setSelectedNameOption(undefined);
         return;
       }
 
@@ -111,7 +105,7 @@ export function NameComboBox({
       placeholder={i18n.FIELD_NAME}
       singleSelection={{ asPlainText: true }}
       options={selectableNameOptions}
-      selectedOptions={selectedNameOptions}
+      selectedOptions={selectedNameOption ? [selectedNameOption] : []}
       onChange={handleNameChange}
       isClearable={false}
       onCreateOption={handleAddCustomName}

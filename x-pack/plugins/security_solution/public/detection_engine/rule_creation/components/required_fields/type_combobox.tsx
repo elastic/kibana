@@ -80,19 +80,13 @@ export function TypeComboBox({
     and trigger a validation error. By using a separate state, we can clear the selected option 
     without clearing the field value.
   */
-  const [selectedTypeOptions, setSelectedTypeOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(() => {
-    const selectedTypeOption = selectableTypeOptions.find((option) => option.value === value.type);
-
-    return selectedTypeOption ? [selectedTypeOption] : [];
-  });
+  const [selectedTypeOption, setSelectedTypeOption] = useState<
+    EuiComboBoxOptionOption<string> | undefined
+  >(selectableTypeOptions.find((option) => option.value === value.type));
 
   useEffect(() => {
     /* Re-computing the new selected type option when the field value changes */
-    const selectedTypeOption = selectableTypeOptions.find((option) => option.value === value.type);
-
-    setSelectedTypeOptions(selectedTypeOption ? [selectedTypeOption] : []);
+    setSelectedTypeOption(selectableTypeOptions.find((option) => option.value === value.type));
   }, [value.type, selectableTypeOptions]);
 
   const handleTypeChange = useCallback(
@@ -101,7 +95,7 @@ export function TypeComboBox({
 
       if (!newlySelectedOption) {
         /* This occurs when the user hits backspace in combobox */
-        setSelectedTypeOptions([]);
+        setSelectedTypeOption(undefined);
         return;
       }
 
@@ -136,7 +130,7 @@ export function TypeComboBox({
       placeholder={i18n.FIELD_TYPE}
       singleSelection={{ asPlainText: true }}
       options={selectableTypeOptions}
-      selectedOptions={selectedTypeOptions}
+      selectedOptions={selectedTypeOption ? [selectedTypeOption] : []}
       onChange={handleTypeChange}
       isClearable={false}
       onCreateOption={handleAddCustomType}
