@@ -9,5 +9,5 @@ export { Actions } from './actions';
 export type { AuthorizationServiceSetupInternal } from './authorization_service';
 export { AuthorizationService } from './authorization_service';
 export type { ElasticsearchRole } from './roles';
-export { transformElasticsearchRoleToRole } from './roles';
+export { transformElasticsearchRoleToRole, compareRolesByName } from './roles';
 export type { CasesSupportedOperations } from './privileges';

@@ -987,7 +987,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Execution log', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/173666
+    describe.skip('Execution log', () => {
       const testRunUuid = uuidv4();
       let rule: any;
 

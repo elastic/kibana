@@ -41,6 +41,11 @@ export enum TELEMETRY_EVENT {
   DELETE_VALUE_LIST_ITEM = 'delete_value_list_item',
   EDIT_VALUE_LIST_ITEM = 'edit_value_list_item',
   ADDITIONAL_UPLOAD_VALUE_LIST_ITEM = 'additinonal_upload_value_list_item',
+
+  // Bulk custom highlighted fields action
+  ADD_INVESTIGATION_FIELDS = 'add_investigation_fields',
+  SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
+  DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
 }
 
 export enum TelemetryEventTypes {

@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -21,7 +22,7 @@ export function isEmbeddableEditActionCompatible(
 ) {
   // for ES|QL is compatible only when advanced setting is enabled
   const query = attributes.state.query;
-  return isOfAggregateQueryType(query) ? core.uiSettings.get('discover:enableESQL') : true;
+  return isOfAggregateQueryType(query) ? core.uiSettings.get(ENABLE_ESQL) : true;
 }
 
 export async function executeEditEmbeddableAction({

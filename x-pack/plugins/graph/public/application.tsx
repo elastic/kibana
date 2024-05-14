@@ -31,7 +31,6 @@ import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-
 
 import './index.scss';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -121,7 +120,6 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       <TableListViewKibanaProvider
         {...{
           core,
-          toMountPoint,
           FormattedRelative,
         }}
       >

@@ -12,7 +12,10 @@ import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/re
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
 
-export async function getApmAlertsClient({ plugins, request }: MinimalAPMRouteHandlerResources) {
+export async function getApmAlertsClient({
+  plugins,
+  request,
+}: Pick<MinimalAPMRouteHandlerResources, 'plugins' | 'request'>) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
   const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(['apm']);

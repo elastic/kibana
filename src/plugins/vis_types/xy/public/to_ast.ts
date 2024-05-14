@@ -20,7 +20,7 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   Dimensions,
   Dimension,
@@ -48,7 +48,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     shouldTruncate: params.truncateLegend,
     showSingleSeries: true,
     legendSize,
-    legendStats: params.labels.show ? [LegendStats.values] : undefined,
+    legendStats: params.labels.show ? [XYLegendValue.CurrentAndLastValue] : undefined,
   });
 
   return buildExpression([legend]);

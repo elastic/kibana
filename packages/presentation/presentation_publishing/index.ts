@@ -43,6 +43,11 @@ export {
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
+export {
+  apiHasAppContext,
+  type HasAppContext,
+  type EmbeddableAppContext,
+} from './interfaces/has_app_context';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
@@ -104,6 +109,7 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
+  getPanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';

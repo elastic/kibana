@@ -14,7 +14,7 @@ export const bulkMarkApiKeysForInvalidation = async (
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
+  await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
     if (apiKeys.length === 0) {
       return;
     }

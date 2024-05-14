@@ -70,8 +70,9 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
-  percentage: rt.number,
   count: rt.number,
+  totalDocs: rt.number,
+  percentage: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
@@ -118,3 +119,12 @@ export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstima
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
   dataStreamsEstimatedDataInBytesRT
 );
+
+export const getNonAggregatableDatasetsRt = rt.exact(
+  rt.type({
+    aggregatable: rt.boolean,
+    datasets: rt.array(rt.string),
+  })
+);
+
+export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;

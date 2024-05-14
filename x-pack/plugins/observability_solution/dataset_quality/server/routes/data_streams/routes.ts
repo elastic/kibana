@@ -13,6 +13,7 @@ import {
   DataStreamSettings,
   DataStreamStat,
   DegradedDocs,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
@@ -22,6 +23,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
+import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -66,7 +68,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      t.partial(rangeRt.props),
+      rangeRt,
       typeRt,
       t.partial({
         datasetQuery: t.string,
@@ -92,6 +94,33 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
     return {
       degradedDocs,
     };
+  },
+});
+
+const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/non_aggregatable',
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      typeRt,
+      t.partial({
+        dataStream: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<NonAggregatableDatasets> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getNonAggregatableDataStreams({
+      esClient,
+      ...params.query,
+    });
   },
 });
 
@@ -200,6 +229,7 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...nonAggregatableDatasetsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
   ...estimatedDataInBytesRoute,

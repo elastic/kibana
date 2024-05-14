@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/ui-theme",

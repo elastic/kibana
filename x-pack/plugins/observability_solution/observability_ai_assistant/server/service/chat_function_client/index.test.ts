@@ -48,7 +48,6 @@ describe('chatFunctionClient', () => {
           }),
           messages: [],
           signal: new AbortController().signal,
-          connectorId: '',
         });
       }).rejects.toThrowError(`Function arguments are invalid`);
 
@@ -107,7 +106,6 @@ describe('chatFunctionClient', () => {
         name: 'get_data_on_screen',
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
-        connectorId: '',
         signal: new AbortController().signal,
       });
 

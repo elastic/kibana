@@ -22,7 +22,7 @@ import {
   DataDocumentsMsg,
   DataMainMsg,
   RecordRawType,
-} from '../services/discover_data_state_container';
+} from '../state_management/discover_data_state_container';
 import { filter } from 'rxjs';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';

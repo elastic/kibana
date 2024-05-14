@@ -24,6 +24,8 @@ export {
   aiAssistantSimulatedFunctionCalling,
 } from '../common';
 
+export { streamIntoObservable } from './service/util/stream_into_observable';
+
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [
     unusedFromRoot('xpack.observability.aiAssistant.enabled', {
