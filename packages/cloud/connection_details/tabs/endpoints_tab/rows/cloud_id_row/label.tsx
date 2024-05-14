@@ -11,20 +11,14 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLink,
   EuiPopover,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CopyInput } from '../../../components/copy_input';
-import { useConnectionDetailsService } from '../../../context';
-import { useBehaviorSubject } from '../../../hooks/use_behavior_subject';
 
-const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => {
+export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const labelText = i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.label', {
@@ -80,45 +74,5 @@ const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => {
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
-
-export interface CloudIdRowProps {
-  value: string;
-}
-
-export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
-  const service = useConnectionDetailsService();
-  const showCloudId = useBehaviorSubject(service.showCloudId$);
-
-  return (
-    <>
-      <EuiSpacer size="l" />
-
-      <EuiSwitch
-        label={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.toggle', {
-          defaultMessage: 'Show Cloud ID',
-        })}
-        checked={showCloudId}
-        onChange={service.toggleShowCloudId}
-        data-test-subj="connectionDetailsCloudIdSwitch"
-      />
-
-      {showCloudId && <EuiSpacer size="l" />}
-
-      {showCloudId && (
-        <EuiFormRow
-          label={<Label learnMoreUrl={service.opts.endpoints?.cloudIdLearMoreLink} />}
-          helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
-            defaultMessage:
-              'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
-          })}
-          fullWidth
-          data-test-subj="connectionDetailsCloudId"
-        >
-          <CopyInput value={value} />
-        </EuiFormRow>
-      )}
-    </>
   );
 };
