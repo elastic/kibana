@@ -61,6 +61,7 @@ export const postKnowledgeBaseRoute = (
         const elserId = await getElser();
         const core = await context.core;
         const esClient = core.elasticsearch.client.asInternalUser;
+        const soClient = core.savedObjects.getClient();
         const authenticatedUser = assistantContext.getCurrentUser();
         if (authenticatedUser == null) {
           return response.custom({
@@ -97,7 +98,7 @@ export const postKnowledgeBaseRoute = (
             authenticatedUser
           );
 
-          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore });
+          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, request, soClient });
 
           return response.ok({ body: { success: true } });
         }
