@@ -6,4 +6,5 @@
  */
 
 export { NARROW_COLUMN_WIDTH } from './constants';
+export { getFieldValueColumn } from './columns';
 export { SimpleAnalysisResultsTable } from './simple_analysis_results_table';
