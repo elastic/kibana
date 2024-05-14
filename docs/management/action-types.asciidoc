@@ -14,7 +14,7 @@ a| <<bedrock-action-type,{bedrock}>>
 
 a| <<cases-action-type,Cases>>
 
-| Send a request to {bedrock}.
+| Add alerts to cases.
 
 a| <<d3security-action-type,D3 Security>>
 
