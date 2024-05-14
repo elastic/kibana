@@ -21,7 +21,12 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
+<<<<<<< HEAD
+=======
+  RequiredFieldArray,
+>>>>>>> 149f6352e6a (Created updateRule)
   RuleCreateProps,
+  RuleUpdateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -424,6 +429,65 @@ export const patchTypeSpecificSnakeToCamel = (
       return assertUnreachable(existingRule);
     }
   }
+};
+
+interface ConvertUpdateAPIToInternalSchemaProps {
+  existingRule: SanitizedRule<RuleParams>;
+  ruleUpdate: RuleUpdateProps;
+}
+
+export const convertUpdateAPIToInternalSchema = ({
+  existingRule,
+  ruleUpdate,
+}: ConvertUpdateAPIToInternalSchemaProps) => {
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
+
+  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
+
+  const newInternalRule: InternalRuleUpdate = {
+    name: ruleUpdate.name,
+    tags: ruleUpdate.tags ?? [],
+    params: {
+      author: ruleUpdate.author ?? [],
+      buildingBlockType: ruleUpdate.building_block_type,
+      description: ruleUpdate.description,
+      ruleId: existingRule.params.ruleId,
+      falsePositives: ruleUpdate.false_positives ?? [],
+      from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
+      immutable: existingRule.params.immutable,
+      license: ruleUpdate.license,
+      outputIndex: ruleUpdate.output_index ?? '',
+      timelineId: ruleUpdate.timeline_id,
+      timelineTitle: ruleUpdate.timeline_title,
+      meta: ruleUpdate.meta,
+      maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
+      relatedIntegrations: ruleUpdate.related_integrations ?? [],
+      requiredFields: existingRule.params.requiredFields,
+      riskScore: ruleUpdate.risk_score,
+      riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
+      ruleNameOverride: ruleUpdate.rule_name_override,
+      setup: ruleUpdate.setup,
+      severity: ruleUpdate.severity,
+      severityMapping: ruleUpdate.severity_mapping ?? [],
+      threat: ruleUpdate.threat ?? [],
+      timestampOverride: ruleUpdate.timestamp_override,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
+      to: ruleUpdate.to ?? 'now',
+      references: ruleUpdate.references ?? [],
+      namespace: ruleUpdate.namespace,
+      note: ruleUpdate.note,
+      version: ruleUpdate.version ?? existingRule.params.version,
+      exceptionsList: ruleUpdate.exceptions_list ?? [],
+      ...typeSpecificParams,
+    },
+    schedule: { interval: ruleUpdate.interval ?? '5m' },
+    actions,
+  };
+
+  return newInternalRule;
 };
 
 // eslint-disable-next-line complexity

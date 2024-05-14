@@ -20,11 +20,11 @@ import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
-import { updateRules } from '../../../logic/crud/update_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import { getRulesManagementClient } from '../../../logic/rules_management_client';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -55,6 +55,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
 
           const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesManagementClient = getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
@@ -85,7 +86,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             existingRule
           );
 
-          const rule = await updateRules({
+          const rule = await rulesManagementClient.updateRule({
             rulesClient,
             existingRule,
             ruleUpdate: request.body,

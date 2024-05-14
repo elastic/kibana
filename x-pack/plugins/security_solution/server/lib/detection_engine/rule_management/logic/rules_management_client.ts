@@ -45,15 +45,15 @@
  *  - etc..
  *
  * USE CASES:
- *  1.  CREATE CUSTOM RULE
- *  2.  BULK CREATE CUSTOM RULES
- *  3.  UPDATE RULE
- *  4.  BULK UPDATE RULES
+ *  1.  CREATE CUSTOM RULE ✅
+ *  2.  BULK CREATE CUSTOM RULES ✅ by 1
+ *  3.  UPDATE RULE ✅
+ *  4.  BULK UPDATE RULES ✅ by 3
  *  5.  PATCH RULE
  *  6.  BULK PATCH RULES
  *  7.  DELETE RULES
  *  8.  BULK DELETE RULES
- *  9.  INSTALL NEW PREBUILT RULES
+ *  9.  INSTALL NEW PREBUILT RULES ✅
  *  10. UPGRADE RULE WITH TYPE CHANGE
  *  11. UPGRADE RULE OF SAME TYPE
  *  12. IMPORT NON EXISTING RULE
@@ -63,11 +63,18 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine';
+import type {
+  PatchRuleRequestBody,
+  RuleCreateProps,
+  RuleUpdateProps,
+} from '../../../../../common/api/detection_engine';
 import { convertCreateAPIToInternalSchema } from '..';
 import type { RuleAlertType, RuleParams, RuleSourceCamelCased } from '../../rule_schema';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import {
+  convertPatchAPIToInternalSchema,
+  convertUpdateAPIToInternalSchema,
+} from '../normalization/rule_converters';
 
 interface CreateCustomRuleProps {
   rulesClient: RulesClient;
@@ -80,8 +87,14 @@ interface CreatePrebuiltRuleProps {
 
 interface UpdateRuleProps {
   rulesClient: RulesClient;
-  existingRule: PrebuiltRuleAsset;
-  ruleId: string;
+  existingRule: RuleAlertType | null;
+  ruleUpdate: RuleUpdateProps;
+}
+
+interface PatchRuleProps {
+  rulesClient: RulesClient;
+  existingRule: RuleAlertType | null;
+  nextParams: PatchRuleRequestBody;
 }
 
 // TODOs:
@@ -126,20 +139,76 @@ export const getRulesManagementClient = () => {
         data: internalRule,
       });
 
-      // Do migration of rulesClient response here
       const migratedRule = normalizeRule(rule);
 
       return migratedRule;
     },
 
     // 3.  UPDATE RULE
-    updateRule: async (
-      updateRulePayload: UpdateRuleProps
-    ): Promise<void> => {
-    //   const { rulesClient, params } = updateRulePayload;
+    updateRule: async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType | null> => {
+      const { rulesClient, ruleUpdate, existingRule } = updateRulePayload;
 
-    //   return;
-    // }
+      if (existingRule == null) {
+        return null;
+      }
+
+      const newInternalRule = convertUpdateAPIToInternalSchema({
+        existingRule,
+        ruleUpdate,
+      });
+
+      const update = await rulesClient.update({
+        id: existingRule.id,
+        data: newInternalRule,
+      });
+
+      const enabled = ruleUpdate.enabled ?? true;
+
+      if (existingRule.enabled && enabled === false) {
+        await rulesClient.disable({ id: existingRule.id });
+      } else if (!existingRule.enabled && enabled === true) {
+        await rulesClient.enable({ id: existingRule.id });
+      }
+      return { ...update, enabled };
+    },
+
+    // 5.  PATCH RULE
+    patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType | null> => {
+      const {
+        rulesClient,
+        nextParams,
+        existingRule,
+        allowMissingConnectorSecrets,
+        shouldIncrementRevision,
+      } = patchRulePayload;
+
+      if (existingRule == null) {
+        return null;
+      }
+
+      const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+
+      const update = await rulesClient.update({
+        id: existingRule.id,
+        data: patchedRule,
+        allowMissingConnectorSecrets,
+        shouldIncrementRevision: () => shouldIncrementRevision,
+      });
+
+      if (existingRule.enabled && nextParams.enabled === false) {
+        await rulesClient.disable({ id: existingRule.id });
+      } else if (!existingRule.enabled && nextParams.enabled === true) {
+        await rulesClient.enable({ id: existingRule.id });
+      } else {
+        // enabled is null or undefined and we do not touch the rule
+      }
+
+      if (nextParams.enabled != null) {
+        return { ...update, enabled: nextParams.enabled };
+      } else {
+        return update;
+      }
+    },
   };
 };
 
