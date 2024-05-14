@@ -23,7 +23,9 @@ function findRegisteredEventTypeByName(eventTypeName: string) {
     ([{ eventType }]) => eventType === eventTypeName
   )!;
 }
-type MockEntryList = { getEntries: () => [object] };
+interface MockEntryList {
+  getEntries: () => [object];
+}
 type ObsCallback = (_entries: MockEntryList, _obs: object) => undefined;
 
 describe('AnalyticsService', () => {
