@@ -19,6 +19,13 @@ const deleteAllAlertingSO = async ({ kbnServer }: { kbnServer: KbnClient }) => {
   });
 };
 
+const deleteAllActionSO = async ({ kbnServer }: { kbnServer: KbnClient }) => {
+  await kbnServer.savedObjects.clean({
+    types: ['action', 'action_task_params', 'connector_token'],
+  });
+};
+
 export const deleteAllAlertingData = async ({ kbnServer }: { kbnServer: KbnClient }) => {
-  return deleteAllAlertingSO({ kbnServer });
+  await deleteAllAlertingSO({ kbnServer });
+  await deleteAllActionSO({ kbnServer });
 };
