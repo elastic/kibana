@@ -68,6 +68,7 @@ import type {
   PatchRuleRequestBody,
   RuleCreateProps,
   RuleObjectId,
+  RuleToImport,
   RuleUpdateProps,
 } from '../../../../../../common/api/detection_engine';
 import { convertCreateAPIToInternalSchema } from '../..';
@@ -86,6 +87,7 @@ interface CreateRuleOptions {
   id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
+  allowMissingConnectorSecrets?: boolean;
 }
 interface CreateCustomRuleProps {
   params: RuleCreateProps;
@@ -94,10 +96,12 @@ interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-interface UpdateRuleProps {
-  existingRule: RuleAlertType | null;
+interface _UpdateRuleProps {
+  existingRule: RuleAlertType;
   ruleUpdate: RuleUpdateProps;
 }
+
+type UpdateRuleProps = _UpdateRuleProps;
 
 interface _PatchRuleProps {
   existingRule: RuleAlertType;
@@ -114,12 +118,27 @@ interface UpgradePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
+interface ImportRuleOptions {
+  allowMissingConnectorSecrets?: boolean;
+}
+
+interface ImportNewRuleProps {
+  ruleToImport: RuleToImport;
+  options?: ImportRuleOptions;
+}
+
+interface ImportExistingRuleProps {
+  ruleToImport: RuleToImport;
+  existingRule: RuleAlertType;
+}
+
 // TODOs:
 // 1. Refactor `convertCreateAPIToInternalSchema` to take a first argument of input/params and then options object
-// 2. Check if the options passed to rule creation didn't change in the refactor. Cases
+// 2. Check if the options (enabled!) passed to rule creation didn't change in the refactor. Cases
 //    a. When creating a custom rule
 //    b. When creating a prebuilt rule
 //    c. When upgrading a prebuilt rule with type change
+// 3. Check that when patching
 
 export class RulesManagementClient {
   private readonly rulesClient: RulesClient;
@@ -152,22 +171,10 @@ export class RulesManagementClient {
   };
 
   // 3.  UPDATE RULE
-  public updateRule = async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType | null> => {
+  public updateRule = async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType> => {
     const { ruleUpdate, existingRule } = updateRulePayload;
 
-    if (existingRule == null) {
-      return null;
-    }
-
-    const newInternalRule = convertUpdateAPIToInternalSchema({
-      existingRule,
-      ruleUpdate,
-    });
-
-    const update = await this.rulesClient.update({
-      id: existingRule.id,
-      data: newInternalRule,
-    });
+    const update = await this._updateRule({ ruleUpdate, existingRule });
 
     const enabled = ruleUpdate.enabled ?? true;
     await this._toggleRuleEnabledOnUpdate(existingRule, ruleUpdate.enabled ?? false);
@@ -231,6 +238,27 @@ export class RulesManagementClient {
     return updatedRule;
   };
 
+  // 12. IMPORT RULE
+  public importNewRule = async (importRulePayload: ImportNewRuleProps): Promise<RuleAlertType> => {
+    const { ruleToImport, options } = importRulePayload;
+
+    return this._createRule(ruleToImport, {
+      immutable: false,
+      allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
+    });
+  };
+
+  public importExistingRule = async (
+    importRulePayload: ImportExistingRuleProps
+  ): Promise<RuleAlertType> => {
+    const { ruleToImport, existingRule } = importRulePayload;
+
+    return this._updateRule({
+      existingRule,
+      ruleUpdate: ruleToImport,
+    });
+  };
+
   private _createRule = async (params: RuleCreateProps, options: CreateRuleOptions) => {
     const rulesClientCreateRuleOptions = options.id ? { id: options.id } : {};
 
@@ -238,13 +266,31 @@ export class RulesManagementClient {
     const rule = await this.rulesClient.create<RuleParams>({
       data: internalRule,
       options: rulesClientCreateRuleOptions,
+      allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
     });
 
     return rule;
   };
 
-  private _patchRule = async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
+  private _updateRule = async (updateRulePayload: _UpdateRuleProps): Promise<RuleAlertType> => {
+    const { ruleUpdate, existingRule } = updateRulePayload;
+
+    const newInternalRule = convertUpdateAPIToInternalSchema({
+      existingRule,
+      ruleUpdate,
+    });
+
+    const update = await this.rulesClient.update({
+      id: existingRule.id,
+      data: newInternalRule,
+    });
+
+    return update;
+  };
+
+  private _patchRule = async (patchRulePayload: _PatchRuleProps): Promise<RuleAlertType> => {
     const { nextParams, existingRule } = patchRulePayload;
+
     const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
 
     const update = await this.rulesClient.update({

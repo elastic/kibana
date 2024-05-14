@@ -17,12 +17,11 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
-import { createRules } from '../crud/create_rules';
 import { readRules } from '../crud/read_rules';
-import { updateRules } from '../crud/update_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import type { RulesManagementClient } from '../crud/rules_management_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -41,6 +40,7 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param rulesClient {object}
+ * @param rulesManagementClient {object}
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -51,6 +51,7 @@ export const importRules = async ({
   mlAuthz,
   overwriteRules,
   rulesClient,
+  rulesManagementClient,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
@@ -59,6 +60,7 @@ export const importRules = async ({
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesClient: RulesClient;
+  rulesManagementClient: RulesManagementClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -104,26 +106,26 @@ export const importRules = async ({
               });
 
               if (rule == null) {
-                await createRules({
-                  rulesClient,
-                  params: {
+                await rulesManagementClient.importNewRule({
+                  ruleToImport: {
                     ...parsedRule,
                     exceptions_list: [...exceptions],
                   },
-                  allowMissingConnectorSecrets,
+                  options: {
+                    allowMissingConnectorSecrets,
+                  },
                 });
                 resolve({
                   rule_id: parsedRule.rule_id,
                   status_code: 200,
                 });
               } else if (rule != null && overwriteRules) {
-                await updateRules({
-                  rulesClient,
-                  existingRule: rule,
-                  ruleUpdate: {
+                await rulesManagementClient.importExistingRule({
+                  ruleToImport: {
                     ...parsedRule,
                     exceptions_list: [...exceptions],
                   },
+                  existingRule: rule,
                 });
                 resolve({
                   rule_id: parsedRule.rule_id,

@@ -34,6 +34,7 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -81,6 +82,7 @@ export const importRulesRoute = (
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -169,6 +171,7 @@ export const importRulesRoute = (
             mlAuthz,
             overwriteRules: request.query.overwrite,
             rulesClient,
+            rulesManagementClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });

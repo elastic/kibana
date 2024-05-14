@@ -24,7 +24,7 @@ import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptio
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -53,9 +53,9 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
-          const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
-          const rulesManagementClient = getRulesManagementClient();
+          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
@@ -80,6 +80,14 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             id: request.body.id,
           });
 
+          if (existingRule == null) {
+            const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          }
+
           await validateResponseActionsPermissions(
             ctx.securitySolution,
             request.body,
@@ -87,7 +95,6 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           );
 
           const rule = await rulesManagementClient.updateRule({
-            rulesClient,
             existingRule,
             ruleUpdate: request.body,
           });

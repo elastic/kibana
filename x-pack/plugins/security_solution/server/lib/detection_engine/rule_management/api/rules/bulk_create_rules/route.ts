@@ -70,9 +70,9 @@ export const bulkCreateRulesRoute = (
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
 
-          const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
-          const rulesManagementClient = new RulesManagementClient();
+          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
