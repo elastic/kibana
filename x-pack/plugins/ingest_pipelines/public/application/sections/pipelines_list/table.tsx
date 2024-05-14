@@ -68,18 +68,6 @@ const defaultFilterOptions: EuiSelectableOption[] = [
   { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
 ];
 
-// Serializer function
-function serializeOptions(options: any) {
-  return qs.stringify({ filterOptions: options }, { encode: false });
-}
-
-// Deserializer function
-function deserializeOptions(queryString: string) {
-  const parsed = qs.parse(queryString);
-  return parsed.filterOptions || [];
-}
-
-
 type ExtendedOption = Omit<EuiSelectableOption, 'checked'> & { checked: 'unset' | 'on' | 'off' };
 type ExtendedOptions = Partial<ExtendedOption>[];
 
@@ -123,10 +111,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const filteredPipelines = useMemo(() => {
+    // Filter pipelines list by whatever the user entered in the search bar
     const filteredPipelines = (pipelines || []).filter((pipeline) => {
       return pipeline.name.toLowerCase().includes(queryText.toLowerCase());
     });
 
+    // Then filter those results down with the selected options from the filter dropdown
     return filteredPipelines.filter((pipeline) => {
       const deprecatedFilter = filterOptions.find(({ key }) => key === 'deprecated')?.checked;
       const managedFilter = filterOptions.find(({ key }) => key === 'managed')?.checked;
@@ -147,20 +137,24 @@ export const PipelineTable: FunctionComponent<Props> = ({
     if (queryText) {
       setQueryText(queryText as string);
     }
+    if (filterOptions) {
+      setFilterOptions(deserializeFilterOptions(filterOptions as ExtendedOptions));
+    }
   }, []);
 
   useEffect(() => {
     const serializedFilterOptions = serializeFilterOptions(filterOptions);
-    const isDefaultFilterConfiguration = isEmpty(queryText) && isDefaultFilterOptions(serializedFilterOptions);
+    const isQueryEmpty = isEmpty(queryText);
+    const isDefaultFilters = isDefaultFilterOptions(serializedFilterOptions);
+    const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
     if (isDefaultFilterConfiguration) {
       history.push('');
     } else {
-      history.push(history.location.pathname + '?' + qs.stringify({ queryText }, { encode: false }));
-      // console.log(qs.stringify({
-        // queryText,
-        // filterOptions: serializedFilterOptions,
-      // }, { encode: false }));
+      history.push(history.location.pathname + '?' + qs.stringify({
+        ...(!isQueryEmpty ? { queryText } : {}),
+        ...(!isDefaultFilters ? { filterOptions: serializedFilterOptions } : {}),
+      }, { encode: false }));
     }
   }, [queryText, filterOptions]);
 
