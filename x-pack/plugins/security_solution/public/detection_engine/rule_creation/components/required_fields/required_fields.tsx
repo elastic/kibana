@@ -145,7 +145,7 @@ const RequiredFieldsList = ({
     typeWarning: typeWarnings[`${name}-${type}`] || '',
   });
 
-  const hasEmptyFieldName = !!fieldValue.find(({ name }) => name === '');
+  const hasEmptyFieldName = fieldValue.some(({ name }) => name === '');
 
   const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
 
