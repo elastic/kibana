@@ -109,7 +109,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
       const latestMs = dateMath.parse(args.end, { roundUp: true })?.valueOf();
 
       if (earliestMs === undefined || latestMs === undefined) {
-        return { content: 'Could not parse time range.', data: { significantItems: [] } };
+        return { content: 'Could not parse time range.', data: {} };
       }
       const delta = latestMs - earliestMs;
       const dayMs = 86400 * 1000;
@@ -338,11 +338,13 @@ export function registerGetAiopsLogRateAnalysisFunction({
               type: type === 'keyword' ? 'metadata' : 'log message pattern',
               documentCount: doc_count,
               baselineCount: bg_count,
+              logIncreaseSort: bg_count > 0 ? doc_count / bg_count : doc_count,
               logIncrease:
                 bg_count > 0
                   ? `${Math.round((doc_count / bg_count) * 100) / 100}x increase`
-                  : `${doc_count} documents up from 0 documents in baseline`,
-            })),
+                  : `${doc_count} docs up from 0 in baseline`,
+            }))
+            .sort((a, b) => b.logIncreaseSort - a.logIncreaseSort),
         },
         data: {
           dateHistogram: buckets,
@@ -359,7 +361,6 @@ export function registerGetAiopsLogRateAnalysisFunction({
             },
           })}`,
           logRateChange,
-          significantItems: [...significantTerms, ...significantCategories],
         },
       };
     }

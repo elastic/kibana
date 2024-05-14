@@ -9,10 +9,12 @@ import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 export interface AiopsApiPluginSetupDeps {
   data: PluginSetup;
@@ -24,6 +26,8 @@ export interface AiopsApiPluginSetupDeps {
 
 export interface AiopsApiPluginStartDeps {
   data: PluginStart;
+  fieldFormats: FieldFormatsStart;
+  uiSettings: IUiSettingsClient;
   observabilityAIAssistant: ObservabilityAIAssistantServerStart;
 }
 

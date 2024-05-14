@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantItem } from '@kbn/ml-agg-utils';
-
 export interface GetAiopsLogRateAnalysisFunctionResponse {
   content:
     | string
@@ -41,6 +39,5 @@ export interface GetAiopsLogRateAnalysisFunctionResponse {
       documentSamplingFactorForAnalysis?: number;
       extendedChangePoint: { startTs: number; endTs: number };
     };
-    significantItems: SignificantItem[];
   };
 }

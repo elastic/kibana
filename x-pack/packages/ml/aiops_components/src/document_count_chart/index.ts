@@ -15,3 +15,4 @@ export type {
   DocumentCountChartProps,
 } from './document_count_chart';
 export { documentCountChartOverallSeriesName } from './i18n';
+export { SimpleDocumentCountChart } from './simple_document_count_chart';

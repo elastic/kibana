@@ -7,89 +7,44 @@
 
 import React from 'react';
 
-import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-
-import type { AiopsApiPluginStartDeps } from '../types';
+import { SimpleDocumentCountChart, NARROW_COLUMN_WIDTH } from '@kbn/aiops-components';
 
 import type { GetAiopsLogRateAnalysisFunctionResponse } from '../../common/types';
 
-const LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR = 'orange';
-const SPEC_ID = 'document_count';
-const NARROW_COLUMN_WIDTH = '120px';
-
-const overallSeriesName = i18n.translate(
-  'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
-  {
-    defaultMessage: 'document count',
-  }
-);
+import type { AiopsApiPluginStartDeps } from '../types';
 
 export function registerLogRateAnalysisRenderFunction({
+  coreStart,
   registerRenderFunction,
   pluginsStart,
 }: {
+  coreStart: CoreStart;
   registerRenderFunction: RegisterRenderFunctionDefinition;
   pluginsStart: AiopsApiPluginStartDeps;
 }) {
-  console.log('REGISTER FUNCTION');
   const renderFunction: RenderFunction<{}, GetAiopsLogRateAnalysisFunctionResponse> = ({
     arguments: args,
     response,
   }) => {
-    console.log('response', response);
-
     if (typeof response.content === 'string') {
       return null;
     }
-
-    // CHART
-
-    const adjustedChartPoints = Object.entries(response.data.dateHistogram).map(
-      ([time, value]) => ({
-        time: Number(time),
-        value,
-      })
-    );
-
-    // const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
-    const useLegacyTimeAxis = false;
-
-    const barStyle = {
-      rect: {
-        opacity: 1,
-        fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
-      },
-    };
-
-    const extendedChangePoint = response.data.logRateChange.extendedChangePoint;
-
-    // Used to highlight an auto-detected change point in the date histogram.
-    const barStyleAccessor: BarStyleAccessor = (d, g) => {
-      return g.specId === 'document_count' &&
-        extendedChangePoint &&
-        d.x > extendedChangePoint.startTs &&
-        d.x < extendedChangePoint.endTs
-        ? barStyle
-        : null;
-    };
-
-    // TABLE
 
     const tableItems = response.content.significantItems;
 
     const columns: Array<EuiBasicTableColumn<typeof tableItems[0]>> = [
       {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
+        width: NARROW_COLUMN_WIDTH,
         field: 'field',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameLabel', {
           defaultMessage: 'Field name',
@@ -140,70 +95,38 @@ export function registerLogRateAnalysisRenderFunction({
       },
     ];
 
-    const sorting = {
-      sort: {
-        field: 'logIncrease',
-        direction: 'desc' as const,
-      },
-    };
-
     return (
       <div css={{ width: '100%' }} data-test-subj={'aiopsDocumentCountChart'}>
-        <Chart
-          size={{
-            width: '100%',
-            height: 120,
+        <SimpleDocumentCountChart
+          dependencies={{
+            charts: pluginsStart.charts,
+            fieldFormats: pluginsStart.fieldFormats,
+            uiSettings: coreStart.uiSettings,
           }}
-        >
-          <Settings
-            // baseTheme={chartBaseTheme}
-            baseTheme={undefined}
-            showLegend={false}
-            showLegendExtra={false}
-            locale={i18n.getLocale()}
-          />
-          <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
-          <Axis
-            id="aiops-histogram-bottom-axis"
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            // tickFormat={(value) => xAxisFormatter.convert(value)}
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
-          />
-          {adjustedChartPoints?.length && (
-            <HistogramBarSeries
-              id={SPEC_ID}
-              name={overallSeriesName}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="time"
-              yAccessors={['value']}
-              stackAccessors={['true']}
-              data={adjustedChartPoints}
-              // timeZone={timeZone}
-              // color={barColor}
-              yNice
-              styleAccessor={barStyleAccessor}
-            />
-          )}
-        </Chart>
+          dateHistogram={response.data.dateHistogram}
+          changePoint={{
+            ...response.data.logRateChange.extendedChangePoint,
+            key: 0,
+            type: 'spike',
+          }}
+        />
         <EuiSpacer size="s" />
         <EuiInMemoryTable
           data-test-subj="aiopsLogRateAnalysisResultsTable"
           compressed
           columns={columns}
-          items={tableItems}
+          items={tableItems.splice(0, 5)}
           loading={false}
-          sorting={sorting}
-          pagination={{ initialPageSize: 5, pageSizeOptions: [5, 10, 20] }}
+          sorting={false}
+          pagination={false}
         />
         <EuiSpacer size="s" />
         <p>
           <small>
-            More analysis options available in{' '}
-            <a href={response.data.logRateAnalysisUILink}>Log Rate Analysis</a>.
+            Showing the top 5 statistically significant log rate change contributors. A view with
+            all results is available in{' '}
+            <a href={response.data.logRateAnalysisUILink}>Log Rate Analysis</a>. The AI assistant
+            considers all results.
           </small>
         </p>
       </div>
