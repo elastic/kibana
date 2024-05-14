@@ -333,9 +333,10 @@ export const useEnterpriseSearchAnalyticsNav = (
     explorer: string;
     integration: string;
     overview: string;
-  }
+  },
+  alwaysReturn?: boolean
 ) => {
-  const navItems = useEnterpriseSearchNav();
+  const navItems = useEnterpriseSearchNav(alwaysReturn);
 
   if (!navItems) return undefined;
 

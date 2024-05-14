@@ -17,6 +17,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 export interface DynamicSideNavItems {
+  collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
 }
@@ -71,7 +72,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps }) => {
+      map(({ indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             { type: 'recentlyAccessed' },
@@ -112,18 +113,14 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
-                        if (!indices) {
-                          return pathNameSerialized.startsWith(
-                            prepend(`/app/enterprise_search/content/search_indices`)
-                          );
-                        }
-                        const someSubItemSelected = indices.some((index) =>
+                        const someSubItemSelected = indices?.some((index) =>
                           index.items?.some((item) => item.isSelected)
                         );
 
                         if (someSubItemSelected) return false;
 
-                        return pathNameSerialized.startsWith(
+                        return (
+                          pathNameSerialized ===
                           prepend(`/app/enterprise_search/content/search_indices`)
                         );
                       },
@@ -151,6 +148,18 @@ export const getNavigationTreeDefinition = ({
                       link: 'enterpriseSearchApplications:playground',
                     },
                     {
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        const someSubItemSelected = searchApps?.some((app) =>
+                          app.items?.some((item) => item.isSelected)
+                        );
+
+                        if (someSubItemSelected) return false;
+
+                        return (
+                          pathNameSerialized ===
+                          prepend(`/app/enterprise_search/applications/search_applications`)
+                        );
+                      },
                       link: 'enterpriseSearchApplications:searchApplications',
                       renderAs: 'item',
                       title: i18n.translate(
@@ -168,7 +177,24 @@ export const getNavigationTreeDefinition = ({
                         : {}),
                     },
                     {
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        const someSubItemSelected = collections?.some((collection) =>
+                          collection.items?.some((item) => item.isSelected)
+                        );
+
+                        if (someSubItemSelected) return false;
+
+                        return pathNameSerialized === prepend(`/app/enterprise_search/analytics`);
+                      },
                       link: 'enterpriseSearchAnalytics',
+                      renderAs: 'item',
+                      ...(collections
+                        ? {
+                            children: collections.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                   ],
                   id: 'build',
