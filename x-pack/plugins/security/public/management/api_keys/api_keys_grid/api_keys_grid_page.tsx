@@ -210,7 +210,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
       canManageOwnApiKeys,
       canManageCrossClusterApiKeys,
       aggregationTotal: totalKeys,
-      total: queryTotal,
+      total: filteredItemTotal,
       queryError,
     },
     currentUser,
@@ -221,11 +221,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
     : [];
 
   const displayedPageCount =
-    totalKeys > MAX_PAGINATED_ITEMS && queryTotal > MAX_PAGINATED_ITEMS
+    totalKeys > MAX_PAGINATED_ITEMS && filteredItemTotal > MAX_PAGINATED_ITEMS
       ? MAX_PAGINATED_ITEMS
-      : totalKeys <= MAX_PAGINATED_ITEMS || totalKeys === queryTotal
+      : totalKeys <= MAX_PAGINATED_ITEMS || totalKeys === filteredItemTotal
       ? totalKeys
-      : queryTotal;
+      : filteredItemTotal;
 
   const pagination = {
     pageIndex: tableState.from / tableState.size,
@@ -325,7 +325,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           />
           <EuiSpacer />
           <KibanaPageTemplate.Section paddingSize="none">
-            {createdApiKey && !state.loading && (
+            {createdApiKey && (
               <>
                 <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
                 <EuiSpacer />
@@ -369,7 +369,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   canManageOwnApiKeys={canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
-                  totalItemCount={totalKeys}
+                  totalItemCount={filteredItemTotal}
                   pagination={pagination}
                   onTableChange={onTableChange}
                   onSearchChange={onSearchChange}
