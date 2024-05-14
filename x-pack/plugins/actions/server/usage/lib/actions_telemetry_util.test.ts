@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getInMemoryActions, getActions, getActionExecutions } from './actions_telemetry_util';
+import {
+  getInMemoryActions,
+  getActions,
+  getActionExecutions,
+  getActionsCount,
+} from './actions_telemetry_util';
 
 describe('Actions Telemetry Util', () => {
   describe('getInMemoryActions', () => {
@@ -105,20 +110,17 @@ describe('Actions Telemetry Util', () => {
   describe('getActionsCount', () => {
     test('should correctly parse action count bucket results', () => {
       expect(
-        getActionExecutions([
+        getActionsCount([
           { key: '.index', doc_count: 1 },
-          { key: '.server-log', doc_count: 1 },
-          { key: 'some.type', doc_count: 1 },
-          { key: 'another.type.', doc_count: 1 },
+          { key: '.server-log', doc_count: 3 },
+          { key: 'some.type', doc_count: 2 },
+          { key: 'another.type.', doc_count: 4 },
         ])
       ).toEqual({
-        connectorTypes: {
-          '.index': 1,
-          '.server-log': 1,
-          'another.type.': 1,
-          'some.type': 1,
-        },
-        total: 4,
+        '.index': 1,
+        '.server-log': 3,
+        'another.type.': 4,
+        'some.type': 2,
       });
     });
   });
