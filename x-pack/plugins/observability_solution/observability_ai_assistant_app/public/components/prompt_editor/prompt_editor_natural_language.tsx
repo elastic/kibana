@@ -149,12 +149,7 @@ export function PromptEditorNaturalLanguage({
         singleSelection
         onChange={handleSelectOption}
       >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
+        {(list) => <>{list}</>}
       </EuiSelectable>
     </EuiInputPopover>
   );
