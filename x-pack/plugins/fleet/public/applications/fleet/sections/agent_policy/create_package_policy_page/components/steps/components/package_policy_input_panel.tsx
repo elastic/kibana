@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import type {
-  NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicyInputStream,
@@ -74,10 +73,8 @@ export const shouldShowStreamsByDefault = (
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
   packageInputStreams: RegistryStreamWithDataStream[];
   packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
@@ -88,8 +85,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     packageInfo,
     packageInputStreams,
     packagePolicyInput,
-    packagePolicy,
-    updatePackagePolicy,
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
@@ -222,10 +217,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
                   packageInfo={packageInfo}
-                  packagePolicy={packagePolicy}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
-                  updatePackagePolicy={updatePackagePolicy}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

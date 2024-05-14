@@ -33,7 +33,6 @@ import {
 } from '../../../../../../../../../common/services';
 
 import type {
-  NewPackagePolicy,
   NewPackagePolicyInputStream,
   PackageInfo,
   RegistryStreamWithDataStream,
@@ -57,11 +56,9 @@ const ScrollAnchor = styled.div`
 `;
 
 interface Props {
-  packagePolicy: NewPackagePolicy;
   packageInputStream: RegistryStreamWithDataStream;
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
@@ -70,11 +67,9 @@ interface Props {
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
   ({
-    packagePolicy,
     packageInputStream,
     packageInfo,
     packagePolicyInputStream,
-    updatePackagePolicy,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
