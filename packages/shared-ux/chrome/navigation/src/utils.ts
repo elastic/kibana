@@ -19,8 +19,15 @@ function isSamePath(pathA: string | null, pathB: string | null) {
   return pathA === pathB;
 }
 
-export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
+export function isActiveFromUrl(
+  nodePath: string,
+  activeNodes: ChromeProjectNavigationNode[][],
+  onlyIfHighestMatch = false
+) {
   return activeNodes.reduce((acc, nodesBranch) => {
-    return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
+    if (acc === true) return true;
+    return onlyIfHighestMatch
+      ? isSamePath(nodesBranch[nodesBranch.length - 1].path, nodePath)
+      : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
   }, false);
 }

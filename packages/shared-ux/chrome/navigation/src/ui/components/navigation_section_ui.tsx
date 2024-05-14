@@ -182,13 +182,23 @@ const nodeToEuiCollapsibleNavProps = (
   isVisible: boolean;
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
-  const isActive = isActiveFromUrl(navNode.path, activeNodes);
-  const { id, path, href, renderAs, onClick: customOnClick } = navNode;
-  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const { id, path, href, renderAs, onClick: customOnClick, isCollapsible } = navNode;
   const isAccordion = hasChildren && !isItem;
+
+  // If the node is an accordion and it is not collapsible, we only want to mark it as active
+  // if it is the highest match in the URL, not if one of its children is also active.
+  const onlyIfHighestMatch = isAccordion && !isCollapsible;
+  const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
+  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded =
     (itemsAccordionState[path]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
-  const isSelected = isAccordion && isAccordionExpanded ? false : isActive;
+  let isSelected = isActive;
+
+  if (isAccordion && isAccordionExpanded) {
+    // For accordions that are collapsible, we don't want to mark the parent button as selected
+    // when it is expanded. If the accordion is **not** collapsible then we do.
+    isSelected = isCollapsible ? false : isActive;
+  }
 
   const dataTestSubj = getTestSubj(navNode, isSelected);
 
@@ -219,9 +229,15 @@ const nodeToEuiCollapsibleNavProps = (
     return { items, isVisible: true };
   }
 
-  const onClick = (e: React.MouseEvent) => {
+  const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    if (customOnClick !== undefined) {
+      customOnClick(e);
+      return;
+    }
+
     if (href !== undefined) {
       e.preventDefault();
+      e.stopPropagation();
       navigateToUrl(href);
       closePanel();
       return;
@@ -434,13 +450,16 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
         'data-test-subj': classNames(`accordionArrow`, `accordionArrow-${id}`),
       };
 
-      const updated: Partial<EuiAccordionProps> = {
+      const updated: Partial<EuiAccordionProps & { isCollapsible?: boolean }> = {
         ..._accordionProps,
         arrowProps,
+        isCollapsible,
         forceState,
-        onToggle: () => {
-          toggleAccordion(id);
-        },
+        onToggle: isCollapsible
+          ? () => {
+              toggleAccordion(id);
+            }
+          : undefined,
       };
 
       return updated;
@@ -535,7 +554,10 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           items: serializeAccordionItems(item.items),
           accordionProps:
             item.items !== undefined
-              ? getAccordionProps(item.path ?? item.id!, item.accordionProps)
+              ? getAccordionProps(item.path ?? item.id!, {
+                  onClick: item.onClick,
+                  ...item.accordionProps,
+                })
               : undefined,
         };
         return parsed;
