@@ -412,3 +412,32 @@ export const EVENT_ACTION_LABEL = i18n.translate(
     defaultMessage: 'Event action',
   }
 );
+
+export const ADDITIONAL_INFO = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoLabel',
+  {
+    defaultMessage: 'Additional info',
+  }
+);
+
+export const ADDITIONAL_INFO_HELP = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltip',
+  {
+    defaultMessage: 'Additional info help',
+  }
+);
+
+export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltipText',
+  {
+    defaultMessage:
+      'The additional info field was pre-filled with relevant internal data. Its value can be extended with additional information.',
+  }
+);
+
+export const ADDITIONAL_INFO_JSON_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoError',
+  {
+    defaultMessage: 'The additional info field does not have a valid JSON format.',
+  }
+);
