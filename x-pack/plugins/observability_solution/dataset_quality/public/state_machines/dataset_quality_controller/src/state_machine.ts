@@ -450,11 +450,18 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
         resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
         storeDataStreamStats: assign((_context, event) => {
-          return 'data' in event
-            ? {
-                dataStreamStats: event.data as DataStreamStat[],
-              }
-            : {};
+          if ('data' in event) {
+            const dataStreamStats = event.data as DataStreamStat[];
+
+            // Check if any DataStreamStat has null; to check for serverless
+            const isSizeStatsAvailable = dataStreamStats.some((stat) => stat.totalDocs !== null);
+
+            return {
+              dataStreamStats,
+              isSizeStatsAvailable,
+            };
+          }
+          return {};
         }),
         storeDegradedDocStats: assign((_context, event) => {
           return 'data' in event
