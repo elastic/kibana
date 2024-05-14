@@ -12,7 +12,7 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
-import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 
 interface QueryParams {
   load_from: string;
