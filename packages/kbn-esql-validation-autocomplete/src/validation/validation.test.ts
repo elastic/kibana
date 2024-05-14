@@ -571,8 +571,6 @@ describe('validation logic', () => {
         }
       }
 
-      // MOVE
-
       for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
@@ -1161,61 +1159,6 @@ describe('validation logic', () => {
               )[0].declaration
             } > 0`,
             [`WHERE does not support function ${name}`]
-          );
-        }
-      }
-
-      // MOVE
-      // Test that all functions work in where
-      const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
-        return signatures.some(
-          ({ returnType, params }) =>
-            ['number', 'string'].includes(returnType) &&
-            params.every(({ type }) => ['number', 'string'].includes(type))
-        );
-      });
-      for (const { name, signatures, ...rest } of numericOrStringFunctions) {
-        const supportedSignatures = signatures.filter(({ returnType }) =>
-          // TODO — not sure why the tests have this limitation... seems like any type
-          // that can be part of a boolean expression should be allowed in a where clause
-          ['number', 'string'].includes(returnType)
-        );
-        for (const { params, returnType, ...restSign } of supportedSignatures) {
-          const correctMapping = getFieldMapping(params);
-          testErrorsAndWarnings(
-            `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
-              // hijacking a bit this function to produce a function call
-              getFunctionSignatures(
-                {
-                  name,
-                  ...rest,
-                  signatures: [{ params: correctMapping, returnType, ...restSign }],
-                },
-                { withTypes: false }
-              )[0].declaration
-            }${returnType !== 'number' ? ')' : ''} > 0`,
-            []
-          );
-
-          const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
-            name,
-            signatures,
-            params,
-            { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
-          );
-          testErrorsAndWarnings(
-            `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
-              // hijacking a bit this function to produce a function call
-              getFunctionSignatures(
-                {
-                  name,
-                  ...rest,
-                  signatures: [{ params: wrongFieldMapping, returnType, ...restSign }],
-                },
-                { withTypes: false }
-              )[0].declaration
-            }${returnType !== 'number' ? ')' : ''} > 0`,
-            expectedErrors
           );
         }
       }

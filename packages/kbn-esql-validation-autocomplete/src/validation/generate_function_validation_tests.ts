@@ -252,94 +252,152 @@ function generateIncorrectlyTypedParameters(
   return { wrongFieldMapping, expectedErrors };
 }
 
-function main() {
-  const testCases: Map<string, string[]> = new Map();
+function generateRowCommandTestsForFunction(
+  { name, alias, signatures, ...defRest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  if (name === 'date_diff') return;
+  for (const { params, ...signRest } of signatures) {
+    // ROW command stuff
+    const fieldMapping = getFieldMapping(params);
+    const signatureStringCorrect = tweakSignatureForRowCommand(
+      getFunctionSignatures(
+        { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+        { withTypes: false }
+      )[0].declaration
+    );
 
-  for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-    if (name === 'date_diff') continue;
-    for (const { params, ...signRest } of signatures) {
-      const fieldMapping = getFieldMapping(params);
-      const signatureStringCorrect = tweakSignatureForRowCommand(
-        getFunctionSignatures(
-          { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
-          { withTypes: false }
-        )[0].declaration
-      );
+    testCases.set(`row var = ${signatureStringCorrect}`, []);
+    testCases.set(`row ${signatureStringCorrect}`, []);
 
-      testCases.set(`row var = ${signatureStringCorrect}`, []);
-      testCases.set(`row ${signatureStringCorrect}`, []);
-
-      if (alias) {
-        for (const otherName of alias) {
-          const signatureStringWithAlias = tweakSignatureForRowCommand(
-            getFunctionSignatures(
-              {
-                name: otherName,
-                ...defRest,
-                signatures: [{ params: fieldMapping, ...signRest }],
-              },
-              { withTypes: false }
-            )[0].declaration
-          );
-
-          testCases.set(`row var = ${signatureStringWithAlias}`, []);
-        }
-      }
-
-      // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-      // to_version functions are a bit harder to test exactly a combination of argument and predict the
-      // the right error message
-      if (
-        params.every(({ type }) => type !== 'any') &&
-        ![
-          'to_version',
-          'mv_sort',
-          // skip the date functions because the row tests always throw in
-          // a string literal and expect it to be invalid for the date functions
-          // but it's always valid because ES will parse it as a date
-          'date_diff',
-          'date_extract',
-          'date_format',
-          'date_trunc',
-        ].includes(name)
-      ) {
-        // now test nested functions
-        const fieldMappingWithNestedFunctions = getFieldMapping(params, {
-          useNestedFunction: true,
-          useLiterals: true,
-        });
-        const signatureString = tweakSignatureForRowCommand(
+    if (alias) {
+      for (const otherName of alias) {
+        const signatureStringWithAlias = tweakSignatureForRowCommand(
           getFunctionSignatures(
             {
-              name,
+              name: otherName,
               ...defRest,
-              signatures: [{ params: fieldMappingWithNestedFunctions, ...signRest }],
+              signatures: [{ params: fieldMapping, ...signRest }],
             },
             { withTypes: false }
           )[0].declaration
         );
 
-        testCases.set(`row var = ${signatureString}`, []);
-
-        const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
-          name,
-          signatures,
-          params,
-          {
-            stringField: '"a"',
-            numberField: '5',
-            booleanField: 'true',
-          }
-        );
-        const wrongSignatureString = tweakSignatureForRowCommand(
-          getFunctionSignatures(
-            { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
-            { withTypes: false }
-          )[0].declaration
-        );
-        testCases.set(`row var = ${wrongSignatureString}`, expectedErrors);
+        testCases.set(`row var = ${signatureStringWithAlias}`, []);
       }
     }
+
+    // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
+    // to_version functions are a bit harder to test exactly a combination of argument and predict the
+    // the right error message
+    if (
+      params.every(({ type }) => type !== 'any') &&
+      ![
+        'to_version',
+        'mv_sort',
+        // skip the date functions because the row tests always throw in
+        // a string literal and expect it to be invalid for the date functions
+        // but it's always valid because ES will parse it as a date
+        'date_diff',
+        'date_extract',
+        'date_format',
+        'date_trunc',
+      ].includes(name)
+    ) {
+      // now test nested functions
+      const fieldMappingWithNestedFunctions = getFieldMapping(params, {
+        useNestedFunction: true,
+        useLiterals: true,
+      });
+      const signatureString = tweakSignatureForRowCommand(
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMappingWithNestedFunctions, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      );
+
+      testCases.set(`row var = ${signatureString}`, []);
+
+      const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
+        name,
+        signatures,
+        params,
+        {
+          stringField: '"a"',
+          numberField: '5',
+          booleanField: 'true',
+        }
+      );
+      const wrongSignatureString = tweakSignatureForRowCommand(
+        getFunctionSignatures(
+          { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
+          { withTypes: false }
+        )[0].declaration
+      );
+      testCases.set(`row var = ${wrongSignatureString}`, expectedErrors);
+    }
+  }
+}
+
+function generateWhereCommandTestsForFunction(
+  { name, signatures, ...rest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const supportedSignatures = signatures.filter(({ returnType }) =>
+    // TODO — not sure why the tests have this limitation... seems like any type
+    // that can be part of a boolean expression should be allowed in a where clause
+    ['number', 'string'].includes(returnType)
+  );
+  for (const { params, returnType, ...restSign } of supportedSignatures) {
+    const correctMapping = getFieldMapping(params);
+    testCases.set(
+      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+        // hijacking a bit this function to produce a function call
+        getFunctionSignatures(
+          {
+            name,
+            ...rest,
+            signatures: [{ params: correctMapping, returnType, ...restSign }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }${returnType !== 'number' ? ')' : ''} > 0`,
+      []
+    );
+
+    const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
+      name,
+      signatures,
+      params,
+      { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
+    );
+    testCases.set(
+      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+        // hijacking a bit this function to produce a function call
+        getFunctionSignatures(
+          {
+            name,
+            ...rest,
+            signatures: [{ params: wrongFieldMapping, returnType, ...restSign }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }${returnType !== 'number' ? ')' : ''} > 0`,
+      expectedErrors
+    );
+  }
+}
+
+function main() {
+  const testCases: Map<string, string[]> = new Map();
+
+  for (const definition of evalFunctionsDefinitions) {
+    generateRowCommandTestsForFunction(definition, testCases);
+    generateWhereCommandTestsForFunction(definition, testCases);
   }
 
   console.log(testCases);
