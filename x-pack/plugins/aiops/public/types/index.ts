@@ -19,7 +19,8 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableChangePointChartInput } from '../embeddable/embeddable_change_point_chart';
+import type { ChangePointDetectionSharedComponent } from '../shared_components';
+
 import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper';
 
 export interface AiopsPluginSetupDeps {
@@ -47,7 +48,7 @@ export interface AiopsPluginStartDeps {
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
-  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
   getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => Promise<boolean>>;
   PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
+  ChangePointDetectionComponent: ChangePointDetectionSharedComponent;
 }
