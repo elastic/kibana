@@ -13,6 +13,7 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
+  assistantAvailability?: AssistantAvailability;
   children: React.ReactNode;
 }
 
@@ -20,33 +21,31 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) => {
+export const MockAssistantProviderComponent: React.FC<Props> = ({
+  assistantAvailability,
+  children,
+}) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-  const mockAssistantAvailability: AssistantAvailability = {
+  const defaultAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
+    hasUpdateAIAssistantAnonymization: true,
     isAssistantEnabled: true,
   };
 
   return (
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
-      assistantAvailability={mockAssistantAvailability}
+      assistantAvailability={assistantAvailability ?? defaultAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn(() => [])}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
-      defaultAllow={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
       }}
-      defaultAllowReplacement={[]}
       getComments={jest.fn(() => [])}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
       http={mockHttp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
     >

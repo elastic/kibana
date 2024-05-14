@@ -22,7 +22,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
+import * as loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
 import { FieldIcon } from '@kbn/field-utils';
 import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
@@ -179,8 +179,10 @@ describe('Lens Field Item', () => {
   });
 
   beforeEach(() => {
-    (loadFieldStats as jest.Mock).mockReset();
-    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockReset();
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() =>
+      Promise.resolve({})
+    );
   });
 
   it('should display displayName of a field', async () => {
@@ -252,7 +254,7 @@ describe('Lens Field Item', () => {
   it('should pass add filter callback and pass result to filter manager', async () => {
     let resolveFunction: (arg: unknown) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -301,7 +303,7 @@ describe('Lens Field Item', () => {
     const dataViewField = new DataViewField(defaultProps.field);
     let resolveFunction: (arg: unknown) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -313,7 +315,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -356,7 +358,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledTimes(1);
 
     act(() => {
       const closePopover = wrapper.find(EuiPopover).prop('closePopover');
@@ -387,8 +389,8 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(2);
-    expect(loadFieldStats).toHaveBeenLastCalledWith({
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledTimes(2);
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenLastCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -426,7 +428,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
@@ -448,7 +450,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
@@ -471,7 +473,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe(

@@ -303,7 +303,7 @@ export const browserUptimeUI = {
     'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     revision: 1,
     secrets:
-      '{"params":"","source.inline.script":"lkjelre","source.project.content":"","source.zip_url.username":"","source.zip_url.password":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
+      '{"params":"","source.inline.script":"step()","source.project.content":"","source.zip_url.username":"","source.zip_url.password":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
   },
   references: [],
   coreMigrationVersion: '8.8.0',

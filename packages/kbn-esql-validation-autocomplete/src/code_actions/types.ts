@@ -31,3 +31,7 @@ export interface CodeAction {
     text: string;
   }>;
 }
+
+export interface CodeActionOptions {
+  relaxOnMissingCallbacks?: boolean;
+}

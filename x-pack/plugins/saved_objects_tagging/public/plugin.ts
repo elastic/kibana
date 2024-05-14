@@ -67,7 +67,7 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start({ http, application, overlays, theme, analytics, notifications }: CoreStart) {
+  public start({ http, application, analytics, ...startServices }: CoreStart) {
     this.tagCache = new TagsCache({
       refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
@@ -87,12 +87,11 @@ export class SavedObjectTaggingPlugin
       client: this.tagClient,
       cache: this.tagCache,
       ui: getUiApi({
+        ...startServices,
+        analytics,
         cache: this.tagCache,
         client: this.tagClient,
         capabilities: getTagsCapabilities(application.capabilities),
-        overlays,
-        theme,
-        notifications,
       }),
     };
   }

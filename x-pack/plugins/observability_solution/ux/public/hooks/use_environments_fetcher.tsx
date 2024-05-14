@@ -7,10 +7,7 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../../common/environment_filter_values';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
 import {
   getEnvironments,
@@ -63,10 +60,7 @@ export function useEnvironmentsFetcher({
     [esQueryResponse]
   );
 
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(environments),
-    [environments]
-  );
+  const environmentOptions = useMemo(() => getEnvironmentOptions(environments), [environments]);
 
   return { environments, loading, environmentOptions };
 }

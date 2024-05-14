@@ -17,8 +17,7 @@ export function useProfilingPlugin() {
     return callApmApi('GET /internal/apm/profiling/status');
   }, []);
 
-  const isProfilingAvailable =
-    isProfilingIntegrationEnabled && data?.initialized;
+  const isProfilingAvailable = isProfilingIntegrationEnabled && data?.initialized;
 
   return {
     profilingLocators: isProfilingAvailable

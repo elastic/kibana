@@ -6,6 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import type {
+  RiskScoresEntityCalculationRequest,
+  RiskScoresEntityCalculationResponse,
+} from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
@@ -19,6 +24,8 @@ import {
   ASSET_CRITICALITY_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  RISK_SCORE_ENTITY_CALCULATION_URL,
 } from '../../../common/constants';
 
 import type {
@@ -34,6 +41,9 @@ import type { RiskEngineSettingsResponse } from '../../../common/api/entity_anal
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
+export interface DeleteAssetCriticalityResponse {
+  deleted: true;
+}
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
@@ -93,6 +103,17 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Calculate and stores risk score for an entity
+     */
+    const calculateEntityRiskScore = (params: RiskScoresEntityCalculationRequest) => {
+      return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    };
+
+    /**
      * Get risk engine privileges
      */
     const fetchRiskEnginePrivileges = () =>
@@ -114,7 +135,9 @@ export const useEntityAnalyticsRoutes = () => {
      * Create asset criticality
      */
     const createAssetCriticality = async (
-      params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
+      params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
+        refresh?: 'wait_for';
+      }
     ): Promise<AssetCriticalityRecord> =>
       http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
         version: '1',
@@ -123,8 +146,22 @@ export const useEntityAnalyticsRoutes = () => {
           id_value: params.idValue,
           id_field: params.idField,
           criticality_level: params.criticalityLevel,
+          refresh: params.refresh,
         }),
       });
+
+    const deleteAssetCriticality = async (
+      params: Pick<AssetCriticality, 'idField' | 'idValue'> & { refresh?: 'wait_for' }
+    ): Promise<{ deleted: true }> => {
+      await http.fetch(ASSET_CRITICALITY_URL, {
+        version: '1',
+        method: 'DELETE',
+        query: { id_value: params.idValue, id_field: params.idField, refresh: params.refresh },
+      });
+
+      // spoof a response to allow us to better distnguish a delete from a create in use_asset_criticality.ts
+      return { deleted: true };
+    };
 
     /**
      * Get asset criticality
@@ -136,6 +173,24 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'GET',
         query: { id_value: params.idValue, id_field: params.idField },
+      });
+    };
+
+    const uploadAssetCriticalityFile = async (
+      fileContent: string,
+      fileName: string
+    ): Promise<AssetCriticalityCsvUploadResponse> => {
+      const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
+      const body = new FormData();
+      body.append('file', file);
+
+      return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
+        version: '1',
+        method: 'POST',
+        headers: {
+          'Content-Type': undefined, // Lets the browser set the appropriate content type
+        },
+        body,
       });
     };
 
@@ -178,9 +233,12 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
+      deleteAssetCriticality,
       fetchAssetCriticality,
+      uploadAssetCriticalityFile,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
+      calculateEntityRiskScore,
     };
   }, [http]);
 };

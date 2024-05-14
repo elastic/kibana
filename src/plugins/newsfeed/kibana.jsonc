@@ -9,8 +9,6 @@
     "requiredPlugins": [
       "screenshotMode"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

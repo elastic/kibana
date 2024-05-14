@@ -64,6 +64,8 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-security-browser-internal",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-user-profile-browser-internal",
   ],
   "exclude": [
     "target/**/*",

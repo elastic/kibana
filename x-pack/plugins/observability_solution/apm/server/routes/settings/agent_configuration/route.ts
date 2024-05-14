@@ -30,9 +30,7 @@ import { createInternalESClientWithResources } from '../../../lib/helpers/create
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
-function throwNotFoundIfAgentConfigNotAvailable(
-  featureFlags: ApmFeatureFlags
-): void {
+function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.agentConfigurationAvailable) {
     throw Boom.notFound();
   }
@@ -88,9 +86,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     });
 
     if (!exactConfig) {
-      logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
-      );
+      logger.info(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
@@ -126,16 +122,12 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       apmEventClient,
     });
     if (!exactConfig) {
-      logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
-      );
+      logger.info(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
 
-    logger.info(
-      `Deleting config ${service.name}/${service.environment} (${exactConfig.id})`
-    );
+    logger.info(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
 
     const deleteConfigurationResult = await deleteConfiguration({
       configurationId: exactConfig.id,
@@ -214,9 +206,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         internalESClient,
         telemetryUsageCounter,
       });
-      logger.info(
-        `Saved latest agent settings to Fleet integration policy for APM.`
-      );
+      logger.info(`Saved latest agent settings to Fleet integration policy for APM.`);
     }
   },
 });
@@ -242,15 +232,9 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
     const { params, logger } = resources;
 
-    const {
-      service,
-      etag,
-      mark_as_applied_by_agent: markAsAppliedByAgent,
-    } = params.body;
+    const { service, etag, mark_as_applied_by_agent: markAsAppliedByAgent } = params.body;
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient = await createInternalESClientWithResources(resources);
     const configuration = await searchConfigurations({
       service,
       internalESClient,
@@ -281,7 +265,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     );
 
     if (willMarkAsApplied) {
-      markAppliedByAgent({
+      await markAppliedByAgent({
         id: configuration._id,
         body: configuration._source,
         internalESClient,
@@ -324,9 +308,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getEnvironments({
       serviceName,
       internalESClient,

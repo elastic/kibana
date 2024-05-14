@@ -9,24 +9,54 @@ import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetActivitiesResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
-  NormalizedExternalConnectorClientExecuteOptions,
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
+import type {
   NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
+import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  SentinelOneActionRequestCommonMeta,
+  SentinelOneActivityEsDoc,
+  SentinelOneGetFileRequestMeta,
+  SentinelOneIsolationRequestMeta,
+  SentinelOneIsolationResponseMeta,
+} from '../../../../../../common/endpoint/types';
+import type {
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
@@ -48,28 +78,93 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
-  ): Promise<LogsEndpointAction> {
-    const agentId = actionRequest.endpoint_ids[0];
-    const agentDetails = await this.getAgentDetails(agentId);
+  private async handleResponseActionCreation<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      Partial<TMeta>
+    >
+  ): Promise<{
+    actionEsDoc: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+    actionDetails: ActionDetails<TOutputContent, TParameters>;
+  }> {
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >(reqIndexOptions);
 
-    return super.writeActionRequestToEndpointIndex({
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: reqIndexOptions.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    return {
+      actionEsDoc: actionRequestDoc,
+      actionDetails: await this.fetchActionDetails<ActionDetails<TOutputContent, TParameters>>(
+        actionRequestDoc.EndpointActions.action_id
+      ),
+    };
+  }
+
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      Partial<TMeta> // Partial<> because the common Meta properties are actually set in this method for all requests
+    >
+  ): Promise<
+    LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
+  > {
+    const agentUUID = actionRequest.endpoint_ids[0];
+    const agentDetails = await this.getAgentDetails(agentUUID);
+
+    const doc = await super.writeActionRequestToEndpointIndex<
+      TParameters,
+      TOutputContent,
+      TMeta & SentinelOneActionRequestCommonMeta
+    >({
       ...actionRequest,
       hosts: {
-        [agentId]: { name: agentDetails.computerName },
+        [agentUUID]: { name: agentDetails.computerName },
       },
+      meta: {
+        // Add common meta data
+        agentUUID,
+        agentId: agentDetails.id,
+        hostName: agentDetails.computerName,
+        ...(actionRequest.meta ?? {}),
+      } as TMeta & SentinelOneActionRequestCommonMeta,
     });
+
+    return doc;
   }
 
   /**
    * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
-  private async sendAction(
+  private async sendAction<T = unknown>(
     actionType: SUB_ACTION,
     actionParams: object
-  ): Promise<ActionTypeExecutorResult<unknown>> {
+  ): Promise<ActionTypeExecutorResult<T>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
         subAction: actionType,
@@ -97,11 +192,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
 
-    return actionSendResponse;
+    return actionSendResponse as ActionTypeExecutorResult<T>;
   }
 
   /** Gets agent details directly from SentinelOne */
-  private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
+  private async getAgentDetails(
+    agentUUID: string
+  ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
     const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
       SentinelOneGetAgentsParams,
       SUB_ACTION
@@ -109,23 +206,33 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       params: {
         subAction: SUB_ACTION.GET_AGENTS,
         subActionParams: {
-          uuid: id,
+          uuid: agentUUID,
         },
       },
     };
 
-    const s1ApiResponse: SentinelOneGetAgentsResponse | undefined = (
-      (await this.connectorActionsClient.execute(
-        executeOptions
-      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>
-    ).data;
+    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
-    this.log.debug(
-      `Response for SentinelOne agent id [${id}] returned:\n${stringify(s1ApiResponse)}`
-    );
+    try {
+      const response = (await this.connectorActionsClient.execute(
+        executeOptions
+      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
+
+      this.log.debug(
+        `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
+      );
+
+      s1ApiResponse = response.data;
+    } catch (err) {
+      throw new ResponseActionsClientError(
+        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]: ${err.message}`,
+        500,
+        err
+      );
+    }
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
-      throw new ResponseActionsClientError(`SentinelOne agent id [${id}] not found`, 404);
+      throw new ResponseActionsClientError(`SentinelOne agent id [${agentUUID}] not found`, 404);
     }
 
     return s1ApiResponse.data[0];
@@ -152,7 +259,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: IsolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      SentinelOneIsolationRequestMeta
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'isolate',
@@ -176,23 +287,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
-
-    if (!actionRequestDoc.error) {
+    if (
+      !actionRequestDoc.error &&
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
+    ) {
       await this.writeActionResponseToEndpointIndex({
         actionId: actionRequestDoc.EndpointActions.action_id,
         agentId: actionRequestDoc.agent.id,
@@ -200,16 +301,22 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
   }
 
   async release(
     actionRequest: IsolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      SentinelOneIsolationRequestMeta
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'unisolate',
@@ -233,23 +340,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
-
-    if (!actionRequestDoc.error) {
+    if (
+      !actionRequestDoc.error &&
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
+    ) {
       await this.writeActionResponseToEndpointIndex({
         actionId: actionRequestDoc.EndpointActions.action_id,
         agentId: actionRequestDoc.agent.id,
@@ -257,20 +354,341 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
+  }
+
+  async getFile(
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      ResponseActionGetFileParameters,
+      ResponseActionGetFileOutputContent,
+      Partial<SentinelOneGetFileRequestMeta>
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'get-file',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+      const timestamp = new Date().toISOString();
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
+            agentUUID: actionRequest.endpoint_ids[0],
+            files: [actionRequest.parameters.path],
+            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+          });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+
+      if (!error) {
+        const { id: agentId } = await this.getAgentDetails(actionRequest.endpoint_ids[0]);
+
+        const activitySearchCriteria: SentinelOneGetActivitiesParams = {
+          // Activity type for fetching a file from a host machine in SentinelOne:
+          // {
+          //   "id": 81
+          //   "action": "User Requested Fetch Files",
+          //   "descriptionTemplate": "The management user {{ username }} initiated a fetch file command to the agent {{ computer_name }} ({{ external_ip }}).",
+          // },
+          activityTypes: '81',
+          limit: 1,
+          sortBy: 'createdAt',
+          sortOrder: 'asc',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          createdAt__gte: timestamp,
+          agentIds: agentId,
+        };
+
+        // Fetch the Activity log entry for this get-file request and store needed data
+        const activityLogSearchResponse = await this.sendAction<
+          SentinelOneGetActivitiesResponse<{ commandBatchUuid: string }>
+        >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
+
+        this.log.debug(
+          `Search of activity log with:\n${stringify(
+            activitySearchCriteria
+          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
+        );
+
+        if (activityLogSearchResponse.data?.data.length) {
+          const activityLogItem = activityLogSearchResponse.data?.data[0];
+
+          reqIndexOptions.meta = {
+            commandBatchUuid: activityLogItem?.data.commandBatchUuid,
+            activityId: activityLogItem?.id,
+          };
+        } else {
+          this.log.warn(
+            `Unable to find a fetch file command entry in SentinelOne activity log. May be unable to complete response action`
+          );
+        }
+      }
+    }
+
+    return (
+      await this.handleResponseActionCreation<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >(reqIndexOptions)
+    ).actionDetails;
   }
 
   async processPendingActions({
     abortSignal,
     addToQueue,
   }: ProcessPendingActionsMethodOptions): Promise<void> {
-    // TODO:PT implement resolving of pending S1 actions
-    // if (abortSignal.aborted) {
-    //   return;
-    // }
-    // Dev test entry below
-    // await this.getAgentDetails('123').catch(() => {});
+    if (abortSignal.aborted) {
+      return;
+    }
+
+    for await (const pendingActions of this.fetchAllPendingActions()) {
+      if (abortSignal.aborted) {
+        return;
+      }
+
+      const pendingActionsByType = groupBy(pendingActions, 'EndpointActions.data.command');
+
+      for (const [actionType, typePendingActions] of Object.entries(pendingActionsByType)) {
+        if (abortSignal.aborted) {
+          return;
+        }
+
+        switch (actionType as ResponseActionsApiCommandNames) {
+          case 'isolate':
+          case 'unisolate':
+            {
+              const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
+                typePendingActions as Array<
+                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+                >,
+                actionType as 'isolate' | 'unisolate'
+              );
+              if (isolationResponseDocs.length) {
+                addToQueue(...isolationResponseDocs);
+              }
+            }
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Checks if the provided Isolate or Unisolate actions are complete and if so, then it builds the Response
+   * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
+   * @param actionRequests
+   * @param command
+   * @private
+   */
+  private async checkPendingIsolateOrReleaseActions(
+    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>,
+    command: ResponseActionsApiCommandNames & ('isolate' | 'unisolate')
+  ): Promise<LogsEndpointActionResponse[]> {
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const actionsByAgentId: {
+      [s1AgentId: string]: Array<
+        LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+      >;
+    } = {};
+    const warnings: string[] = [];
+
+    // Create the `OR` clause that filters for each agent id and an updated date of greater than the date when
+    // the isolate request was created
+    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce((acc, action) => {
+      const s1AgentId = action.meta?.agentId;
+
+      if (s1AgentId) {
+        if (!actionsByAgentId[s1AgentId]) {
+          actionsByAgentId[s1AgentId] = [];
+        }
+
+        actionsByAgentId[s1AgentId].push(action);
+
+        acc.push({
+          bool: {
+            filter: [
+              { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+              { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
+            ],
+          },
+        });
+      } else {
+        // This is an edge case and should never happen. But just in case :-)
+        warnings.push(
+          `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
+        );
+
+        completedResponses.push(
+          this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+            actionId: action.EndpointActions.action_id,
+            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+            data: { command },
+            error: {
+              message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
+            },
+          })
+        );
+      }
+
+      return acc;
+    }, [] as QueryDslQueryContainer[]);
+
+    if (agentListQuery.length > 0) {
+      const query: QueryDslQueryContainer = {
+        bool: {
+          must: [
+            {
+              terms: {
+                // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
+                'sentinel_one.activity.type':
+                  command === 'isolate'
+                    ? [
+                        // {
+                        //    "id": 1001
+                        //    "action": "Agent Disconnected From Network",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was disconnected from network.",
+                        // },
+                        1001,
+
+                        // {
+                        //    "id": 2010
+                        //    "action": "Agent Mitigation Report Quarantine Network Failed",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was unable to disconnect from network.",
+                        // },
+                        2010,
+                      ]
+                    : [
+                        // {
+                        //    "id": 1002
+                        //    "action": "Agent Reconnected To Network",
+                        //    "descriptionTemplate": "Agent {{ computer_name }} was connected to network.",
+                        // },
+                        1002,
+                      ],
+              },
+            },
+          ],
+          should: agentListQuery,
+          minimum_should_match: 1,
+        },
+      };
+
+      const searchRequestOptions: SearchRequest = {
+        index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+        query,
+        // There may be many documents for each host/agent, so we collapse it and only get back the
+        // first one that came in after the isolate request was sent
+        collapse: {
+          field: 'sentinel_one.activity.agent.id',
+          inner_hits: {
+            name: 'first_found',
+            size: 1,
+            sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
+          },
+        },
+        // we don't need the source. The document will be stored in `inner_hits.first_found`
+        // due to use of `collapse
+        _source: false,
+        sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
+        size: 1000,
+      };
+
+      this.log.debug(
+        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+          searchRequestOptions,
+          15
+        )}`
+      );
+
+      const searchResults = await this.options.esClient
+        .search<SentinelOneActivityEsDoc>(searchRequestOptions)
+        .catch(catchAndWrapError);
+
+      this.log.debug(
+        `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
+      );
+
+      for (const searchResultHit of searchResults.hits.hits) {
+        const isolateActivityResponseDoc = searchResultHit.inner_hits?.first_found.hits
+          .hits[0] as SearchHit<SentinelOneActivityEsDoc>;
+
+        if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
+          const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
+
+          const elasticDocId = isolateActivityResponseDoc._id;
+          const s1AgentId = s1ActivityData.agent.id;
+          const activityLogEntryId = s1ActivityData.id;
+          const activityLogEntryType = s1ActivityData.type;
+          const activityLogEntryDescription = s1ActivityData.description.primary;
+
+          for (const actionRequest of actionsByAgentId[s1AgentId]) {
+            completedResponses.push(
+              this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: { command },
+                error:
+                  activityLogEntryType === 2010 && command === 'isolate'
+                    ? {
+                        message:
+                          activityLogEntryDescription ??
+                          `Action failed. SentinelOne activity log entry [${activityLogEntryId}] has a 'type' value of 2010 indicating a failure to disconnect`,
+                      }
+                    : undefined,
+                meta: {
+                  elasticDocId,
+                  activityLogEntryId,
+                  activityLogEntryType,
+                  activityLogEntryDescription,
+                },
+              })
+            );
+          }
+        }
+      }
+    } else {
+      this.log.debug(`Nothing to search for. List of agents IDs is empty.`);
+    }
+
+    this.log.debug(
+      `${completedResponses.length} ${command} action responses generated:\n${stringify(
+        completedResponses
+      )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
   }
 }

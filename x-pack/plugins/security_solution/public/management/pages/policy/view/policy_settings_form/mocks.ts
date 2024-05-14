@@ -7,7 +7,10 @@
 
 import { set } from 'lodash';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import {
+  AntivirusRegistrationModes,
+  ProtectionModes,
+} from '../../../../../../common/endpoint/types';
 
 interface TestSubjGenerator {
   (suffix?: string): string;
@@ -106,8 +109,8 @@ export const getPolicySettingsFormTestSubjects = (
       lockedCard: attackSurfaceTestSubj('locked'),
       lockedCardTitle: attackSurfaceTestSubj('locked-title'),
       enableDisableSwitch: attackSurfaceTestSubj('enableDisableSwitch'),
+      switchLabel: attackSurfaceTestSubj('switchLabel'),
       osValues: attackSurfaceTestSubj('osValues'),
-      viewModeValue: attackSurfaceTestSubj('valueLabel'),
     },
 
     windowsEvents: {
@@ -143,9 +146,11 @@ export const getPolicySettingsFormTestSubjects = (
     },
     antivirusRegistration: {
       card: antivirusTestSubj(),
-      enableDisableSwitch: antivirusTestSubj('switch'),
+      radioButtons: antivirusTestSubj('radioButtons'),
+      disabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.disabled),
+      enabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.enabled),
+      syncRadioButton: antivirusTestSubj(AntivirusRegistrationModes.sync),
       osValueContainer: antivirusTestSubj('osValueContainer'),
-      viewOnlyValue: antivirusTestSubj('value'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),
@@ -168,12 +173,14 @@ export const getPolicySettingsFormTestSubjects = (
   };
 };
 
-export const expectIsViewOnly = (ele: HTMLElement): void => {
-  expect(
-    ele.querySelectorAll(
+export const expectIsViewOnly = (elem: HTMLElement): void => {
+  elem
+    .querySelectorAll(
       'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
     )
-  ).toHaveLength(0);
+    .forEach((inputElement) => {
+      expect(inputElement).toHaveAttribute('disabled');
+    });
 };
 
 /**
@@ -223,4 +230,23 @@ export const setMalwareMode = (
     set(policy, 'mac.malware.on_write_scan', enableValue);
     set(policy, 'linux.malware.on_write_scan', enableValue);
   }
+};
+
+export const setMalwareModeToDetect = (policy: PolicyConfig) => {
+  set(policy, 'windows.malware.mode', ProtectionModes.detect);
+  set(policy, 'mac.malware.mode', ProtectionModes.detect);
+  set(policy, 'linux.malware.mode', ProtectionModes.detect);
+
+  set(policy, 'windows.popup.malware.enabled', false);
+  set(policy, 'mac.popup.malware.enabled', false);
+  set(policy, 'linux.popup.malware.enabled', false);
+};
+
+export const setAntivirusRegistration = (
+  policy: PolicyConfig,
+  mode: AntivirusRegistrationModes,
+  enabled: boolean
+) => {
+  policy.windows.antivirus_registration.mode = mode;
+  policy.windows.antivirus_registration.enabled = enabled;
 };

@@ -6,11 +6,8 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import {
-  DataPublicPluginStart,
-  isRunningResponse,
-} from '@kbn/data-plugin/public';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import { IKibanaSearchRequest } from '@kbn/search-types';
 import {
   FetchDataParams,
   HasDataParams,
@@ -18,20 +15,14 @@ import {
   UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
-import {
-  inpQuery,
-  transformINPResponse,
-} from '../../../services/data/inp_query';
+import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import {
   coreWebVitalsQuery,
   transformCoreWebVitalsResponse,
   DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
-import {
-  formatHasRumResult,
-  hasRumDataQuery,
-} from '../../../services/data/has_rum_data_query';
+import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_rum_data_query';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -42,12 +33,9 @@ async function getCoreWebVitalsResponse({
   serviceName,
   dataStartPlugin,
 }: WithDataPlugin<FetchDataParams>) {
-  const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/index_pattern',
-    {
-      signal: null,
-    }
-  );
+  const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
+    signal: null,
+  });
 
   return await Promise.all([
     esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
@@ -83,12 +71,8 @@ const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
 export const fetchUxOverviewDate = async (
   params: WithDataPlugin<FetchDataParams>
 ): Promise<UxFetchDataResponse> => {
-  const [coreWebVitalsResponse, inpResponse] = await getCoreWebVitalsResponse(
-    params
-  );
-  const data =
-    transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
-    CORE_WEB_VITALS_DEFAULTS;
+  const [coreWebVitalsResponse, inpResponse] = await getCoreWebVitalsResponse(params);
+  const data = transformCoreWebVitalsResponse(coreWebVitalsResponse) ?? CORE_WEB_VITALS_DEFAULTS;
   const inpData = transformINPResponse(inpResponse);
   return {
     coreWebVitals: {
@@ -102,12 +86,9 @@ export const fetchUxOverviewDate = async (
 export async function hasRumData(
   params: WithDataPlugin<HasDataParams>
 ): Promise<UXHasDataResponse> {
-  const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/index_pattern',
-    {
-      signal: null,
-    }
-  );
+  const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
+    signal: null,
+  });
 
   const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
     params.dataStartPlugin,
@@ -122,10 +103,7 @@ export async function hasRumData(
     }
   );
 
-  return formatHasRumResult(
-    esQueryResponse,
-    dataViewResponse.apmDataViewIndexPattern
-  );
+  return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewIndexPattern);
 }
 
 async function esQuery<T>(
@@ -133,23 +111,21 @@ async function esQuery<T>(
   query: IKibanaSearchRequest<T> & { params: { index?: string } }
 ) {
   // @ts-expect-error upgrade typescript v4.9.5
-  return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: false }>>(
-    (resolve, reject) => {
-      const search$ = dataStartPlugin.search
-        .search(query, {
-          legacyHitsTotal: false,
-        })
-        .subscribe({
-          next: (result) => {
-            if (!isRunningResponse(result)) {
-              resolve(result.rawResponse as any);
-              search$.unsubscribe();
-            }
-          },
-          error: (err) => {
-            reject(err);
-          },
-        });
-    }
-  );
+  return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: false }>>((resolve, reject) => {
+    const search$ = dataStartPlugin.search
+      .search(query, {
+        legacyHitsTotal: false,
+      })
+      .subscribe({
+        next: (result) => {
+          if (!isRunningResponse(result)) {
+            resolve(result.rawResponse as any);
+            search$.unsubscribe();
+          }
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+  });
 }

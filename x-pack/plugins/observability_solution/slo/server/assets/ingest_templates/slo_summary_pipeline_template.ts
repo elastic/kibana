@@ -9,10 +9,10 @@ import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export const getSLOSummaryPipelineTemplate = (
-  slo: SLO,
+  slo: SLODefinition,
   spaceId: string,
   basePath: IBasePath
 ): IngestPutPipelineRequest => {
@@ -166,8 +166,10 @@ export const getSLOSummaryPipelineTemplate = (
           value: spaceId,
         },
       },
+      // >= 8.14:
       {
         set: {
+          description: 'Store the indicator params',
           field: 'slo.indicator.params',
           value: slo.indicator.params,
           ignore_failure: true,

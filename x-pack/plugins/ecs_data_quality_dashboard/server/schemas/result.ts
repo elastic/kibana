@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const ResultDocument = t.type({
+const ResultDocumentInterface = t.interface({
   batchId: t.string,
   indexName: t.string,
   isCheckAll: t.boolean,
@@ -22,12 +22,19 @@ export const ResultDocument = t.type({
   unallowedMappingFields: t.array(t.string),
   unallowedValueFields: t.array(t.string),
   sizeInBytes: t.number,
-  ilmPhase: t.string,
   markdownComments: t.array(t.string),
   ecsVersion: t.string,
-  indexId: t.string,
   error: t.union([t.string, t.null]),
 });
+
+const ResultDocumentOptional = t.partial({
+  indexPattern: t.string,
+  checkedBy: t.string,
+  indexId: t.string,
+  ilmPhase: t.string,
+});
+
+export const ResultDocument = t.intersection([ResultDocumentInterface, ResultDocumentOptional]);
 export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
 export const PostResultBody = ResultDocument;

@@ -39,9 +39,7 @@ export class EsLegacyConfigService {
 
   async readConfig(): Promise<ElasticsearchConfig> {
     if (!this.config$) {
-      throw new Error(
-        'Could not read elasticsearch config, this service has not been setup!'
-      );
+      throw new Error('Could not read elasticsearch config, this service has not been setup!');
     }
 
     if (!this.config) {

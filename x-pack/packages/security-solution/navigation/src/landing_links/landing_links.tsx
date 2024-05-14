@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import {
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -33,24 +32,11 @@ export const LandingLink: React.FC<LandingLinkProps> = React.memo(function Landi
   children,
   ...rest
 }) {
-  if (item.externalUrl != null) {
-    // Link to outside Kibana
-    const linkProps: EuiLinkAnchorProps = {
-      target: '_blank',
-      external: true,
-      href: item.externalUrl,
-      ...(onLinkClick && !item.disabled && { onClick: () => onLinkClick(item.id) }),
-      ...rest,
-    };
-    return <EuiLink {...linkProps}>{children}</EuiLink>;
-  } else {
-    // Kibana link
-    const linkProps = {
-      ...getKibanaLinkProps({ item, urlState, onLinkClick }),
-      ...rest,
-    };
-    return <LinkAnchor {...linkProps}>{children}</LinkAnchor>;
-  }
+  const linkProps = {
+    ...getKibanaLinkProps({ item, urlState, onLinkClick }),
+    ...rest,
+  };
+  return <LinkAnchor {...linkProps}>{children}</LinkAnchor>;
 });
 
 interface LandingLinksProps {

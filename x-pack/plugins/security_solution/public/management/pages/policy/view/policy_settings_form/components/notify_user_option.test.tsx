@@ -28,7 +28,7 @@ jest.mock('../../../../../../common/hooks/use_license');
 
 const useLicenseMock = _useLicense as jest.Mock;
 
-describe('Policy form Detect Prevent Protection level component', () => {
+describe('Policy form Notify User option component', () => {
   let formProps: NotifyUserOptionProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;

@@ -19,6 +19,7 @@ import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -52,4 +53,6 @@ export interface CoreStart {
   plugins: PluginsServiceStart;
   /** {@link SecurityServiceStart} */
   security: SecurityServiceStart;
+  /** {@link UserProfileServiceStart} */
+  userProfile: UserProfileServiceStart;
 }

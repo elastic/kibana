@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useMemo } from 'react';
+import React, { createContext, FC, PropsWithChildren, useMemo } from 'react';
 import { useSourcererDataView } from '../modules/indicators/hooks/use_sourcerer_data_view';
 
 export type FieldTypesContextValue = Record<string, string | undefined>;
@@ -15,7 +15,7 @@ export const FieldTypesContext = createContext<FieldTypesContextValue | undefine
 /**
  * Exposes mapped field types for threat intel shared use
  */
-export const FieldTypesProvider: FC = ({ children }) => {
+export const FieldTypesProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { indexPattern } = useSourcererDataView();
 
   // field name to field type map to allow the cell_renderer to format dates

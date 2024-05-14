@@ -45,7 +45,7 @@ const TopNContent = styled.div`
 `;
 
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  combinedQueries?: string;
+  filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
@@ -61,7 +61,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
 }
 
 const TopNComponent: React.FC<Props> = ({
-  combinedQueries,
+  filterQuery,
   defaultView,
   deleteQuery,
   filters,
@@ -115,7 +115,7 @@ const TopNComponent: React.FC<Props> = ({
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
-            combinedQueries={combinedQueries}
+            filterQuery={filterQuery}
             deleteQuery={deleteQuery}
             filters={applicableFilters}
             from={from}
@@ -139,15 +139,11 @@ const TopNComponent: React.FC<Props> = ({
           />
         ) : (
           <SignalsByCategory
-            combinedQueries={combinedQueries}
             filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
-            query={query}
-            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            runtimeMappings={runtimeMappings}
             hideQueryToggle
           />
         )}

@@ -24,22 +24,6 @@ export const renderParameterTemplates = (
   const context = variables?.context as Context;
   const alertIds = map(context.alerts, '_id');
 
-  if (params?.subAction === SUB_ACTION.KILL_PROCESS) {
-    const processNames = ((params.subActionParams.processName && [
-      params.subActionParams.processName,
-    ]) ||
-      map(context.alerts, 'process.name').filter((elm) => elm)) as string[];
-
-    return {
-      subAction: SUB_ACTION.KILL_PROCESS,
-      subActionParams: {
-        processName: processNames.join(','),
-        computerName: context.alerts[0].host?.name,
-        alertIds,
-      },
-    };
-  }
-
   if (params?.subAction === SUB_ACTION.ISOLATE_HOST) {
     return {
       subAction: SUB_ACTION.ISOLATE_HOST,

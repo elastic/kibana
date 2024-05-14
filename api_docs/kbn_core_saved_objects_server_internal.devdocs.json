@@ -38,13 +38,7 @@
           "<",
           "InternalSavedObjectsServiceSetup",
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsServiceStart",
-            "text": "SavedObjectsServiceStart"
-          },
+          "InternalSavedObjectsServiceStart",
           ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
@@ -130,13 +124,7 @@
               "({ elasticsearch, pluginsInitialized, docLinks, node, }: ",
               "SavedObjectsStartDeps",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsServiceStart",
-                "text": "SavedObjectsServiceStart"
-              },
+              "InternalSavedObjectsServiceStart",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
@@ -1195,29 +1183,7 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-common.InternalSavedObjectsServiceStart",
-        "type": "Type",
-        "tags": [],
-        "label": "InternalSavedObjectsServiceStart",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsServiceStart",
-            "text": "SavedObjectsServiceStart"
-          }
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",

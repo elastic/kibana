@@ -10,30 +10,15 @@ import {
   FetchHistoricalSummaryResponse,
   fetchHistoricalSummaryResponseSchema,
 } from '@kbn/slo-schema';
-import { HistoricalSummaryClient, SLOWithInstanceId } from './historical_summary_client';
-import { SLORepository } from './slo_repository';
+import { HistoricalSummaryClient } from './historical_summary_client';
 
 export class FetchHistoricalSummary {
-  constructor(
-    private repository: SLORepository,
-    private historicalSummaryClient: HistoricalSummaryClient
-  ) {}
+  constructor(private historicalSummaryClient: HistoricalSummaryClient) {}
 
   public async execute(
     params: FetchHistoricalSummaryParams
   ): Promise<FetchHistoricalSummaryResponse> {
-    const sloIds = params.list.map((slo) => slo.sloId);
-    const sloList = await this.repository.findAllByIds(sloIds);
-
-    const list: SLOWithInstanceId[] = params.list
-      .filter(({ sloId }) => sloList.find((slo) => slo.id === sloId))
-      .map(({ sloId, instanceId }) => ({
-        sloId,
-        instanceId,
-        slo: sloList.find((slo) => slo.id === sloId)!,
-      }));
-
-    const historicalSummary = await this.historicalSummaryClient.fetch(list);
+    const historicalSummary = await this.historicalSummaryClient.fetch(params);
 
     return fetchHistoricalSummaryResponseSchema.encode(historicalSummary);
   }

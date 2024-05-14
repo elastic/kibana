@@ -194,7 +194,13 @@ export class AuthorizationService {
             />
           );
 
-          return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+          return toolkit.render({
+            body,
+            headers: {
+              'Content-Security-Policy': http.csp.header,
+              'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
+            },
+          });
         }
       }
 

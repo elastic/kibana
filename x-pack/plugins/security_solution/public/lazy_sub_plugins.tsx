@@ -10,6 +10,7 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
+import { AttackDiscovery } from './attack_discovery';
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
@@ -24,11 +25,15 @@ import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
+import { Assets } from './assets';
+import { Investigations } from './investigations';
+import { MachineLearning } from './machine_learning';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
 const subPluginClasses = {
+  AttackDiscovery,
   Detections,
   Cases,
   Exceptions,
@@ -43,5 +48,8 @@ const subPluginClasses = {
   CloudSecurityPosture,
   ThreatIntelligence,
   EntityAnalytics,
+  Assets,
+  Investigations,
+  MachineLearning,
 };
 export { subPluginClasses };

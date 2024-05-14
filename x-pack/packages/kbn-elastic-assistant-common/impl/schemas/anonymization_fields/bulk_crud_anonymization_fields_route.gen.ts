@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';
+import { UUID, NonEmptyString } from '../conversations/common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
 export const BulkActionSkipReason = z.literal('ANONYMIZATION_FIELD_NOT_MODIFIED');
@@ -47,13 +47,12 @@ export const AnonymizationFieldResponse = z.object({
   id: UUID,
   timestamp: NonEmptyString.optional(),
   field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
   createdBy: z.string().optional(),
-  users: z.array(User).optional(),
   /**
    * Kibana space
    */
@@ -104,15 +103,15 @@ export const BulkActionBase = z.object({
 export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;
 export const AnonymizationFieldCreateProps = z.object({
   field: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
 });
 
 export type AnonymizationFieldUpdateProps = z.infer<typeof AnonymizationFieldUpdateProps>;
 export const AnonymizationFieldUpdateProps = z.object({
   id: z.string(),
-  defaultAllow: z.boolean().optional(),
-  defaultAllowReplacement: z.boolean().optional(),
+  allowed: z.boolean().optional(),
+  anonymized: z.boolean().optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;

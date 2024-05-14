@@ -7,16 +7,17 @@
 
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type {
@@ -128,6 +129,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       [packageInputStreams, packagePolicyInput.streams]
     );
 
+    const titleElementId = useMemo(() => htmlIdGenerator()(), []);
+
     return (
       <>
         {/* Header / input-level toggle */}
@@ -137,9 +140,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               label={
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <h4>{packageInput.title || packageInput.type}</h4>
-                    </EuiText>
+                    <EuiTitle size="xs">
+                      <h3 id={titleElementId}>{packageInput.title || packageInput.type}</h3>
+                    </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
@@ -179,27 +182,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   onClick={() => setIsShowingStreams(!isShowingStreams)}
                   iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
                   iconSide="right"
-                  aria-label={
-                    isShowingStreams
-                      ? i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
-                          {
-                            defaultMessage: 'Hide {type} inputs',
-                            values: {
-                              type: packageInput.type,
-                            },
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
-                          {
-                            defaultMessage: 'Show {type} inputs',
-                            values: {
-                              type: packageInput.type,
-                            },
-                          }
-                        )
-                  }
+                  aria-expanded={isShowingStreams}
+                  aria-labelledby={titleElementId}
                 >
                   {
                     <FormattedMessage

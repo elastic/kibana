@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface SearchEsPromptsSchema {
+export interface EsPromptsSchema {
   id: string;
   '@timestamp': string;
   created_at: string;

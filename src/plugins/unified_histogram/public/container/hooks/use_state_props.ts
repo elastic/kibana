@@ -7,12 +7,7 @@
  */
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import {
-  AggregateQuery,
-  getAggregateQueryMode,
-  isOfAggregateQueryType,
-  Query,
-} from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
@@ -56,11 +51,7 @@ export const useStateProps = ({
    */
 
   const isPlainRecord = useMemo(() => {
-    return (
-      query &&
-      isOfAggregateQueryType(query) &&
-      ['sql', 'esql'].some((mode) => mode === getAggregateQueryMode(query))
-    );
+    return query && isOfAggregateQueryType(query);
   }, [query]);
 
   const isTimeBased = useMemo(() => {
@@ -158,9 +149,9 @@ export const useStateProps = ({
     [stateService]
   );
 
-  const onSuggestionChange = useCallback(
-    (suggestion) => {
-      stateService?.setCurrentSuggestion(suggestion);
+  const onSuggestionContextChange = useCallback(
+    (suggestionContext) => {
+      stateService?.setCurrentSuggestionContext(suggestionContext);
     },
     [stateService]
   );
@@ -190,6 +181,6 @@ export const useStateProps = ({
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
-    onSuggestionChange,
+    onSuggestionContextChange,
   };
 };

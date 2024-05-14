@@ -17,7 +17,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
       experimentalFeatures: {
         rulesListDatagrid: true,
         rulesDetailLogs: true,
-        globalAlertsPage: false,
+        stackAlertsPage: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
@@ -36,9 +36,9 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('globalAlertsPage');
+    result = getIsExperimentalFeatureEnabled('stackAlertsPage');
 
-    expect(result).toEqual(false);
+    expect(result).toEqual(true);
 
     result = getIsExperimentalFeatureEnabled('ruleTagFilter');
 

@@ -58,10 +58,7 @@ describe('url_params_context helpers', () => {
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
         const endDate = moment('2021-06-04T18:03:24.211Z');
-        jest
-          .spyOn(datemath, 'parse')
-          .mockReturnValueOnce(undefined)
-          .mockReturnValueOnce(endDate);
+        jest.spyOn(datemath, 'parse').mockReturnValueOnce(undefined).mockReturnValueOnce(endDate);
 
         expect(
           helpers.getDateRange({

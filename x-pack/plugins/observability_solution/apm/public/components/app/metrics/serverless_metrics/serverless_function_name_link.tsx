@@ -19,10 +19,7 @@ interface Props {
   serverlessId: string;
 }
 
-export function ServerlessFunctionNameLink({
-  serverlessFunctionName,
-  serverlessId,
-}: Props) {
+export function ServerlessFunctionNameLink({ serverlessFunctionName, serverlessId }: Props) {
   const { serviceName } = useApmServiceContext();
   const { query } = useApmParams('/services/{serviceName}/metrics');
   const { link } = useApmRouter();

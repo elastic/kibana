@@ -10,9 +10,7 @@ import { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const getLazyAPMPolicyEditExtension = () => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
-    const { EditAPMPolicyForm } = await import(
-      './apm_policy_form/edit_apm_policy_form'
-    );
+    const { EditAPMPolicyForm } = await import('./apm_policy_form/edit_apm_policy_form');
 
     return { default: EditAPMPolicyForm };
   });

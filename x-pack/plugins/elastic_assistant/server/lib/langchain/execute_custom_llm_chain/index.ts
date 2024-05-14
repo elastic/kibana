@@ -12,9 +12,12 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
+import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientChatOpenAI } from '../llm/openai';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
@@ -31,8 +34,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actions,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
+  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
@@ -61,6 +63,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
+    model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
@@ -96,11 +104,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    allow,
-    allowReplacement,
+    anonymizationFields,
     alertsIndexPattern,
     isEnabledKnowledgeBase,
     chain,
+    llm,
     esClient,
     modelExists,
     onNewReplacements,
@@ -108,23 +116,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
-  );
+
+  const tools: ToolInterface[] = assistantTools
+    .filter((tool) =>
+      isStream
+        ? tool.id !== 'esql-knowledge-base-tool'
+        : tool.id !== 'esql-knowledge-base-structured-tool'
+    )
+    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
+  const executorArgs = {
+    memory,
+    verbose: false,
+    handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+  };
   // isStream check is not on agentType alone because typescript doesn't like
   const executor = isStream
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
-        memory,
-        verbose: false,
+        ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'chat-conversational-react-description',
-        memory,
-        verbose: false,
+        ...executorArgs,
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
@@ -145,12 +161,16 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     let didEnd = false;
 
-    const handleStreamEnd = (finalResponse: string) => {
+    const handleStreamEnd = (finalResponse: string, isError = false) => {
       if (onLlmResponse) {
-        onLlmResponse(finalResponse, {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
-        });
+        onLlmResponse(
+          finalResponse,
+          {
+            transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+            traceId: streamingSpan?.ids?.['trace.id'],
+          },
+          isError
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;
@@ -161,6 +181,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     };
 
     let message = '';
+    let tokenParentRunId = '';
 
     executor
       .invoke(
@@ -172,15 +193,24 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         {
           callbacks: [
             {
-              handleLLMNewToken(payload) {
-                if (payload.length && !didEnd) {
+              handleLLMNewToken(payload, _idx, _runId, parentRunId) {
+                if (tokenParentRunId.length === 0 && !!parentRunId) {
+                  // set the parent run id as the parentRunId of the first token
+                  // this is used to ensure that all tokens in the stream are from the same run
+                  // filtering out runs that are inside e.g. tool calls
+                  tokenParentRunId = parentRunId;
+                }
+                if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
                   push({ payload, type: 'content' });
                   // store message in case of error
                   message += payload;
                 }
               },
-              handleChainEnd(llmResult) {
-                handleStreamEnd(llmResult.output);
+              handleChainEnd(outputs, runId, parentRunId) {
+                // if parentRunId is undefined, this is the end of the stream
+                if (!parentRunId) {
+                  handleStreamEnd(outputs.output);
+                }
               },
             },
             apmTracer,
@@ -202,7 +232,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         }
         logger.error(`Error streaming from LangChain: ${error.message}`);
         push({ payload: error.message, type: 'content' });
-        handleStreamEnd(error.message);
+        handleStreamEnd(error.message, true);
       });
 
     return responseWithHeaders;

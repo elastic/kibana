@@ -62,18 +62,10 @@ export const FlyoutWrapper = ({
                         values: { lang: language },
                       })}
                   <EuiToolTip
-                    content={
-                      language
-                        ? i18n.translate('xpack.lens.config.experimentalLabelTextBased', {
-                            defaultMessage:
-                              'Technical preview, {lang} currently offers limited configuration options',
-                            values: { lang: language },
-                          })
-                        : i18n.translate('xpack.lens.config.experimentalLabelDataview', {
-                            defaultMessage:
-                              'Technical preview, inline editing currently offers limited configuration options',
-                          })
-                    }
+                    content={i18n.translate('xpack.lens.config.experimentalLabelDataview', {
+                      defaultMessage:
+                        'Technical preview, inline editing currently offers limited configuration options',
+                    })}
                   >
                     <EuiBetaBadge
                       label="Lab"
@@ -133,6 +125,7 @@ export const FlyoutWrapper = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                id="lnsCancelEditOnFlyFlyout"
                 onClick={onCancel}
                 flush="left"
                 aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {

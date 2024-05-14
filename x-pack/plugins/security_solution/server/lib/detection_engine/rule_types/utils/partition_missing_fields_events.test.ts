@@ -56,6 +56,63 @@ describe('partitionMissingFieldsEvents', () => {
       ],
     ]);
   });
+  it('should partition when fields objects located in event property', () => {
+    expect(
+      partitionMissingFieldsEvents(
+        [
+          {
+            event: {
+              fields: {
+                'agent.host': 'host-1',
+                'agent.type': ['test-1', 'test-2'],
+                'agent.version': 2,
+              },
+              _id: '1',
+              _index: 'index-0',
+            },
+          },
+          {
+            event: {
+              fields: {
+                'agent.host': 'host-1',
+                'agent.type': ['test-1', 'test-2'],
+              },
+              _id: '1',
+              _index: 'index-0',
+            },
+          },
+        ],
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['event']
+      )
+    ).toEqual([
+      [
+        {
+          event: {
+            fields: {
+              'agent.host': 'host-1',
+              'agent.type': ['test-1', 'test-2'],
+              'agent.version': 2,
+            },
+            _id: '1',
+            _index: 'index-0',
+          },
+        },
+      ],
+      [
+        {
+          event: {
+            fields: {
+              'agent.host': 'host-1',
+              'agent.type': ['test-1', 'test-2'],
+            },
+            _id: '1',
+            _index: 'index-0',
+          },
+        },
+      ],
+    ]);
+  });
   it('should partition if two fields are empty', () => {
     expect(
       partitionMissingFieldsEvents(

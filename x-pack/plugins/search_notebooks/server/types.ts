@@ -5,85 +5,41 @@
  * 2.0.
  */
 
+import type { IRouter } from '@kbn/core/server';
+import type { NotebookDefinition } from '@kbn/ipynb';
+import type { Logger } from '@kbn/logging';
+
+import type { SearchNotebooksConfig } from './config';
+import type { NotebookCatalog, NotebookInformation } from '../common/types';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginStart {}
 
-export interface NotebookInformation {
-  id: string;
-  title: string;
-  description: string;
-}
-export interface NotebookCatalog {
-  notebooks: NotebookInformation[];
+export interface RouteDependencies {
+  config: SearchNotebooksConfig;
+  logger: Logger;
+  notebooksCache: NotebooksCache;
+  router: IRouter;
 }
 
-export interface Notebook extends NotebookInformation {
-  link?: {
-    title: string;
-    url: string;
-  };
-  notebook: NotebookDefinition;
+export interface RemoteNotebookInformation extends NotebookInformation {
+  url: string;
 }
 
-export interface NotebookDefinition {
-  cells: NotebookCellType[];
-  metadata?: NotebookMetadataType;
-  nbformat?: number;
-  nbformat_minor?: number;
+export interface RemoteNotebookCatalog extends NotebookCatalog {
+  notebooks: RemoteNotebookInformation[];
 }
 
-export interface NotebookMetadataType {
-  kernelspec?: {
-    display_name?: string;
-    language?: string;
-    name?: string;
-  };
-  language_info?: {
-    mimetype?: string;
-    name?: string;
-    version?: string;
-  };
+export interface CachedNotebookCatalog extends RemoteNotebookCatalog {
+  timestamp: Date;
 }
 
-export interface NotebookCellType {
-  auto_number?: number;
-  cell_type?: string;
-  execution_count?: number | null;
-  id?: string;
-  inputs?: string[];
-  metadata?: {
-    id?: string;
-  };
-  outputs?: NotebookOutputType[];
-  prompt_number?: number;
-  source?: string[];
+export interface CachedNotebook extends NotebookDefinition {
+  timestamp: Date;
 }
-
-export interface NotebookOutputType {
-  name?: string;
-  ename?: string;
-  evalue?: string;
-  traceback?: string[];
-  data?: {
-    'text/plain'?: string[];
-    'text/html'?: string[];
-    'text/latex'?: string[];
-    'image/png'?: string;
-    'image/jpeg'?: string;
-    'image/gif'?: string;
-    'image/svg+xml'?: string;
-    'application/javascript'?: string[];
-  };
-  output_type?: string;
-  png?: string;
-  jpeg?: string;
-  gif?: string;
-  svg?: string;
-  text?: string[];
-  execution_count?: number;
-  metadata?: {
-    scrolled?: boolean;
-  };
+export interface NotebooksCache {
+  catalog?: CachedNotebookCatalog;
+  notebooks: Record<string, CachedNotebook>;
 }

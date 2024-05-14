@@ -91,6 +91,7 @@ describe('saved_searches_utils', () => {
           "title": "saved search",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });
@@ -143,6 +144,7 @@ describe('saved_searches_utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });

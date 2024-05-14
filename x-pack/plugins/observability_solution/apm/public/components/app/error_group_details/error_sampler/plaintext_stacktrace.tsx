@@ -24,11 +24,7 @@ export function PlaintextStacktrace({
 }: PlaintextStacktraceProps) {
   return (
     <>
-      <ExceptionStacktraceTitle
-        type={type}
-        message={message}
-        codeLanguage={codeLanguage}
-      />
+      <ExceptionStacktraceTitle type={type} message={message} codeLanguage={codeLanguage} />
       {stacktrace && (
         <EuiCodeBlock isCopyable={true} language={codeLanguage}>
           {stacktrace}

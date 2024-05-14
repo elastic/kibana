@@ -337,11 +337,7 @@ export default function ({
     }
   }
 
-  function addMetaToTermsList(
-    list: unknown[],
-    meta: unknown,
-    template?: string
-  ): Array<{ meta: unknown; template: unknown; name?: string }> {
+  function addMetaToTermsList(list: ResultTerm[], meta: string, template?: string): ResultTerm[] {
     return _.map(list, function (t) {
       if (typeof t !== 'object') {
         t = { name: t };
@@ -984,7 +980,7 @@ export default function ({
 
     const components = getTopLevelUrlCompleteComponents(context.method);
     let urlTokenPath = context.urlTokenPath;
-    let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
+    let predicate: (term: ResultTerm) => boolean = () => true;
 
     const tokenIter = createTokenIterator({ editor, position: pos });
     const currentTokenType = tokenIter.getCurrentToken()?.type;

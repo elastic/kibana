@@ -21,7 +21,7 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TryInConsoleButton } from '@kbn/search-api-panels';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -52,8 +52,8 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
                 <TryInConsoleButton
                   request={children}
                   application={application}
-                  consolePlugin={consolePlugin}
-                  sharePlugin={share}
+                  consolePlugin={consolePlugin ?? undefined}
+                  sharePlugin={share ?? undefined}
                 />
               </EuiFlexItem>
             )}

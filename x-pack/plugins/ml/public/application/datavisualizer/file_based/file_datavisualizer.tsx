@@ -15,6 +15,7 @@ import type {
   GetAdditionalLinks,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 
@@ -39,6 +40,7 @@ export const FileDataVisualizerPage: FC = () => {
   getMlNodeCount();
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
+  const [resultLinks, setResultLinks] = useState<ResultLinks | null>(null);
 
   const getAdditionalLinks: GetAdditionalLinks = useMemo(
     () => [
@@ -100,10 +102,15 @@ export const FileDataVisualizerPage: FC = () => {
   );
 
   useEffect(() => {
+    // ML uses this function
     if (dataVisualizer !== undefined) {
       getMlNodeCount();
       const { getFileDataVisualizerComponent } = dataVisualizer;
-      getFileDataVisualizerComponent().then(setFileDataVisualizer);
+      getFileDataVisualizerComponent().then((resp) => {
+        const items = resp();
+        setFileDataVisualizer(() => items.component);
+        setResultLinks(items.resultLinks);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -118,7 +125,10 @@ export const FileDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <FileDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+          <FileDataVisualizer
+            getAdditionalLinks={getAdditionalLinks}
+            resultLinks={resultLinks ?? undefined}
+          />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

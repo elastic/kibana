@@ -1,0 +1,268 @@
+[[update-monitor-api]]
+== Update Monitor API
+++++
+<titleabbrev>Update monitor</titleabbrev>
+++++
+
+Updates a new monitor with the specified attributes. The required and default fields may vary based on the monitor type.
+
+=== {api-request-title}
+
+`PUT <kibana host>:<port>/api/synthetics/monitors/<config_id>`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/synthetics/monitors/<config_id>`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+
+[[update-monitor-api-path-params]]
+=== {api-path-parms-title}
+
+`config_id`::
+(Required, string) The ID of the monitor that you want to update.
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
+
+[[monitor-update-body]]
+==== Request Body
+
+The request body should contain the attributes of the monitor you want to update. The required and default fields differ depending on the monitor type:
+
+*Common Fields*:
+
+`name`:: (string): The monitor's name.
+
+`schedule`:: (Optional, number): The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120` and `240`.
+  * The default value is `3` minutes for HTTP, TCP, and ICMP monitors.
+
+  * The default value is `10` minutes for Browser monitors.
+
+:private-locations-url: https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html
+
+`locations`:: (https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts#L28-L37[`Array<SyntheticsLocationsType>`])
+Where to deploy the monitor. Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
++
+To list available locations you can:
++
+  * Run the {locations-command}[`elastic-synthetics locations`] command
+  with the deployment's {kib} URL.
+  * Go to *Synthetics* -> *Management* and click *Create monitor*.
+    Locations will be listed in _Locations_.
+
+`private_locations` (`Array<string>`)::
+
+The {private-locations-url}[Private Locations] to which the monitors will be deployed. These Private Locations refer to locations hosted and managed by you, whereas
+`locations` are hosted by Elastic. You can specify a Private Location using the location's name.
++
+To list available Private Locations you can:
++
+  * Run the {locations-command}[`elastic-synthetics locations`] command
+  with the deployment's {kib} URL.
+  * Go to *Synthetics* -> *Settings* and click *Private locations*.
+  Private Locations will be listed in the table.
+
+[NOTE]
+====
+You may provide `locations` or `private_locations`, or both. At least one is required.
+====
+
+
+`enabled`:: (Optional, boolean, default: true): Whether the monitor is enabled.
+
+`tags`:: (Optional, array of strings): An array of tags. 
+
+`alert`:: (Optional, object, default: `{ status: { enabled: true }, tls: { enabled: true } }`): Alert configuration.
+
+`service.name`:: (Optional, string): The APM service name.
+
+`timeout`:: (Optional, number, default: 16): The monitor timeout in seconds, monitor will fail if it doesn't complete within this time.
+
+`namespace`:: (Optional, string, default: "default"): The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`
+
+`params`:: (Optional, string): Monitor parameters.
+
+`retest_on_failure`:: (Optional, boolean, default: true): Enable or disable retesting when a monitor fails. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created, and if configured, an alert sent. Then the monitor will resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
+
+
+*HTTP Monitor Fields*:
+
+`url`:: (Required, string): URL to monitor.
+
+`ssl`:: (Optional, object): The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used. See https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html for full SSL Options.
+
+`max_redirects`:: (Optional, number, default: 0): The maximum number of redirects to follow.
+
+`mode`:: (Optional, string, default: "any"): The mode of the monitor. Can be "all" or "any". If you’re using a DNS-load balancer and want to ping every IP address for the specified hostname, you should use all.
+
+     * `any`: The monitor pings only one IP address for a hostname.
+     * `all`: The monitor pings all resolvable IPs for a hostname.
+
+`ipv4`:: (Optional, boolean, default: true): Whether to ping using the ipv4 protocol.
+
+`ipv6`:: (Optional, boolean, default: true): Whether to ping using the ipv6 protocol.
+
+`username`:: (Optional, string): The username for authenticating with the server. The credentials are passed with the request.
+
+`password`:: (Optional, string): The password for authenticating with the server. The credentials are passed with the request.
+
+`proxy_headers`:: (Optional, object): Additional headers to send to proxies during CONNECT requests.
+
+`proxy_url`:: (Optional, string): The URL of the proxy to use for this monitor.
+
+`response`:: (Optional, object): Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.
+
+`response.include_body`:: (Optional, boolean, default: true): Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.
+  * `include_body` ("on_error" | "never" | "always", default: on_error) Set response.include_body to one of the options listed below.
+         ** `on_error`: Include the body if an error is encountered during the check. This is the default.
+         ** `never`: Never include the body.
+         ** `always`: Always include the body.
+  * `include_body_max_bytes` (Optional, number, default: 1024) Set `response.include_body_max_bytes` to control the maximum size of the stored body contents.
+
+`check`:: (Optional, object): The check request settings.
+  * `request` An optional request to send to the remote host. Under check.request, specify these options:
+      ** `method` ("HEAD" | "GET" | "POST" | "OPTIONS"): The HTTP method to use. 
+      ** `headers` (Optional, object): A dictionary of additional HTTP headers to send. By default Synthetics will set the User-Agent header to identify itself.
+      ** `body` (Optional, string): Optional request body content.
+        
+      Example: This POSTs an x-www-form-urlencoded string to the endpoint
+[source,sh]
+--------------------------------------------------
+{
+  "check": {
+    "request": {
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "body": "name=first&email=someemail%40someemailprovider.com"
+    }
+  }
+}
+--------------------------------------------------
+
+  * `response` The expected response. Under `check.response`, specify these options:
+      ** `status`  A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered up.
+      ** `headers` (Optional, object): A dictionary of expected HTTP headers. If the header is not found, the check fails.
+      ** `body.positive`: A list of regular expressions to match the body output. Only a single expression needs to match.
+          Example:
+          This monitor examines the response body for the strings foo or Foo:
+      ** `body.negative`: A list of regular expressions to match the body output negatively. Return match failed if single expression matches. HTTP response bodies of up to 100MiB are supported.
+          This monitor examines match successfully if there is no bar or Bar at all, examines match failed if there is bar or Bar in the response body:
+      ** `json`: A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB. 
+          *** `description` (string): A description of the check.
+          *** `expression` (string): The following configuration shows how to check the response using [gval](https://github.com/PaesslerAG/gval) expressions when the body contains JSON:
+
+
+
+
+*TCP Monitor Fields*:
+
+`host`:: (Required, string): The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon (e.g., "example.com:9200").
+
+`ssl`:: (Optional, object): The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used. See https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html for full SSL Options.
+
+`check`:: An optional payload string to send to the remote host and the expected answer. If no payload is specified, the endpoint is assumed to be available if the connection attempt was successful. If send is specified without receive, any response is accepted as OK. If receive is specified without send, no payload is sent, but the client expects to receive a payload in the form of a "hello message" or "banner" on connect.
+  
+    * `send` (Optional, string): check.send: 'Hello World'
+    * `receive` (Optional, string): check.receive: 'Hello World'
+
+`proxy_url`:: (Optional, string): The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
+
+`proxy_use_local_resolver`:: (Optional, boolean, default: false): A Boolean value that determines whether hostnames are resolved locally instead of being resolved on the proxy server. The default value is false, which means that name resolution occurs on the proxy server.
+
+*ICMP Monitor Fields*:
+
+`host`:: (Required, string): Host to ping.
+`wait`:: (Optional, number, default: 1): Wait time in seconds.
+
+*Browser Monitor Fields*:
+
+`inline_script`:: (Required, string): The inline script.
+
+`screenshots`:: (Optional, string, default: "on"): Screenshot option, either "on",  "off" or "only-on-failure".
+
+`synthetics_args`:: (Optional, array): Synthetics agent CLI arguments.
+
+`ignore_https_errors`:: (Optional, boolean, default: false): Whether to ignore HTTPS errors.
+
+`playwright_options`:: (Optional, object): Playwright options.
+
+==== Examples
+
+Here are some examples of creating monitors of different types:
+
+**HTTP Monitor**:
+Create an HTTP monitor to check a website's availability.
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/monitors/<monitor_id>
+{
+  "type": "http",
+  "name": "Website Availability",
+  "url": "https://example.com",
+  "tags": ["website", "availability"],
+  "locations": ["united_kingdom"]
+}
+--------------------------------------------------
+
+**TCP Monitor**:
+Create a TCP monitor to monitor a server's availability.
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/monitors/<monitor_id>
+{
+  "type": "tcp",
+  "name": "Server Availability",
+  "host": "example.com",
+  "private_locations": ["my_private_location"]
+}
+--------------------------------------------------
+
+**ICMP Monitor**:
+Create an ICMP monitor to perform ping checks.
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/monitors/<monitor_id>
+{
+  "type": "icmp",
+  "name": "Ping Test",
+  "host": "example.com",
+  "locations": ["united_kingdom"]
+}
+--------------------------------------------------
+
+**Browser Monitor**:
+Create a Browser monitor to check a website.
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/monitors/<monitor_id>
+{
+  "type": "browser",
+  "name": "Example journey",
+  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+  "locations": ["united_kingdom"]
+}
+--------------------------------------------------
+
+==== Partial Updates
+
+You can also partially update a monitor. This will only update the fields that are specified in the request body. All other fields are left unchanged.
+Specified fields should confirm to the monitor type. For example, you can't update the `inline_scipt` field of a HTTP monitor.
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/monitors/<monitor_id>
+{
+  "name": "New name"
+}
+--------------------------------------------------
+

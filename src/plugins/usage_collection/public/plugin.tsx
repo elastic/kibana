@@ -9,7 +9,7 @@
 import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type {
   PluginInitializerContext,
   Plugin,
@@ -74,7 +74,7 @@ export interface UsageCollectionSetup {
      * }
      * ```
      */
-    ApplicationUsageTrackingProvider: React.FC;
+    ApplicationUsageTrackingProvider: FC<PropsWithChildren<unknown>>;
   };
 
   /** Report whenever a UI event occurs for UI counters to report it **/

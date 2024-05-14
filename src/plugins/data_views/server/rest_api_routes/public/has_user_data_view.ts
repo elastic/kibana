@@ -49,9 +49,10 @@ const hasUserDataViewRouteFactory =
           request: {},
           response: {
             200: {
-              body: schema.object({
-                result: schema.boolean(),
-              }),
+              body: () =>
+                schema.object({
+                  result: schema.boolean(),
+                }),
             },
           },
         },

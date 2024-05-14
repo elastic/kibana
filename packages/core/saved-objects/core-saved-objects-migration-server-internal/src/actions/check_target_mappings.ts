@@ -9,10 +9,10 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedRootFields, getUpdatedTypes } from '../core/compare_mappings';
+import { getUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
-export interface CheckTargetMappingsParams {
+export interface CheckTargetTypesMappingsParams {
   indexTypes: string[];
   indexMappings?: IndexMapping;
   appMappings: IndexMapping;
@@ -21,34 +21,31 @@ export interface CheckTargetMappingsParams {
 }
 
 /** @internal */
-export interface ComparedMappingsMatch {
-  type: 'compared_mappings_match';
-}
-
 export interface IndexMappingsIncomplete {
   type: 'index_mappings_incomplete';
 }
 
-export interface RootFieldsChanged {
-  type: 'root_fields_changed';
-  updatedFields: string[];
+/** @internal */
+export interface TypesMatch {
+  type: 'types_match';
 }
 
+/** @internal */
 export interface TypesChanged {
   type: 'types_changed';
   updatedTypes: string[];
 }
 
-export const checkTargetMappings =
+export const checkTargetTypesMappings =
   ({
     indexTypes,
     indexMappings,
     appMappings,
     latestMappingsVersions,
     hashToVersionMap = {},
-  }: CheckTargetMappingsParams): TaskEither.TaskEither<
-    IndexMappingsIncomplete | RootFieldsChanged | TypesChanged,
-    ComparedMappingsMatch
+  }: CheckTargetTypesMappingsParams): TaskEither.TaskEither<
+    IndexMappingsIncomplete | TypesChanged,
+    TypesMatch
   > =>
   async () => {
     if (
@@ -57,15 +54,6 @@ export const checkTargetMappings =
       indexMappings.dynamic !== appMappings.dynamic
     ) {
       return Either.left({ type: 'index_mappings_incomplete' as const });
-    }
-
-    const updatedFields = getUpdatedRootFields(indexMappings);
-
-    if (updatedFields.length) {
-      return Either.left({
-        type: 'root_fields_changed',
-        updatedFields,
-      });
     }
 
     const updatedTypes = getUpdatedTypes({
@@ -81,6 +69,6 @@ export const checkTargetMappings =
         updatedTypes,
       });
     } else {
-      return Either.right({ type: 'compared_mappings_match' as const });
+      return Either.right({ type: 'types_match' as const });
     }
   };

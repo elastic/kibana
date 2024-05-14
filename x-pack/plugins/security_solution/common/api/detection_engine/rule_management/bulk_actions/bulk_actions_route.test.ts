@@ -187,7 +187,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 9 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 11 more"`
         );
       });
 
@@ -249,7 +249,7 @@ describe('Perform bulk action request schema', () => {
         expectParseError(result);
 
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 9 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 11 more"`
         );
       });
 
@@ -299,6 +299,62 @@ describe('Perform bulk action request schema', () => {
       });
     });
 
+    describe('investigation_fields', () => {
+      test('valid request: set_investigation_fields edit action', () => {
+        const payload: PerformBulkActionRequestBody = {
+          query: 'name: test',
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
+            {
+              type: BulkActionEditTypeEnum.set_investigation_fields,
+              value: { field_names: ['field-1'] },
+            },
+          ],
+        };
+
+        const result = PerformBulkActionRequestBody.safeParse(payload);
+
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+
+      test('valid request: add_investigation_fields edit action', () => {
+        const payload: PerformBulkActionRequestBody = {
+          query: 'name: test',
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
+            {
+              type: BulkActionEditTypeEnum.add_investigation_fields,
+              value: { field_names: ['field-2'] },
+            },
+          ],
+        };
+
+        const result = PerformBulkActionRequestBody.safeParse(payload);
+
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+
+      test('valid request: delete_investigation_fields edit action', () => {
+        const payload: PerformBulkActionRequestBody = {
+          query: 'name: test',
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
+            {
+              type: BulkActionEditTypeEnum.delete_investigation_fields,
+              value: { field_names: ['field-3'] },
+            },
+          ],
+        };
+
+        const result = PerformBulkActionRequestBody.safeParse(payload);
+
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+    });
+
     describe('timeline', () => {
       test('invalid request: wrong timeline payload type', () => {
         const payload = {
@@ -311,7 +367,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 7 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 9 more"`
         );
       });
 
@@ -333,7 +389,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 10 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 12 more"`
         );
       });
 
@@ -371,7 +427,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 7 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 9 more"`
         );
       });
 
@@ -416,7 +472,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 10 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 12 more"`
         );
       });
 
@@ -438,7 +494,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 10 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 12 more"`
         );
       });
 
@@ -476,7 +532,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 7 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 9 more"`
         );
       });
 
@@ -498,7 +554,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 11 more"`
+          `"action: Invalid literal value, expected \\"delete\\", action: Invalid literal value, expected \\"disable\\", action: Invalid literal value, expected \\"enable\\", action: Invalid literal value, expected \\"export\\", action: Invalid literal value, expected \\"duplicate\\", and 13 more"`
         );
       });
 

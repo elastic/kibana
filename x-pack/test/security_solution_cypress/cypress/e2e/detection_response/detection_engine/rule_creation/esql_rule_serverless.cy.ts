@@ -20,25 +20,19 @@ describe('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
     login();
   });
 
-  it('does not display ES|QL rule on form', function () {
+  it('should display ES|QL rule on form', function () {
     visit(CREATE_RULE_URL);
 
     // ensure, page is loaded and rule types are displayed
     cy.get(NEW_TERMS_TYPE).should('be.visible');
     cy.get(THRESHOLD_TYPE).should('be.visible');
 
-    // ES|QL rule tile should not be rendered
-    cy.get(ESQL_TYPE).should('not.exist');
+    cy.get(ESQL_TYPE).should('exist');
   });
 
-  it('does not allow to create rule by API call', function () {
+  it('allow creation rule by API call', function () {
     createRule(getEsqlRule()).then((response) => {
-      expect(response.status).to.equal(400);
-
-      expect(response.body).to.deep.equal({
-        status_code: 400,
-        message: 'Rule type "siem.esqlRule" is not registered.',
-      });
+      expect(response.status).to.equal(200);
     });
   });
 });

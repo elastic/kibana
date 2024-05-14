@@ -34,7 +34,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
           const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
 
           return {
-            id: (await row.getAttribute('data-test-search-session-id')).split('id-')[1],
+            id: ((await row.getAttribute('data-test-search-session-id')) ?? '').split('id-')[1],
             name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),

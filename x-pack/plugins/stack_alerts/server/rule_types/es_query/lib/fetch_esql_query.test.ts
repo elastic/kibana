@@ -67,6 +67,7 @@ describe('fetchEsqlQuery', () => {
             },
           },
           "query": "from test",
+          "version": "2024.04.01",
         }
       `);
     });
@@ -94,6 +95,7 @@ describe('fetchEsqlQuery', () => {
             },
           },
           "query": "from test | limit 100",
+          "version": "2024.04.01",
         }
       `);
     });

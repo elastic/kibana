@@ -8,14 +8,12 @@
 
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
-import { OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-interface StartServices {
-  openModal: OverlayStart['openModal'];
-}
+type StartServices = Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
 
 export const createHelloWorldActionDefinition = (
   getStartServices: () => Promise<StartServices>
@@ -24,15 +22,16 @@ export const createHelloWorldActionDefinition = (
   type: ACTION_HELLO_WORLD,
   getDisplayName: () => 'Hello World!',
   execute: async () => {
-    const { openModal } = await getStartServices();
-    const overlay = openModal(
+    const { overlays, ...startServices } = await getStartServices();
+    const overlay = overlays.openModal(
       toMountPoint(
         <EuiModalBody>
           <EuiText data-test-subj="helloWorldActionText">Hello world!</EuiText>
           <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
             Close
           </EuiButton>
-        </EuiModalBody>
+        </EuiModalBody>,
+        startServices
       )
     );
   },

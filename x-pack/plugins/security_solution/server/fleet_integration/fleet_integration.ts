@@ -29,6 +29,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
@@ -222,7 +223,7 @@ export const getPackagePolicyUpdateCallback = (
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    notifyProtectionFeatureUsage(
+    await notifyProtectionFeatureUsage(
       endpointIntegrationData,
       featureUsageService,
       endpointMetadataService
@@ -269,6 +270,8 @@ export const getPackagePolicyUpdateCallback = (
         ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
     }
 
+    updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);
+
     return endpointIntegrationData;
   };
 };
@@ -291,7 +294,9 @@ export const getPackagePolicyPostCreateCallback = (
         exceptionsClient,
         integrationConfig.value.eventFilters,
         packagePolicy
-      );
+      ).catch((error) => {
+        logger.error(`Failed to create event filters: ${error}`);
+      });
     }
     return packagePolicy;
   };

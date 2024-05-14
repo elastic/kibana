@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, FC, PropsWithChildren } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 const seeFullErrorMessage = i18n.translate(
@@ -23,7 +23,7 @@ const hideFullErrorMessage = i18n.translate(
   }
 );
 
-export const ToastWithCircuitBreakerContent: React.FC = ({ children }) => {
+export const ToastWithCircuitBreakerContent: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const onToggleShowDetails = useCallback(() => {

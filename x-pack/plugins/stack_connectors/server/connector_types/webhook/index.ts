@@ -104,7 +104,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
+export const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 

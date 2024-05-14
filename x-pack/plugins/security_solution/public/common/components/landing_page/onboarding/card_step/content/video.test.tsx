@@ -53,6 +53,7 @@ describe('Video Component', () => {
       cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
+      trigger: 'click',
     });
 
     const iframe = screen.getByTitle(WATCH_VIDEO_BUTTON_TITLE);

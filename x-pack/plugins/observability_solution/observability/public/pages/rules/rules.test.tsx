@@ -38,6 +38,10 @@ jest.mock('../../utils/kibana_react', () => ({
   })),
 }));
 
+jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
+  useGetAvailableRulesWithDescriptions: jest.fn(),
+}));
+
 jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({

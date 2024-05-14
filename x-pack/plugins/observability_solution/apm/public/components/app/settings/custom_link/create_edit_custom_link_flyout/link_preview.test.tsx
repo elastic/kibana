@@ -6,13 +6,7 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import {
-  render,
-  getNodeText,
-  getByTestId,
-  act,
-  waitFor,
-} from '@testing-library/react';
+import { render, getNodeText, getByTestId, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as stories from './link_preview.stories';
 
@@ -27,30 +21,20 @@ describe('LinkPreview', () => {
 
   it('shows label and url default values', () => {
     act(() => {
-      const { container } = render(
-        <Example label="" url="" filters={[{ key: '', value: '' }]} />
-      );
+      const { container } = render(<Example label="" url="" filters={[{ key: '', value: '' }]} />);
       expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
-      expect(getElementValue(container, 'preview-url')).toEqual(
-        'https://www.elastic.co'
-      );
+      expect(getElementValue(container, 'preview-url')).toEqual('https://www.elastic.co');
     });
   });
 
   it('shows label and url values', () => {
     act(() => {
       const { container } = render(
-        <Example
-          label="foo"
-          url="https://baz.co"
-          filters={[{ key: '', value: '' }]}
-        />
+        <Example label="foo" url="https://baz.co" filters={[{ key: '', value: '' }]} />
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        removeExternalLinkText(
-          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-        )
+        removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
       ).toContain('https://baz.co');
     });
   });
@@ -66,9 +50,7 @@ describe('LinkPreview', () => {
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        removeExternalLinkText(
-          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-        )
+        removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
       ).toContain('https://baz.co?service.name={{invalid}');
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
@@ -86,9 +68,7 @@ describe('LinkPreview', () => {
     await waitFor(() => {
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        removeExternalLinkText(
-          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-        )
+        removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
       ).toContain('https://baz.co?transaction=0');
     });
   });

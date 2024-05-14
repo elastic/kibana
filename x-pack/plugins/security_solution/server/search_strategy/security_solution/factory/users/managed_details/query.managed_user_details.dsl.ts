@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';

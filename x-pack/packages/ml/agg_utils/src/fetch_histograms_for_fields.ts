@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 

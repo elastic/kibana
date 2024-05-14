@@ -107,3 +107,11 @@ export const CONFLICT_MULTIPLE_INDEX_DESCRIPTION = (name: string, count: number)
     defaultMessage: '{name} ({count} indices)',
     values: { count, name },
   });
+
+export const WILDCARD_WITH_IS_OPERATOR_TOOLTIP = i18n.translate(
+  'xpack.lists.exceptions.builder.exceptionIsOperator.warningmessage.tooltip',
+  {
+    defaultMessage:
+      'Using a wildcard with the "IS" operator can make an entry ineffective. Change the operator to "MATCHES" to ensure wildcards run properly.',
+  }
+);

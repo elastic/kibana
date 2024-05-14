@@ -20,6 +20,13 @@ FROM employees
 | WHERE still_hired
 ```
 
+Use date math to retrieve data from a specific time range. For example, to
+retrieve the last hour of logs:
+```esql
+FROM sample_data
+| WHERE @timestamp > NOW() - 1 hour
+```
+
 WHERE supports various functions. For example the
 LENGTH function:
 ```esql
@@ -28,7 +35,7 @@ FROM employees
 | WHERE LENGTH(first_name) < 4
 ```
 
-For a complete list of all functions, refer to Functions and operators.For NULL comparison, use the IS NULL and IS NOT NULL predicates:
+For a complete list of all functions, refer to Functions overview.For NULL comparison, use the IS NULL and IS NOT NULL predicates:
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
@@ -49,6 +56,7 @@ also act on a constant (literal) expression. The right-hand side of the operator
 represents the pattern.The following wildcard characters are supported:
 * matches zero or more characters.
 ? matches one character.
+Supported types
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
@@ -58,7 +66,7 @@ FROM employees
 Use RLIKE to filter data based on string patterns using using
 regular expressions. RLIKE usually acts on a field placed on
 the left-hand side of the operator, but it can also act on a constant (literal)
-expression. The right-hand side of the operator represents the pattern.
+expression. The right-hand side of the operator represents the pattern.Supported types
 ```esql
 FROM employees
 | WHERE first_name RLIKE ".leja.*"

@@ -192,10 +192,9 @@ describe('ServiceIcons', () => {
   });
 
   describe('details', () => {
-    const callApmApi =
-      (apisMockData: Record<string, object>) => (endpoint: string) => {
-        return apisMockData[endpoint];
-      };
+    const callApmApi = (apisMockData: Record<string, object>) => (endpoint: string) => {
+      return apisMockData[endpoint];
+    };
     it('Shows loading spinner while fetching data', () => {
       const apisMockData = {
         'GET /internal/apm/services/{serviceName}/metadata/icons': {
@@ -214,11 +213,9 @@ describe('ServiceIcons', () => {
           refetch: jest.fn(),
         },
       };
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockImplementation((func: Function, deps: string[]) => {
-          return func(callApmApi(apisMockData)) || {};
-        });
+      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+        return func(callApmApi(apisMockData)) || {};
+      });
 
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
@@ -259,11 +256,9 @@ describe('ServiceIcons', () => {
           refetch: jest.fn(),
         },
       };
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockImplementation((func: Function, deps: string[]) => {
-          return func(callApmApi(apisMockData)) || {};
-        });
+      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+        return func(callApmApi(apisMockData)) || {};
+      });
 
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>
@@ -312,11 +307,9 @@ describe('ServiceIcons', () => {
           refetch: jest.fn(),
         },
       };
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockImplementation((func: Function, deps: string[]) => {
-          return func(callApmApi(apisMockData)) || {};
-        });
+      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+        return func(callApmApi(apisMockData)) || {};
+      });
 
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>
@@ -371,11 +364,9 @@ describe('ServiceIcons', () => {
           refetch: jest.fn(),
         },
       };
-      jest
-        .spyOn(fetcherHook, 'useFetcher')
-        .mockImplementation((func: Function, deps: string[]) => {
-          return func(callApmApi(apisMockData)) || {};
-        });
+      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+        return func(callApmApi(apisMockData)) || {};
+      });
 
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>

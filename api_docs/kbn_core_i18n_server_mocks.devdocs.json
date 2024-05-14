@@ -73,6 +73,30 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-mocks",
+            "id": "def-common.i18nServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-i18n-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nServerInternalPluginApi",
+                "section": "def-common.InternalI18nServicePreboot",
+                "text": "InternalI18nServicePreboot"
+              },
+              ">"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false

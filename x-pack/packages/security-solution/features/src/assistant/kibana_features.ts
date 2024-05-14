@@ -26,7 +26,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   minimumLicense: 'enterprise',
   privileges: {
     all: {
-      api: [],
+      api: ['elasticAssistant'],
       app: [ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {

@@ -59,8 +59,6 @@ export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks, isSmall }) =
     <EuiBasicTable
       columns={[TERM_COLUMN, TAGS_COLUMN, ...COUNT_COLUMNS, ACTIONS_COLUMN] as Columns}
       items={items}
-      responsive
-      hasActions
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="visLine"

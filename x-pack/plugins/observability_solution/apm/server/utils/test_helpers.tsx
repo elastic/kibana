@@ -13,9 +13,7 @@ import { APMInternalESClient } from '../lib/helpers/create_es_client/create_inte
 import { ApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 
 interface Options {
-  mockResponse?: (
-    request: ESSearchRequest
-  ) => ESSearchResponse<unknown, ESSearchRequest>;
+  mockResponse?: (request: ESSearchRequest) => ESSearchResponse<unknown, ESSearchRequest>;
   config?: Partial<APMConfig>;
 }
 

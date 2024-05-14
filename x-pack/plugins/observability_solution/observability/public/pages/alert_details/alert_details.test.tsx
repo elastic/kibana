@@ -16,6 +16,7 @@ import { waitFor } from '@testing-library/react';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { from } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
@@ -54,6 +55,7 @@ const mockKibana = () => {
     services: {
       ...kibanaStartMock.startContract(),
       cases: casesPluginMock.createStartContract(),
+      application: { currentAppId$: from('mockedApp') },
       http: {
         basePath: {
           prepend: jest.fn(),

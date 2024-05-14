@@ -39,6 +39,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      queue: n2-2-spot
+    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - wait
+
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs
     key: public-api-docs
@@ -83,7 +96,9 @@ steps:
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -95,7 +110,9 @@ steps:
     label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -107,7 +124,9 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -119,7 +138,9 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -131,7 +152,9 @@ steps:
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -143,7 +166,9 @@ steps:
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -155,7 +180,9 @@ steps:
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -167,7 +194,9 @@ steps:
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -179,7 +208,9 @@ steps:
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -191,7 +222,9 @@ steps:
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -203,7 +236,9 @@ steps:
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -215,7 +250,9 @@ steps:
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -227,7 +264,9 @@ steps:
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -239,7 +278,9 @@ steps:
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -251,7 +292,9 @@ steps:
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -263,7 +306,9 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 7
     retry:
@@ -275,7 +320,9 @@ steps:
     label: 'Threat Intelligence Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -287,7 +334,9 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -299,7 +348,9 @@ steps:
     label: 'Serverless Osquery Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -313,6 +364,7 @@ steps:
       queue: n2-4-virt
     depends_on:
       - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 20
     retry:
@@ -326,6 +378,7 @@ steps:
       queue: n2-4-virt
     depends_on:
       - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 14
     retry:
@@ -338,6 +391,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
+      - quick_checks
     agents:
       queue: 'kibana-default'
 
@@ -363,16 +417,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/quick_checks.sh
-    label: 'Quick Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
@@ -387,7 +431,7 @@ steps:
     label: 'Check Types'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 60
+    timeout_in_minutes: 70
     retry:
       automatic:
         - exit_status: '-1'

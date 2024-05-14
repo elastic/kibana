@@ -218,6 +218,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               }
               options={proxiesOptions}
               singleSelection={{ asPlainText: true }}
+              isDisabled={inputs.proxyIdInput.props.disabled}
               isClearable={true}
               placeholder={i18n.translate(
                 'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',

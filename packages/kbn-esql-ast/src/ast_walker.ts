@@ -87,9 +87,9 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  return ctx
-    .getTypedRuleContexts(FromIdentifierContext)
-    .map((sourceCtx) => createSource(sourceCtx));
+  const fromContexts = ctx.getTypedRuleContexts(FromIdentifierContext);
+
+  return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
 function extractIdentifiers(

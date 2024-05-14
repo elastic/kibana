@@ -233,7 +233,7 @@ describe('edit package policy page', () => {
     });
 
     await act(async () => {
-      fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+      fireEvent.click(renderResult.getByText('Change defaults'));
     });
 
     await act(async () => {
@@ -355,7 +355,7 @@ describe('edit package policy page', () => {
     render();
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('euiErrorBoundary')).toBeVisible();
+      expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
     });
   });
 

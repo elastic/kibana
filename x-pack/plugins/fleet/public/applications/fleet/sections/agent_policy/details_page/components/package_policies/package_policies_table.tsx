@@ -335,7 +335,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           },
         ],
       }}
-      isSelectable={false}
     />
   );
 };

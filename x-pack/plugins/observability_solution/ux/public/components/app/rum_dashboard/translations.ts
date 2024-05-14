@@ -32,30 +32,21 @@ export const I18LABELS = {
   pageLoadTimes: i18n.translate('xpack.ux.dashboard.pageLoadTimes.label', {
     defaultMessage: 'Page load times',
   }),
-  pageLoadDuration: i18n.translate(
-    'xpack.ux.dashboard.pageLoadDuration.label',
-    {
-      defaultMessage: 'Page load duration',
-    }
-  ),
+  pageLoadDuration: i18n.translate('xpack.ux.dashboard.pageLoadDuration.label', {
+    defaultMessage: 'Page load duration',
+  }),
   pageLoad: i18n.translate('xpack.ux.dashboard.pageLoad.label', {
     defaultMessage: 'Page load',
   }),
-  pageLoadDistribution: i18n.translate(
-    'xpack.ux.dashboard.pageLoadDistribution.label',
-    {
-      defaultMessage: 'Page load distribution',
-    }
-  ),
+  pageLoadDistribution: i18n.translate('xpack.ux.dashboard.pageLoadDistribution.label', {
+    defaultMessage: 'Page load distribution',
+  }),
   jsErrors: i18n.translate('xpack.ux.dashboard.impactfulMetrics.jsErrors', {
     defaultMessage: 'JavaScript errors',
   }),
-  highTrafficPages: i18n.translate(
-    'xpack.ux.dashboard.impactfulMetrics.highTrafficPages',
-    {
-      defaultMessage: 'High traffic pages',
-    }
-  ),
+  highTrafficPages: i18n.translate('xpack.ux.dashboard.impactfulMetrics.highTrafficPages', {
+    defaultMessage: 'High traffic pages',
+  }),
   resetZoom: i18n.translate('xpack.ux.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -86,12 +77,9 @@ export const I18LABELS = {
   median: i18n.translate('xpack.ux.median', {
     defaultMessage: 'median',
   }),
-  avgPageLoadDuration: i18n.translate(
-    'xpack.ux.visitorBreakdownMap.avgPageLoadDuration',
-    {
-      defaultMessage: 'Average page load duration',
-    }
-  ),
+  avgPageLoadDuration: i18n.translate('xpack.ux.visitorBreakdownMap.avgPageLoadDuration', {
+    defaultMessage: 'Average page load duration',
+  }),
   pageLoadDurationByRegion: i18n.translate(
     'xpack.ux.visitorBreakdownMap.pageLoadDurationByRegion',
     {
@@ -155,15 +143,11 @@ export const I18LABELS = {
     defaultMessage: 'No data.',
   }),
   // Helper tooltips
-  totalPageLoadTooltip: i18n.translate(
-    'xpack.ux.dashboard.tooltips.totalPageLoad',
-    {
-      defaultMessage: 'Total represents the full page load duration',
-    }
-  ),
+  totalPageLoadTooltip: i18n.translate('xpack.ux.dashboard.tooltips.totalPageLoad', {
+    defaultMessage: 'Total represents the full page load duration',
+  }),
   frontEndTooltip: i18n.translate('xpack.ux.dashboard.tooltips.frontEnd', {
-    defaultMessage:
-      'Frontend time represents the total page load duration minus the backend time',
+    defaultMessage: 'Frontend time represents the total page load duration minus the backend time',
   }),
   backEndTooltip: i18n.translate('xpack.ux.dashboard.tooltips.backEnd', {
     defaultMessage:
@@ -171,9 +155,6 @@ export const I18LABELS = {
   }),
 };
 
-export const VisitorBreakdownLabel = i18n.translate(
-  'xpack.ux.visitorBreakdown',
-  {
-    defaultMessage: 'Visitor breakdown',
-  }
-);
+export const VisitorBreakdownLabel = i18n.translate('xpack.ux.visitorBreakdown', {
+  defaultMessage: 'Visitor breakdown',
+});

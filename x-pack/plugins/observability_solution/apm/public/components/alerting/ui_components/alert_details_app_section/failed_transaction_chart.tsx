@@ -6,14 +6,9 @@
  */
 /* Error Rate */
 
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BoolQuery } from '@kbn/es-query';
 import React from 'react';
 import { RecursivePartial } from '@elastic/eui';
 import { Theme } from '@elastic/charts';
@@ -26,6 +21,7 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -43,6 +39,8 @@ const INITIAL_STATE_ERROR_RATE: ErrorRate = {
 
 function FailedTransactionChart({
   transactionType,
+  transactionTypes,
+  setTransactionType,
   transactionName,
   serviceName,
   environment,
@@ -50,8 +48,12 @@ function FailedTransactionChart({
   end,
   comparisonChartTheme,
   timeZone,
+  kuery = '',
+  filters,
 }: {
   transactionType: string;
+  transactionTypes?: string[];
+  setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
   environment: string;
@@ -59,6 +61,8 @@ function FailedTransactionChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
+  kuery?: string;
+  filters?: BoolQuery;
 }) {
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
@@ -66,7 +70,7 @@ function FailedTransactionChart({
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
-    kuery: '',
+    kuery,
     numBuckets: 100,
     type: transactionName
       ? ApmDocumentType.TransactionMetric
@@ -85,7 +89,8 @@ function FailedTransactionChart({
               },
               query: {
                 environment,
-                kuery: '',
+                kuery,
+                filters: filters ? JSON.stringify(filters) : undefined,
                 start,
                 end,
                 transactionType,
@@ -107,6 +112,8 @@ function FailedTransactionChart({
       transactionType,
       transactionName,
       preferred,
+      kuery,
+      filters,
     ]
   );
   const timeseriesErrorRate = [
@@ -119,6 +126,7 @@ function FailedTransactionChart({
       }),
     },
   ];
+  const showTransactionTypeSelect = setTransactionType && transactionTypes;
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -136,6 +144,15 @@ function FailedTransactionChart({
           <EuiFlexItem grow={false}>
             <EuiIconTip content={errorRateI18n} position="right" />
           </EuiFlexItem>
+          {showTransactionTypeSelect && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                transactionTypes={transactionTypes}
+                onChange={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <TimeseriesChart

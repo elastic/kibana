@@ -191,7 +191,6 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       items={getRestores()}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
       columns={columns}
       sorting={getSorting()}
       pagination={getPagination()}

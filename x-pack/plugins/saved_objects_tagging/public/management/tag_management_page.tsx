@@ -40,7 +40,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   capabilities,
   assignableTypes,
 }) => {
-  const { overlays, notifications, application, http, theme } = core;
+  const { application, http, ...startServices } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -75,13 +75,13 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const createModalOpener = useMemo(
-    () => getCreateModalOpener({ overlays, theme, tagClient, notifications }),
-    [overlays, theme, tagClient, notifications]
+    () => getCreateModalOpener({ ...startServices, tagClient }),
+    [startServices, tagClient]
   );
 
   const tableActions = useMemo(() => {
     return getTableActions({
-      core,
+      startServices,
       capabilities,
       tagClient,
       tagCache,
@@ -92,7 +92,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       canceled$: unmount$,
     });
   }, [
-    core,
+    startServices,
     capabilities,
     tagClient,
     tagCache,
@@ -105,7 +105,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   const bulkActions = useMemo(() => {
     return getBulkActions({
-      core,
+      startServices,
       capabilities,
       tagClient,
       tagCache,
@@ -114,7 +114,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       assignableTypes,
       clearSelection: () => setSelectedTags([]),
     });
-  }, [core, capabilities, tagClient, tagCache, assignmentService, assignableTypes]);
+  }, [startServices, capabilities, tagClient, tagCache, assignmentService, assignableTypes]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -125,6 +125,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       },
     ]);
   }, [setBreadcrumbs]);
+
+  const { notifications } = startServices;
 
   const openCreateModal = useCallback(() => {
     createModalOpener({

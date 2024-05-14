@@ -49,13 +49,14 @@ const flattenedBuckets = getFlattenedBuckets({
 const onIndexSelected = jest.fn();
 
 const defaultProps: Props = {
+  accessor: 'sizeInBytes',
   flattenedBuckets,
-  formatBytes,
   maxChartHeight: DEFAULT_MAX_CHART_HEIGHT,
   onIndexSelected,
   patternRollups,
   patterns,
   baseTheme: DARK_THEME,
+  valueFormatter: formatBytes,
 };
 
 jest.mock('@elastic/charts', () => {

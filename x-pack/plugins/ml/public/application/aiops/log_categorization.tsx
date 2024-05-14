@@ -15,7 +15,6 @@ import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
@@ -33,9 +32,6 @@ export const LogCategorizationPage: FC = () => {
               id="xpack.ml.logCategorization.pageHeader"
               defaultMessage="Log pattern analysis"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

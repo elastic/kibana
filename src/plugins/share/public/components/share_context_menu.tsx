@@ -136,6 +136,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       });
       menuItems.push({
         ...shareMenuItem,
+        name: shareMenuItem!.name,
         panel: panelId,
       });
     });

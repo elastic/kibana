@@ -57,10 +57,10 @@ describe('Alerts', () => {
     synthtrace.clean();
   });
 
-  describe('when rendered from Service view in APM app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180981
+  describe.skip('when rendered from Service view in APM app', () => {
     const ruleName = 'Error count threshold';
-    const confirmModalButtonSelector =
-      '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
 
     it('alerts table is rendered correctly', () => {
       cy.loginAsEditorUser();
@@ -90,9 +90,7 @@ describe('Alerts', () => {
       // Check that the "Alerts" table is loaded
       cy.wait(2000);
       cy.visitKibana('/app/apm/services/opbeans-java/alerts');
-      cy.getByTestSubj('o11yGetRenderCellValueLink')
-        .first()
-        .click({ force: true });
+      cy.getByTestSubj('o11yGetRenderCellValueLink').first().click({ force: true });
       cy.getByTestSubj('alertsFlyout').should('exist');
       cy.contains('Overview');
       cy.contains('Status');

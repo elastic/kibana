@@ -90,7 +90,7 @@ export function ObservabilityAlertSearchBar({
     onAlertStatusChange(status);
   }, [onAlertStatusChange, status]);
 
-  useEffect(() => {
+  const submitQuery = useCallback(() => {
     try {
       onEsQueryChange(
         buildEsQuery({
@@ -123,21 +123,30 @@ export function ObservabilityAlertSearchBar({
     toasts,
   ]);
 
-  const onSearchBarParamsChange = useCallback<
-    (query: {
+  useEffect(() => {
+    submitQuery();
+  }, [submitQuery]);
+
+  const onQuerySubmit = (
+    {
+      dateRange,
+      query,
+    }: {
       dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
       query?: string;
-    }) => void
-  >(
-    ({ dateRange, query }) => {
+    },
+    isUpdate?: boolean
+  ) => {
+    if (isUpdate) {
       clearSavedQuery();
       onKueryChange(query ?? '');
       timeFilterService.setTime(dateRange);
       onRangeFromChange(dateRange.from);
       onRangeToChange(dateRange.to);
-    },
-    [onKueryChange, timeFilterService, clearSavedQuery, onRangeFromChange, onRangeToChange]
-  );
+    } else {
+      submitQuery();
+    }
+  };
 
   const onFilterUpdated = useCallback<(filters: Filter[]) => void>(
     (updatedFilters) => {
@@ -162,7 +171,7 @@ export function ObservabilityAlertSearchBar({
           onSavedQueryUpdated={setSavedQuery}
           onClearSavedQuery={clearSavedQuery}
           query={kuery}
-          onQuerySubmit={onSearchBarParamsChange}
+          onQuerySubmit={onQuerySubmit}
         />
       </EuiFlexItem>
 

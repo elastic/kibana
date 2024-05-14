@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess Rule exception operators for data type double', () => {
+  describe('@serverless @serverlessQA @ess Rule exception operators for data type double', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double_as_string');

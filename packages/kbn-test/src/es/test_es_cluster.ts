@@ -182,6 +182,7 @@ export function createTestEsCluster<
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
+  const isFIPSMode = process.env.FTR_FIPS_MODE === '1';
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
@@ -192,7 +193,12 @@ export function createTestEsCluster<
       : ['discovery.type=single-node']),
   ];
 
-  const esArgs = assignArgs(defaultEsArgs, customEsArgs);
+  const esArgs = assignArgs(
+    defaultEsArgs,
+    // ML has issues running in FIPS mode due to custom OpenSSL
+    // Remove after https://github.com/elastic/kibana-operations/issues/96
+    isFIPSMode ? [...customEsArgs, 'xpack.ml.enabled=false'] : customEsArgs
+  );
 
   const config = {
     version: esTestConfig.getVersion(),

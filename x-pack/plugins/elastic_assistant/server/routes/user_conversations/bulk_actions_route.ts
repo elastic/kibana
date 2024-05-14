@@ -10,7 +10,6 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   BulkActionSkipResult,
   BulkCrudActionResponse,
@@ -19,6 +18,7 @@ import {
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
   ConversationResponse,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -35,6 +35,7 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -126,7 +127,7 @@ export const bulkActionConversationsRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
@@ -154,7 +155,15 @@ export const bulkActionConversationsRoute = (
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
+          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();

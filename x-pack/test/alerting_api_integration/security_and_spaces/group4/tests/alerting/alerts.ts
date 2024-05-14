@@ -1880,7 +1880,7 @@ instanceStateValue: true
       const space = SuperuserAtSpace1.space;
 
       const connectorId = 'system-connector-test.system-action-connector-adapter';
-      const name = 'System action: test.system-action-connector-adapter';
+      const name = 'Test system action with a connector adapter set';
 
       it('should use connector adapters correctly on system actions', async () => {
         const alertUtils = new AlertUtils({

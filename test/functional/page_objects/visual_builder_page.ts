@@ -373,7 +373,7 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
-  public async getGaugeColor(isInner = false): Promise<string> {
+  public async getGaugeColor(isInner = false): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
     return await gaugeColoredCircle.getAttribute('stroke');
@@ -395,7 +395,7 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
-  public async getTopNBarStyle(nth: number = 0): Promise<string> {
+  public async getTopNBarStyle(nth: number = 0): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const topNBars = await this.testSubjects.findAll('topNInnerBar');
     return await topNBars[nth].getAttribute('style');
@@ -756,19 +756,19 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async getBackgroundStyle(): Promise<string> {
+  public async getBackgroundStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const visualization = await this.find.byClassName('tvbVis');
     return await visualization.getAttribute('style');
   }
 
-  public async getMetricValueStyle(): Promise<string> {
+  public async getMetricValueStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('tsvbMetricValue');
     return await metricValue.getAttribute('style');
   }
 
-  public async getGaugeValueStyle(): Promise<string> {
+  public async getGaugeValueStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('gaugeValue');
     return await metricValue.getAttribute('style');
