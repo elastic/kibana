@@ -15,6 +15,7 @@ import { stopAndDeleteTransform } from '../../lib/oam/stop_and_delete_transform'
 import { deleteIngestPipeline } from '../../lib/oam/delete_ingest_pipeline';
 import { deleteOAMDefinition } from '../../lib/oam/delete_oam_definition';
 import { OAMDefinitionNotFound } from '../../lib/oam/errors/oam_not_found';
+import { OAM_API_PREFIX } from '../../../common/constants_oam';
 
 export function deleteOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -22,7 +23,7 @@ export function deleteOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, unknown, unknown>(
     {
-      path: '/api/oam/definition/{id}',
+      path: `${OAM_API_PREFIX}/definition/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

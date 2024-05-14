@@ -19,6 +19,7 @@ import { startTransform } from '../../lib/oam/start_transform';
 import { deleteOAMDefinition } from '../../lib/oam/delete_oam_definition';
 import { deleteIngestPipeline } from '../../lib/oam/delete_ingest_pipeline';
 import { stopAndDeleteTransform } from '../../lib/oam/stop_and_delete_transform';
+import { OAM_API_PREFIX } from '../../../common/constants_oam';
 
 export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -26,7 +27,7 @@ export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, OAMDefinition>(
     {
-      path: '/api/oam/definition',
+      path: `${OAM_API_PREFIX}/definition`,
       validate: {
         body: (body, res) => {
           try {

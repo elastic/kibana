@@ -18,6 +18,7 @@ import { createAndInstallIngestPipeline } from '../../lib/oam/create_and_install
 import { createAndInstallTransform } from '../../lib/oam/create_and_install_transform';
 import { startTransform } from '../../lib/oam/start_transform';
 import { OAMDefinitionNotFound } from '../../lib/oam/errors/oam_not_found';
+import { OAM_API_PREFIX } from '../../../common/constants_oam';
 
 export function resetOAMDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -25,7 +26,7 @@ export function resetOAMDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: '/api/oam/definition/{id}/_reset',
+      path: `${OAM_API_PREFIX}/definition/{id}/_reset`,
       validate: {
         params: schema.object({
           id: schema.string(),
