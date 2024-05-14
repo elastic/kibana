@@ -30,7 +30,7 @@ import { convertTo } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { WindowSchema } from '../../../../../../typings';
 import { ErrorRateChart } from '../../../../error_rate_chart';
-import { BurnRateAlert, BurnRateRule } from '../../alert_details_app_section';
+import { BurnRateAlert, BurnRateRule } from '../../types';
 import { getActionGroupFromReason } from '../../utils/alert';
 
 interface Props {
