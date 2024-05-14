@@ -12,7 +12,7 @@ import type {
   ReportAttackDiscoveriesGeneratedParams,
   ReportAttackDiscoveryTelemetryEventParams,
 } from './events/attack_discovery/types';
-import type { SecurityMetadata } from '../../../actions/types';
+import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
   AlertsGroupingTelemetryEvent,
@@ -91,7 +91,7 @@ export interface ReportMLJobUpdateParams {
 }
 
 export interface ReportCellActionClickedParams {
-  metadata: SecurityMetadata | undefined;
+  metadata: SecurityCellActionMetadata | undefined;
   displayName: string;
   actionId: string;
   fieldName: string;

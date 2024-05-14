@@ -71,13 +71,12 @@ import type {
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
-  Installation,
-  Output,
   PackageInfo,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
   AgentPolicyNotFoundError,
+  AgentPolicyInvalidError,
   FleetError,
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -87,6 +86,8 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
 
@@ -102,7 +103,6 @@ import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from './app_context';
 import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
@@ -316,6 +316,8 @@ class AgentPolicyService {
         'Agent policy requires Elastic Defend integration to set tamper protection to true'
       );
     }
+
+    this.checkAgentless(agentPolicy);
 
     await this.requireUniqueName(soClient, agentPolicy);
 
@@ -581,6 +583,7 @@ class AgentPolicyService {
       }
     }
     this.checkTamperProtectionLicense(agentPolicy);
+    this.checkAgentless(agentPolicy);
     await this.checkForValidUninstallToken(agentPolicy, id);
 
     if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
@@ -653,6 +656,7 @@ class AgentPolicyService {
           'monitoring_output_id',
           'download_source_id',
           'fleet_server_host_id',
+          'supports_agentless',
         ]),
         ...newAgentPolicyProps,
       },
@@ -1474,17 +1478,26 @@ class AgentPolicyService {
       }
     }
   }
+  private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
+    const cloudSetup = appContextService.getCloud();
+    if (
+      (!cloudSetup?.isServerlessEnabled ||
+        !appContextService.getExperimentalFeatures().agentless) &&
+      agentPolicy?.supports_agentless !== undefined
+    ) {
+      throw new AgentPolicyInvalidError(
+        'supports_agentless is only allowed in serverless environments that support the agentless feature'
+      );
+    }
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();
 
-// TODO: remove unused parameters
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packageToInstall: Installation,
   agentPolicy: AgentPolicy,
-  defaultOutput: Output,
   packageInfo: PackageInfo,
   packagePolicyName?: string,
   packagePolicyId?: string | number,
