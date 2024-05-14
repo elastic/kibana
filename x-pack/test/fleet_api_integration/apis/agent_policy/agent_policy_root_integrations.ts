@@ -117,12 +117,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         ]);
 
-        // const {
-        //     body: { item: agentPolicy },
-        //   } = await supertest
-        //     .get(`/api/fleet/agent_policies/${agentPolicyId}`)
-        //     .set('kbn-xsrf', 'xxxx');
-
         // Cleanup agent and package policy
         await supertest
           .post(`/api/fleet/agent_policies/delete`)
