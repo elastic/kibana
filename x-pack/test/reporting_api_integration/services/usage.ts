@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import { Response } from 'supertest';
+import { indexTimestamp } from './index_timestamp';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
