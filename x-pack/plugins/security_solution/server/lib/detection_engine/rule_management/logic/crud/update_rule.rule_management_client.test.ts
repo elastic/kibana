@@ -8,11 +8,13 @@
 import type { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
-import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
+import { getRulesManagementClient } from './rules_management_client';
 
 // Failing with rule registry enabled
-describe('updateRules', () => {
+describe('RuleManagementClient.updateRule', () => {
+  const rulesManagementClient = getRulesManagementClient();
+
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
@@ -20,7 +22,7 @@ describe('updateRules', () => {
       getRuleMock(getQueryRuleParams())
     );
 
-    await updateRules(rulesOptionsMock);
+    await rulesManagementClient.updateRule(rulesOptionsMock);
 
     expect(rulesOptionsMock.rulesClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,7 +46,7 @@ describe('updateRules', () => {
       getRuleMock(getQueryRuleParams())
     );
 
-    await updateRules(rulesOptionsMock);
+    await rulesManagementClient.updateRule(rulesOptionsMock);
 
     expect(rulesOptionsMock.rulesClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -65,7 +67,7 @@ describe('updateRules', () => {
       resolveRuleMock(getMlRuleParams())
     );
 
-    await updateRules(rulesOptionsMock);
+    await rulesManagementClient.updateRule(rulesOptionsMock);
 
     expect(rulesOptionsMock.rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({

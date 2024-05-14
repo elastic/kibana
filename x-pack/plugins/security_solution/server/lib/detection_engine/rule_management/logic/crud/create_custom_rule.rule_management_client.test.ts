@@ -6,17 +6,22 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { createRules } from './create_rules';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRulesManagementClient } from './rules_management_client';
 
-describe('createRules', () => {
+describe('RuleManagementClient.createCustomRule', () => {
+  const rulesManagementClient = getRulesManagementClient();
+
   it('calls the rulesClient with legacy ML params', async () => {
     const rulesClient = rulesClientMock.create();
-    await createRules({ rulesClient, params: getCreateMachineLearningRulesSchemaMock() });
+    await rulesManagementClient.createCustomRule({
+      rulesClient,
+      params: getCreateMachineLearningRulesSchemaMock(),
+    });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -31,7 +36,7 @@ describe('createRules', () => {
 
   it('calls the rulesClient with ML params', async () => {
     const rulesClient = rulesClientMock.create();
-    await createRules({
+    await rulesManagementClient.createCustomRule({
       rulesClient,
       params: {
         ...getCreateMachineLearningRulesSchemaMock(),
@@ -54,7 +59,7 @@ describe('createRules', () => {
     const rulesClient = rulesClientMock.create();
     const params = getCreateThreatMatchRulesSchemaMock();
     delete params.threat_indicator_path;
-    await createRules({ rulesClient, params });
+    await rulesManagementClient.createCustomRule({ rulesClient, params });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -68,7 +73,10 @@ describe('createRules', () => {
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
     const rulesClient = rulesClientMock.create();
-    await createRules({ rulesClient, params: getCreateMachineLearningRulesSchemaMock() });
+    await rulesManagementClient.createCustomRule({
+      rulesClient,
+      params: getCreateMachineLearningRulesSchemaMock(),
+    });
     expect(rulesClient.create).not.toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

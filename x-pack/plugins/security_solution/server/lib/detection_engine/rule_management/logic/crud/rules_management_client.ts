@@ -49,13 +49,13 @@
  *  2.  BULK CREATE CUSTOM RULES ✅ by 1
  *  3.  UPDATE RULE ✅
  *  4.  BULK UPDATE RULES ✅ by 3
- *  5.  PATCH RULE
- *  6.  BULK PATCH RULES
- *  7.  DELETE RULES
- *  8.  BULK DELETE RULES
+ *  5.  PATCH RULE ✅
+ *  6.  BULK PATCH RULES ✅ by 5
+ *  7.  DELETE RULE ✅
+ *  8.  BULK DELETE RULES ✅ by 7
  *  9.  INSTALL NEW PREBUILT RULES ✅
- *  10. UPGRADE RULE WITH TYPE CHANGE
- *  11. UPGRADE RULE OF SAME TYPE
+ *  10. UPGRADE PREBUILT RULE WITH TYPE CHANGE
+ *  11. UPGRADE PREBUILT RULE OF SAME TYPE
  *  12. IMPORT NON EXISTING RULE
  *  13. IMPORT EXISTING RULE - with override option
  *  14. CREATE RULE EXCEPTIONS
@@ -66,6 +66,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   PatchRuleRequestBody,
   RuleCreateProps,
+  RuleObjectId,
   RuleUpdateProps,
 } from '../../../../../../common/api/detection_engine';
 import { convertCreateAPIToInternalSchema } from '../..';
@@ -75,26 +76,36 @@ import {
   convertPatchAPIToInternalSchema,
   convertUpdateAPIToInternalSchema,
 } from '../../normalization/rule_converters';
+import { readRules } from './read_rules';
+import { PrepackagedRulesError } from '../../../prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
 
-interface CreateCustomRuleProps {
+interface ClientProps {
   rulesClient: RulesClient;
+}
+
+interface CreateCustomRuleProps extends ClientProps {
   params: RuleCreateProps;
 }
-interface CreatePrebuiltRuleProps {
-  rulesClient: RulesClient;
+interface CreatePrebuiltRuleProps extends ClientProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-interface UpdateRuleProps {
-  rulesClient: RulesClient;
+interface UpdateRuleProps extends ClientProps {
   existingRule: RuleAlertType | null;
   ruleUpdate: RuleUpdateProps;
 }
 
-interface PatchRuleProps {
-  rulesClient: RulesClient;
+interface PatchRuleProps extends ClientProps {
   existingRule: RuleAlertType | null;
   nextParams: PatchRuleRequestBody;
+}
+
+interface DeleteRuleProps {
+  ruleId: RuleObjectId;
+}
+
+interface UpgradePrebuiltRuleProps extends ClientProps {
+  ruleAsset: PrebuiltRuleAsset;
 }
 
 // TODOs:
@@ -115,9 +126,9 @@ export const getRulesManagementClient = () => {
       });
 
       // TODO: Remove
-      const normalizedRule = normalizeRule(rule);
+      // const normalizedRule = normalizeRule(rule);
 
-      return normalizedRule;
+      return rule;
     },
 
     // 2.  BULK CREATE CUSTOM RULES
@@ -140,9 +151,9 @@ export const getRulesManagementClient = () => {
       });
 
       // TODO: Remove
-      const normalizedRule = normalizeRule(rule);
+      // const normalizedRule = normalizeRule(rule);
 
-      return normalizedRule;
+      return rule;
     },
 
     // 3.  UPDATE RULE
@@ -201,6 +212,73 @@ export const getRulesManagementClient = () => {
       } else {
         return update;
       }
+    },
+
+    // 7.  DELETE RULE
+    deleteRule: async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
+      const { rulesClient, ruleId } = deleteRulePayload;
+      await rulesClient.delete({ id: ruleId });
+    },
+
+    // 10. AND 11. UPGRADE PREBUILT RULE
+    upgradePrebuiltRule: async (
+      upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
+    ): Promise<RuleAlertType> => {
+      const { rulesClient, ruleAsset } = upgradePrebuiltRulePayload;
+      const existingRule = await readRules({
+        rulesClient,
+        ruleId: ruleAsset.rule_id,
+        id: undefined,
+      });
+
+      if (!existingRule) {
+        throw new PrepackagedRulesError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
+      }
+
+      // If we're trying to change the type of a prepackaged rule, we need to delete the old one
+      // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
+      // and exception lists from the old rule
+      if (ruleAsset.type !== existingRule.params.type) {
+        await rulesClient.delete({ id: ruleAsset.rule_id });
+
+        return createRules({
+          rulesClient,
+          immutable: true,
+          id: existingRule.id,
+          params: {
+            ...rule,
+            // Force the prepackaged rule to use the enabled state from the existing rule,
+            // regardless of what the prepackaged rule says
+            enabled: existingRule.enabled,
+            exceptions_list: existingRule.params.exceptionsList,
+            actions: existingRule.actions.map(transformAlertToRuleAction),
+            timeline_id: existingRule.params.timelineId,
+            timeline_title: existingRule.params.timelineTitle,
+          },
+        });
+      }
+
+      await patchRules({
+        rulesClient,
+        existingRule,
+        nextParams: {
+          ...rule,
+          // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
+          enabled: undefined,
+        },
+      });
+
+      const updatedRule = await readRules({
+        rulesClient,
+        ruleId: rule.rule_id,
+        id: undefined,
+      });
+
+      if (!updatedRule) {
+        throw new PrepackagedRulesError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
+      }
+
+      return updatedRule;
     },
   };
 };

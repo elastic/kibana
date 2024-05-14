@@ -16,9 +16,9 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
+import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -50,6 +50,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
+          const rulesManagementClient = getRulesManagementClient();
 
           const rule = await readRules({ rulesClient, id, ruleId });
 
@@ -61,7 +62,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await deleteRules({
+          await rulesManagementClient.deleteRule({
             ruleId: rule.id,
             rulesClient,
           });
