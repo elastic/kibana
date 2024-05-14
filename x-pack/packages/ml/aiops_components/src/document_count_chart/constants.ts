@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export const DOCUMENT_COUNT_CHART_DEFFAULT_HEIGHT = 120;
 export const DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID = 'document_count';

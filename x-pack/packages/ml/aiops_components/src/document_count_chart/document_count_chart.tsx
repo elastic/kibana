@@ -14,7 +14,7 @@ import type {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import { Chart, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
 import type {
   BarStyleAccessor,
   RectAnnotationSpec,
@@ -33,15 +33,18 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import { type BrushSelectionUpdatePayload } from '@kbn/aiops-log-rate-analysis/state';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 
+import { DocumentCountChartAxisX, DocumentCountChartAxisY } from './axis';
 import { BrushBadge } from './brush_badge';
-import { DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID } from './constants';
+import {
+  DOCUMENT_COUNT_CHART_DEFFAULT_HEIGHT,
+  DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID,
+} from './constants';
 import {
   documentCountChartOverallSeriesName,
   documentCountChartOverallSeriesNameWithSplit,
@@ -465,7 +468,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         <Chart
           size={{
             width: '100%',
-            height: height ?? 120,
+            height: height ?? DOCUMENT_COUNT_CHART_DEFFAULT_HEIGHT,
           }}
         >
           <Settings
@@ -480,15 +483,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             showLegend={false}
             locale={i18n.getLocale()}
           />
-          <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
-          <Axis
-            id="aiops-histogram-bottom-axis"
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convert(value)}
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+          <DocumentCountChartAxisX />
+          <DocumentCountChartAxisY
+            formatter={xAxisFormatter}
+            useLegacyTimeAxis={useLegacyTimeAxis}
           />
           {adjustedChartPoints?.length && (
             <HistogramBarSeries

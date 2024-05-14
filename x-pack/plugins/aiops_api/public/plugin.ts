@@ -30,13 +30,12 @@ export class AiopsApiPlugin
     Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
       ([license, [coreStart, pluginsStart]]) => {
         if (license.hasAtLeast('enterprise')) {
-          const service = pluginsStart.observabilityAIAssistant.service;
-
-          service.register(async ({ registerRenderFunction }) => {
-            const { registerFunctions } = await import('./functions');
-
-            await registerFunctions({ coreStart, pluginsStart, registerRenderFunction });
-          });
+          pluginsStart.observabilityAIAssistant.service.register(
+            async ({ registerRenderFunction }) => {
+              const { registerFunctions } = await import('./functions');
+              await registerFunctions({ coreStart, pluginsStart, registerRenderFunction });
+            }
+          );
         }
       }
     );
