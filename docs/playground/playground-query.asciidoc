@@ -48,4 +48,21 @@ Refer to <<playground-context, Optimize context>> for more information.
 Retrievers make it easier to compose and test different retrieval strategies in your search pipelines. 
 ====
 // TODO: uncomment and add to note once following page is live
-//Refer to {ref}/retrievers-overview.html[documentation] for a high level overview of retrievers.
+Refer to {ref}/retrievers-overview.html[documentation] for a high level overview of retrievers.
+[float]
+[[playground-hidden-fields]]
+=== Hidden fields
+
+The query editor shows fields which make sense for the user to search on, but not all fields in your documents are visible from the editor.
+
+Available field types:
+
+- Semantic fields like `sparse_vector` or `dense_vector` fields where the embeddings have been created from a inference processor
+- `text` fields
+
+Hidden Field Types:
+
+- non `text` fields like `keyword` fields
+- fields that are not indexed
+- semantic fields where the embeddings have not been created from a inference processor
+- nested fields
