@@ -392,7 +392,7 @@ class AgentPolicyService {
       agentPolicy.package_policies =
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
 
-      await this.populateRootIntegrations(soClient, agentPolicy as AgentPolicy);
+      await this.populateRootIntegrations?.(soClient, agentPolicy as AgentPolicy);
     }
 
     auditLoggingService.writeCustomSoAuditLog({

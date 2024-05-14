@@ -901,6 +901,7 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
+          root_integrations: [],
         });
       });
 
