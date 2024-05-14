@@ -93,10 +93,9 @@ describe('saml_auth', () => {
     });
 
     test(`throws error when response has no 'set-cookie' header`, async () => {
-      const location = 'http/.test';
       mockRequestOnce('/internal/security/login', {
         data: {
-          location,
+          location: mockedLocation,
         },
         headers: {},
       });
@@ -107,10 +106,10 @@ describe('saml_auth', () => {
     });
 
     test('throws error when location is not a valid url', async () => {
-      const location = 'http/.test';
+      const invalidLocation = 'http/.test';
       mockRequestOnce('/internal/security/login', {
         data: {
-          location,
+          location: invalidLocation,
         },
         headers: {
           'set-cookie': [`sid=${mockedSid}; Secure; HttpOnly; Path=/`],
@@ -153,7 +152,7 @@ describe('saml_auth', () => {
       expect(actualResponse).toBe(mockedSamlResponse);
     });
 
-    test('throws error when response has no response value', async () => {
+    test('throws error when failed to parse SAML response value', async () => {
       mockGetOnce(mockedLocation, {
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body></body></html>`,
       });
@@ -161,7 +160,7 @@ describe('saml_auth', () => {
       await expect(createSAMLResponse(mockedLocation, mockedToken, mockedEmail, mockedKbnHost, log))
         .rejects
         .toThrowError(`Failed to parse SAML response value.\nMost likely the '${mockedEmail}' user has no access to the cloud deployment.
-Login to cloud.test with the user from '.ftr/role_users.json' file and try to load
+Login to ${new URL(mockedLocation).hostname} with the user from '.ftr/role_users.json' file and try to load
 ${mockedKbnHost} in the same window.`);
     });
   });
