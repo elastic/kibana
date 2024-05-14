@@ -10,7 +10,8 @@ import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { SvlReportingServiceProvider } from './svl_reporting';
 import { SvlUserManagerProvider } from './svl_user_manager';
 import { DataViewApiProvider } from './data_view_api';
-
+import { AlertingApiProvider } from './alerting_api';
+import { SloApiProvider } from './slo_api';
 export type { RoleCredentials } from './svl_user_manager';
 
 export const services = {
@@ -20,4 +21,6 @@ export const services = {
   svlReportingApi: SvlReportingServiceProvider,
   svlUserManager: SvlUserManagerProvider,
   dataViewApi: DataViewApiProvider,
+  alertingApi: AlertingApiProvider,
+  sloApi: SloApiProvider,
 };
