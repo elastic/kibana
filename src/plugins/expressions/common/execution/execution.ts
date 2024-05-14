@@ -522,11 +522,11 @@ export class Execution<
           return output;
         }),
         finalize(() => {
-          if (completionFlag) {
+          if (completionFlag && hash) {
             while (this.functionCache.size >= maxCacheSize) {
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
-            this.functionCache.set(hash as string, { value: lastValue, time: Date.now() });
+            this.functionCache.set(hash, { value: lastValue, time: Date.now() });
           }
         })
       )
