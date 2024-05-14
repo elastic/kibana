@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import qs from 'qs';
 import { i18n } from '@kbn/i18n';
+import { find, isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -60,6 +63,51 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
   defaultMessage: 'Managed',
 });
 
+const defaultFilterOptions: EuiSelectableOption[] = [
+  { key: 'managed', label: managedFilterLabel },
+  { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
+];
+
+// Serializer function
+function serializeOptions(options: any) {
+  return qs.stringify({ filterOptions: options }, { encode: false });
+}
+
+// Deserializer function
+function deserializeOptions(queryString: string) {
+  const parsed = qs.parse(queryString);
+  return parsed.filterOptions || [];
+}
+
+
+type ExtendedOption = Omit<EuiSelectableOption, 'checked'> & { checked: 'unset' | 'on' | 'off' };
+type ExtendedOptions = Partial<ExtendedOption>[];
+
+function serializeFilterOptions(options: EuiSelectableOption[]) {
+  return options.map(option => {
+    const checked = option.checked ?? 'unset';
+    return { key: option.key, checked };
+  }) as ExtendedOptions;
+}
+
+function deserializeFilterOptions(options: ExtendedOptions) {
+  return options.map(option => {
+    const base = {
+      key: option.key,
+      label: defaultFilterOptions.find(filter => filter.key === option.key)!.label,
+    };
+
+    return option.checked === 'unset' ? base : { ...base, checked: option.checked };
+  });
+}
+
+function isDefaultFilterOptions(options: ExtendedOptions) {
+  return (
+    (find(options, { key: 'managed' })?.checked === 'unset') &&
+    (find(options, { key: 'deprecated' })?.checked === 'off')
+  );
+}
+
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   isLoading,
@@ -68,15 +116,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
-  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
-    { key: 'managed', label: managedFilterLabel },
-    { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
-  ]);
+  const [queryText, setQueryText] = useState<string>('');
+  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
+
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const filteredPipelines = useMemo(() => {
-    return (pipelines || []).filter((pipeline) => {
+    const filteredPipelines = (pipelines || []).filter((pipeline) => {
+      return pipeline.name.toLowerCase().includes(queryText.toLowerCase());
+    });
+
+    return filteredPipelines.filter((pipeline) => {
       const deprecatedFilter = filterOptions.find(({ key }) => key === 'deprecated')?.checked;
       const managedFilter = filterOptions.find(({ key }) => key === 'managed')?.checked;
       return !(
@@ -86,7 +137,32 @@ export const PipelineTable: FunctionComponent<Props> = ({
         (managedFilter === 'on' && !pipeline.isManaged)
       );
     });
-  }, [pipelines, filterOptions]);
+  }, [pipelines, filterOptions, queryText]);
+
+  // This effect will run once only to update the initial state of the filters
+  // and queryText based on whatever is set in the query params.
+  useEffect(() => {
+    const { queryText, filterOptions } = qs.parse(history?.location?.search || '', { ignoreQueryPrefix: true });
+
+    if (queryText) {
+      setQueryText(queryText as string);
+    }
+  }, []);
+
+  useEffect(() => {
+    const serializedFilterOptions = serializeFilterOptions(filterOptions);
+    const isDefaultFilterConfiguration = isEmpty(queryText) && isDefaultFilterOptions(serializedFilterOptions);
+
+    if (isDefaultFilterConfiguration) {
+      history.push('');
+    } else {
+      history.push(history.location.pathname + '?' + qs.stringify({ queryText }, { encode: false }));
+      // console.log(qs.stringify({
+        // queryText,
+        // filterOptions: serializedFilterOptions,
+      // }, { encode: false }));
+    }
+  }, [queryText, filterOptions]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => {
@@ -130,6 +206,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
       };
     },
     search: {
+      query: queryText,
+      onChange: ({ queryText }) => setQueryText(queryText),
       toolsLeft:
         selection.length > 0 ? (
           <EuiButton
