@@ -23,7 +23,7 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
       description: (
         <FormattedMessage
           id="xpack.datasetQuality.nonAggregatable.warning"
-          defaultMessage="Some of your datasets don't support _ignored aggregation and may cause delays when querying data. {howToFixIt} {showDatasets}"
+          defaultMessage="Some of your datasets do not support _ignored aggregation and may cause delays when querying data. {howToFixIt} {showDatasets}"
           values={{
             showDatasets: (
               <FormattedMessage
