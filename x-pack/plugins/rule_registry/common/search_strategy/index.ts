@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
-import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,

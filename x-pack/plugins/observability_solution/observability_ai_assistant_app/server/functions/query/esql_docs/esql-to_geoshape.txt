@@ -1,13 +1,10 @@
 TO_GEOSHAPE
 
 Syntax
-TO_GEOPOINT(v)
 Parameters
-v
+field
 Input value. The input can be a single- or multi-valued column or an expression.
-The input type must be a string, a geo_shape or a geo_point.
-DescriptionConverts an input value to a geo_shape value.A string will only be successfully converted if it respects the
-WKT format.Supported types
+DescriptionConverts an input value to a geo_shape value. A string will only be successfully converted if it respects the WKT format.Supported types
 Example
 ```esql
 ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"

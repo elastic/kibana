@@ -13,7 +13,7 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
@@ -118,7 +118,17 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = !isPlainRecord
+    ? dataView.getFieldByName(columnName)
+    : new DataViewField({
+        name: columnName,
+        type: columnsMeta?.[columnName]?.type ?? 'unknown',
+        esTypes: columnsMeta?.[columnName]?.esType
+          ? ([columnsMeta[columnName].esType] as string[])
+          : undefined,
+        searchable: true,
+        aggregatable: false,
+      });
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -263,7 +273,7 @@ export function getEuiGridColumns({
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
   columnsMeta?: DataTableColumnsMeta;

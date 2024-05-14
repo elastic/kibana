@@ -93,6 +93,11 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+          timestamp: { type: 'date', esType: 'dateTime' },
+        },
       });
       expect(actual).toMatchSnapshot();
     });
@@ -299,7 +304,7 @@ describe('Data table columns', function () {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
         columns,
@@ -348,7 +353,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         columnsMeta: {
-          var_test: { type: 'number' },
+          extension: { type: 'string' },
         },
       });
       expect(gridColumns[1].schema).toBe('string');
@@ -402,6 +407,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       const extensionGridColumn = gridColumns[0];
@@ -428,6 +437,10 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       expect(customizedGridColumns).toMatchSnapshot();
