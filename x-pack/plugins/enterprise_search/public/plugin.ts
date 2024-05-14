@@ -64,7 +64,7 @@ import {
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
-import { DynamicSideNavItems, getNavigationTreeDefinition } from './navigation_tree';
+import { type DynamicSideNavItems, getNavigationTreeDefinition } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;

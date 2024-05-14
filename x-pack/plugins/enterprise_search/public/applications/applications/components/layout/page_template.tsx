@@ -84,6 +84,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   }, []);
 
   useEffect(() => {
+    // We update the new side nav definition with the selected app items
     updateSideNavDefinition({ searchApps: getSelectedAppItems(navItems) });
   }, [navItems, getSelectedAppItems, updateSideNavDefinition]);
 

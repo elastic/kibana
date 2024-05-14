@@ -116,6 +116,7 @@ export const SearchIndex: React.FC = () => {
   }, [guidedOnboarding, index?.count]);
 
   useEffect(() => {
+    // We update the new side nav definition with the selected indices items
     updateSideNavDefinition({ indices: indicesItems });
   }, [indicesItems, updateSideNavDefinition]);
 

@@ -72,6 +72,7 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
   );
 
   useEffect(() => {
+    // We update the new side nav definition with the selected collection items
     updateSideNavDefinition({ collections: getSelectedCollectionItems(navItems) });
   }, [navItems, updateSideNavDefinition]);
 

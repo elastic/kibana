@@ -272,6 +272,7 @@ export const useEnterpriseSearchApplicationNav = (
               }),
             },
             {
+              // Required for the new side nav
               iconToString: hasSchemaConflicts ? 'warning' : undefined,
               id: 'enterpriseSearchApplicationsContent',
               name: (
