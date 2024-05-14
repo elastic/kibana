@@ -87,6 +87,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  updateSideNavDefinition: jest.fn(),
   user: null,
 };
 
