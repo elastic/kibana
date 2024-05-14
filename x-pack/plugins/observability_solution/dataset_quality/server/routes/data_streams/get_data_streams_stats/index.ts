@@ -21,21 +21,21 @@ export async function getDataStreamsStats({
   datasetQuery?: string;
   sizeStatsAvailable?: boolean; // Only Needed to determine whether `_stats` endpoint is available https://github.com/elastic/kibana/issues/178954
 }) {
-  const matchingDataStreamsStatsPromise = dataStreamService.getMatchingDataStreamsStats(esClient, {
+  const matchingDataStreamsStats = dataStreamService.getMatchingDataStreamsStats(esClient, {
     type: type ?? '*',
     dataset: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 
-  const indicesDocsCountPromise = sizeStatsAvailable
+  const indicesDocsCount = sizeStatsAvailable
     ? indexStatsService.getIndicesDocCounts(esClient, type ?? '*')
     : Promise.resolve(null);
 
-  const [indicesDocsCountStats, matchingDataStreamsStats] = await Promise.all([
-    indicesDocsCountPromise,
-    matchingDataStreamsStatsPromise,
+  const [indicesDocsCountStats, dataStreamsStats] = await Promise.all([
+    indicesDocsCount,
+    matchingDataStreamsStats,
   ]);
 
-  const mappedDataStreams = matchingDataStreamsStats.map((dataStream) => {
+  const mappedDataStreams = dataStreamsStats.map((dataStream) => {
     return {
       name: dataStream.data_stream,
       size: dataStream.store_size?.toString(),

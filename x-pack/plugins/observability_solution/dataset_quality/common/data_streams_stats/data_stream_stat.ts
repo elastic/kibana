@@ -26,7 +26,7 @@ export class DataStreamStat {
   degradedDocs: {
     percentage: number;
     count: number;
-    totalDocs: number; // docs count in the filtered time range
+    docsCount: number; // docs count in the filtered time range
     quality: QualityIndicators;
   };
 
@@ -44,7 +44,7 @@ export class DataStreamStat {
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
-      totalDocs: dataStreamStat.degradedDocs.totalDocs,
+      docsCount: dataStreamStat.degradedDocs.docsCount,
       quality: dataStreamStat.degradedDocs.quality,
     };
   }
@@ -87,7 +87,7 @@ export class DataStreamStat {
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
-        totalDocs: degradedDocStat.totalDocs,
+        docsCount: degradedDocStat.docsCount,
         quality: mapPercentageToQuality(degradedDocStat.percentage),
       },
     };
@@ -97,6 +97,6 @@ export class DataStreamStat {
 
   public static calculateFilteredSize({ sizeBytes, totalDocs, degradedDocs }: DataStreamStat) {
     const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
-    return avgDocSize * degradedDocs.totalDocs;
+    return avgDocSize * degradedDocs.docsCount;
   }
 }
