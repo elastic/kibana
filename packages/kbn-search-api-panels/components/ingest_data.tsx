@@ -14,7 +14,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IngestPipelinePanel } from './ingest_pipeline_panel';
+import { IngestPipelinePanel } from './ingest_pipelines/ingest_pipeline_panel';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
@@ -36,6 +36,7 @@ interface IngestDataProps {
   additionalIngestionPanel?: React.ReactNode;
   ingestPipelineData?: IngestGetPipelineResponse;
   setSelectedPipeline: (pipelineId: string) => void;
+  defaultIngestionPipeline: string;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -52,6 +53,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   additionalIngestionPanel,
   ingestPipelineData,
   setSelectedPipeline,
+  defaultIngestionPipeline,
 }) => {
   return (
     <OverviewPanel
@@ -80,6 +82,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
       <IngestPipelinePanel
         setSelectedPipeline={setSelectedPipeline}
         ingestPipelinesData={ingestPipelineData}
+        defaultIngestionPipeline={defaultIngestionPipeline}
       />
       <EuiTitle size="xs">
         <h4>

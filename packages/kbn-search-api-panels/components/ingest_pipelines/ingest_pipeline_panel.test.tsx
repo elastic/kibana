@@ -10,6 +10,8 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { IngestPipelinePanel } from './ingest_pipeline_panel';
 
+const DEFAULT_INGESTION_PIPELINE = 'default-ingestion-pipeline';
+
 describe('IngestPipelinePanel', () => {
   const setSelectedPipelineMock = jest.fn();
 
@@ -26,11 +28,18 @@ describe('IngestPipelinePanel', () => {
         managed: false,
       },
     },
-    'search-default-ingestion': {
+    [DEFAULT_INGESTION_PIPELINE]: {
       processors: ['processor1', 'processor2', 'processor3'],
       _meta: {
         managed: true,
       },
+    },
+    deprecated_pipeline: {
+      processors: ['processor1'],
+      _meta: {
+        managed: false,
+      },
+      deprecated: true,
     },
   } as any;
 
@@ -42,6 +51,7 @@ describe('IngestPipelinePanel', () => {
       defaultProps: {
         setSelectedPipeline: setSelectedPipelineMock,
         ingestPipelinesData: mockPipelineData,
+        defaultIngestionPipeline: DEFAULT_INGESTION_PIPELINE,
       },
       memoryRouter: { wrapComponent: false },
     });
@@ -68,20 +78,34 @@ describe('IngestPipelinePanel', () => {
 
   it('should display number of processors', () => {
     find('ingestPipelinePanelSelect').simulate('click');
-    expect(find('ingestPipelinePanelProcessors').at(0).contains('2 processors')).toBe(true);
-    expect(find('ingestPipelinePanelProcessors').at(1).contains('1 processor')).toBe(true);
+    expect(find('ingestPipelinePanelOptions').at(0).contains('3 processors')).toBe(true);
+    expect(find('ingestPipelinePanelOptions').at(1).contains('2 processors')).toBe(true);
+    expect(find('ingestPipelinePanelOptions').at(2).contains('1 processor')).toBe(true);
   });
 
   it('should display the badges correctly', () => {
     find('ingestPipelinePanelSelect').simulate('click');
     expect(
-      find('ingestPipelinePanelProcessors').at(0).find('.euiBadge__text').contains('Managed')
+      find('ingestPipelinePanelOptions').at(0).find('.euiBadge__text').contains('Recommended')
     ).toBe(true);
     expect(
-      find('ingestPipelinePanelProcessors').at(1).find('.euiBadge__text').contains('Managed')
+      find('ingestPipelinePanelOptions').at(1).find('.euiBadge__text').contains('Managed')
+    ).toBe(true);
+    expect(
+      find('ingestPipelinePanelOptions').at(2).find('.euiBadge__text').contains('Managed')
     ).toBe(false);
-    expect(
-      find('ingestPipelinePanelProcessors').at(2).find('.euiBadge__text').contains('Recommended')
-    ).toBe(true);
+  });
+
+  it('should display only active pipelines', () => {
+    find('ingestPipelinePanelSelect').simulate('click');
+    expect(find('ingestPipelinePanelOptionTitle').contains('pipeline1')).toBe(true);
+    expect(find('ingestPipelinePanelOptionTitle').contains('deprecated_pipeline')).toBe(false);
+  });
+
+  it('should display the recommended pipeline at the beginning', () => {
+    find('ingestPipelinePanelSelect').simulate('click');
+    expect(find('ingestPipelinePanelOptionTitle').at(0).contains(DEFAULT_INGESTION_PIPELINE)).toBe(
+      true
+    );
   });
 });

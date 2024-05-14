@@ -44,6 +44,7 @@ import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
   ELASTICSEARCH_URL_PLACEHOLDER,
+  DEFAULT_INGESTION_PIPELINE,
 } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
@@ -319,6 +320,7 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
           setSelectedPipeline={setSelectedPipeline}
+          defaultIngestionPipeline={DEFAULT_INGESTION_PIPELINE}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

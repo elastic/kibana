@@ -40,6 +40,7 @@ import { languageDefinitions } from '../languages/languages';
 import { LanguageGrid } from '../languages/language_grid';
 
 import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+import { DEFAULT_INGESTION_PIPELINE } from '../../constants';
 
 import {
   API_KEY_PLACEHOLDER,
@@ -98,6 +99,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
             <IngestPipelinePanel
               setSelectedPipeline={setSelectedPipeline}
               ingestPipelinesData={pipelineData?.pipelines}
+              defaultIngestionPipeline={DEFAULT_INGESTION_PIPELINE}
             />
           </EuiFlexItem>
           <EuiFlexItem>

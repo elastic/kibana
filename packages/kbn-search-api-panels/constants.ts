@@ -17,4 +17,3 @@ export const LEARN_MORE_LABEL: string = i18n.translate(
 export const API_KEY_PLACEHOLDER = 'your_api_key';
 export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const INDEX_NAME_PLACEHOLDER = 'index_name';
-export const DEFAULT_INGESTION_PIPELINE = 'search-default-ingestion';
