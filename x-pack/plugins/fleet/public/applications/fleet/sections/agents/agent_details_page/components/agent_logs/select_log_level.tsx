@@ -139,6 +139,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
             <EuiButtonEmpty
               flush="both"
               size="xs"
+              disabled={!authz.fleet.allAgents}
               isLoading={isSetLevelLoading || isResetLevelLoading}
               iconType="check"
               onClick={onClickApply}
@@ -162,6 +163,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               <EuiButtonEmpty
                 flush="both"
                 size="xs"
+                disabled={!authz.fleet.allAgents}
                 isLoading={isSetLevelLoading || isResetLevelLoading}
                 iconType="cross"
                 onClick={resetLogLevel}
