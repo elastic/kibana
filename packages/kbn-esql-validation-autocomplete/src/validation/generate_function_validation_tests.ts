@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { readFileSync, writeFileSync } from 'fs';
 import { camelCase } from 'lodash';
+import { join } from 'path';
+import * as recast from 'recast';
+const b = recast.types.builders;
+const n = recast.types.namedTypes;
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
@@ -30,7 +35,161 @@ function main() {
     testCasesByFunction.set(definition.name, generateTestsForGroupingFunction(definition));
   }
 
-  console.log(testCasesByFunction);
+  writeTestsToFile(testCasesByFunction);
+}
+
+function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>>) {
+  const testFilePath = join(__dirname, 'validation.test.ts');
+
+  const ast = recast.parse(readFileSync(testFilePath).toString(), {
+    parser: require('recast/parsers/typescript'),
+  });
+
+  const functionsDescribeBlock = findFunctionsDescribeBlock(ast);
+  if (!functionsDescribeBlock) {
+    throw Error("Couldn't find the 'functions' describe block in the test file");
+  }
+
+  if (!n.ArrowFunctionExpression.check(functionsDescribeBlock.arguments[1])) {
+    throw Error('Expected an arrow function expression');
+  }
+
+  if (!n.BlockStatement.check(functionsDescribeBlock.arguments[1].body)) {
+    throw Error('Expected a block statement');
+  }
+
+  for (const [functionName, testCases] of testCasesByFunction) {
+    functionsDescribeBlock.arguments[1].body.body.push(
+      buildDescribeBlockForFunction(functionName, testCases)
+    );
+  }
+
+  // for (const node of functionsDescribeBlock.arguments[1].body.body) {
+  //   if (!n.ExpressionStatement.check(node)) {
+  //     continue;
+  //   }
+
+  //   if (!n.CallExpression.check(node.expression)) {
+  //     continue;
+  //   }
+
+  //   if (!n.StringLiteral.check(node.expression.arguments[0])) {
+  //     continue;
+  //   }
+
+  //   const functionName = node.expression.arguments[0].value;
+
+  //   const generatedTestCasesForFunction = (
+  //     testCasesByFunction.has(functionName) ? testCasesByFunction.get(functionName) : new Map()
+  //   ) as Map<string, string[]>;
+
+  //   if (!n.ArrowFunctionExpression.check(node.expression.arguments[1])) {
+  //     continue;
+  //   }
+
+  //   if (!n.BlockStatement.check(node.expression.arguments[1].body)) {
+  //     continue;
+  //   }
+
+  //   for (const testCaseInCode of node.expression.arguments[1].body.body) {
+  //     if (!n.ExpressionStatement.check(testCaseInCode)) {
+  //       continue;
+  //     }
+
+  //     if (!n.CallExpression.check(testCaseInCode.expression)) {
+  //       continue;
+  //     }
+
+  //     if (!n.Identifier.check(testCaseInCode.expression.callee)) {
+  //       continue;
+  //     }
+
+  //     if (testCaseInCode.expression.callee.name !== 'testErrorsAndWarnings') {
+  //       continue;
+  //     }
+
+  //     const testQuery = getValueFromStringOrTemplateLiteral(testCaseInCode.expression.arguments[0]);
+
+  //     if (!testQuery) {
+  //       console.warn('Could not find the test query for', functionName);
+  //       continue;
+  //     }
+
+  //     const expectedErrors = [];
+
+  //     if (n.ArrayExpression.check(testCaseInCode.expression.arguments[1])) {
+  //       for (const element of testCaseInCode.expression.arguments[1].elements) {
+  //         const expectedError = getValueFromStringOrTemplateLiteral(element);
+
+  //         if (expectedError) {
+  //           expectedErrors.push(expectedError);
+  //         }
+  //       }
+  //     }
+
+  //     generatedTestCasesForFunction.set(testQuery, expectedErrors);
+  //   }
+
+  //   node.expression.arguments[1].body.body.push(buildTestCase('test query', ['expected error']));
+  // }
+
+  writeFileSync(testFilePath, recast.print(ast).code, 'utf-8');
+}
+
+const buildTestCase = (testQuery: string, expectedErrors: string[]) => {
+  return b.expressionStatement(
+    b.callExpression(b.identifier('testErrorsAndWarnings'), [
+      b.stringLiteral(testQuery),
+      b.arrayExpression(expectedErrors.map((error) => b.stringLiteral(error))),
+    ])
+  );
+};
+
+const buildDescribeBlockForFunction = (_functionName: string, testCases: Map<string, string[]>) => {
+  const testCasesInCode = Array.from(testCases.entries()).map(([testQuery, expectedErrors]) => {
+    return buildTestCase(testQuery, expectedErrors);
+  });
+
+  return b.expressionStatement(
+    b.callExpression(b.identifier('describe'), [
+      b.stringLiteral(_functionName),
+      b.arrowFunctionExpression([], b.blockStatement(testCasesInCode)),
+    ])
+  );
+};
+
+function getValueFromStringOrTemplateLiteral(node: any): string {
+  if (n.StringLiteral.check(node)) {
+    return node.value;
+  }
+
+  if (n.TemplateLiteral.check(node)) {
+    return node.quasis[0].value.raw;
+  }
+
+  return '';
+}
+
+function findFunctionsDescribeBlock(ast: any): recast.types.namedTypes.CallExpression | null {
+  let functionsDescribeBlock: recast.types.namedTypes.CallExpression | null = null;
+
+  recast.visit(ast, {
+    visitCallExpression(path) {
+      const node = path.node;
+      if (
+        n.Identifier.check(node.callee) &&
+        node.callee.name === 'describe' &&
+        n.StringLiteral.check(node.arguments[0]) &&
+        node.arguments[0].value === 'functions'
+      ) {
+        functionsDescribeBlock = node;
+        this.abort();
+      }
+      this.traverse(path);
+    },
+  });
+
+  return functionsDescribeBlock;
 }
 
 function generateTestsForEvalFunction(definition: FunctionDefinition) {

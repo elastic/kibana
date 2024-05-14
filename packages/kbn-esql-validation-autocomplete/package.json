@@ -1,7 +1,11 @@
 {
-    "name": "@kbn/esql-validation-autocomplete",
-    "version": "1.0.0",
-    "private": true,
-    "license": "SSPL-1.0 OR Elastic License 2.0",
-    "sideEffects": false
+  "name": "@kbn/esql-validation-autocomplete",
+  "version": "1.0.0",
+  "private": true,
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
+  "dependencies": {
+    "recast": "^0.23.7",
+    "ts-node": "^10.9.2"
   }
+}
