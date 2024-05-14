@@ -430,19 +430,11 @@ describe('RequiredFields form part', () => {
 
       await submitForm();
 
-      /* 
-        useForm's "submit" implementation calls setTimeout internally in cases when form is untouched.
-        We need to tell Jest to wait for the next tick of the event loop to allow the form to be submitted.
-      */
       await waitFor(() => {
-        new Promise((resolve) => {
-          setImmediate(resolve);
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: undefined,
+          isValid: true,
         });
-      });
-
-      expect(handleSubmit).toHaveBeenCalledWith({
-        data: undefined,
-        isValid: true,
       });
     });
 
@@ -459,19 +451,11 @@ describe('RequiredFields form part', () => {
 
       await submitForm();
 
-      /* 
-        useForm's "submit" implementation calls setTimeout internally in cases when form is untouched.
-        We need to tell Jest to wait for the next tick of the event loop to allow the form to be submitted.
-      */
       await waitFor(() => {
-        new Promise((resolve) => {
-          setImmediate(resolve);
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: undefined,
+          isValid: true,
         });
-      });
-
-      expect(handleSubmit).toHaveBeenCalledWith({
-        data: undefined,
-        isValid: true,
       });
     });
 
