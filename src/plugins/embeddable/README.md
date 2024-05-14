@@ -7,7 +7,7 @@ Embeddables are React components that manage their own state, can be serialized 
 
 #### Best practices
 * **Do not use Embeddables to share Components between plugins: ** Only create an embeddable if your Component is rendered on a page that persists embeddable state and renders multiple embeddable types. For example, create an embeddable to render your Component on a Dashboard. Otherwise, use a vanilla React Component to share Components between plugins. 
-* **Do not use Embeddables to avoid circular plugin dependencies: ** Avoid using embeddables to work around circular plugin dependencies. Instead, break your Component into a Package or another plugin.
+* **Do not use Embeddables to avoid circular plugin dependencies: ** Break your Component into a Package or another plugin to avoid circular plugin dependencies.
 * **Minimal API surface area: ** Embeddable APIs are accessable to all Kibana systems and all embeddable siblings and parents. Functions and state that are internal to an embeddable including any child components should not be added to the API. Consider passing internal state to child as props or react context.
 
 #### Examples
