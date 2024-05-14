@@ -635,15 +635,15 @@ function selectEuiComboBoxOption({
     if (typeof optionText === 'string') {
       const optionToSelect = options.find((option) => option.textContent === optionText);
 
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
+      if (!optionToSelect) {
         throw new Error(
           `Could not find option with text "${optionText}". Available options: ${options
             .map((option) => option.textContent)
             .join(', ')}`
         );
       }
+
+      fireEvent.click(optionToSelect);
     } else {
       fireEvent.click(options[optionIndex]);
     }
