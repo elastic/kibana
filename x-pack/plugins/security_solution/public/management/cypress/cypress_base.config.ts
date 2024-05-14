@@ -27,6 +27,7 @@ export const getCypressBaseConfig = (
         configFile: './public/management/reporter_config.json',
       },
 
+      chromeWebSecurity: false,
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
