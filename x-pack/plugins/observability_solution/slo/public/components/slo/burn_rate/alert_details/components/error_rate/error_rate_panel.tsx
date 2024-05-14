@@ -20,31 +20,16 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ALERT_EVALUATION_VALUE,
-  ALERT_RULE_PARAMETERS,
-  ALERT_TIME_RANGE,
-} from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { WindowSchema } from '../../../../../../typings';
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { TimeRange } from '../../../../error_rate_chart/use_lens_definition';
-import { BurnRateAlert } from '../../alert_details_app_section';
-import { getActionGroupFromReason } from '../../utils/alert';
+import { BurnRateAlert } from '../../types';
+import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
-
-function getDataTimeRange(
-  timeRange: { gte: string; lte?: string },
-  window: WindowSchema
-): TimeRange {
-  const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
-  return {
-    from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
-    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
-  };
-}
+import { getDataTimeRange } from '../../utils/time_range';
 
 function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
   return {
@@ -63,14 +48,8 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const {
     services: { http },
   } = useKibana();
-
-  const actionGroup = getActionGroupFromReason(alert.reason);
-  const actionGroupWindow = (
-    (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
-  ).find((window: WindowSchema) => window.actionGroup === actionGroup);
-
-  // @ts-ignore
-  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
+  const dataTimeRange = getDataTimeRange(alert);
+  const actionGroupWindow = getActionGroupWindow(alert);
   // @ts-ignore
   const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
