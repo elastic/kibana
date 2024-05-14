@@ -1021,25 +1021,26 @@ export class SearchSource {
       // if items that are in the docvalueFields are provided, we should
       // make sure those are added to the fields API unless they are
       // already set in docvalue_fields
-      if(!sourceFieldsProvided){
+      if (!sourceFieldsProvided) {
         return this.getUniqueFields({
-            index,
-            fields,
-            metaFields,
-            filteredDocvalueFields,
-          });
+          index,
+          fields,
+          metaFields,
+          filteredDocvalueFields,
+        });
       }
       return [
-            ...fields,
-            ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
-              const fldName = this.getFieldName(fld);
-              return (
-                fieldsFromSource.includes(fldName) &&
-                !(docvalueFields || [])
-                  .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d)).includes(fldName)
-              );
-            }),
-          ];
+        ...fields,
+        ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+          const fldName = this.getFieldName(fld);
+          return (
+            fieldsFromSource.includes(fldName) &&
+            !(docvalueFields || [])
+              .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
+              .includes(fldName)
+          );
+        }),
+      ];
     }
 
     return fields;
