@@ -413,9 +413,7 @@ export const DocViewerTable = ({
           ? css`
               height: ${availableHeight - 2 * 16 - 32}px; // vertical paddings and tabs height
             `
-          : css`
-              min-height: 500px;
-            `
+          : undefined
       }
     >
       <EuiFlexItem grow={false}>
@@ -447,7 +445,7 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow>
+          <EuiFlexItem grow={Boolean(availableHeight)}>
             <EuiDataGrid
               {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
