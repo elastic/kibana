@@ -19,6 +19,7 @@ import { switchMap } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
 import { SearchSourceSearchOptions } from './types';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -95,6 +96,8 @@ describe('SearchSource', () => {
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
       scriptedFieldsEnabled: true,
+      // @ts-ignore
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);

@@ -13,7 +13,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { ISearchOptions } from '@kbn/search-types';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec, DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
 
@@ -120,6 +120,10 @@ export interface SearchSourceFields {
   pit?: estypes.SearchPointInTimeReference;
 
   parent?: SearchSourceFields;
+}
+
+export interface SearchSourceFieldsLazy extends Omit<SearchSourceFields, 'index'> {
+  index?: DataViewLazy;
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

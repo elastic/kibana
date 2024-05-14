@@ -99,6 +99,7 @@ import type {
   ISearchSource,
   SearchFieldValue,
   SearchSourceFields,
+  SearchSourceFieldsLazy,
   SearchSourceOptions,
   SearchSourceSearchOptions,
 } from './types';
@@ -106,7 +107,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
+import { getEsQueryConfig, isRunningResponse, UI_SETTINGS, DataViewsContract } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -135,6 +136,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
   scriptedFieldsEnabled: boolean;
+  dataViews: DataViewsContract;
 }
 
 interface ExpressionAstOptions {
@@ -1233,5 +1235,15 @@ export class SearchSource {
     }
 
     return [...indexPatternSet];
+  }
+
+  async withDataViewLazy(fields: SearchSourceFieldsLazy) {
+    const { index } = fields;
+    let dataView: DataView | undefined;
+    if (index && index.id) {
+      dataView = await this.dependencies.dataViews.get(index.id);
+    }
+    this.setFields({ ...fields, index: dataView });
+    return {};
   }
 }
