@@ -146,8 +146,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
-    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] =
-      useState<boolean>(false);
+    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
+      getHasWrongOperator([exception])
+    );
+
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(

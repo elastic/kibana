@@ -391,7 +391,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
-  const submitException = useCallback(async (): Promise<void> => {
+  const submitEndpointException = useCallback(async (): Promise<void> => {
     if (submitNewExceptionItems == null) return;
 
     try {
@@ -466,9 +466,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     if (wildcardWarningExists) {
       setShowConfirmModal(true);
     } else {
-      return submitException();
+      return submitEndpointException();
     }
-  }, [wildcardWarningExists, submitException]);
+  }, [wildcardWarningExists, submitEndpointException]);
 
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
@@ -529,12 +529,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         body={body}
         confirmButton={confirmButton}
         cancelButton={cancelButton}
-        onSuccess={submitException}
+        onSuccess={submitEndpointException}
         onCancel={() => setShowConfirmModal(false)}
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, submitException]);
+  }, [listType, submitEndpointException]);
 
   return (
     <EuiFlyout
