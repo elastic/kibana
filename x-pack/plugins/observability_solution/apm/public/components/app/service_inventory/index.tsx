@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -177,6 +178,7 @@ function useServicesDetailedStatisticsFetcher({
 
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
+  const { onPageReady } = usePerformanceContext();
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
@@ -280,6 +282,15 @@ export function ServiceInventory() {
       ],
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
+
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      comparisonFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady();
+    }
+  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
 
   const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,
