@@ -230,17 +230,10 @@ export class DashboardPageObject extends FtrService {
     await this.expectExistsDashboardLandingPage();
   }
 
-  public async duplicateDashboard(
-    interactionMode: 'view' | 'edit',
-    dashboardNameOverride?: string
-  ) {
+  public async duplicateDashboard(dashboardNameOverride?: string) {
     this.log.debug('Clicking duplicate');
 
-    if (interactionMode === 'edit') {
-      await this.testSubjects.click('dashboardSaveAsMenuItem');
-    } else {
-      await this.testSubjects.click('dashboardDuplication');
-    }
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
 
     if (dashboardNameOverride) {
       this.log.debug('entering dashboard duplicate override title');
@@ -587,7 +580,7 @@ export class DashboardPageObject extends FtrService {
     });
 
     if (!isSaveModalOpen) {
-      await this.testSubjects.click('dashboardSaveAsMenuItem');
+      await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
 
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');

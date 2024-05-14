@@ -9,7 +9,11 @@
 import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
@@ -111,7 +115,7 @@ export async function runQuickSave(this: DashboardContainer) {
  */
 export async function runInteractiveSave(
   this: DashboardContainer,
-  interactionMode: 'view' | 'edit'
+  interactionMode: Extract<ViewMode, ViewMode.EDIT | ViewMode.VIEW>
 ) {
   const {
     data: {
@@ -129,7 +133,7 @@ export async function runInteractiveSave(
   } = this.getState();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
-    if (interactionMode === 'edit' && managed) {
+    if (interactionMode === ViewMode.EDIT && managed) {
       resolve(undefined);
     }
 
@@ -272,15 +276,17 @@ export async function runInteractiveSave(
       newTitle = `${baseTitle} (${baseCount + 1})`;
 
       switch (interactionMode) {
-        case 'edit': {
-          customModalTitle = i18n.translate('dashboard.topNav.saveAs.modalTitle', {
+        case ViewMode.EDIT: {
+          customModalTitle = i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
             defaultMessage: 'Save as new dashboard',
           });
+          break;
         }
-        case 'view': {
-          customModalTitle = i18n.translate('dashboard.topNav.duplicate.modalTitle', {
+        case ViewMode.VIEW: {
+          customModalTitle = i18n.translate('dashboard.topNav.viewModeInteractiveSave.modalTitle', {
             defaultMessage: 'Duplicate dashboard',
           });
+          break;
         }
         default: {
           customModalTitle = undefined;
