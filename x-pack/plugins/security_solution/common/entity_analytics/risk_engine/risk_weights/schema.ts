@@ -7,9 +7,7 @@
 
 import * as t from 'io-ts';
 import { NumberBetweenZeroAndOneInclusive } from '@kbn/securitysolution-io-ts-types';
-
-import { fromEnum } from '../utils';
-import { RiskCategories, RiskWeightTypes } from './types';
+import { RiskWeightTypes } from './types';
 
 const hostWeight = t.type({
   host: NumberBetweenZeroAndOneInclusive,
@@ -25,9 +23,7 @@ const identifierWeights = t.union([
   t.exact(t.intersection([userWeight, t.partial({ host: t.undefined })])),
 ]);
 
-const riskCategories = fromEnum('riskCategories', RiskCategories);
-
-const globalRiskWeightSchema = t.intersection([
+export const riskWeightSchema = t.intersection([
   t.exact(
     t.type({
       type: t.literal(RiskWeightTypes.global),
@@ -35,20 +31,6 @@ const globalRiskWeightSchema = t.intersection([
   ),
   identifierWeights,
 ]);
-export type GlobalRiskWeight = t.TypeOf<typeof globalRiskWeightSchema>;
-
-const riskCategoryRiskWeightSchema = t.intersection([
-  t.exact(
-    t.type({
-      type: t.literal(RiskWeightTypes.riskCategory),
-      value: riskCategories,
-    })
-  ),
-  identifierWeights,
-]);
-export type RiskCategoryRiskWeight = t.TypeOf<typeof riskCategoryRiskWeightSchema>;
-
-export const riskWeightSchema = t.union([globalRiskWeightSchema, riskCategoryRiskWeightSchema]);
 export type RiskWeightSchema = t.TypeOf<typeof riskWeightSchema>;
 export type RiskWeight = RiskWeightSchema;
 
