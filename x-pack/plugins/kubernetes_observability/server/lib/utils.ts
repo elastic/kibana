@@ -43,6 +43,26 @@ export type Node = {
     cpu_utilization: number | undefined;
 };
 
+export type NodeCpu = {
+    name: string;
+    cpu_utilization: number | undefined;
+    cpu_utilization_median_deviation: number | undefined;
+    alarm: string | undefined;
+    message: string | undefined;
+    reason: string | undefined;
+};
+
+export type NodeMem = {
+    name: string;
+    memory_available: number | undefined;
+    memory_usage: number | undefined;
+    memory_utilization: number| undefined;
+    memory_usage_median_deviation: number| undefined;
+    alarm: string | undefined;
+    message: string | undefined;
+    reason: string | undefined;
+};
+
 export type Limits = {
     [key: string]: double;
 };

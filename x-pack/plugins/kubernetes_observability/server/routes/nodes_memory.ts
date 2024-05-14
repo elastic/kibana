@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, Limits, Node, round, median, toPct } from '../lib/utils';
+import { extractFieldValue, Limits, NodeMem, round, toPct } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   NODE_MEMORY_ROUTE
@@ -79,59 +79,52 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
                     filter: filter,
                 },
             },
+            aggs: {
+                "group_by_category": {
+                    terms: {
+                        field: "resource.attributes.k8s.node.name" 
+                    },
+                    aggs: {
+                        "stats_memory": {
+                            "stats": {field: "metrics.k8s.node.memory.usage"}
+                        },
+                        "review_variability_memory_usage": {
+                            median_absolute_deviation: {
+                                field: "metrics.k8s.node.memory.usage" 
+                              }
+                        },
+                        "stats_available": { stats: {field: "metrics.k8s.node.memory.available"}},
+                        "review_variability_memory_available": {
+                            median_absolute_deviation: {
+                                field: "metrics.k8s.node.memory.available" 
+                              }
+                        },
+                    }
+                }
+            }
         };
-        console.log(dsl);
+        // console.log(dsl);
         const esResponse = await client.search(dsl);
-        var message = undefined;
-        var reason = undefined;
-        var memory_utilization = undefined;
-        var memory_usage_median = undefined;
-        var memory_usage = undefined;
-        var memory_available = undefined;
-
         console.log(esResponse);
-        if (esResponse.hits.hits.length > 0) {
-          const firsttHit = esResponse.hits.hits[0];
-          const { fields = {} } = firsttHit;
-          const time = extractFieldValue(fields['@timestamp']);
-          var alarm = '';
-          var nodes = new Array();
-          var memories_usage = new Array();
-          var memories_available = new Array();
-          const allhits = esResponse.hits.hits;
-          for (const hit of allhits) {
-            //console.log(hit);
-            var node = {} as Node;
-            const { fields = {} } = hit;
-            const name = extractFieldValue(fields['resource.attributes.k8s.node.name']);
-            memory_available = extractFieldValue(fields['metrics.k8s.node.memory.available']);
-            memory_usage = extractFieldValue(fields['metrics.k8s.node.memory.usage']);
-            node = {
-                'name': name,
-                'memory_available': memory_available,
-                'memory_usage': memory_usage,
-                'cpu_utilization': undefined,
-            };
-            nodes.push(node);
-          }
-
-          for (const n of nodes) {
-                console.log("Name: " + n.name, "Available: " + n.memory_available + ", Usage: " + n.memory_usage);
-                memories_usage.push(n.memory_usage);
-                memories_available.push(n.memory_available);
-          }
-          const total_memory_usage = memories_usage.reduce((accumulator, currentValue) => accumulator + currentValue);
-          memory_usage = total_memory_usage / nodes.length;
-          memory_usage_median = median(memories_usage);
-          const total_memory_available = memories_available.reduce((accumulator, currentValue) => accumulator + currentValue);
-
-          if (isNaN(total_memory_available)) {
-                reason = { 'node': request.query.name, 'value': undefined, 'desc': ' No memory limit defined ' };
-                message = { 'node': request.query.name, 'memory_usage': memory_usage, 'memory_usage_median': memory_usage_median, 'desc': ' Pod Memory usage in  Bytes' };
-          } else {
-                memory_available = total_memory_available / nodes.length;
-                memory_utilization = round(memory_usage / memory_available, 3);
-
+        const buckets = esResponse.aggregations.group_by_category['buckets'];
+        if (buckets.length > 0) {
+          if (esResponse.hits.hits.length > 0) {
+            const firsttHit = esResponse.hits.hits[0];
+            const { fields = {} } = firsttHit;
+            const time = extractFieldValue(fields['@timestamp']);
+            var nodes = new Array();
+            for (const bucket of buckets) {
+              console.log(bucket);
+              var nodeMem = {} as NodeMem;
+              var alarm = '';
+              const name = bucket.key;
+              const memory_available = bucket.stats_available.avg;
+              const memory_usage = bucket.stats_memory.avg;
+              const memory_usage_median_deviation = bucket.review_variability_memory_usage.value;
+              const [memoryAlloc, _] = await getNodeAllocMemCpu(client, name);
+              var memory_utilization = undefined;
+              if (memoryAlloc !== undefined){
+                memory_utilization = round(memory_usage / memoryAlloc, 3);
                 if (memory_utilization < limits["medium"]) {
                     alarm = "Low";
                 } else if (memory_utilization >= limits["medium"] && memory_utilization < limits["high"]) {
@@ -139,33 +132,87 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
                 } else {
                     alarm = "High";
                 }
-                reason = { 'node': request.query.name, 'value': alarm, 'desc': ' Memory utilisation' };
-                message = { 'node': request.query.name, 'memory_available': memory_available, 'memory_usage': memory_usage, 'memory_utilisation': toPct(memory_utilization), 'memory_usage_median': memory_usage_median, 'Desc': '% - Percentage of Memory utilisation' };
+              }
+              const reason = `Node ${name} has ${alarm} memory utilization`
+              const message = `Node ${name} has ${memory_available} bytes memory available, ${memory_usage} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_deviation} bytes deviation from median value.`
+              nodeMem = {
+                  'name': name,
+                  'memory_available': memory_available,
+                  'memory_usage': memory_usage,
+                  'memory_utilization': memory_utilization,
+                  'memory_usage_median_deviation': memory_usage_median_deviation,
+                  'alarm': alarm,
+                  'message': message,
+                  'reason': reason
+              };
+              nodes.push(nodeMem);
+            }
 
+            return response.ok({
+                  body: {
+                    time: time,
+                    nodes: nodes,
+                  },
+            });
           }
-          return response.ok({
-                body: {
-                  time: time,
-                  message: message,
-                  name: request.query.name,
-                  memory_utilization: toPct(memory_utilization),
-                  memory_usage_median: memory_usage_median,
-                  memory_available: memory_available,
-                  memory_usage: memory_usage,
-                  reason: reason,
-                },
-          });
         } else {
-          const message = `Node ${request.query.name} not found`
-          return response.ok({
-            body: {
-              time: '',
-              message: message,
-              name: request.query.name,
-              reason: "Not found",
-            },
-          });
+            var notFoundMessage = '';
+            if (request.query.name !== undefined) {
+                notFoundMessage = `Node ${request.query.name} was not found`
+            } else {
+                notFoundMessage = "No kubernetes node was found";
+            }
+            return response.ok({
+                body: {
+                time: '',
+                message: notFoundMessage,
+                name: request.query.name,
+                reason: "Not found",
+                },
+            });
         };
     },
     );
 };
+
+
+export async function getNodeAllocMemCpu(client: any, node: string): Promise<[any, any]>{
+
+    const musts = [
+        {
+          term: {
+            'resource.attributes.k8s.node.name': node,
+          },
+        },
+        { exists: { field: 'metrics.k8s.node.allocatable_memory' } },
+        { exists: { field: 'metrics.k8s.node.allocatable_cpu' } },
+    ];
+  
+
+    const dsl: estypes.SearchRequest = {
+      index: ["metrics-otel.*"],
+      size: 1,
+      sort: [{ '@timestamp': 'desc' }],
+      _source: false,
+      fields: [
+        'metrics.k8s.node.allocatable_memory',
+        'metrics.k8s.node.allocatable_cpu',
+      ],
+      query: {
+        bool: {
+          must: musts,
+        },
+      },
+    };
+  
+    const esResponse = await client.search(dsl);
+    var memoryAlloc = undefined;
+    var cpuAlloc = undefined;
+    if (esResponse.hits.hits.length > 0) {
+      const hit = esResponse.hits.hits[0];
+      const { fields = {} } = hit;
+      memoryAlloc = extractFieldValue(fields['metrics.k8s.node.allocatable_memory']);
+      cpuAlloc = extractFieldValue(fields['metrics.k8s.node.allocatable_cpu']);
+    }
+    return [memoryAlloc, cpuAlloc];
+  }

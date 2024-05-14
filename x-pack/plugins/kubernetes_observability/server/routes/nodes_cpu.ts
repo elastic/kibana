@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, Limits, Node, round, median, toPct } from '../lib/utils';
+import { extractFieldValue, Limits, NodeCpu, round, toPct } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   NODE_CPU_ROUTE
@@ -42,7 +42,7 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         var musts = new Array();
         musts.push(
-            { exists: { field: 'metrics.k8s.node.cpu.utilization' } }
+            { exists: { field: 'metrics.k8s.node.cpu.utilization' } },
         );
         const filter = [
             {
@@ -77,83 +77,85 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
                     filter: filter,
                 },
             },
-        };
-        console.log(dsl);
-        const esResponse = await client.search(dsl);
-        var message = undefined;
-        var reason = undefined;
-        var cpu_utilization = undefined;
-        var cpu_utilization_median = undefined;
-        console.log(esResponse);
-        if (esResponse.hits.hits.length > 0) {
-          const firsttHit = esResponse.hits.hits[0];
-          const { fields = {} } = firsttHit;
-          const time = extractFieldValue(fields['@timestamp']);
-
-          var message = undefined;
-          var reason = undefined;
-          var alarm = '';
-          var cpu_utilization = undefined;
-          var cpu_utilization_median = undefined;
-          var nodes = new Array();
-          var cpu_utilizations = new Array();
-          const allhits = esResponse.hits.hits;
-          for (const hit of allhits) {
-            //console.log(hit);
-            var node = {} as Node;
-            const { fields = {} } = hit;
-            const name = extractFieldValue(fields['resource.attributes.k8s.node.name']);
-            const nodeCpuUtilization = round(extractFieldValue(fields['metrics.k8s.node.cpu.utilization']), 3);
-
-            node = {
-                'name': name,
-                'memory_availabe': undefined,
-                'memory_usage': undefined,
-                'cpu_utilization': nodeCpuUtilization,
-            };
-            nodes.push(node);
-          }
-
-          for (const n of nodes) {
-                console.log("Name: " + n.name, "Available: " + n.cpu_utilization);
-                cpu_utilizations.push(n.cpu_utilization);
-          }
-            const total_cpu_utilization = cpu_utilizations.reduce((accumulator, currentValue) => accumulator + currentValue);
-
-            // console.log("Sum" + total_cpu_utilization)
-
-            cpu_utilization = total_cpu_utilization / nodes.length;
-            cpu_utilization_median = median(cpu_utilizations);
-            cpu_utilization = round(cpu_utilization, 3);
-            if (cpu_utilization < limits["medium"]) {
-                alarm = "Low";
-            } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
-                alarm = "Medium";
-            } else {
-                alarm = "High";
+            aggs: {
+                "group_by_category": {
+                    terms: {
+                        field: "resource.attributes.k8s.node.name" 
+                    },
+                    aggs: {
+                        "stats_cpu": {
+                            "stats": {field: "metrics.k8s.node.cpu.utilization"}
+                        },
+                        "review_variability_cpu_utilization": {
+                            median_absolute_deviation: {
+                                field: "metrics.k8s.node.cpu.utilization" 
+                              }
+                        },
+                    }
+                }
             }
-            reason = { 'node': request.query.name, 'value': alarm, 'desc': ' Cpu utilisation' };
-            message = { 'node': request.query.name, 'cpu_utilization': toPct(cpu_utilization), 'cpu_utilization_median': toPct(cpu_utilization_median), 'Desc': '% - Percentage of Cpu utilisation' };
+        };
+        // console.log(dsl);
+        const esResponse = await client.search(dsl);
+        console.log(esResponse);
+        const buckets = esResponse.aggregations.group_by_category['buckets'];
+        if (buckets.length > 0) {
+          if (esResponse.hits.hits.length > 0) {
+            const firsttHit = esResponse.hits.hits[0];
+            const { fields = {} } = firsttHit;
+            const time = extractFieldValue(fields['@timestamp']);
+            var nodes = new Array();
+            for (const bucket of buckets) {
+              console.log(bucket);
+              var nodeCpu = {} as NodeCpu;
+              var alarm = '';
+              const name = bucket.key;
+              var cpu_utilization = bucket.stats_cpu.avg;
+              var cpu_utilization_median_deviation = bucket.review_variability_cpu_utilization.value;
+              cpu_utilization_median_deviation = round(cpu_utilization_median_deviation, 3);
+              cpu_utilization = round(cpu_utilization, 3);
+              if (cpu_utilization < limits["medium"]) {
+                alarm = "Low";
+              } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
+                    alarm = "Medium";
+              } else {
+                    alarm = "High";
+              }
+              const reason = `Node ${name} has ${alarm} cpu utilization`
+              const message = `Node ${name} has ${toPct(cpu_utilization)}% cpu utilisation and ${toPct(cpu_utilization_median_deviation)}% deviation from median value.`
+              nodeCpu = {
+                  'name': name,
+                  'cpu_utilization': cpu_utilization,
+                  'cpu_utilization_median_deviation': cpu_utilization_median_deviation,
+                  'alarm': alarm,
+                  'message': message,
+                  'reason': reason
+              };
+              nodes.push(nodeCpu);
+            }
+
+            return response.ok({
+                  body: {
+                    time: time,
+                    nodes: nodes,
+                  },
+            });
+          }
+        } else {
+            var notFoundMessage = '';
+            if (request.query.name !== undefined) {
+                notFoundMessage = `Node ${request.query.name} was not found`
+            } else {
+                notFoundMessage = "No kubernetes node was found";
+            }
             return response.ok({
                 body: {
-                  time: time,
-                  name: request.query.name,
-                  cpu_utilization: toPct(cpu_utilization),
-                  cpu_utilization_median: toPct(cpu_utilization_median),
-                  message: message,
-                  reason: reason
+                time: '',
+                message: notFoundMessage,
+                name: request.query.name,
+                reason: "Not found",
                 },
             });
-        } else {
-          const message = `Node ${request.query.name} not found`
-          return response.ok({
-            body: {
-              time: '',
-              message: message,
-              name: request.query.name,
-              reason: "Not found",
-            },
-          });
         };
     },
     );
