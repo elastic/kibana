@@ -426,11 +426,11 @@ class AgentPolicyService {
     );
 
     agentPolicy.rootIntegrations = packageInfos
-      .filter(async (packageInfo: any) => {
+      .filter((packageInfo: any) => {
         if (!packageInfo) return false;
-        return packageInfo.agent?.privileges?.root ?? false;
+        return packageInfo.agent?.privileges?.root || false;
       })
-      .map((packageInfo) => packageInfo?.name || '');
+      .map((packageInfo) => ({ name: packageInfo?.name || '', title: packageInfo?.title || '' }));
   }
 
   public async getByIDs(

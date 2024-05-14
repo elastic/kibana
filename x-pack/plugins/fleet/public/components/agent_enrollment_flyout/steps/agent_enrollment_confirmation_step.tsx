@@ -57,7 +57,7 @@ export const AgentEnrollmentConfirmationStep = ({
   poll?: boolean;
   showLoading?: boolean;
   isLongEnrollment?: boolean;
-  rootIntegrations?: string[];
+  rootIntegrations?: Array<{ name: string; title: string }>;
   unprivilegedAgentsCount?: number;
 }): EuiContainedStepProps => {
   const isComplete = !!agentCount;
@@ -84,7 +84,7 @@ export const AgentEnrollmentConfirmationStep = ({
                 id="xpack.fleet.agentEnrollmentCallout.unprivilegedAgentsMessage"
                 defaultMessage="This agent policy has integrations that require Elastic Agents to have root privileges: {rootIntegrations}. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
                 values={{
-                  rootIntegrations: rootIntegrations.join(', '),
+                  rootIntegrations: rootIntegrations.map((item) => item.title).join(', '),
                   unprivilegedAgentsCount,
                 }}
               />
