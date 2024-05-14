@@ -594,8 +594,8 @@ x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
-x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
-x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
+x-pack/plugins/monitoring_collection @elastic/stack-monitoring
+x-pack/plugins/monitoring @elastic/stack-monitoring
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
@@ -865,6 +865,7 @@ x-pack/plugins/translations @elastic/kibana-localization
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
+packages/kbn-try-in-console @elastic/enterprise-search-frontend
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team

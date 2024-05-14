@@ -100,7 +100,8 @@
     "@kbn/search-types",
     "@kbn/alerting-comparators",
     "@kbn/react-hooks",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/router-utils"
   ],
   "exclude": [
     "target/**/*"
