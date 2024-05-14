@@ -250,6 +250,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       callbacks: [
         {
           handleLLMNewToken(token) {
+            console.log('heyo handleLLMNewToken', token);
             if (finalOutputIndex === -1) {
               // Remove whitespace to simplify parsing
               currentOutput += token.replace(/\s/g, '');

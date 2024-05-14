@@ -13,7 +13,8 @@ import { Logger } from '@kbn/core/server';
 type StreamParser = (
   responseStream: Readable,
   logger: Logger,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  tokenHandler?: (token: string) => void
 ) => Promise<string>;
 
 export const handleStreamStorage = async ({
@@ -88,7 +89,12 @@ const parseOpenAIResponse = (responseBody: string) =>
       return prev + (msg.content || '');
     }, '');
 
-const parseBedrockStream: StreamParser = async (responseStream, logger, abortSignal) => {
+export const parseBedrockStream: StreamParser = async (
+  responseStream,
+  logger,
+  abortSignal,
+  tokenHandler
+) => {
   const responseBuffer: Uint8Array[] = [];
   if (abortSignal) {
     abortSignal.addEventListener('abort', () => {
@@ -99,6 +105,7 @@ const parseBedrockStream: StreamParser = async (responseStream, logger, abortSig
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
+    tokenHandler?.(chunk);
   });
 
   await finished(responseStream).catch((err) => {

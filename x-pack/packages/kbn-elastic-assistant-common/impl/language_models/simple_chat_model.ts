@@ -15,6 +15,9 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { Readable } from 'stream';
+import { parseBedrockStream } from '@kbn/elastic-assistant-plugin/server/lib/parse_stream';
 import { getDefaultArguments } from './constants';
 import { ExecuteConnectorRequestBody } from '../..';
 
@@ -28,6 +31,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   connectorId: string;
   logger: Logger;
   llmType?: string;
+  signal?: AbortSignal;
   model?: string;
   temperature?: number;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -40,6 +44,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #traceId: string;
+  #signal?: AbortSignal;
   llmType: string;
   streaming: boolean;
   model?: string;
@@ -53,6 +58,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     model,
     request,
     temperature,
+    signal,
     streaming,
   }: CustomChatModelInput) {
     super({});
@@ -61,6 +67,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.#connectorId = connectorId;
     this.#traceId = uuidv4();
     this.#logger = logger;
+    this.#signal = signal;
     this.#request = request;
     this.llmType = llmType ?? 'openai';
     this.model = model;
@@ -79,7 +86,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     return 'base_chat_model';
   }
 
-  async _call(messages: BaseMessage[], options: this['ParsedCallOptions']): Promise<string> {
+  async _call(
+    messages: BaseMessage[],
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun
+  ): Promise<string> {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
@@ -107,7 +118,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       actionId: this.#connectorId,
       params: {
         // hard code to non-streaming subaction as this class only supports non-streaming
-        subAction: 'invokeAI',
+        subAction: this.streaming ? 'invokeStream' : 'invokeAI',
         subActionParams: {
           model: this.#request.body.model,
           messages: formattedMessages,
@@ -115,6 +126,29 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         },
       },
     };
+
+    if (!this.streaming) {
+      // create an actions client from the authenticated request context:
+      const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+
+      const actionResult = await actionsClient.execute(requestBody);
+
+      if (actionResult.status === 'error') {
+        throw new Error(
+          `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+        );
+      }
+
+      const content = get('data.message', actionResult);
+
+      if (typeof content !== 'string') {
+        throw new Error(
+          `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
+    }
 
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
@@ -127,26 +161,35 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       );
     }
 
-    const content = get('data.message', actionResult);
-
-    if (typeof content !== 'string') {
-      throw new Error(
-        `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
-      );
+    const readable = get('data', actionResult) as Readable;
+    if (typeof readable?.read !== 'function') {
+      throw new Error('Action result status is error: result is not streamable');
     }
 
-    return content; // per the contact of _call, return a string
+    // Trigger the appropriate callback for new chunks
+    // await runManager?.handleLLMNewToken(token);
+
+    // do not await, blocks stream for UI
+    const parsed = await parseBedrockStream(
+      readable,
+      this.#logger,
+      this.#signal,
+      runManager?.handleLLMNewToken
+    );
+
+    // return readable.pipe(new PassThrough());
+    return parsed; // per the contact of _call, return a string
   }
   async *_streamResponseChunks() {
     console.log('heyo _streamResponseChunks');
     return 'hi';
   }
-  async *_streamIterator() {
-    console.log('heyo _streamIterator');
-    return 'hi';
-  }
-
-  async completionWithRetry() {
-    return 'hi';
-  }
+  // async *_streamIterator() {
+  //   console.log('heyo _streamIterator');
+  //   return 'hi';
+  // }
+  //
+  // async completionWithRetry() {
+  //   return 'hi';
+  // }
 }
