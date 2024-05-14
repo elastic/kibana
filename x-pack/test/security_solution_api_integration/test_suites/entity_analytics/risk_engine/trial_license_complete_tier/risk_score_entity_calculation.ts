@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 import { RISK_SCORE_ENTITY_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
+import { EntityRiskScore } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
     body,
   }: {
     body: object;
-  }): Promise<{ score: RiskScore; success: boolean }> => {
+  }): Promise<{ score: EntityRiskScore; success: boolean }> => {
     const { body: result } = await supertest
       .post(RISK_SCORE_ENTITY_CALCULATION_URL)
       .set('kbn-xsrf', 'true')

@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { EntityRiskScore } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
     body,
   }: {
     body: object;
-  }): Promise<{ scores: { host?: RiskScore[]; user?: RiskScore[] } }> => {
+  }): Promise<{ scores: { host?: EntityRiskScore[]; user?: EntityRiskScore[] } }> => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
