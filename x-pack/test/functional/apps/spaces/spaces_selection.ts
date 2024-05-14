@@ -21,8 +21,8 @@ export default function spaceSelectorFunctionalTests({
     'spaceSelector',
   ]);
   const spacesService = getService('spaces');
-
-  describe('Spaces', function () {
+// FLAKY TEST RUNNER!
+  describe.only('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
       for (const testSpaceId of testSpacesIds) {
