@@ -13,7 +13,6 @@ import { combineLatest, tap, debounceTime, switchMap, skipWhile, startWith, of }
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import {
   type MlEntityField,
   type MlEntityFieldOperation,
@@ -21,7 +20,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import { Subject, catchError } from 'rxjs';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
@@ -57,8 +56,8 @@ export interface EmbeddableAnomalyChartsContainerProps extends AnomalyChartsEmbe
 }
 function useAnomalyChartsData(
   api: AnomalyChartsEmbeddableInput,
-  onInputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
+  appliedTimeRange$,
   chartWidth: number,
   severity: number,
   renderCallbacks: {
@@ -84,19 +83,19 @@ function useAnomalyChartsData(
     const subscription = combineLatest([
       getJobsObservable(api.jobIds$, anomalyDetectorService, setError),
       api.maxSeriesToPlot$,
-      api.timeRange$,
+      appliedTimeRange$,
       api.filters$,
       api.query$,
-      chartWidth$, // @todo  .pipe(skipWhile((v) => !v)),
+      chartWidth$.pipe(skipWhile((v) => !v)),
       severity$,
       api.refresh$.pipe(startWith(null)),
     ])
       .pipe(
-        // tap(setIsLoading.bind(null, true)),
-        // debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        // tap(() => {
-        //   renderCallbacks.onLoading();
-        // }),
+        tap(setIsLoading.bind(null, true)),
+        debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCallbacks.onLoading();
+        }),
         switchMap(
           ([
             explorerJobs,
@@ -107,18 +106,6 @@ function useAnomalyChartsData(
             embeddableContainerWidth,
             severityValue,
           ]) => {
-            // @TODO: remove
-            console.log(
-              `--@@explorerJobs, input, embeddableContainerWidth, severityValue$`,
-              explorerJobs,
-              maxSeriesToPlot,
-              timeRangeInput,
-              filters,
-              query,
-              embeddableContainerWidth,
-              severityValue
-            );
-
             if (!explorerJobs) {
               // couldn't load the list of jobs
               return of(undefined);
@@ -170,18 +157,15 @@ function useAnomalyChartsData(
           }
         ),
         catchError((e) => {
-          // @TODO: remove
-          console.log(`--@@e`, e);
+          // eslint-disable-next-line no-console
+          console.error(`Error occured fetching anomaly charts data for embeddable\n`, e);
           setError(e.body);
           return of(undefined);
         })
       )
       .subscribe((results) => {
-        console.log(`--@@results`, results);
-
         if (results !== undefined) {
           setError(null);
-          // @TODO: remove
           setChartsData(results);
           setIsLoading(false);
 
@@ -192,11 +176,10 @@ function useAnomalyChartsData(
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // @TODO: remove
-    console.log(`--@@chartWidth updated`, chartWidth);
     chartWidth$.next(chartWidth);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth]);
@@ -218,9 +201,11 @@ function useAnomalyChartsData(
 
 const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
-  timeRange,
+  // timeRange,
+  appliedTimeRange$,
   // embeddableContext,
-  severityThreshold,
+  // severityThreshold,
+  initialstate,
   embeddableApi$,
   services,
   onInputChange,
@@ -230,16 +215,15 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
   onLoading,
   api,
 }) => {
-  // @TODO: remove
-  console.log(`--@@EmbeddableAnomalyChartsContainer api`, api);
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
-    optionValueToThreshold(severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING)
+    optionValueToThreshold(initialstate.severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING)
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
     services;
   const { timefilter } = dataServices.query.timefilter;
+  const timeRange = useObservable(appliedTimeRange$);
 
   const mlLocator = useMemo(
     () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
@@ -256,28 +240,30 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // const input = useObservable(embeddableApi$);
-
   useEffect(() => {
-    // onInputChange({
-    //   severityThreshold: severity.val,
-    // });
-    // onOutputChange({
-    //   severity: severity.val,
-    //   entityFields: selectedEntities,
-    // });
-  }, [severity, selectedEntities]);
+    if (api?.updateSeverityThreshold) {
+      api.updateSeverityThreshold({
+        severityThreshold: severity.val,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity.val, api.updateSeverityThreshold]);
 
   const renderCallbacks = useMemo(() => {
-    // @TODO: remove
-    console.log(`--@@renderCallbacks updated`);
     return { onRenderComplete, onError, onLoading };
   }, [onRenderComplete, onError, onLoading]);
   const {
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(api, onInputChange, services, chartWidth, severity.val, renderCallbacks);
+  } = useAnomalyChartsData(
+    api,
+    services,
+    appliedTimeRange$,
+    chartWidth,
+    severity.val,
+    renderCallbacks
+  );
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
