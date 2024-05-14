@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -19,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, type AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../common/utils/formatters';
+import { useFetchRuleTypes } from '../../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../utils/kibana_react';
 import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 import {
@@ -43,7 +46,17 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = useKibana().services;
   const instanceId = alert.fields[ALERT_INSTANCE_ID];
-  const featureIds = [rule.consumer as AlertConsumers];
+  const filteredRuleTypes = useGetFilteredRuleTypes();
+  const { ruleTypes } = useFetchRuleTypes({
+    filterByRuleTypeIds: filteredRuleTypes,
+  });
+  const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
+  const featureIds =
+    rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
+      ? [ruleType.producer as AlertConsumers]
+      : rule
+      ? [rule.consumer as AlertConsumers]
+      : [];
   const ruleId = alert.fields[ALERT_RULE_UUID];
 
   const {
