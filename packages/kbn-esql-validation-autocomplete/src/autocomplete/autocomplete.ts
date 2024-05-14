@@ -62,6 +62,7 @@ import {
   buildSourcesDefinitions,
   buildNewVarDefinition,
   buildNoPoliciesAvailableDefinition,
+  buildSelectDataDefinition,
   getCompatibleFunctionDefinition,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
@@ -836,7 +837,7 @@ async function getExpressionSuggestionsByType(
       } else {
         // FROM <suggest>
         // @TODO: filter down the suggestions here based on other existing sources defined
-        suggestions.push(...(await getSources()));
+        suggestions.push(...(await getSources()), ...buildSelectDataDefinition());
       }
     }
   }

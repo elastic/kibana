@@ -214,6 +214,8 @@ export function Histogram({
     }
   `;
 
+  // console.dir(lensProps);
+
   return (
     <>
       <div

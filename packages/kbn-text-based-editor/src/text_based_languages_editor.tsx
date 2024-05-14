@@ -7,6 +7,7 @@
  */
 
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
@@ -32,6 +33,14 @@ import {
   EuiResizeObserver,
   EuiOutsideClickDetector,
   EuiToolTip,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+  EuiSpacer,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
@@ -125,6 +134,13 @@ interface TextBasedEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
+interface FleetResponse {
+  items: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+
 const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
@@ -184,6 +200,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [integrations, setIntegrations] = useState<
+    Array<{
+      name: string;
+      description: string;
+    }>
+  >([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isPopoverlVisible, setIsPopoverVisible] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -270,6 +295,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const editorClassName = classNames('TextBasedLangEditor', {
     'TextBasedLangEditor--expanded': isCodeEditorExpanded,
@@ -611,6 +637,46 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [language, documentationSections]);
 
+  useEffect(() => {
+    async function fetchIntegrations() {
+      // fetch list of integrations
+      const route = '/api/fleet/epm/packages/installed';
+      const response = (await core.http
+        .get(route, { query: undefined, version: '2023-10-31' })
+        .catch((error) => {
+          throw new Error(`Failed to fetch integrations": ${error}`);
+        })) as FleetResponse;
+      setIntegrations(response.items);
+    }
+    fetchIntegrations();
+  }, [core.http]);
+
+  monaco.editor.registerCommand('esql.sources.select', (...args) => {
+    setIsModalVisible(true);
+  });
+
+  monaco.editor.registerCommand('esql.popover', (...args) => {
+    const currentCursorPosition = editor1.current?.getPosition();
+    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
+
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
+      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      setIsPopoverVisible(true);
+
+      setTimeout(() => {
+        popoverRef?.current?.focus();
+      }, 500);
+    }
+  });
+
+  const closeModal = () => setIsModalVisible(false);
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     accessibilitySupport: 'off',
@@ -901,7 +967,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           onEditorFocus();
                         });
 
-                        editor.onKeyDown(() => {
+                        editor.onKeyDown((e) => {
                           onEditorFocus();
                         });
 
@@ -1056,6 +1122,60 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onKeyDownResizeHandler={onKeyDownResizeHandler}
           editorIsInline={editorIsInline}
         />
+      )}
+      {isModalVisible && (
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id="modal">Integrations</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiDescriptionList
+              listItems={integrations.map((i) => {
+                return {
+                  title: i.name,
+                  description: i.description,
+                };
+              })}
+            />
+            <EuiSpacer />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+
+      {createPortal(
+        isPopoverlVisible && (
+          <div
+            style={{
+              ...popoverPosition,
+              backgroundColor: 'white',
+              position: 'absolute',
+              border: '1px solid #ccc',
+              padding: '10px',
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+              maxWidth: 300,
+              overflow: 'auto',
+            }}
+            ref={popoverRef}
+          >
+            <EuiDescriptionList
+              listItems={integrations.map((i) => {
+                return {
+                  title: i.name,
+                  description: i.description,
+                };
+              })}
+            />
+          </div>
+        ),
+        document.body
       )}
     </>
   );
