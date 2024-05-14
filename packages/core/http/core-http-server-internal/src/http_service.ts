@@ -252,6 +252,7 @@ export class HttpService
       handler: async (req, h) => {
         const version = req.query?.version;
         const pathStartsWith = req.query?.pathStartsWith;
+        const excludePathsMatching = req.query?.excludePathsMatching;
         const pluginId = req.query?.pluginId;
 
         const access = req.query?.access as 'public' | 'internal' | undefined;
@@ -273,7 +274,7 @@ export class HttpService
                   baseUrl,
                   title: 'Kibana HTTP APIs',
                   version: '0.0.0', // TODO get a better version here
-                  filters: { pathStartsWith, access, version },
+                  filters: { pathStartsWith, excludePathsMatching, access, version },
                 });
                 return h.response(result);
               } catch (e) {

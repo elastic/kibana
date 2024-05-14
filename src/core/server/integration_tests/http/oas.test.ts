@@ -133,11 +133,21 @@ it.each([
         },
       },
     },
-    excludes: [
-      '/api/my-include-test/{id}',
-      '/api/my-include-test/exclude-test',
-      '/api/my-other-plugin',
-    ],
+    excludes: ['/api/my-include-test/{id}', '/api/exclude-test', '/api/my-other-plugin'],
+  },
+  {
+    queryParam: { excludePathsMatching: ['/api/exclude-test', '/api/my-other-plugin'] },
+    includes: {
+      paths: {
+        '/api/include-test': {
+          get: {},
+        },
+        '/api/versioned': {
+          get: {},
+        },
+      },
+    },
+    excludes: ['/api/exclude-test', '/api/my-other-plugin'],
   },
 ])(
   'can filter paths based on query params $queryParam',
