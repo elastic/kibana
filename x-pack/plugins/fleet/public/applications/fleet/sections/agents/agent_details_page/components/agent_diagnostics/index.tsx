@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiPortal } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,6 +19,7 @@ import {
   EuiText,
   EuiSkeletonText,
   formatDate,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -135,10 +135,12 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const errorIcon = <MarginedIcon type="warning" color="red" />;
   const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
 
-  const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
+  const columns: Array<EuiBasicTableColumn<AgentDiagnostics>> = [
     {
       field: 'id',
-      name: 'File',
+      name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.fileLabelText', {
+        defaultMessage: 'File',
+      }),
       render: (id: string) => {
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
@@ -177,16 +179,41 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     },
     {
       field: 'id',
-      name: 'Date',
+      name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.dateLabelText', {
+        defaultMessage: 'Date',
+      }),
       dataType: 'date',
       render: (id: string) => {
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return (
-          <EuiText color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
+          <EuiText size="s" color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
             {formatDate(currentItem?.createTime, 'lll')}
           </EuiText>
         );
       },
+    },
+    {
+      name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
+        defaultMessage: 'Actions',
+      }),
+      width: '70px',
+      actions: [
+        {
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate(
+            'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
+            {
+              defaultMessage: 'Delete diagnostics file',
+            }
+          ),
+          onClick: (item: AgentDiagnostics) => {},
+        },
+      ],
     },
   ];
 
@@ -219,25 +246,8 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           />
         </EuiPortal>
       )}
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <EuiCallOut
-            iconType="warning"
-            color="warning"
-            title={
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.calloutTitle"
-                defaultMessage="Agent diagnostics"
-              />
-            }
-          >
-            <FormattedMessage
-              id="xpack.fleet.requestDiagnostics.calloutText"
-              defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
-            />
-          </EuiCallOut>
-        </EuiFlexItem>
-        <FlexStartEuiFlexItem>
+      <EuiFlexGroup direction="row" gutterSize="l" alignItems="center">
+        <EuiFlexItem grow={false}>
           {isAgentRequestDiagnosticsSupported(agent) ? (
             requestDiagnosticsButton
           ) : (
@@ -253,15 +263,21 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
               {requestDiagnosticsButton}
             </EuiToolTip>
           )}
-        </FlexStartEuiFlexItem>
+        </EuiFlexItem>
         <EuiFlexItem>
-          {isLoading ? (
-            <EuiSkeletonText lines={3} />
-          ) : (
-            <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
-          )}
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.calloutText"
+            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+      {isLoading ? (
+        <EuiSkeletonText lines={3} />
+      ) : (
+        <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
+      )}
     </>
   );
 };
