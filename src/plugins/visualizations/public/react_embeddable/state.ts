@@ -13,16 +13,39 @@ import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import { cloneDeep, omit } from 'lodash';
 import {
+  getAnalytics,
+  getDataViews,
+  getI18n,
+  getOverlays,
+  getSavedObjectTagging,
+  getSearch,
+  getSpaces,
+  getTheme,
+} from '../services';
+import {
   deserializeReferences,
   serializeReferences,
 } from '../utils/saved_visualization_references';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import type { VisualizeSerializedState } from './types';
+import {
+  isVisualizeSavedObjectState,
+  VisualizeSavedObjectState,
+  VisualizeSerializedState,
+} from './types';
 
-export const deserializeState = (state: SerializedPanelState<VisualizeSerializedState>) => {
+export const deserializeState = (
+  state: SerializedPanelState<VisualizeSerializedState | VisualizeSavedObjectState>
+) => {
   const serializedState = cloneDeep(state.rawState);
+  if (isVisualizeSavedObjectState(serializedState)) {
+    // Defer deserialization to the embeddable factory, as it requires an async call
+    return { ...serializedState, references: state.references };
+  }
+
   const references: Reference[] = state.references ?? [];
-  const { data } = serializedState.savedVis;
+
+  const { data } = serializedState.savedVis ?? { data: {} };
   let serializedSearchSource = data.searchSource as SerializedSearchSourceFields & {
     indexRefName: string;
   };
@@ -55,6 +78,49 @@ export const deserializeState = (state: SerializedPanelState<VisualizeSerialized
       },
     },
   } as VisualizeSerializedState;
+};
+
+export const deserializeSavedObjectState = async (state: VisualizeSavedObjectState) => {
+  const {
+    title,
+    description,
+    id = state.id,
+    visState,
+    searchSource,
+    searchSourceFields,
+    savedSearchId,
+  } = await getSavedVisualization(
+    {
+      dataViews: getDataViews(),
+      search: getSearch(),
+      savedObjectsTagging: getSavedObjectTagging().getTaggingApi(),
+      spaces: getSpaces(),
+      i18n: getI18n(),
+      overlays: getOverlays(),
+      analytics: getAnalytics(),
+      theme: getTheme(),
+    },
+    state.savedObjectId
+  );
+
+  return deserializeState({
+    rawState: {
+      id,
+      savedVis: {
+        title,
+        type: visState.type,
+        params: visState.params,
+        data: {
+          aggs: visState.aggs,
+          searchSource: (searchSource ?? searchSourceFields) as SerializedSearchSourceFields,
+          savedSearchId,
+        },
+      },
+      title,
+      description,
+    },
+    references: state.references,
+  }) as VisualizeSerializedState;
 };
 
 export const serializeState = ({

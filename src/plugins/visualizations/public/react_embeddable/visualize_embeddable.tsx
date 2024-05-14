@@ -31,15 +31,25 @@ import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
-import { deserializeState, serializeState } from './state';
-import type { VisualizeApi, VisualizeSerializedState } from './types';
+import { deserializeSavedObjectState, deserializeState, serializeState } from './state';
+import {
+  isVisualizeSavedObjectState,
+  VisualizeApi,
+  VisualizeSavedObjectState,
+  VisualizeSerializedState,
+} from './types';
 
 export const getVisualizeEmbeddableFactory: (
   embeddableStart: EmbeddableStart
-) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeApi> = (embeddableStart) => ({
+) => ReactEmbeddableFactory<VisualizeSerializedState | VisualizeSavedObjectState, VisualizeApi> = (
+  embeddableStart
+) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
-  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+  buildEmbeddable: async (inputState, buildApi, uuid, parentApi) => {
+    const state = isVisualizeSavedObjectState(inputState)
+      ? await deserializeSavedObjectState(inputState)
+      : inputState;
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const vis = await createVisAsync(state.savedVis.type, state.savedVis);
 

@@ -107,6 +107,7 @@ import {
   setSavedObjectsManagement,
   setContentManagement,
   setSavedSearch,
+  setDataViews,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -460,6 +461,7 @@ export class VisualizationsPlugin
       savedObjectsManagement,
       contentManagement,
       savedSearch,
+      dataViews,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -484,6 +486,7 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
+    setDataViews(dataViews);
 
     if (spaces) {
       setSpaces(spaces);
