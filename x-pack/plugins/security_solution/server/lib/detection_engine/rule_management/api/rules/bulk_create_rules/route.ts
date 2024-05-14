@@ -33,7 +33,7 @@ import {
   buildSiemResponse,
 } from '../../../../routes/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
-import { getRulesManagementClient } from '../../../logic/rules_management_client';
+import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead

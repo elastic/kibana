@@ -67,14 +67,14 @@ import type {
   PatchRuleRequestBody,
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../../common/api/detection_engine';
-import { convertCreateAPIToInternalSchema } from '..';
-import type { RuleAlertType, RuleParams, RuleSourceCamelCased } from '../../rule_schema';
-import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+} from '../../../../../../common/api/detection_engine';
+import { convertCreateAPIToInternalSchema } from '../..';
+import type { RuleAlertType, RuleParams, RuleSourceCamelCased } from '../../../rule_schema';
+import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import {
   convertPatchAPIToInternalSchema,
   convertUpdateAPIToInternalSchema,
-} from '../normalization/rule_converters';
+} from '../../normalization/rule_converters';
 
 interface CreateCustomRuleProps {
   rulesClient: RulesClient;
@@ -114,10 +114,10 @@ export const getRulesManagementClient = () => {
         data: internalRule,
       });
 
-      // Do migration of rulesClient response here
-      const migratedRule = normalizeRule(rule);
+      // TODO: Remove
+      const normalizedRule = normalizeRule(rule);
 
-      return migratedRule;
+      return normalizedRule;
     },
 
     // 2.  BULK CREATE CUSTOM RULES
@@ -139,9 +139,10 @@ export const getRulesManagementClient = () => {
         data: internalRule,
       });
 
-      const migratedRule = normalizeRule(rule);
+      // TODO: Remove
+      const normalizedRule = normalizeRule(rule);
 
-      return migratedRule;
+      return normalizedRule;
     },
 
     // 3.  UPDATE RULE
@@ -174,13 +175,7 @@ export const getRulesManagementClient = () => {
 
     // 5.  PATCH RULE
     patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType | null> => {
-      const {
-        rulesClient,
-        nextParams,
-        existingRule,
-        allowMissingConnectorSecrets,
-        shouldIncrementRevision,
-      } = patchRulePayload;
+      const { rulesClient, nextParams, existingRule } = patchRulePayload;
 
       if (existingRule == null) {
         return null;
@@ -191,8 +186,6 @@ export const getRulesManagementClient = () => {
       const update = await rulesClient.update({
         id: existingRule.id,
         data: patchedRule,
-        allowMissingConnectorSecrets,
-        shouldIncrementRevision: () => shouldIncrementRevision,
       });
 
       if (existingRule.enabled && nextParams.enabled === false) {

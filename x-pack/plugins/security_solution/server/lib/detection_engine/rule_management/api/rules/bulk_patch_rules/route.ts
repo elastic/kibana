@@ -22,12 +22,12 @@ import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../../../../routes/utils';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
-import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -67,6 +67,7 @@ export const bulkPatchRulesRoute = (
 
           const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesManagementClient = getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
@@ -108,11 +109,12 @@ export const bulkPatchRulesRoute = (
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await patchRules({
+                const rule = await rulesManagementClient.patchRule({
                   existingRule,
                   rulesClient,
                   nextParams: payloadRule,
                 });
+
                 if (rule != null && rule.enabled != null && rule.name != null) {
                   return transformValidateBulkError(rule.id, rule);
                 } else {

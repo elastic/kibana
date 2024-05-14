@@ -24,7 +24,7 @@ import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptio
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
-import { getRulesManagementClient } from '../../../logic/rules_management_client';
+import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned

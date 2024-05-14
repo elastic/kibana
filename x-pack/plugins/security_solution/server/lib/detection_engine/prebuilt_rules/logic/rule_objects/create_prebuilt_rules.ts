@@ -10,7 +10,7 @@ import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/consta
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { getRulesManagementClient } from '../../../rule_management/logic/rules_management_client';
+import { getRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRuleAsset[]) => {
   const rulesManagementClient = getRulesManagementClient();

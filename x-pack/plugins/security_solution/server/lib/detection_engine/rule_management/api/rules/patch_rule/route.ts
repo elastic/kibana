@@ -19,12 +19,12 @@ import { buildRouteValidationWithZod } from '../../../../../../utils/build_valid
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
+import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -57,6 +57,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
           const savedObjectsClient = (await context.core).savedObjects.client;
+          const rulesManagementClient = getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: (await context.licensing).license,
@@ -87,11 +88,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             ruleId: params.id,
           });
 
-          const rule = await patchRules({
+          const rule = await rulesManagementClient.patchRule({
             rulesClient,
             existingRule,
             nextParams: params,
           });
+
           if (rule != null && rule.enabled != null && rule.name != null) {
             return response.ok({
               body: transformValidate(rule),

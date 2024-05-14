@@ -39,12 +39,12 @@ import {
 } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/crud/read_rules';
-import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { getRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -280,6 +280,8 @@ export const createAndAssociateDefaultExceptionList = async ({
   rulesClient: RulesClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
+  const rulesManagementClient = getRulesManagementClient();
+
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
   if (exceptionListToAssociate == null) {
@@ -294,7 +296,7 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  await patchRules({
+  await rulesManagementClient.patchRule({
     rulesClient,
     existingRule: rule,
     nextParams: {
