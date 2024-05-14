@@ -21,7 +21,7 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TryInConsoleButton } from '@kbn/search-api-panels';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -60,7 +60,13 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={children}>
                 {(copy) => (
-                  <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
+                  <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchDevToolsConsoleCodeBlockCopyButton"
+                    color="text"
+                    iconType="copyClipboard"
+                    size="s"
+                    onClick={copy}
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy"
                       defaultMessage="Copy"
