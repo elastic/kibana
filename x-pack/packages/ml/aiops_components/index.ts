@@ -8,8 +8,14 @@
 export { DualBrush, DualBrushAnnotation } from './src/dual_brush';
 export { ProgressControls } from './src/progress_controls';
 export {
+  documentCountChartOverallSeriesName,
   DocumentCountChart,
   DocumentCountChartRedux,
-  type BrushSettings,
+  DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID,
+  getLogRateAnalysisBarStyleAccessor,
 } from './src/document_count_chart';
-export type { DocumentCountChartProps } from './src/document_count_chart';
+export type {
+  BrushSettings,
+  BrushSelectionUpdateHandler,
+  DocumentCountChartProps,
+} from './src/document_count_chart';

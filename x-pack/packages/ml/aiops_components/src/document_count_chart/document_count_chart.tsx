@@ -41,6 +41,11 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DualBrush, DualBrushAnnotation } from '../..';
 
 import { BrushBadge } from './brush_badge';
+import { DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID } from './constants';
+import {
+  documentCountChartOverallSeriesName,
+  documentCountChartOverallSeriesNameWithSplit,
+} from './i18n';
 
 declare global {
   interface Window {
@@ -82,7 +87,7 @@ type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
 /**
  * Brush selection update handler
  */
-type BrushSelectionUpdateHandler = (
+export type BrushSelectionUpdateHandler = (
   /** Payload for the brush selection update */
   d: BrushSelectionUpdatePayload
 ) => void;
@@ -137,8 +142,6 @@ export interface DocumentCountChartProps {
   /** Optional change point metadata */
   changePoint?: DocumentCountStatsChangePoint;
 }
-
-const SPEC_ID = 'document_count';
 
 const BADGE_HEIGHT = 20;
 const BADGE_WIDTH = 75;
@@ -198,20 +201,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
-
-  const overallSeriesName = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
-    {
-      defaultMessage: 'document count',
-    }
-  );
-
-  const overallSeriesNameWithSplit = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
-    {
-      defaultMessage: 'Other document count',
-    }
-  );
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -503,8 +492,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           />
           {adjustedChartPoints?.length && (
             <HistogramBarSeries
-              id={SPEC_ID}
-              name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              id={DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID}
+              name={
+                chartPointsSplit
+                  ? documentCountChartOverallSeriesNameWithSplit
+                  : documentCountChartOverallSeriesName
+              }
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
@@ -519,7 +512,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           )}
           {adjustedChartPointsSplit?.length && (
             <HistogramBarSeries
-              id={`${SPEC_ID}_split`}
+              id={`${DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID}_split`}
               name={chartPointsSplitLabel}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
