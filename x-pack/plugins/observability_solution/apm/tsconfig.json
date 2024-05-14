@@ -116,6 +116,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/search-types",
+    "@kbn/logs-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/presentation-publishing"
   ],
