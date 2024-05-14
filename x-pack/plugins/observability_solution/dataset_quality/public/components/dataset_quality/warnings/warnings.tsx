@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -80,11 +73,6 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
             ),
           }}
         />
-      ),
-      datasets: (
-        <EuiCode language="json" transparentBackground>
-          {nonAggregatableDatasets.join(', ')}
-        </EuiCode>
       ),
     }}
   />
