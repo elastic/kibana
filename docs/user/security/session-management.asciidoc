@@ -17,7 +17,7 @@ By default, sessions expire after 3 days of inactivity. To define another value 
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.session.idleTimeout: "3d"
+xpack.security.session.idleTimeout: "30m"
 --------------------------------------------------------------------------------
 --
 
