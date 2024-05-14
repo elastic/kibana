@@ -11,6 +11,7 @@ import {
   createStorybookService,
   type ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { Subject } from 'rxjs';
 import { ObservabilityAIAssistantAppService } from '../service/create_app_service';
 import { ObservabilityAIAssistantAppServiceProvider } from '../context/observability_ai_assistant_app_service_provider';
 
@@ -22,19 +23,44 @@ const mockChatService: ObservabilityAIAssistantChatService = createStorybookChat
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const ObservabilityAIAssistantChatServiceContext = React.createContext(mockChatService);
+  const ObservabilityAIAssistantMultipaneFlyoutContext = React.createContext({
+    container: <div />,
+    setVisibility: () => false,
+  });
+
   return (
     <KibanaContextProvider
       services={{
-        triggersActionsUi: { getAddRuleFlyout: {} },
+        application: {
+          navigateToApp: () => {},
+        },
+        http: {
+          basePath: {
+            prepend: () => '',
+          },
+        },
+        licensing: {
+          license$: new Subject(),
+        },
+        observabilityAIAssistant: {
+          ObservabilityAIAssistantChatServiceContext,
+          ObservabilityAIAssistantMultipaneFlyoutContext,
+        },
+        plugins: {
+          start: {
+            observabilityAIAssistant: {
+              ObservabilityAIAssistantMultipaneFlyoutContext,
+            },
+            triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
+          },
+        },
+        triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
               return 'MMM D, YYYY HH:mm';
             }
           },
-        },
-        observabilityAIAssistant: {
-          ObservabilityAIAssistantChatServiceContext,
         },
       }}
     >

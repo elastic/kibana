@@ -46,17 +46,17 @@ const newChatButtonWrapperClassName = css`
 `;
 
 export function ConversationList({
+  conversations,
+  isLoading,
   selectedConversationId,
   onConversationSelect,
   onConversationDeleteClick,
-  conversations,
-  isLoading,
 }: {
+  conversations: UseConversationListResult['conversations'];
+  isLoading: boolean;
   selectedConversationId?: string;
   onConversationSelect?: (conversationId?: string) => void;
   onConversationDeleteClick: (conversationId: string) => void;
-  conversations: UseConversationListResult['conversations'];
-  isLoading: boolean;
 }) {
   const router = useObservabilityAIAssistantRouter();
 
