@@ -63,7 +63,7 @@ if (ctx.entity?.metadata?.kubernetes?.pod?.name != null) {
   Object {
     "set": Object {
       "field": "_index",
-      "value": ".entities-observability.entity-v1.admin-console-logs-service",
+      "value": ".entities-observability.summary-v1.admin-console-logs-service",
     },
   },
 ]
