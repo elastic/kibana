@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { useContextAwareness } from './use_context_awareness';
+export * from './root_context';
+export * from './data_source_context';
+export * from './document_context';
