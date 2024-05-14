@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       docLinks: {
         links: {
           securitySolution: {
-            ruleUiAdvancedParams: 'http://link-to-docs',
+            createDetectionRules: 'http://link-to-docs',
           },
         },
       },
