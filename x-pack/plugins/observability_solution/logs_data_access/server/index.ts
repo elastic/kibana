@@ -9,6 +9,11 @@ import type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart } from './plu
 
 export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
 
+export type {
+  LogsRatesMetrics,
+  LogsRatesServiceReturnType,
+} from './services/get_logs_rates_service';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { LogsDataAccessPlugin } = await import('./plugin');
   return new LogsDataAccessPlugin(initializerContext);
