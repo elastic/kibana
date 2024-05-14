@@ -18,4 +18,4 @@ Examples available at [/examples/embeddable_examples](https://github.com/elastic
 * [Render an embeddable](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/search/search_embeddable_renderer.tsx)
 
 Run examples with `yarn start --run-examples`
-Navigate to `http://localhost:5601/app/embeddablesApp`
+To access example embeddables, create a new dashboard, click "Add panel" and finally select "Embeddable examples".
