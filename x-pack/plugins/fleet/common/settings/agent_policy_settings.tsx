@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode } from '@elastic/eui';
+
 import { z } from 'zod';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
@@ -133,12 +136,12 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent logging level',
     }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription',
-      {
-        defaultMessage:
-          'Sets the log level for all the agents on the policy. The default log level is "info".',
-      }
+    description: (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription"
+        defaultMessage="Sets the log level for all the agents on the policy. The default log level is {level}."
+        values={{ level: <EuiCode>{DEFAULT_LOG_LEVEL}</EuiCode> }}
+      />
     ),
     api_field: {
       name: 'agent_logging_level',
