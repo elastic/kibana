@@ -88,7 +88,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                   agentId={agentId}
                   agentType={agentType}
                   hostName={hostName}
-                  platform={props.platform}
+                  platform={platform}
                 />
               );
             }
