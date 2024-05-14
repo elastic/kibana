@@ -27,18 +27,21 @@ export const getExtendedChangePoint = (buckets: Record<string, number>, changePo
   let uIndex = cpIndex + 1;
 
   while (
-    lIndex >= 0 &&
+    lIndex > 0 &&
     Math.abs(bucketValues[lIndex] - meanValue) > Math.abs(bucketValues[lIndex] - cpValue)
   ) {
     lIndex--;
   }
 
   while (
-    uIndex < bucketValues.length &&
+    uIndex < bucketValues.length - 1 &&
     Math.abs(bucketValues[uIndex] - meanValue) > Math.abs(bucketValues[uIndex] - cpValue)
   ) {
     uIndex++;
   }
 
-  return { startTs: +bucketKeys[lIndex], endTs: +bucketKeys[uIndex] };
+  const startTs = +bucketKeys[lIndex];
+  const endTs = +bucketKeys[uIndex];
+
+  return { startTs, endTs };
 };
