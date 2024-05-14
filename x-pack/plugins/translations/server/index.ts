@@ -13,7 +13,7 @@ interface TranslationsStartDeps {
 
 class TranslationsPlugin {
   public setup(core: CoreSetup<TranslationsStartDeps>) {
-    core.getStartServices().then(async ([start]) => {
+    void core.getStartServices().then(async ([start]) => {
       const esClient = start.elasticsearch.client.asInternalUser;
       const res = await esClient.search({
         index: '.kibana',
