@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     depends_on:
       - build
       - quick_checks
@@ -16,7 +16,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     depends_on:
       - build
       - quick_checks
@@ -30,7 +30,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     depends_on:
       - build
       - quick_checks
@@ -44,7 +44,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     depends_on:
       - build
       - quick_checks
