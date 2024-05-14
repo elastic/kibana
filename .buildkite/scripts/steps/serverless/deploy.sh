@@ -89,16 +89,18 @@ deploy() {
     PROJECT_PASSWORD=$(jq -r --slurp '.[2].password' $DEPLOY_LOGS)
 
     echo "Write to vault..."
-    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-    VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-    VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    retry 5 30 vault login -no-print "$VAULT_TOKEN"
 
     # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
     if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+      VAULT_ROLE_ID="$(get_vault_role_id)"
+      VAULT_SECRET_ID="$(get_vault_secret_id)"
+      VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+      retry 5 30 vault login -no-print "$VAULT_TOKEN"
       vault_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+      VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
     else
       vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+      VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
     fi
 
   else
@@ -113,13 +115,6 @@ deploy() {
   PROJECT_KIBANA_URL=$(jq -r --slurp '.[1].endpoints.kibana' $DEPLOY_LOGS)
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
-
-  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  else
-    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  fi
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
@@ -142,7 +137,7 @@ create_github_issue_oblt_test_environments() {
 
 echo "--- Create GitHub issue for deploying in the oblt test env"
 
-GITHUB_ISSUE=$(mktemp --suffix ".md") 
+GITHUB_ISSUE=$(mktemp --suffix ".md")
 cat <<EOF > "$GITHUB_ISSUE"
 ### Kibana image
 
