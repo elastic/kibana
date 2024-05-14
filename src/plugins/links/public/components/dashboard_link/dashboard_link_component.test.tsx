@@ -287,4 +287,31 @@ describe('Dashboard link component', () => {
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });
+
+  test('can override link label for the current dashboard', async () => {
+    const customLabel = 'my new label for the current dashboard';
+    const linkInfo = {
+      ...defaultLinkInfo,
+      destination: '123',
+      id: 'bar',
+      label: customLabel,
+    };
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi: buildMockDashboard({
+        overrides: { title: 'current dashboard' },
+        savedObjectId: '123',
+      }),
+    });
+    render(
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
+    );
+
+    const link = screen.getByTestId('dashboardLink--bar');
+    expect(link).toHaveTextContent(customLabel);
+  });
 });

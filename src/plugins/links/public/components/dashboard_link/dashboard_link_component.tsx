@@ -54,8 +54,15 @@ export const DashboardLinkComponent = ({
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
       ? [parentDashboardTitle, parentDashboardDescription]
-      : [link.label ?? link.title, link.description];
+      : [link.title, link.description];
   }, [link, parentDashboardId, parentDashboardTitle, parentDashboardDescription]);
+
+  /**
+   * Memoized link information
+   */
+  const linkLabel = useMemo(() => {
+    return link.label ?? dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel();
+  }, [link, dashboardTitle]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
     if (link.error) {
@@ -65,10 +72,10 @@ export const DashboardLinkComponent = ({
       };
     }
     return {
-      tooltipTitle: Boolean(dashboardDescription) ? dashboardTitle : undefined,
-      tooltipMessage: dashboardDescription || dashboardTitle,
+      tooltipTitle: Boolean(dashboardDescription) ? linkLabel : undefined,
+      tooltipMessage: dashboardDescription ?? linkLabel,
     };
-  }, [link, dashboardTitle, dashboardDescription]);
+  }, [link, linkLabel, dashboardDescription]);
 
   /**
    * Dashboard-to-dashboard navigation
@@ -141,7 +148,7 @@ export const DashboardLinkComponent = ({
         dashboardLinkError: Boolean(link.error),
         'dashboardLinkError--noLabel': !link.label,
       })}
-      label={dashboardTitle}
+      label={linkLabel}
       external={link.options?.openInNewTab}
       data-test-subj={link.error ? `${id}--error` : `${id}`}
       aria-current={link.destination === parentDashboardId}
