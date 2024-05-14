@@ -61,6 +61,11 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
+
+  .euiDataGridRowCell__popover & {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeS;
+  }
 }
 
 .kbnDocViewer__fieldsGrid {
@@ -74,5 +79,10 @@
 
   &.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+
+  & .euiDataGridRowCell--firstColumn .euiDataGridRowCell__content {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }

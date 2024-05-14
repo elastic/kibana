@@ -68,13 +68,13 @@ const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions
     visibleColumns: ['name', 'value'],
     setVisibleColumns: () => null,
   },
-  rowHeightsOptions: { defaultHeight: 'auto' },
+  rowHeightsOptions: { defaultHeight: undefined }, // single line
   gridStyle: {
     border: 'horizontal',
     stripes: true,
     rowHover: 'highlight',
     header: 'underline',
-    cellPadding: 's',
+    cellPadding: 'm',
     fontSize: 's',
   },
 };
@@ -313,7 +313,7 @@ export const DocViewerTable = ({
         displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
           defaultMessage: 'Field',
         }),
-        initialWidth: 270, // TODO: what should be the default width?
+        initialWidth: 200, // TODO: what should be the default width?
         actions: false,
         visibleCellActions: 3,
         cellActions: [
@@ -402,6 +402,8 @@ export const DocViewerTable = ({
     [rows, searchText]
   );
 
+  const isHeightLimited = Boolean(availableHeight);
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -413,7 +415,9 @@ export const DocViewerTable = ({
           ? css`
               height: ${availableHeight - 2 * 16 - 32}px; // vertical paddings and tabs height
             `
-          : undefined
+          : css`
+              display: block;
+            `
       }
     >
       <EuiFlexItem grow={false}>
@@ -445,7 +449,13 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={Boolean(availableHeight)}>
+          <EuiFlexItem
+            grow={isHeightLimited}
+            css={css`
+              min-block-size: 0;
+              display: block;
+            `}
+          >
             <EuiDataGrid
               {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
