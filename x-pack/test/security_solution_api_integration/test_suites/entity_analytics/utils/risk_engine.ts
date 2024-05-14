@@ -421,8 +421,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
 
     await supertest
       .post(
@@ -430,8 +429,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
   } catch (e) {
     log.warning(`Error deleting legacy dashboards: ${e.message}`);
   }
