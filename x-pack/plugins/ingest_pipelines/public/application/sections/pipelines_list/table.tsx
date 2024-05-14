@@ -138,7 +138,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     if (queryText) {
       setQueryText(queryText as string);
     }
-    if (filterOptions) {
+    if (filters) {
       setFilterOptions(deserializeFilterOptions(filters as FilterQueryParams));
     }
   }, []);
@@ -149,13 +149,19 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilters = isDefaultFilterOptions(serializedFilterOptions);
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
+    // When the default filters are set, clear them up from the url
     if (isDefaultFilterConfiguration) {
       history.push('');
     } else {
-      history.push(history.location.pathname + '?' + qs.stringify({
-        ...(!isQueryEmpty ? { queryText } : {}),
-        ...(!isDefaultFilters ? { filters: serializedFilterOptions } : {}),
-      }, { encode: false }));
+      // Otherwise, we can go ahead and update the query params with whatever
+      // the user has set.
+      history.push({
+        pathname: '',
+        search: '?' + qs.stringify({
+          ...(!isQueryEmpty ? { queryText } : {}),
+          ...(!isDefaultFilters ? { filters: serializedFilterOptions } : {}),
+        }, { encode: false })
+      });
     }
   }, [queryText, filterOptions]);
 
