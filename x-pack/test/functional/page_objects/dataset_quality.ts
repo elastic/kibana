@@ -182,7 +182,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         '0',
         'Dataset Name',
         'Namespace',
-        // 'Size', https://github.com/elastic/kibana/issues/178954
+        'Size',
         'Dataset Quality',
         'Degraded Docs (%)',
         'Last Activity',
