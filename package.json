@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.12.2",
+    "node": "20.13.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1097,7 +1097,7 @@
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
-    "puppeteer": "22.3.0",
+    "puppeteer": "22.8.1",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
