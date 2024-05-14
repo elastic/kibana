@@ -20,7 +20,7 @@ import {
   IntegrationsResponse,
   DataStreamStat,
   DataStreamStatType,
-  NonAggregatableDatasetsResponse,
+  GetNonAggregatableDataStreamsResponse,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -62,6 +62,7 @@ export interface WithFlyoutOptions {
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
+    isNonAggregatable?: boolean;
   };
 }
 
@@ -199,7 +200,7 @@ export type DatasetQualityControllerEvent =
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
-  | DoneInvokeEvent<NonAggregatableDatasetsResponse>
+  | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DataStreamSettings>

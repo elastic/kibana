@@ -18,6 +18,7 @@ import {
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
+  GetNonAggregatableDataStreamsResponse,
 } from '../../../../common/data_streams_stats';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
@@ -39,6 +40,7 @@ import {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
   DatasetQualityControllerTypeState,
+  DefaultDatasetQualityControllerState,
   FlyoutDataset,
 } from './types';
 
@@ -208,6 +210,36 @@ export const createPureDatasetQualityControllerStateMachine = (
             initializing: {
               type: 'parallel',
               states: {
+                nonAggregatableDataset: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDatasetIsNonAggregatable',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeDatasetIsNonAggregatable'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                        },
+                      },
+                    },
+                    done: {
+                      on: {
+                        UPDATE_INSIGHTS_TIME_RANGE: {
+                          target: 'fetching',
+                          actions: ['storeFlyoutOptions'],
+                        },
+                        SELECT_DATASET: {
+                          target: 'fetching',
+                          actions: ['storeFlyoutOptions'],
+                        },
+                      },
+                    },
+                  },
+                },
                 dataStreamSettings: {
                   initial: 'fetching',
                   states: {
@@ -431,13 +463,18 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
-        storeNonAggregatableDatasets: assign((_context, event) => {
-          return 'data' in event
-            ? {
-                nonAggregatableDatasets: event.data as string[],
-              }
-            : {};
-        }),
+        storeNonAggregatableDatasets: assign(
+          (
+            _context: DefaultDatasetQualityControllerState,
+            event: DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
+          ) => {
+            return 'data' in event
+              ? {
+                  nonAggregatableDatasets: event.data.datasets,
+                }
+              : {};
+          }
+        ),
         storeDataStreamSettings: assign((context, event) => {
           return 'data' in event
             ? {
@@ -458,6 +495,21 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeDatasetIsNonAggregatable: assign(
+          (
+            context: DefaultDatasetQualityControllerState,
+            event: DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
+          ) => {
+            return 'data' in event
+              ? {
+                  flyout: {
+                    ...context.flyout,
+                    isNonAggregatable: !event.data.aggregatable,
+                  },
+                }
+              : {};
+          }
+        ),
         storeIntegrations: assign((_context, event) => {
           return 'data' in event
             ? {
@@ -612,6 +664,29 @@ export const createDatasetQualityControllerStateMachine = ({
         return integration
           ? dataStreamDetailsClient.getIntegrationDashboards({ integration: integration.name })
           : Promise.resolve({});
+      },
+      loadDatasetIsNonAggregatable: async (context) => {
+        if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
+          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
+
+          return Promise.resolve({});
+        }
+
+        const { type, name: dataset, namespace } = context.flyout.dataset;
+        const { startDate: start, endDate: end } = getDateISORange(
+          context.flyout.insightsTimeRange
+        );
+
+        return dataStreamStatsClient.getNonAggregatableDatasets({
+          type: context.type as GetNonAggregatableDataStreamsParams['type'],
+          start,
+          end,
+          dataStream: dataStreamPartsToIndexName({
+            type: type as DataStreamType,
+            dataset,
+            namespace,
+          }),
+        });
       },
     },
   });

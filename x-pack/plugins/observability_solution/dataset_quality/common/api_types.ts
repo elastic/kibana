@@ -106,12 +106,6 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
   })
 );
 
-export const getNonAggregatableDataStreamsResponseRt = rt.exact(
-  rt.type({
-    datasets: rt.array(rt.string),
-  })
-);
-
 export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
 
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
@@ -125,3 +119,12 @@ export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstima
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
   dataStreamsEstimatedDataInBytesRT
 );
+
+export const getNonAggregatableDatasetsRt = rt.exact(
+  rt.type({
+    aggregatable: rt.boolean,
+    datasets: rt.array(rt.string),
+  })
+);
+
+export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;

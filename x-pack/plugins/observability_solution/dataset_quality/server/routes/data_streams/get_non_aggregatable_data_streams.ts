@@ -18,35 +18,36 @@ export async function getNonAggregatableDataStreams({
   type = DEFAULT_DATASET_TYPE,
   start,
   end,
-  datasetQuery,
+  dataStream,
 }: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
   start: number;
   end: number;
-  datasetQuery?: string;
+  dataStream?: string;
 }) {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const response = await datasetQualityESClient.fieldCaps({
-    index: `${type}-${datasetQuery ? datasetQuery + '-' : ''}*`,
+    index: dataStream ?? `${type}-*`,
     fields: [_IGNORED],
     index_filter: {
       ...rangeQuery(start, end)[0],
     },
   });
 
-  const nonAggregatableIndices = response.fields._ignored?._ignored?.non_aggregatable_indices ?? [];
+  const ignoredField = response.fields._ignored?._ignored;
 
-  const nonAggregatableDatasets = (
-    typeof nonAggregatableIndices === 'string' ? [nonAggregatableIndices] : nonAggregatableIndices
-  ).reduce(
-    (acc, index) => ({
-      ...acc,
-      [extractIndexNameFromBackingIndex(index)]: index,
-    }),
-    {}
+  const nonAggregatableIndices = ignoredField?.non_aggregatable_indices ?? [];
+
+  const nonAggregatableDatasets = new Set(
+    (Array.isArray(nonAggregatableIndices) ? nonAggregatableIndices : [nonAggregatableIndices]).map(
+      extractIndexNameFromBackingIndex
+    )
   );
 
-  return Object.keys(nonAggregatableDatasets);
+  return {
+    aggregatable: ignoredField?.aggregatable ?? true,
+    datasets: Array.from(nonAggregatableDatasets),
+  };
 }

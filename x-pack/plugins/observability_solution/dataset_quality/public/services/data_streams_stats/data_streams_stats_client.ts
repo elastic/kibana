@@ -12,7 +12,7 @@ import {
   getDataStreamsEstimatedDataInBytesResponseRt,
   getDataStreamsStatsResponseRt,
   getIntegrationsResponseRt,
-  getNonAggregatableDataStreamsResponseRt,
+  getNonAggregatableDatasetsRt,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
@@ -96,13 +96,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${error}`);
       });
 
-    const { datasets } = decodeOrThrow(
-      getNonAggregatableDataStreamsResponseRt,
+    const nonAggregatableDatasets = decodeOrThrow(
+      getNonAggregatableDatasetsRt,
       (message: string) =>
         new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${message}`)
     )(response);
 
-    return datasets;
+    return nonAggregatableDatasets;
   }
 
   public async getDataStreamsEstimatedDataInBytes(

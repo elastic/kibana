@@ -13,6 +13,7 @@ import {
   DataStreamSettings,
   DataStreamStat,
   DegradedDocs,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
@@ -103,29 +104,23 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
       rangeRt,
       typeRt,
       t.partial({
-        datasetQuery: t.string,
+        dataStream: t.string,
       }),
     ]),
   }),
   options: {
     tags: [],
   },
-  async handler(resources): Promise<{
-    datasets: string[];
-  }> {
+  async handler(resources): Promise<NonAggregatableDatasets> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const datasets = await getNonAggregatableDataStreams({
+    return await getNonAggregatableDataStreams({
       esClient,
       ...params.query,
     });
-
-    return {
-      datasets: datasets as string[],
-    };
   },
 });
 
