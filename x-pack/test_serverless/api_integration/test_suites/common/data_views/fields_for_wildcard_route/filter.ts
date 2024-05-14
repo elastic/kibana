@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can filter', async () => {
-      const a = await supertest
+      const a = await supertestWithoutAuth
         .put(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         // TODO: API requests in Serverless require internal request headers

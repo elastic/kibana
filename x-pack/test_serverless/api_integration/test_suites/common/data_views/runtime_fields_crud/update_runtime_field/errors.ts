@@ -10,18 +10,21 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('errors', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('returns 404 error on non-existing index_pattern', async () => {
           const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(`${config.path}/${id}/runtime_field/foo`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               runtimeField: {
                 type: 'keyword',
@@ -36,10 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('returns error when field name is specified', async () => {
           const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(`${config.path}/${id}/runtime_field/foo`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               name: 'foo',
               runtimeField: {

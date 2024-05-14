@@ -10,28 +10,31 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('errors', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('returns an error field object is not provided', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
               },
             });
           const id = response1.body[config.serviceKey].id;
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .post(`${config.path}/${id}/runtime_field`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({});
 
           expect(response2.status).to.be(400);

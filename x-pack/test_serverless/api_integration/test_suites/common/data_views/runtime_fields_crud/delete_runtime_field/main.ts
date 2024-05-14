@@ -29,10 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
       describe(config.name, () => {
         it('can delete a runtime field', async () => {
           const title = `basic_index*`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -48,32 +48,32 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(typeof response2.body[config.serviceKey].fields.runtimeBar).to.be('object');
 
-          const response3 = await supertest
+          const response3 = await supertestWithoutAuth
             .delete(
               `${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeBar`
             )
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response3.status).to.be(200);
 
-          const response4 = await supertest
+          const response4 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(typeof response4.body[config.serviceKey].fields.runtimeBar).to.be('undefined');
-          await supertest
+          await supertestWithoutAuth
             .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
         });
       });
     });

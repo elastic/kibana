@@ -46,11 +46,11 @@ export default function ({ getService }: FtrProviderContext) {
           // "index_not_found_exception: no such index [.kibana_ingest]",
           // so it was switched to `savedObjects.cleanStandardList()`
           await kibanaServer.savedObjects.cleanStandardList();
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(servicePath)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(false);
         });
@@ -59,11 +59,11 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.load(
             'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
-          await supertest
+          await supertestWithoutAuth
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -71,11 +71,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(servicePath)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
 
@@ -85,11 +85,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should return true if has user index pattern without data', async () => {
-          await supertest
+          await supertestWithoutAuth
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -98,11 +98,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(servicePath)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
         });

@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           indexPattern = (
-            await supertest
+            await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           if (indexPattern) {
-            await supertest
+            await supertestWithoutAuth
               .delete(`${config.path}/${indexPattern.id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -54,10 +54,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('can update multiple fields', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -68,10 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response1.body[config.serviceKey].fieldAttrs.foo).to.be(undefined);
           expect(response1.body[config.serviceKey].fieldAttrs.bar).to.be(undefined);
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               fields: {
                 foo: {
@@ -89,10 +89,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('test');
           expect(response2.body[config.serviceKey].fieldAttrs.bar.count).to.be(456);
 
-          const response3 = await supertest
+          const response3 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response3.status).to.be(200);
           expect(response3.body[config.serviceKey].fieldAttrs.foo.count).to.be(123);
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         describe('count', () => {
           it('can set field "count" attribute on non-existing field', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo).to.be(undefined);
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.count).to.be(123);
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can update "count" attribute in index_pattern attribute map', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo.count).to.be(1);
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -175,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.count).to.be(2);
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can delete "count" attribute from index_pattern attribute map', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo.count).to.be(1);
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -219,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.count).to.be(undefined);
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         describe('customLabel', () => {
           it('can set field "customLabel" attribute on non-existing field', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -245,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo).to.be(undefined);
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -260,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can update "customLabel" attribute in index_pattern attribute map', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -289,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('bar');
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -315,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can delete "customLabel" attribute from index_pattern attribute map', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -333,7 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -348,7 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be(undefined);
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -358,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it('can set field "customLabel" attribute on an existing field', async () => {
-            await supertest
+            await supertestWithoutAuth
               .post(`${config.path}/${indexPattern.id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -370,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               });
 
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .get(`${config.path}/${indexPattern.id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -383,7 +383,7 @@ export default function ({ getService }: FtrProviderContext) {
         describe('format', () => {
           it('can set field "format" attribute on non-existing field', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -396,7 +396,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response1.status).to.be(200);
             expect(response1.body[config.serviceKey].fieldFormats.foo).to.be(undefined);
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -417,7 +417,7 @@ export default function ({ getService }: FtrProviderContext) {
               params: { baz: 'qux' },
             });
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -431,7 +431,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can update "format" attribute in index_pattern format map', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -457,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -478,7 +478,7 @@ export default function ({ getService }: FtrProviderContext) {
               params: { baz: 'qux-2' },
             });
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${response1.body[config.serviceKey].id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());
@@ -491,7 +491,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it('can remove "format" attribute from index_pattern format map', async () => {
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(`${config.path}/${indexPattern.id}/fields`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader())
@@ -506,7 +506,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response2.status).to.be(200);
             expect(response2.body[config.serviceKey].fieldFormats.foo).to.be(undefined);
 
-            const response3 = await supertest
+            const response3 = await supertestWithoutAuth
               .get(`${config.path}/${indexPattern.id}`)
               // TODO: API requests in Serverless require internal request headers
               .set(svlCommonApi.getInternalRequestHeader());

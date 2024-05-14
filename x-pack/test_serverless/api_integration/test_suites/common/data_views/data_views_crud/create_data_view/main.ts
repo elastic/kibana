@@ -8,20 +8,33 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
+
   describe('main', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('editor');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('can create an index_pattern with just a title', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -33,10 +46,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('returns back the created index_pattern object', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -52,10 +66,11 @@ export default function ({ getService }: FtrProviderContext) {
         it('can specify primitive optional attributes when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const id = `test-id-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -74,10 +89,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('can specify optional sourceFilters attribute when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -109,10 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can specify optional fields attribute when creating an index pattern', async () => {
             const title = `basic_index*`;
-            const response = await supertest
+            const response = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 override: true,
                 [config.serviceKey]: {
@@ -140,10 +157,11 @@ export default function ({ getService }: FtrProviderContext) {
           // TODO: Scripted fields code dropped since they are not supported in Serverless
           it('can add fields created from es index', async () => {
             const title = `basic_index*`;
-            const response = await supertest
+            const response = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 override: true,
                 [config.serviceKey]: {
@@ -172,10 +190,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('can add runtime fields', async () => {
             const title = `basic_index*`;
-            const response = await supertest
+            const response = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 override: true,
                 [config.serviceKey]: {
@@ -205,10 +224,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('can specify optional typeMeta attribute when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -221,10 +241,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('can specify optional fieldFormats attribute when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -244,10 +265,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('can specify optional fieldFormats attribute when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
@@ -268,19 +290,21 @@ export default function ({ getService }: FtrProviderContext) {
         describe('when creating index pattern with existing name', () => {
           it('returns error, by default', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 [config.serviceKey]: {
                   title,
                 },
               });
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 [config.serviceKey]: {
                   title,
@@ -293,20 +317,22 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('succeeds, override flag is set', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest
+            const response1 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 [config.serviceKey]: {
                   title,
                   timeFieldName: 'foo',
                 },
               });
-            const response2 = await supertest
+            const response2 = await supertestWithoutAuth
               .post(config.path)
               // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 override: true,
                 [config.serviceKey]: {

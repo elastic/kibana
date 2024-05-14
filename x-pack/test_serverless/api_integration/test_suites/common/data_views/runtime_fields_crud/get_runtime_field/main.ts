@@ -29,10 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
       describe(config.name, () => {
         it('can fetch a runtime field', async () => {
           const title = `basic_index*`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -56,10 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(response1.status).to.be(200);
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           const field =
             config.serviceKey === 'index_pattern' ? response2.body.field : response2.body.fields[0];
@@ -71,10 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(field.type).to.be('string');
           expect(field.scripted).to.be(false);
           expect(field.runtimeField.script.source).to.be("emit(doc['field_name'].value)");
-          await supertest
+          await supertestWithoutAuth
             .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
         });
       });
     });

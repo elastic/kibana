@@ -16,8 +16,11 @@ import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
   const title = 'logs-*';
   const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
   const PREVIEW_PATH = `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`;
@@ -26,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
     before(async () => {
-      const result = await supertest
+      const result = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)
         .send({ data_view: { title } })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
@@ -35,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       dataViewId = result.body.data_view.id;
     });
     after(async () => {
-      await supertest
+      await supertestWithoutAuth
         .delete(SPECIFIC_DATA_VIEW_PATH.replace('{id}', dataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -53,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can preview', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -66,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can preview specifying type', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -80,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can save changes', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -96,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can save changes and remove old saved object', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -111,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res.body.deleteStatus.remainingRefs).to.equal(0);
       expect(res.body.deleteStatus.deletePerformed).to.equal(true);
 
-      const res2 = await supertest
+      const res2 = await supertestWithoutAuth
         .get(SPECIFIC_DATA_VIEW_PATH.replace('{id}', prevDataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
@@ -133,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it("won't delete if reference remains", async () => {
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -152,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('can limit by id', async () => {
         // confirm this will find two items
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -165,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.body.result.length).to.equal(2);
 
         // limit to one item
-        const res2 = await supertest
+        const res2 = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -181,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('can limit by type', async () => {
         // confirm this will find two items
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -194,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.body.result.length).to.equal(2);
 
         // limit to one item
-        const res2 = await supertest
+        const res2 = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',

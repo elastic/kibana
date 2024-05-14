@@ -29,10 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
       describe(config.name, () => {
         it('returns 404 error on non-existing index_pattern', async () => {
           const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .put(`${config.path}/${id}/runtime_field`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               name: 'runtimeBar',
               runtimeField: {
@@ -48,10 +48,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('returns error on non-runtime field update attempt', async () => {
           const title = `basic_index`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -59,10 +59,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .put(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               name: 'bar',
               runtimeField: {

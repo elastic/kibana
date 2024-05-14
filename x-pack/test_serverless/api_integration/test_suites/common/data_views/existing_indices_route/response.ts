@@ -12,8 +12,11 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('_existing_indices response', () => {
     before(() =>
@@ -24,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     it('returns an array of existing indices', async () => {
-      await supertest
+      await supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         // TODO: API requests in Serverless require internal request headers
@@ -36,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns an empty array when no indices exist', async () => {
-      await supertest
+      await supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         // TODO: API requests in Serverless require internal request headers
