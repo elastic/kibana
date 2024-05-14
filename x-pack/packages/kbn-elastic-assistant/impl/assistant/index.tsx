@@ -1157,7 +1157,6 @@ const AssistantComponent: React.FC<Props> = ({
           flex-direction: column;
         `}
       >
-        <EuiText>{'hello world!'}</EuiText>
         <BlockBotCallToAction
           connectorPrompt={connectorPrompt}
           http={http}
