@@ -15,7 +15,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -106,14 +105,16 @@ export class SloPlugin
             return { width: 12, height: 8 };
           }
         );
-        registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
-          const deps = { ...coreStart, ...pluginsStart };
-
-          const { getOverviewEmbeddableFactory } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
-          return getOverviewEmbeddableFactory(deps);
-        });
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(
+          SLO_OVERVIEW_EMBEDDABLE_ID,
+          async () => {
+            const deps = { ...coreStart, ...pluginsStart };
+            const { getOverviewEmbeddableFactory } = await import(
+              './embeddable/slo/overview/slo_embeddable_factory'
+            );
+            return getOverviewEmbeddableFactory(deps);
+          }
+        );
         const registerSloAlertsEmbeddableFactory = async () => {
           const { SloAlertsEmbeddableFactoryDefinition } = await import(
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'
@@ -126,7 +127,7 @@ export class SloPlugin
         };
         registerSloAlertsEmbeddableFactory();
 
-        registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
           const deps = { ...coreStart, ...pluginsStart };
 
           const { getErrorBudgetEmbeddableFactory } = await import(

@@ -25,6 +25,8 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param {Object} clusterInfo Cluster info (GET /)
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
  * @param {Object} kibana The Kibana Usage stats
+ * @param dataTelemetry The telemetry data
+ * @param context The context
  */
 export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
   // eslint-disable-next-line @typescript-eslint/naming-convention

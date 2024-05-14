@@ -93,6 +93,8 @@
     "@kbn/datemath",
     "@kbn/presentation-containers",
     "@kbn/dashboard-plugin",
-    "@kbn/react-kibana-context-render",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render"
   ]
 }
