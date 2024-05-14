@@ -59,17 +59,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
     const [dashboardMissing, setDashboardMissing] = useState(false);
-    const [useMargins, setUseMargins] = useState(dashboardContainer?.getInput().useMargins);
-
-    useEffect(() => {
-      if (dashboardContainer?.getInput$) {
-        const s = dashboardContainer?.getInput$().subscribe((value) => {
-          setUseMargins(value.useMargins);
-        });
-
-        return () => s.unsubscribe();
-      }
-    }, [dashboardContainer]);
 
     useImperativeHandle(
       ref,
@@ -174,8 +163,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const viewportClasses = classNames(
       'dashboardViewport',
       { 'dashboardViewport--screenshotMode': screenshotMode },
-      { 'dashboardViewport--loading': loading },
-      { 'dashboardViewport--defaultBg': !useMargins }
+      { 'dashboardViewport--loading': loading }
     );
 
     const loadingSpinner = showPlainSpinner ? (

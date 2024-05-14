@@ -290,7 +290,10 @@ describe('dashboard renderer', () => {
     });
 
     expect(
-      wrapper!.find('#superParent').getDOMNode().querySelector('.dashboardViewport--defaultBg')
+      wrapper!
+        .find('#superParent')
+        .getDOMNode()
+        .classList.contains('dshDashboardViewportWrapper--defaultBg')
     ).not.toBe(null);
   });
 });
