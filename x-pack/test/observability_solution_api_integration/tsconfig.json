@@ -19,7 +19,6 @@
     { "path": "../../api_integration/services/**/*" },
     "@kbn/test",
     "@kbn/expect",
-    "@kbn/securitysolution-ecs",
     "@kbn/data-forge",
   ]
 }
