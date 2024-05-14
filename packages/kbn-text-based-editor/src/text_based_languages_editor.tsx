@@ -33,7 +33,6 @@ import { TooltipWrapper } from '@kbn/visualization-utils';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
 import { css } from '@emotion/css';
 import { EditorFooter } from './editor_footer';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
@@ -245,8 +244,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
-  const codeRef = useRef<string>(code);
-
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -278,17 +275,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const editorClassName = classNames(
-    'TextBasedLangEditor',
-    css`
-      max-width: 100%;
-    `,
-    {
-      'TextBasedLangEditor--expanded': isCodeEditorExpanded,
-      'TextBasedLangEditor--compact': isCompactFocused,
-      'TextBasedLangEditor--initial': !isCompactFocused,
-    }
-  );
+  const editorClassName = classNames('TextBasedLangEditor', {
+    'TextBasedLangEditor--expanded': isCodeEditorExpanded,
+    'TextBasedLangEditor--compact': isCompactFocused,
+    'TextBasedLangEditor--initial': !isCompactFocused,
+  });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
@@ -582,6 +573,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [isCompactFocused, queryString, editorMessages]
   );
 
+  // When the layout changes, and the editor is not focused, we want to
+  // recalculate the visible code so it fills up the available space. We
+  // use a ref because editorDidMount is only called once, and the reference
+  // to the state becomes stale after re-renders.
+  const onLayoutChange = (layoutInfoEvent: monaco.editor.EditorLayoutInfo) => {
+    if (layoutInfoEvent.contentWidth !== measuredEditorWidth) {
+      const nextMeasuredWidth = layoutInfoEvent.contentWidth;
+      setMeasuredEditorWidth(nextMeasuredWidth);
+      if (isCodeEditorExpandedFocused || isCompactFocused) {
+        calculateVisibleCode(nextMeasuredWidth, true);
+      }
+    }
+  };
+
+  const onLayoutChangeRef = useRef(onLayoutChange);
+
+  onLayoutChangeRef.current = onLayoutChange;
+
   useEffect(() => {
     if (editor1.current && !isCompactFocused) {
       if (code !== queryString) {
@@ -813,6 +822,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             <EuiFlexItem
               data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
               className={editorClassName}
+              css={css`
+                max-width: 100%;
+              `}
             >
               <div css={styles.editorContainer}>
                 {!isCompactFocused && (
@@ -871,22 +883,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       lines = model?.getLineCount() || 1;
                     }
 
-                    editor.onDidChangeModelContent((e) => {
-                      if (updateLinesFromModel) {
-                        lines = model?.getLineCount() || 1;
-                      }
-                      const currentPosition = editor.getPosition();
-                      const content = editorModel.current?.getValueInRange({
-                        startLineNumber: 0,
-                        startColumn: 0,
-                        endLineNumber: currentPosition?.lineNumber ?? 1,
-                        endColumn: currentPosition?.column ?? 1,
-                      });
-                      if (content) {
-                        codeRef.current = content || editor.getValue();
-                      }
-                    });
-
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
@@ -914,11 +910,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     );
 
                     editor.onDidLayoutChange((layoutInfoEvent) => {
-                      if (layoutInfoEvent.contentWidth !== measuredEditorWidth) {
-                        const nextMeasuredWidth = layoutInfoEvent.contentWidth;
-                        setMeasuredEditorWidth(nextMeasuredWidth);
-                        calculateVisibleCode(nextMeasuredWidth);
-                      }
+                      onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
                     if (!isCodeEditorExpanded) {
