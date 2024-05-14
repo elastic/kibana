@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 
