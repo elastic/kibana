@@ -288,11 +288,11 @@ export async function getInUseTotalCount(
       const actionTypeId = bucket.key[1];
       if (actionRef.startsWith('preconfigured:')) {
         preconfiguredActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        preconfiguredActionsAggs.total += bucket.doc_count;
+        preconfiguredActionsAggs.total++;
       }
       if (actionRef.startsWith('system_action:')) {
         systemActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        systemActionsAggs.total += bucket.doc_count;
+        systemActionsAggs.total++;
       }
     }
     const totalInMemoryActions =
@@ -306,7 +306,7 @@ export async function getInUseTotalCount(
       const connectorId = bucket.key[0];
       const actionRef = bucket.key[1];
       aggs.connectorIds[connectorId] = actionRef;
-      aggs.total += bucket.doc_count;
+      aggs.total++;
     }
 
     const { hits: actions } = await esClient.search<{

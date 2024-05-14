@@ -734,7 +734,7 @@ describe('actions telemetry', () => {
         },
         "countEmailByService": Object {},
         "countNamespaces": 1,
-        "countTotal": 5,
+        "countTotal": 4,
         "hasErrors": false,
       }
     `);
