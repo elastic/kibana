@@ -31,7 +31,7 @@ describe('AnalyticsService', () => {
   beforeEach(() => {
     const mockObs = { observe: jest.fn, disconnect: jest.fn };
     const mockPerformanceObserver = function (callback: ObsCallback) {
-      callback;
+      callback({ getEntries: () => [{}] }, mockObs);
       return mockObs;
     };
 

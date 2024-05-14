@@ -6,7 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
+import React, { Suspense } from 'react';
+
+type Loader<TElement extends React.ComponentType<any>> = () => Promise<{
+  default: TElement;
+}>;
+
+function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(loader: Loader<TElement>) {
+  const Component = React.lazy(loader);
+
+  return React.forwardRef<TRef, React.ComponentPropsWithRef<TElement>>((props, ref) => (
+    <Suspense fallback={null}>{React.createElement(Component, { ...props, ref })}</Suspense>
+  ));
+}
 
 export { usePerformanceContext } from './context/use_performance_context';
 export { perfomanceMarkers } from './performance_markers';
