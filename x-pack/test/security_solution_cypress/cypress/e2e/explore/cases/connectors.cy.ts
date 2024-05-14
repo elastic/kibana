@@ -33,6 +33,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
     updated_at: null,
     updated_by: null,
     customFields: [],
+    templates: [],
     mappings: [
       { source: 'title', target: 'summary', action_type: 'overwrite' },
       { source: 'description', target: 'description', action_type: 'overwrite' },
