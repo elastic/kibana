@@ -21,7 +21,6 @@ export async function resolveAnomalySwimlaneUserInput(
   focusedPanelId: string,
   input?: Partial<AnomalySwimLaneEmbeddableState>
 ): Promise<AnomalySwimlaneEmbeddableUserInput> {
-
   const { http, overlays, ...startServices } = coreStart;
 
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
