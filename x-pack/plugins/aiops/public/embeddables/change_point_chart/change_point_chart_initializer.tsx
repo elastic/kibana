@@ -8,14 +8,15 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiTitle,
 } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
@@ -28,24 +29,22 @@ import usePrevious from 'react-use/lib/usePrevious';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
-} from '../components/change_point_detection/change_point_detection_context';
-import { DEFAULT_AGG_FUNCTION } from '../components/change_point_detection/constants';
-import { FunctionPicker } from '../components/change_point_detection/function_picker';
-import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
-import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
-import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
-import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
-import { ViewTypeSelector } from '../components/change_point_detection/view_type_selector';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { DataSourceContextProvider } from '../hooks/use_data_source';
+} from '../../components/change_point_detection/change_point_detection_context';
+import { DEFAULT_AGG_FUNCTION } from '../../components/change_point_detection/constants';
+import { FunctionPicker } from '../../components/change_point_detection/function_picker';
+import { MaxSeriesControl } from '../../components/change_point_detection/max_series_control';
+import { MetricFieldSelector } from '../../components/change_point_detection/metric_field_selector';
+import { PartitionsSelector } from '../../components/change_point_detection/partitions_selector';
+import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
+import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
-import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { type EmbeddableChangePointChartExplicitInput } from './types';
+import type { ChangePointEmbeddableRuntimeState } from './types';
 
 export interface AnomalyChartsInitializerProps {
-  initialInput?: Partial<EmbeddableChangePointChartInput>;
-  onCreate: (props: EmbeddableChangePointChartExplicitInput) => void;
+  initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
+  onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
   onCancel: () => void;
 }
 
@@ -99,17 +98,19 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   }, [formInput, dataViewId, viewType]);
 
   return (
-    <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.modalTitle"
-            defaultMessage="Change point detection configuration"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+    <>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2 id={'changePointConfig'}>
+            <FormattedMessage
+              id="xpack.aiops.embeddableChangePointChart.modalTitle"
+              defaultMessage="Change point detection configuration"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiForm>
           <ViewTypeSelector value={viewType} onChange={setViewType} />
           <EuiFormRow
@@ -145,37 +146,42 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
             </ChangePointDetectionControlsContextProvider>
           </DataSourceContextProvider>
         </EuiForm>
-      </EuiModalBody>
+      </EuiFlyoutBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={onCancel}
-          data-test-subj="aiopsChangePointChartsInitializerCancelButton"
-        >
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-
-        <EuiButton
-          data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-          isDisabled={!isFormValid || !dataViewId}
-          onClick={onCreate.bind(null, updatedProps)}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              data-test-subj="aiopsChangePointChartsInitializerCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
+              isDisabled={!isFormValid || !dataViewId}
+              onClick={onCreate.bind(null, updatedProps)}
+              fill
+            >
+              <FormattedMessage
+                id="xpack.aiops.embeddableChangePointChart.setupModal.confirmButtonLabel"
+                defaultMessage="Confirm configurations"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
   );
 };
 
 export type FormControlsProps = Pick<
-  EmbeddableChangePointChartProps,
+  ChangePointEmbeddableRuntimeState,
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
