@@ -39,6 +39,10 @@ export type AlertFilterControlsProps = Omit<
    */
   dataViewSpec?: DataViewSpec;
   /**
+   * Callback to be called when the filters are initially loaded
+   */
+  onFiltersLoaded?: () => void;
+  /**
    * The services needed by the filter bar
    */
   services: {
@@ -53,7 +57,7 @@ export type AlertFilterControlsProps = Omit<
  * A configurable alert filters bar based on the controls embeddable
  *
  * @example
- *
+ *```tsx
  * <AlertFilterControls
  *   // Data view configuration
  *   featureIds={[AlertConsumers.STACK_ALERTS]}
@@ -78,6 +82,7 @@ export type AlertFilterControlsProps = Omit<
  *     storage: Storage,
  *   }}
  * />
+ * ```
  */
 export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   const {
@@ -91,6 +96,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
       dataViews,
       storage,
     },
+    onFiltersLoaded,
     ...restFilterItemGroupProps
   } = props;
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
@@ -114,14 +120,16 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
           } as DataViewSpec;
           await dataViews.create(spec);
           setLoadingPageFilters(false);
+          onFiltersLoaded?.();
         })();
       } else {
         setLoadingPageFilters(false);
+        onFiltersLoaded?.();
       }
     }
 
     return () => dataViews.clearInstanceCache();
-  }, [dataViewSpec, alertDataViews, dataViews, loadingDataViews]);
+  }, [dataViewSpec, alertDataViews, dataViews, loadingDataViews, onFiltersLoaded]);
 
   const handleFilterChanges = useCallback(
     (newFilters: Filter[]) => {

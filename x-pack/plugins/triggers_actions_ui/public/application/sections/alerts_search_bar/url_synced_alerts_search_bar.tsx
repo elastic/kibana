@@ -59,6 +59,7 @@ export const UrlSyncedAlertsSearchBar = ({
     timefilter: { timefilter: timeFilterService },
   } = queryService;
   const [spaceId, setSpaceId] = useState<string>();
+  const [controlFiltersLoaded, setControlFiltersLoaded] = useState(false);
 
   const {
     kuery,
@@ -84,6 +85,9 @@ export const UrlSyncedAlertsSearchBar = ({
   }, [spaces]);
 
   useEffect(() => {
+    if (showFilterControls && !controlFiltersLoaded) {
+      return;
+    }
     try {
       onActiveFeatureFiltersChange?.([
         ...new Set(
@@ -110,6 +114,7 @@ export const UrlSyncedAlertsSearchBar = ({
     }
   }, [
     controlFilters,
+    controlFiltersLoaded,
     filters,
     kuery,
     onActiveFeatureFiltersChange,
@@ -117,6 +122,7 @@ export const UrlSyncedAlertsSearchBar = ({
     onKueryChange,
     rangeFrom,
     rangeTo,
+    showFilterControls,
     toasts,
   ]);
 
@@ -130,6 +136,10 @@ export const UrlSyncedAlertsSearchBar = ({
     },
     [onKueryChange, onRangeFromChange, onRangeToChange, setSavedQuery, timeFilterService]
   );
+
+  const onFiltersLoaded = useCallback(() => {
+    setControlFiltersLoaded(true);
+  }, []);
 
   return (
     <>
@@ -156,13 +166,14 @@ export const UrlSyncedAlertsSearchBar = ({
           controlsUrlState={filterControls}
           filters={controlFilters}
           onFiltersChange={onControlFiltersChange}
+          onFiltersLoaded={onFiltersLoaded}
+          ControlGroupRenderer={ControlGroupRenderer}
           services={{
             http,
             notifications,
             dataViews,
             storage: Storage,
           }}
-          ControlGroupRenderer={ControlGroupRenderer}
         />
       )}
     </>
