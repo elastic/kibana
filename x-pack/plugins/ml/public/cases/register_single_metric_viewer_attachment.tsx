@@ -15,7 +15,7 @@ import type { MlStartDependencies } from '../plugin';
 
 export function registerSingleMetricViewerCasesAttachment(
   cases: CasesPublicSetup,
-  pluginStart: MlStartDependencies // TODO: remove if not needed
+  pluginStart: MlStartDependencies
 ) {
   cases.attachmentFramework.registerPersistableState({
     id: CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,

@@ -59,7 +59,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         listItems.push({
           title: (
             <FormattedMessage
-              id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
+              id="xpack.ml.cases.singleMetricViewer.description.queryLabel"
               defaultMessage="Query"
             />
           ),
