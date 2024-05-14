@@ -60,7 +60,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
           );
         } catch (error) {
           notifications.toasts.addError(error, {
-            title: i18n.translate('xpack.fleet.agentLogs.selectLogLevel.errorTitleText', {
+            title: i18n.translate('xpack.fleet.agentLogs.resetLogLevel.errorTitleText', {
               defaultMessage: 'Error resetting agent logging level',
             }),
           });
@@ -89,7 +89,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
           setAgentLogLevel(selectedLogLevel);
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.agentLogs.selectLogLevel.successText', {
-              defaultMessage: `Changed agent logging level to '{logLevel}'.`,
+              defaultMessage: `Changed agent logging level to '{logLevel}'`,
               values: {
                 logLevel: selectedLogLevel,
               },
