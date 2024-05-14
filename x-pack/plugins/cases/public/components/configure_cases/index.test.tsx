@@ -729,11 +729,11 @@ describe('ConfigureCases', () => {
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('customFieldFlyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
       userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.click(screen.getByTestId('customFieldFlyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -756,6 +756,7 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
           ],
+          templates: [],
           id: '',
           version: '',
         });
@@ -767,7 +768,7 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('customFieldFlyout')).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -775,12 +776,12 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('customFieldFlyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
+      userEvent.click(screen.getByTestId('customFieldFlyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customFieldFlyout')).not.toBeInTheDocument();
     });
 
     it('closes fly out for when click on save field', async () => {
@@ -788,11 +789,11 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('customFieldFlyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.click(screen.getByTestId('customFieldFlyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -812,13 +813,14 @@ describe('ConfigureCases', () => {
               required: false,
             },
           ],
+          templates: [],
           id: '',
           version: '',
         });
       });
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customFieldFlyout')).not.toBeInTheDocument();
     });
   });
 

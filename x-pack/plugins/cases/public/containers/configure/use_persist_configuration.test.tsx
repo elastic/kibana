@@ -38,6 +38,7 @@ describe('useCreateAttachments', () => {
       type: ConnectorTypes.none,
     },
     customFields: [],
+    templates: [],
     version: '',
     id: '',
   };
@@ -69,6 +70,7 @@ describe('useCreateAttachments', () => {
       connector: { fields: null, id: 'none', name: 'none', type: '.none' },
       customFields: [],
       owner: 'securitySolution',
+      templates: [],
     });
   });
 
@@ -91,6 +93,7 @@ describe('useCreateAttachments', () => {
       closure_type: 'close-by-user',
       connector: { fields: null, id: 'none', name: 'none', type: '.none' },
       customFields: [],
+      templates: [],
       owner: 'securitySolution',
     });
   });
@@ -114,6 +117,7 @@ describe('useCreateAttachments', () => {
       closure_type: 'close-by-user',
       connector: { fields: null, id: 'none', name: 'none', type: '.none' },
       customFields: [],
+      templates: [],
       version: 'test-version',
     });
   });

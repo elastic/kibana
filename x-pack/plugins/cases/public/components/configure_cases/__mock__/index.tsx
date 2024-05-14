@@ -27,6 +27,7 @@ const mockConfigurationData = {
     type: ConnectorTypes.none,
   },
   customFields: [],
+  templates: [],
   mappings: [],
   version: '',
   id: '',

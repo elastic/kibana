@@ -19,9 +19,11 @@ import { getConfigurationByOwner } from '../../containers/configure/utils';
 
 interface Props {
   isLoading: boolean;
+  path?: string;
+  setAsOptional?: boolean;
 }
 
-const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
+const CustomFieldsComponent: React.FC<Props> = ({ isLoading, path, setAsOptional }) => {
   const { owner } = useCasesContext();
   const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({ watch: ['selectedOwner'] });
   const { data: configurations, isLoading: isLoadingCaseConfiguration } =
@@ -54,6 +56,8 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
           isLoading={isLoading || isLoadingCaseConfiguration}
           customFieldConfiguration={customField}
           key={customField.key}
+          path={path}
+          setAsOptional={setAsOptional}
         />
       );
     }

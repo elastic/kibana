@@ -12,11 +12,12 @@ const CommonUseField = getUseField({ component: Field });
 
 interface Props {
   isLoading: boolean;
+  path?: string;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading }) => (
+const TitleComponent: React.FC<Props> = ({ isLoading, path }) => (
   <CommonUseField
-    path="title"
+    path={path ?? 'title'}
     componentProps={{
       idAria: 'caseTitle',
       'data-test-subj': 'caseTitle',

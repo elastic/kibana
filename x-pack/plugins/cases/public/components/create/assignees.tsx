@@ -38,6 +38,7 @@ import { useIsUserTyping } from '../../common/use_is_user_typing';
 
 interface Props {
   isLoading: boolean;
+  path?: string;
 }
 
 interface FieldProps {
@@ -200,7 +201,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
-const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
+const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm, path }) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
@@ -245,7 +246,7 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
 
   return (
     <UseField
-      path="assignees"
+      path={path ?? 'assignees'}
       config={getConfig()}
       component={AssigneesFieldComponent}
       componentProps={{

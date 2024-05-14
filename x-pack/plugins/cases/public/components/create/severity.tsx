@@ -18,11 +18,12 @@ import { SEVERITY_TITLE } from '../severity/translations';
 
 interface Props {
   isLoading: boolean;
+  path?: string;
 }
 
-const SeverityComponent: React.FC<Props> = ({ isLoading }) => (
+const SeverityComponent: React.FC<Props> = ({ isLoading, path }) => (
   <UseField<CaseSeverity>
-    path={'severity'}
+    path={path ?? 'severity'}
     componentProps={{
       isLoading,
     }}

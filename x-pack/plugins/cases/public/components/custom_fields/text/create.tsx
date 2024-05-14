@@ -11,21 +11,26 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
+import { OptionalFieldLabel } from '../../create/optional_field_label';
 
 const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,
   isLoading,
+  path,
+  setAsOptional,
 }) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getTextFieldConfig({
-    required,
+    required: setAsOptional ? false : required,
     label,
     ...(defaultValue && { defaultValue: String(defaultValue) }),
   });
 
+  const newPath = path ?? 'customFields';
+
   return (
     <UseField
-      path={`customFields.${key}`}
+      path={`${newPath}.${key}`}
       config={config}
       component={TextField}
       label={label}
@@ -35,6 +40,7 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
           fullWidth: true,
           disabled: isLoading,
           isLoading,
+          labelAppend: setAsOptional ? OptionalFieldLabel : null,
         },
       }}
     />

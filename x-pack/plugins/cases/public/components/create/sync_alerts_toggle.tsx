@@ -14,13 +14,14 @@ const CommonUseField = getUseField({ component: Field });
 
 interface Props {
   isLoading: boolean;
+  path?: string;
 }
 
-const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading }) => {
+const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading, path }) => {
   const [{ syncAlerts }] = useFormData({ watch: ['syncAlerts'] });
   return (
     <CommonUseField
-      path="syncAlerts"
+      path={path ?? 'syncAlerts'}
       componentProps={{
         idAria: 'caseSyncAlerts',
         'data-test-subj': 'caseSyncAlerts',
