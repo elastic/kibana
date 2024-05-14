@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const euiSelectable = getService('selectable');
   const browser = getService('browser');
 
   return {
@@ -31,7 +30,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('createIndexCallout');
       },
 
-      async expectSelectIndex(indexName) {
+      async expectSelectIndex(indexName: string) {
         await browser.refresh();
         await testSubjects.missingOrFail('createIndexCallout');
         await testSubjects.existOrFail('selectIndicesComboBox');
@@ -96,6 +95,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('editContextActionButton');
         await testSubjects.existOrFail('editContextFlyout');
         await testSubjects.click('contextFieldsSelectable_basic_index');
+        await testSubjects.existOrFail('contextField');
         const fields = await testSubjects.findAll('contextField');
 
         expect(fields.length).to.be(1);

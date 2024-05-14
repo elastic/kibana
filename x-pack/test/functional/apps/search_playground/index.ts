@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { FtrProviderContext } from './config';
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const config = getService('config');
+  const isServerless = config.get('serverless');
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('playground', function () {
-    loadTestFile(require.resolve('./playground_overview'));
+  describe('playground', async () => {
+    if (isServerless) {
+      loadTestFile(require.resolve('./playground_overview.serverless'));
+    } else {
+      loadTestFile(require.resolve('./playground_overview.ess.ts'));
+    }
   });
 }
