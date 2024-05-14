@@ -81,6 +81,7 @@ import {
   setMapAppConfig,
   setSpaceId,
   setStartServices,
+  untilPluginStartServicesReady,
 } from './kibana_services';
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
@@ -203,14 +204,18 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const [coreStart, { savedObjectsTagging, spaces }] = await core.getStartServices();
+        const [, startServices, { renderApp }] = await Promise.all([
+          untilPluginStartServicesReady(),
+          core.getStartServices(),
+          import('./render_app'),
+        ]);
+        const [coreStart, { savedObjectsTagging, spaces }] = startServices;
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const activeSpace = await spaces?.getActiveSpace();
         if (activeSpace) {
           setSpaceId(activeSpace.id);
         }
-        const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
     });

@@ -9,10 +9,16 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { untilPluginStartServicesReady } from '../kibana_services';
 
 export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
-    const { mapEmbeddableFactory } = await import('./map_react_embeddable');
+    const startServicesPromise = untilPluginStartServicesReady();
+    const [, { mapEmbeddableFactory }] = await Promise.all([
+      startServicesPromise,
+      import('./map_react_embeddable'),
+    ]);
+
     return mapEmbeddableFactory;
   });
 

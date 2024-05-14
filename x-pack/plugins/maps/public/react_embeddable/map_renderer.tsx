@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
@@ -40,7 +39,6 @@ export interface Props {
 }
 
 export function MapRenderer(props: Props) {
-  const isMounted = useMountedState();
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
 
