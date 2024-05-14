@@ -117,24 +117,24 @@ const validateTemplates = async ({
   });
 
   if (templates && templates.length) {
+    /**
+     * Assign users to a template is only available to Platinum+
+     */
+    const hasAssigneesInTemplate = templates.some((template) =>
+      Boolean(template.caseFields?.assignees && template.caseFields?.assignees.length > 0)
+    );
+
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
-    templates.forEach((template, index) => {
-      /**
-       * Assign users to a template is only available to Platinum+
-       */
+    if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
+      throw Boom.forbidden(
+        'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+      );
+    }
 
-      const hasAssigneesInTemplate =
-        template.caseFields?.assignees && template.caseFields?.assignees.length > 0;
-
-      if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
-        throw Boom.forbidden(
-          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
-        );
-      }
-
+    if (hasAssigneesInTemplate) {
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-    });
+    }
 
     validateTemplatesCustomFieldsInRequest({
       templates,
