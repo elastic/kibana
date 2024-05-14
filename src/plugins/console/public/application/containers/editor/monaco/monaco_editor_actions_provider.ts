@@ -44,7 +44,6 @@ export interface EditorRequest {
   method: string;
   url: string;
   data: string[];
-  text: string;
 }
 
 export interface AdjustedParsedRequest extends ParsedRequest {
@@ -343,23 +342,29 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position);
   }
 
-  private getTextInRange(selectionRange: monaco.IRange): string {
+  /*
+  This function returns the text in the provided range.
+  If no range is provided, it returns all text in the editor.
+  */
+  private getTextInRange(selectionRange?: monaco.IRange): string {
     const model = this.editor.getModel();
-    if (!model || !selectionRange) {
+    if (!model) {
       return '';
     }
-    const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
-    const text = model.getValueInRange({
-      startLineNumber,
-      startColumn,
-      endLineNumber,
-      endColumn,
-    });
-    return text;
+    if (selectionRange) {
+      const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
+      return model.getValueInRange({
+        startLineNumber,
+        startColumn,
+        endLineNumber,
+        endColumn,
+      });
+    }
+    // If no range is provided, return all text in the editor
+    return model.getValue();
   }
 
   public async autoIndent(event: React.MouseEvent) {
-    event.preventDefault();
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -375,14 +380,20 @@ export class MonacoEditorActionsProvider {
     }
 
     const selectedText = this.getTextInRange(selectedRange);
+    const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText);
+    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
 
-    this.editor.executeEdits('', [
-      {
-        range: selectedRange,
-        text: autoIndentedText,
-      },
-    ]);
+    this.editor.executeEdits(
+      i18n.translate('console.monaco.applyIndentationCall', {
+        defaultMessage: 'Apply indentations.',
+      }),
+      [
+        {
+          range: selectedRange,
+          text: autoIndentedText,
+        },
+      ]
+    );
   }
 }

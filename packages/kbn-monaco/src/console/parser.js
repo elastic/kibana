@@ -59,9 +59,7 @@ export const createParser = () => {
     },
     addRequestEnd = function() {
       const lastRequest = getLastRequest();
-      const requestText = text.substring(requestStartOffset, requestEndOffset);
       lastRequest.endOffset = requestEndOffset;
-      lastRequest.text = requestText;
       requests.push(lastRequest);
     },
     error = function (m) {

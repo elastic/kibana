@@ -17,7 +17,6 @@ export interface ParsedRequest {
   method: string;
   url: string;
   data?: Array<Record<string, unknown>>;
-  text: string;
 }
 export interface ConsoleParserResult {
   errors: ErrorAnnotation[];

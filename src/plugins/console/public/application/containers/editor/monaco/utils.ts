@@ -61,7 +61,7 @@ export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest =>
   const url = removeTrailingWhitespaces(parsedRequest.url);
   const method = parsedRequest.method.toUpperCase();
   const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
-  return { url, method, data: data ?? [], text: parsedRequest.text };
+  return { url, method, data: data ?? [] };
 };
 
 const replaceVariables = (text: string, variables: DevToolsVariable[]): string => {
@@ -76,14 +76,13 @@ const replaceVariables = (text: string, variables: DevToolsVariable[]): string =
 };
 
 export const replaceRequestVariables = (
-  { method, url, data, text }: EditorRequest,
+  { method, url, data }: EditorRequest,
   variables: DevToolsVariable[]
 ): EditorRequest => {
   return {
     method,
     url: replaceVariables(url, variables),
     data: data.map((dataObject) => replaceVariables(dataObject, variables)),
-    text,
   };
 };
 
@@ -135,49 +134,51 @@ export const getDocumentationLink = (request: EditorRequest, docLinkVersion: str
   return null;
 };
 
-export const isStartOfRequest = (line: string) => {
-  const regex = /\s*(GET|POST|PUT|DELETE|HEAD|PATCH|get|post|put|delete|head|patch)\s+.*/g;
-  return regex.test(line);
-};
-
 const containsComments = (text: string) => {
   return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
 };
 
-/*
- * This function takes a list of parsed requests and a string representing the unformatted
- * text from the editor that contains these requests, and returns a text in which
- * the requests are auto-indented.
+/**
+ * This function takes a string containing unformatted Console requests and
+ * returns a text in which the requests are auto-indented.
+ * @param requests The list of {@link AdjustedParsedRequest} that are in the selected text in the editor.
+ * @param selectedText The selected text in the editor.
+ * @param allText The whole text input in the editor.
  */
 export const getAutoIndentedRequests = (
   requests: AdjustedParsedRequest[],
-  text: string
+  selectedText: string,
+  allText: string
 ): string => {
-  const textLines = text.split(`\n`);
-  const formattedText: string[] = [];
+  const selectedTextLines = selectedText.split(`\n`);
+  const allTextLines = allText.split(`\n`);
+  const formattedTextLines: string[] = [];
 
   let currentLineIndex = 0;
   let currentRequestIndex = 0;
 
-  while (currentLineIndex < textLines.length) {
-    if (isStartOfRequest(textLines[currentLineIndex])) {
+  while (currentLineIndex < selectedTextLines.length) {
+    const request = requests[currentRequestIndex];
+    // Check if the current line is the start of the next request
+    if (
+      request &&
+      selectedTextLines[currentLineIndex] === allTextLines[request.startLineNumber - 1]
+    ) {
       // Start of a request
-      const request = requests[currentRequestIndex];
-      const requestText = request.text;
-      const requestLines = requestText.split('\n');
+      const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
 
-      if (containsComments(requestText)) {
+      if (requestLines.some((line) => containsComments(line))) {
         // If request has comments, add it as it is - without formatting
         // TODO: Format requests with comments
-        formattedText.push(...requestLines);
+        formattedTextLines.push(...requestLines);
       } else {
         // If no comments, add stringified parsed request
         const stringifiedRequest = stringifyRequest(request);
         const firstLine = stringifiedRequest.method + ' ' + stringifiedRequest.url;
-        formattedText.push(firstLine);
+        formattedTextLines.push(firstLine);
 
         if (stringifiedRequest.data && stringifiedRequest.data.length > 0) {
-          formattedText.push(...stringifiedRequest.data);
+          formattedTextLines.push(...stringifiedRequest.data);
         }
       }
 
@@ -185,13 +186,13 @@ export const getAutoIndentedRequests = (
       currentRequestIndex++;
     } else {
       // Current line is a comment or whitespaces
-      // Add it to the formatted text as it is
-      formattedText.push(textLines[currentLineIndex]);
+      // Trim white spaces and add it to the formatted text
+      formattedTextLines.push(selectedTextLines[currentLineIndex].trim());
       currentLineIndex++;
     }
   }
 
-  return formattedText.join('\n');
+  return formattedTextLines.join('\n');
 };
 
 /*

@@ -14,7 +14,6 @@ import {
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
-  isStartOfRequest,
 } from './utils';
 import { MetricsTracker } from '../../../../types';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
@@ -67,7 +66,6 @@ describe('monaco editor utils', () => {
       endOffset: 11,
       method: 'get',
       url: '_search some_text',
-      text: 'get _search some_text',
     };
     it('calls the "removeTrailingWhitespaces" on the url', () => {
       const stringifiedRequest = stringifyRequest(request);
@@ -107,7 +105,6 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '${variable1}',
         data: [],
-        text: 'GET ${variable1}',
       };
       it('when there is no other text', () => {
         const result = replaceRequestVariables(request, variables);
@@ -134,7 +131,6 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '${variable1}',
         data: [JSON.stringify({ '${variable1}': '${variable2}' }, null, 2)],
-        text: '',
       };
       it('works with several variables', () => {
         const result = replaceRequestVariables(request, variables);
@@ -145,7 +141,7 @@ describe('monaco editor utils', () => {
 
   describe('getCurlRequest', () => {
     it('works without a request body', () => {
-      const request = { method: 'GET', url: '_search', data: [], text: '' };
+      const request = { method: 'GET', url: '_search', data: [] };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe('curl -XGET "http://test.com/_search" -H "kbn-xsrf: reporting"');
     });
@@ -154,7 +150,6 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '_search',
         data: [JSON.stringify(dataObjects[0], null, 2)],
-        text: '',
       };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe(
@@ -171,7 +166,6 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '_search',
         data: [JSON.stringify(dataObjects[0], null, 2), JSON.stringify(dataObjects[1], null, 2)],
-        text: '',
       };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe(
@@ -191,8 +185,8 @@ describe('monaco editor utils', () => {
   describe('trackSentRequests', () => {
     it('tracks each request correctly', () => {
       const requests = [
-        { method: 'GET', url: '_search', data: [], text: '' },
-        { method: 'POST', url: '_test', data: [], text: '' },
+        { method: 'GET', url: '_search', data: [] },
+        { method: 'POST', url: '_test', data: [] },
       ];
       const mockMetricsTracker: jest.Mocked<MetricsTracker> = { count: jest.fn(), load: jest.fn() };
       trackSentRequests(requests, mockMetricsTracker);
@@ -203,7 +197,7 @@ describe('monaco editor utils', () => {
   });
 
   describe('getDocumentationLink', () => {
-    const mockRequest = { method: 'GET', url: '_search', data: [], text: '' };
+    const mockRequest = { method: 'GET', url: '_search', data: [] };
     const version = '8.13';
     const expectedLink = 'http://elastic.co/8.13/_search';
 
@@ -247,130 +241,194 @@ describe('monaco editor utils', () => {
     });
   });
 
-  describe('isStartOfRequest', () => {
-    it('correctly matches first lines of requests', () => {
-      expect(isStartOfRequest('GET _all')).toBe(true);
-      expect(isStartOfRequest('  get   _search   ')).toBe(true);
-      expect(isStartOfRequest('POST _all')).toBe(true);
-      expect(isStartOfRequest('  post   _search   ')).toBe(true);
-      expect(isStartOfRequest('PUT _all')).toBe(true);
-      expect(isStartOfRequest('  put   _search   ')).toBe(true);
-      expect(isStartOfRequest('DELETE _all')).toBe(true);
-      expect(isStartOfRequest('  delete   _search   ')).toBe(true);
-      expect(isStartOfRequest('HEAD _all')).toBe(true);
-      expect(isStartOfRequest('  head   _search   ')).toBe(true);
-      expect(isStartOfRequest('PATCH _all')).toBe(true);
-      expect(isStartOfRequest('  patch   _search   ')).toBe(true);
-    });
-
-    it('does not match any other lines', () => {
-      expect(isStartOfRequest('// comment')).toBe(false);
-      expect(isStartOfRequest('/*')).toBe(false);
-      expect(isStartOfRequest(' { ')).toBe(false);
-      expect(isStartOfRequest('"jdks": 4')).toBe(false);
-      expect(isStartOfRequest('   ')).toBe(false);
-      expect(isStartOfRequest('')).toBe(false);
-      expect(isStartOfRequest(' }')).toBe(false);
-    });
-  });
-
   describe('getAutoIndentedRequests', () => {
-    const mockRequestParams = {
-      // Required properties in the AdjustedParsedRequest type
-      startLineNumber: 1,
-      endLineNumber: 1,
-      startOffset: 1,
-      endOffset: 1,
-    };
+    const sampleEditorTextLines = [
+      '                                    ', // line 1
+      'GET    _search                      ', // line 2
+      '{                                   ', // line 3
+      '  "query":     {                    ', // line 4
+      '    "match_all":    {      }        ', // line 5
+      '    }                               ', // line 6
+      '   }                                ', // line 7
+      '                                    ', // line 8
+      '// single comment before Request 2  ', // line 9
+      '  GET  _all                         ', // line 10
+      '                                    ', // line 11
+      '/*                                  ', // line 12
+      ' multi-line comment before Request 3', // line 13
+      '*/                                  ', // line 14
+      'POST   /_bulk                       ', // line 15
+      '{                                   ', // line 16
+      '       "index":{                    ', // line 17
+      '          "_index":"books"          ', // line 18
+      '     }                              ', // line 19
+      ' }                                  ', // line 20
+      '{                                   ', // line 21
+      '"name":"1984"                       ', // line 22
+      '}{"name":"Atomic habits"}           ', // line 23
+      '                                    ', // line 24
+      'GET    _search  // test comment     ', // line 25
+      '{                                   ', // line 26
+      '  "query":     {                    ', // line 27
+      '    "match_all":    {   } // comment', // line 28
+      '    }                               ', // line 29
+      '}                                   ', // line 30
+      ' // some comment                    ', // line 31
+      '                                    ', // line 32
+    ];
 
     const TEST_REQUEST_1 = {
-      ...mockRequestParams,
       method: 'GET',
       url: '_search',
       data: [{ query: { match_all: {} } }],
-      // Non-formatted text
-      text: 'GET    _search   \n{    \n  "query":     {\n    "match_all":    {   }\n    }\n}',
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 2,
+      endLineNumber: 7,
+      startOffset: 1,
+      endOffset: 36,
     };
 
     const TEST_REQUEST_2 = {
-      ...mockRequestParams,
       method: 'GET',
       url: '_all',
       data: [],
-      // Non-formatted text
-      text: '  GET  _all ',
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 10,
+      endLineNumber: 10,
+      startOffset: 1,
+      endOffset: 36,
     };
 
     const TEST_REQUEST_3 = {
-      ...mockRequestParams,
       method: 'POST',
       url: '/_bulk',
       // Multi-data
       data: [{ index: { _index: 'books' } }, { name: '1984' }, { name: 'Atomic habits' }],
-      // Non-formatted text
-      text: 'POST   /_bulk\n{\n"index":{\n"_index":"books"\n}\n}\n{\n"name":"1984"\n}{"name":"Atomic habits"}',
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 15,
+      endLineNumber: 23,
+      startOffset: 1,
+      endOffset: 36,
     };
 
     const TEST_REQUEST_4 = {
-      ...mockRequestParams,
       method: 'GET',
       url: '_search',
       data: [{ query: { match_all: {} } }],
-      // Non-formatted text with comments
-      text: 'GET    _search  // test comment \n{    \n  "query":     {\n    "match_all":    {   } // comment\n    }\n}',
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 24,
+      endLineNumber: 30,
+      startOffset: 1,
+      endOffset: 36,
     };
 
     it('correctly auto-indents a single request with data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_1], TEST_REQUEST_1.text);
-      const expectedResult = 'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}';
-      expect(formattedData).toBe(expectedResult);
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_1],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_1.startLineNumber - 1, TEST_REQUEST_1.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
+      const expectedResultLines = [
+        'GET _search',
+        '{',
+        '  "query": {',
+        '    "match_all": {}',
+        '  }',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
     });
 
     it('correctly auto-indents a single request with no data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_2], TEST_REQUEST_2.text);
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_2],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_2.startLineNumber - 1, TEST_REQUEST_2.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
       const expectedResult = 'GET _all';
 
       expect(formattedData).toBe(expectedResult);
     });
 
     it('correctly auto-indents a single request with multiple data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_3], TEST_REQUEST_3.text);
-      const expectedResult =
-        'POST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
-
-      expect(formattedData).toBe(expectedResult);
-    });
-
-    it('correctly auto-indents multiple request', () => {
       const formattedData = getAutoIndentedRequests(
-        [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
-        TEST_REQUEST_1.text + '\n\n' + TEST_REQUEST_2.text + '\n\n' + TEST_REQUEST_3.text
+        [TEST_REQUEST_3],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_3.startLineNumber - 1, TEST_REQUEST_3.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
       );
-      const expectedResult =
-        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\nGET _all\n\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
+      const expectedResultLines = [
+        'POST /_bulk',
+        '{',
+        '  "index": {',
+        '    "_index": "books"',
+        '  }',
+        '}',
+        '{',
+        '  "name": "1984"',
+        '}',
+        '{',
+        '  "name": "Atomic habits"',
+        '}',
+      ];
 
-      expect(formattedData).toBe(expectedResult);
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
     });
 
     it('auto-indents multiple request with comments in between', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
-        TEST_REQUEST_1.text +
-          '\n\n// single comment\n' +
-          TEST_REQUEST_2.text +
-          '\n\n/*\n multi-line comment\n*/\n' +
-          TEST_REQUEST_3.text
+        sampleEditorTextLines.slice(1, 23).join('\n'),
+        sampleEditorTextLines.join('\n')
       );
-      const expectedResult =
-        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\n// single comment\nGET _all\n\n/*\n multi-line comment\n*/\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
+      const expectedResultLines = [
+        'GET _search',
+        '{',
+        '  "query": {',
+        '    "match_all": {}',
+        '  }',
+        '}',
+        '',
+        '// single comment before Request 2',
+        'GET _all',
+        '',
+        '/*',
+        'multi-line comment before Request 3',
+        '*/',
+        'POST /_bulk',
+        '{',
+        '  "index": {',
+        '    "_index": "books"',
+        '  }',
+        '}',
+        '{',
+        '  "name": "1984"',
+        '}',
+        '{',
+        '  "name": "Atomic habits"',
+        '}',
+      ];
 
-      expect(formattedData).toBe(expectedResult);
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
     });
 
     it('does not auto-indent a request with comments', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_4], TEST_REQUEST_4.text);
-      const expectedResult = TEST_REQUEST_4.text;
-      expect(formattedData).toBe(expectedResult);
+      const requestText = sampleEditorTextLines
+        .slice(TEST_REQUEST_4.startLineNumber - 1, TEST_REQUEST_4.endLineNumber)
+        .join('\n');
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_4],
+        requestText,
+        sampleEditorTextLines.join('\n')
+      );
+
+      expect(formattedData).toBe(requestText);
     });
   });
 });
