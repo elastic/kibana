@@ -93,9 +93,13 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       }
     }, [fetchedNote, getNoteInProgress]);
 
+    const customDeployedVersionSet = deployedVersion !== 'latest';
     const automaticUpdatesEnabled = manifestVersion === 'latest';
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
+    const isDeployedVersionDifferentFromSelected =
+      customDeployedVersionSet &&
+      !moment.utc(deployedVersion, internalDateFormat).isSame(selectedDate.toISOString(), 'days');
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
     const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
 
@@ -104,16 +108,37 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       : AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL;
 
     const saveButtonEnabled =
-      (fetchedNote ? note !== fetchedNote.note : note !== '') ||
-      manifestVersion !== deployedVersion;
+      (fetchedNote ? note !== fetchedNote.note : note !== '') || // Note has changed
+      manifestVersion !== deployedVersion || // User selected a different version
+      isDeployedVersionDifferentFromSelected; // User entered the screen with deployed version that is different from default, selected one
 
     useEffect(() => {
+      if (
+        isDeployedVersionDifferentFromSelected &&
+        selectedDate.isSame(defaultDate.toISOString(), 'day')
+      ) {
+        // Don't set unsaved changes if user visited the page with deployed version that is different from default, selected one. This is to prevent the user from being prompted to save changes when they haven't made any changes.
+        return;
+      }
       setUnsavedChanges(saveButtonEnabled);
-    }, [saveButtonEnabled, setUnsavedChanges]);
+    }, [
+      defaultDate,
+      isDeployedVersionDifferentFromSelected,
+      saveButtonEnabled,
+      selectedDate,
+      setUnsavedChanges,
+    ]);
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);
-      update.inputs[0].config.policy.value.global_manifest_version = manifestVersion;
+      if (isDeployedVersionDifferentFromSelected && manifestVersion !== 'latest') {
+        setManifestVersion(selectedDate.format(internalDateFormat));
+        // User entered the screen with deployed version that is different from default and wants to save the default version without selecting a date manually
+        update.inputs[0].config.policy.value.global_manifest_version =
+          selectedDate.format(internalDateFormat);
+      } else {
+        update.inputs[0].config.policy.value.global_manifest_version = manifestVersion;
+      }
       sendPolicyUpdate({ policy: update })
         .then(({ item: policyItem }) => {
           toasts.addSuccess({
@@ -173,10 +198,12 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       }
     }, [
       policy,
-      manifestVersion,
+      isDeployedVersionDifferentFromSelected,
       sendPolicyUpdate,
       fetchedNote,
       note,
+      selectedDate,
+      manifestVersion,
       toasts,
       dispatch,
       createNote,
