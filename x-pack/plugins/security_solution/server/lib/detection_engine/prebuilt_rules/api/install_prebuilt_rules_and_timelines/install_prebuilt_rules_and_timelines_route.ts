@@ -117,7 +117,7 @@ export const createPrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(rulesClient, rulesToUpdate);
+  await upgradePrebuiltRules(rulesManagementClient, rulesToUpdate);
 
   const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,

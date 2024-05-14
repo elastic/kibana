@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '../../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -50,7 +50,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = getRulesManagementClient();
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const rule = await readRules({ rulesClient, id, ruleId });
 
@@ -64,7 +64,6 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           await rulesManagementClient.deleteRule({
             ruleId: rule.id,
-            rulesClient,
           });
 
           const transformed = transform(rule);

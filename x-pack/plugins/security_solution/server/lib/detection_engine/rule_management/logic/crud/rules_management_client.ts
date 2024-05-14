@@ -54,8 +54,8 @@
  *  7.  DELETE RULE ✅
  *  8.  BULK DELETE RULES ✅ by 7
  *  9.  INSTALL NEW PREBUILT RULES ✅
- *  10. UPGRADE PREBUILT RULE WITH TYPE CHANGE
- *  11. UPGRADE PREBUILT RULE OF SAME TYPE
+ *  10. UPGRADE PREBUILT RULE WITH TYPE CHANGE ✅
+ *  11. UPGRADE PREBUILT RULE OF SAME TYPE ✅
  *  12. IMPORT NON EXISTING RULE
  *  13. IMPORT EXISTING RULE - with override option
  *  14. CREATE RULE EXCEPTIONS
@@ -63,6 +63,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type {
   PatchRuleRequestBody,
   RuleCreateProps,
@@ -78,9 +79,11 @@ import {
 } from '../../normalization/rule_converters';
 import { readRules } from './read_rules';
 import { PrepackagedRulesError } from '../../../prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
-import { transformAlertToRuleAction } from '@kbn/security-solution-plugin/common/detection_engine/transform_actions';
 
 interface CreateRuleOptions {
+  /* Optionally pass an ID to use for the rule document. If not provided, an ID will be generated. */
+  /* This is the ES document ID, NOT the rule_id */
+  id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
 }
@@ -113,6 +116,10 @@ interface UpgradePrebuiltRuleProps {
 
 // TODOs:
 // 1. Refactor `convertCreateAPIToInternalSchema` to take a first argument of input/params and then options object
+// 2. Check if the options passed to rule creation didn't change in the refactor. Cases
+//    a. When creating a custom rule
+//    b. When creating a prebuilt rule
+//    c. When upgrading a prebuilt rule with type change
 
 export class RulesManagementClient {
   private readonly rulesClient: RulesClient;
@@ -203,42 +210,17 @@ export class RulesManagementClient {
       throw new PrepackagedRulesError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
     }
 
-    // If we're trying to change the type of a prepackaged rule, we need to delete the old one
-    // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
-    // and exception lists from the old rule
+    // If rule has change its type during upgrade, delete and recreate it
     if (ruleAsset.type !== existingRule.params.type) {
-      await this.rulesClient.delete({ id: ruleAsset.rule_id });
-
-      return createRules({
-        rulesClient,
-        immutable: true,
-        id: existingRule.id,
-        params: {
-          ...ruleAsset,
-          // Force the prepackaged rule to use the enabled state from the existing rule,
-          // regardless of what the prepackaged rule says
-          enabled: existingRule.enabled,
-          exceptions_list: existingRule.params.exceptionsList,
-          actions: existingRule.actions.map(transformAlertToRuleAction),
-          timeline_id: existingRule.params.timelineId,
-          timeline_title: existingRule.params.timelineTitle,
-        },
-      });
+      return this._upgradePrebuiltRuleWithTypeChange(ruleAsset, existingRule);
     }
 
-    await patchRules({
-      rulesClient,
-      existingRule,
-      nextParams: {
-        ...rule,
-        // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
-        enabled: undefined,
-      },
-    });
+    // Else, simply patch it.
+    await this._patchRule({ existingRule, nextParams: ruleAsset });
 
     const updatedRule = await readRules({
-      rulesClient,
-      ruleId: rule.rule_id,
+      rulesClient: this.rulesClient,
+      ruleId: ruleAsset.rule_id,
       id: undefined,
     });
 
@@ -250,9 +232,12 @@ export class RulesManagementClient {
   };
 
   private _createRule = async (params: RuleCreateProps, options: CreateRuleOptions) => {
+    const rulesClientCreateRuleOptions = options.id ? { id: options.id } : {};
+
     const internalRule = convertCreateAPIToInternalSchema(params, options);
     const rule = await this.rulesClient.create<RuleParams>({
       data: internalRule,
+      options: rulesClientCreateRuleOptions,
     });
 
     return rule;
@@ -268,6 +253,28 @@ export class RulesManagementClient {
     });
 
     return update;
+  };
+
+  private _upgradePrebuiltRuleWithTypeChange = async (
+    ruleAsset: PrebuiltRuleAsset,
+    existingRule: RuleAlertType
+  ) => {
+    // If we're trying to change the type of a prepackaged rule, we need to delete the old one
+    // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
+    // and exception lists from the old rule
+    await this.rulesClient.delete({ id: ruleAsset.rule_id });
+
+    return this._createRule(
+      {
+        ...ruleAsset,
+        enabled: existingRule.enabled,
+        exceptions_list: existingRule.params.exceptionsList,
+        actions: existingRule.actions.map(transformAlertToRuleAction),
+        timeline_id: existingRule.params.timelineId,
+        timeline_title: existingRule.params.timelineTitle,
+      },
+      { immutable: true, defaultEnabled: existingRule.enabled, id: existingRule.id }
+    );
   };
 
   private _toggleRuleEnabledOnUpdate = async (existingRule: RuleAlertType, enabled: boolean) => {

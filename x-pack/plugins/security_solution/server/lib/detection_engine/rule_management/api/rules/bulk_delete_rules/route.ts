@@ -29,7 +29,7 @@ import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 type Handler = RequestHandler<
   unknown,
@@ -56,7 +56,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const rulesManagementClient = getRulesManagementClient();
+      const rulesManagementClient = new RulesManagementClient(rulesClient);
 
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -79,7 +79,6 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
             await rulesManagementClient.deleteRule({
               ruleId: rule.id,
-              rulesClient,
             });
 
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule);

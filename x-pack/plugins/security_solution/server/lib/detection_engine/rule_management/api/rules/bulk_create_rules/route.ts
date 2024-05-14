@@ -19,7 +19,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { createRules } from '../../../logic/crud/create_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
@@ -33,7 +32,7 @@ import {
   buildSiemResponse,
 } from '../../../../routes/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -73,7 +72,7 @@ export const bulkCreateRulesRoute = (
 
           const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
-          const rulesManagementClient = getRulesManagementClient();
+          const rulesManagementClient = new RulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
@@ -130,7 +129,6 @@ export const bulkCreateRulesRoute = (
                   throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
                   const createdRule = await rulesManagementClient.createCustomRule({
-                    rulesClient,
                     params: payloadRule,
                   });
 
