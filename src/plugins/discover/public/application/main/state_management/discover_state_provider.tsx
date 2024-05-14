@@ -40,6 +40,7 @@ function createStateHelpers() {
 
   return {
     Provider: context.Provider,
+    useContainer,
     useSavedSearch,
     useSavedSearchInitial,
     useSavedSearchHasChanged,
@@ -48,6 +49,7 @@ function createStateHelpers() {
 
 export const {
   Provider: DiscoverStateProvider,
+  useContainer,
   useSavedSearchInitial,
   useSavedSearch,
   useSavedSearchHasChanged,
