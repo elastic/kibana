@@ -43,6 +43,7 @@ else
     --skip-docker-ubi \
     --skip-docker-fips \
     --skip-docker-ubuntu \
+    --skip-docker-chainguard \
     --skip-docker-serverless \
     --skip-docker-contexts
 fi
