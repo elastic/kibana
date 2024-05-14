@@ -9,8 +9,13 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { RulesManagementClient } from './rules_management_client';
 
 describe('RuleManagementClient.deleteRule', () => {
-  const rulesClient: ReturnType<typeof rulesClientMock.create> = rulesClientMock.create();
-  const rulesManagementClient = new RulesManagementClient(rulesClient);
+  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let rulesManagementClient: RulesManagementClient;
+
+  beforeEach(() => {
+    rulesClient = rulesClientMock.create();
+    rulesManagementClient = new RulesManagementClient(rulesClient);
+  });
 
   it('should delete the rule along with its actions, and statuses', async () => {
     const ruleId = 'ruleId';

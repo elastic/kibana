@@ -13,12 +13,18 @@ import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { getRulesManagementClient } from './rules_management_client';
+import { RulesManagementClient } from './rules_management_client';
 
 describe('RuleManagementClient.patchRule', () => {
-  const rulesManagementClient = getRulesManagementClient();
+  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let rulesManagementClient: RulesManagementClient;
+
+  beforeEach(() => {
+    rulesClient = rulesClientMock.create();
+    rulesManagementClient = new RulesManagementClient(rulesClient);
+  });
+
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const rulesClient = rulesClientMock.create();
     const nextParams = {
       ...getCreateRulesSchemaMock(),
       enabled: false,
@@ -29,7 +35,7 @@ describe('RuleManagementClient.patchRule', () => {
     };
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+    await rulesManagementClient.patchRule({ nextParams, existingRule });
     expect(rulesClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
@@ -38,7 +44,6 @@ describe('RuleManagementClient.patchRule', () => {
   });
 
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const rulesClient = rulesClientMock.create();
     const nextParams = {
       ...getCreateRulesSchemaMock(),
       enabled: true,
@@ -48,7 +53,7 @@ describe('RuleManagementClient.patchRule', () => {
       enabled: false,
     };
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+    await rulesManagementClient.patchRule({ nextParams, existingRule });
     expect(rulesClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
@@ -57,11 +62,10 @@ describe('RuleManagementClient.patchRule', () => {
   });
 
   it('calls the rulesClient with legacy ML params', async () => {
-    const rulesClient = rulesClientMock.create();
     const nextParams = getCreateMachineLearningRulesSchemaMock();
     const existingRule = getRuleMock(getMlRuleParams());
     rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
-    await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+    await rulesManagementClient.patchRule({ nextParams, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -75,14 +79,13 @@ describe('RuleManagementClient.patchRule', () => {
   });
 
   it('calls the rulesClient with new ML params', async () => {
-    const rulesClient = rulesClientMock.create();
     const nextParams = {
       ...getCreateMachineLearningRulesSchemaMock(),
       machine_learning_job_id: ['new_job_1', 'new_job_2'],
     };
     const existingRule = getRuleMock(getMlRuleParams());
     rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
-    await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+    await rulesManagementClient.patchRule({ nextParams, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -97,7 +100,6 @@ describe('RuleManagementClient.patchRule', () => {
 
   describe('regression tests', () => {
     it("updates the rule's actions if provided", async () => {
-      const rulesClient = rulesClientMock.create();
       const nextParams = {
         ...getCreateRulesSchemaMock(),
         actions: [
@@ -113,7 +115,7 @@ describe('RuleManagementClient.patchRule', () => {
       };
       const existingRule = getRuleMock(getQueryRuleParams());
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+      await rulesManagementClient.patchRule({ nextParams, existingRule });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -134,7 +136,6 @@ describe('RuleManagementClient.patchRule', () => {
     });
 
     it('does not update actions if none are specified', async () => {
-      const rulesClient = rulesClientMock.create();
       const nextParams = getCreateRulesSchemaMock();
       delete nextParams.actions;
       const existingRule = getRuleMock(getQueryRuleParams());
@@ -149,7 +150,7 @@ describe('RuleManagementClient.patchRule', () => {
         },
       ];
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      await rulesManagementClient.patchRule({ rulesClient, nextParams, existingRule });
+      await rulesManagementClient.patchRule({ nextParams, existingRule });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({

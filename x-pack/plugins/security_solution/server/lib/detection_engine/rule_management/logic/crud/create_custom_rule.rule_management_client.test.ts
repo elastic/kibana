@@ -11,15 +11,19 @@ import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { getRulesManagementClient } from './rules_management_client';
+import { RulesManagementClient } from './rules_management_client';
 
 describe('RuleManagementClient.createCustomRule', () => {
-  const rulesManagementClient = getRulesManagementClient();
+  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let rulesManagementClient: RulesManagementClient;
+
+  beforeEach(() => {
+    rulesClient = rulesClientMock.create();
+    rulesManagementClient = new RulesManagementClient(rulesClient);
+  });
 
   it('calls the rulesClient with legacy ML params', async () => {
-    const rulesClient = rulesClientMock.create();
     await rulesManagementClient.createCustomRule({
-      rulesClient,
       params: getCreateMachineLearningRulesSchemaMock(),
     });
     expect(rulesClient.create).toHaveBeenCalledWith(
@@ -35,9 +39,7 @@ describe('RuleManagementClient.createCustomRule', () => {
   });
 
   it('calls the rulesClient with ML params', async () => {
-    const rulesClient = rulesClientMock.create();
     await rulesManagementClient.createCustomRule({
-      rulesClient,
       params: {
         ...getCreateMachineLearningRulesSchemaMock(),
         machine_learning_job_id: ['new_job_1', 'new_job_2'],
@@ -56,10 +58,9 @@ describe('RuleManagementClient.createCustomRule', () => {
   });
 
   it('populates a threatIndicatorPath value for threat_match rule if empty', async () => {
-    const rulesClient = rulesClientMock.create();
     const params = getCreateThreatMatchRulesSchemaMock();
     delete params.threat_indicator_path;
-    await rulesManagementClient.createCustomRule({ rulesClient, params });
+    await rulesManagementClient.createCustomRule({ params });
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -72,9 +73,7 @@ describe('RuleManagementClient.createCustomRule', () => {
   });
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
-    const rulesClient = rulesClientMock.create();
     await rulesManagementClient.createCustomRule({
-      rulesClient,
       params: getCreateMachineLearningRulesSchemaMock(),
     });
     expect(rulesClient.create).not.toHaveBeenCalledWith(
