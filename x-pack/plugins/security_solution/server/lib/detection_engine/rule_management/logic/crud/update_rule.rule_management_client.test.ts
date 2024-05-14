@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
-import { getRulesManagementClient } from './rules_management_client';
+import { RulesManagementClient } from './rules_management_client';
 
 // Failing with rule registry enabled
 describe('RuleManagementClient.updateRule', () => {
-  const rulesManagementClient = getRulesManagementClient();
+  let rulesOptionsMock: ReturnType<typeof getUpdateRulesOptionsMock>;
+  let rulesManagementClient: RulesManagementClient;
+
+  beforeEach(() => {
+    rulesOptionsMock = getUpdateRulesOptionsMock();
+    rulesManagementClient = new RulesManagementClient(rulesOptionsMock.rulesClient);
+  })
 
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getRuleMock(getQueryRuleParams())
@@ -32,11 +38,10 @@ describe('RuleManagementClient.updateRule', () => {
   });
 
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const baseRulesOptionsMock = getUpdateRulesOptionsMock();
-    const rulesOptionsMock = {
-      ...baseRulesOptionsMock,
+    rulesOptionsMock = {
+      ...rulesOptionsMock,
       existingRule: {
-        ...baseRulesOptionsMock.existingRule,
+        ...rulesOptionsMock.existingRule,
         enabled: false,
       },
     };
@@ -56,20 +61,20 @@ describe('RuleManagementClient.updateRule', () => {
   });
 
   it('calls the rulesClient with params', async () => {
-    const rulesOptionsMock = getUpdateMlRulesOptionsMock();
-    rulesOptionsMock.ruleUpdate.enabled = true;
+    const mlRulesOptionsMock = getUpdateMlRulesOptionsMock();
+    mlRulesOptionsMock.ruleUpdate.enabled = true;
 
-    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
+    (mlRulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getRuleMock(getMlRuleParams())
     );
 
-    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).resolve.mockResolvedValue(
+    (mlRulesOptionsMock.rulesClient as unknown as RulesClientMock).resolve.mockResolvedValue(
       resolveRuleMock(getMlRuleParams())
     );
 
-    await rulesManagementClient.updateRule(rulesOptionsMock);
+    await rulesManagementClient.updateRule(mlRulesOptionsMock);
 
-    expect(rulesOptionsMock.rulesClient.update).toHaveBeenCalledWith(
+    expect(mlRulesOptionsMock.rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
