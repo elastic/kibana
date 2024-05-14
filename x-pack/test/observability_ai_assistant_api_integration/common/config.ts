@@ -9,7 +9,8 @@ import { Config, FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
-import { InheritedServices } from './ftr_provider_context';
+import { getApmSynthtraceEsClient } from './create_synthtrace_client';
+import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import {
   createObservabilityAIAssistantApiClient,
   ObservabilityAIAssistantAPIClient,
@@ -21,12 +22,8 @@ export interface ObservabilityAIAssistantFtrConfig {
   kibanaConfig?: Record<string, any>;
 }
 
-async function getObservabilityAIAssistantAPIClient({ kibanaServer }: { kibanaServer: UrlObject }) {
-  const url = format({
-    ...kibanaServer,
-  });
-
-  return createObservabilityAIAssistantApiClient(supertest(url));
+async function getObservabilityAIAssistantAPIClient(kibanaServerUrl: string) {
+  return createObservabilityAIAssistantApiClient(supertest(kibanaServerUrl));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
@@ -59,20 +56,20 @@ export function createObservabilityAIAssistantAPIConfig({
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
+  const kibanaServerUrl = format(kibanaServer);
+  const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
 
   const createTest: Omit<CreateTest, 'testFiles'> = {
     ...config.getAll(),
     servers,
     services: {
       ...services,
+      apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+        getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          readUser: await getObservabilityAIAssistantAPIClient({
-            kibanaServer,
-          }),
-          writeUser: await getObservabilityAIAssistantAPIClient({
-            kibanaServer,
-          }),
+          readUser: await getObservabilityAIAssistantAPIClient(kibanaServerUrl),
+          writeUser: await getObservabilityAIAssistantAPIClient(kibanaServerUrl),
         };
       },
     },
