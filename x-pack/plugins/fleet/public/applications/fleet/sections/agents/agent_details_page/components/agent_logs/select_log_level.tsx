@@ -69,7 +69,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
       }
 
       send();
-    }, [agent.id, agentPolicyLogLevel, notifications.toasts]);
+    }, [agent.id, agentPolicyLogLevel, notifications]);
 
     const onClickApply = useCallback(() => {
       setIsSetLevelLoading(true);
@@ -124,6 +124,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               disabled={isSetLevelLoading || !authz.fleet.allAgents}
               compressed={true}
               id="selectAgentLogLevel"
+              data-test-subj="selectAgentLogLevel"
               value={selectedLogLevel}
               onChange={(event) => {
                 setSelectedLogLevel(event.target.value);
@@ -141,6 +142,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               isLoading={isSetLevelLoading || isResetLevelLoading}
               iconType="check"
               onClick={onClickApply}
+              data-test-subj="applyLogLevelBtn"
             >
               {isSetLevelLoading ? (
                 <FormattedMessage
@@ -163,6 +165,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
                 isLoading={isSetLevelLoading || isResetLevelLoading}
                 iconType="cross"
                 onClick={resetLogLevel}
+                data-test-subj="resetLogLevelBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.agentLogs.resetLogLevelLabelText"
