@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo } from 'react';
+import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,9 +27,11 @@ import type {
   RegistryInput,
   RegistryStream,
   RegistryStreamWithDataStream,
+  RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
+import { useAgentlessPolicy } from '../../../single_page_layout/hooks/setup_technology';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
@@ -91,6 +93,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isEditPage = false,
   }) => {
     const defaultDataStreamId = useDataStreamId();
+    const { isAgentlessEnabled } = useAgentlessPolicy();
+
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -101,6 +105,33 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       )
     );
 
+    const showRegistryVars = useCallback(
+      (registryVar: RegistryVarsEntry) => {
+        if (
+          (isAgentlessEnabled &&
+            registryVar.hide_in_deployment_modes?.find((mode) => mode !== 'agentless')) ||
+          (!isAgentlessEnabled &&
+            registryVar.hide_in_deployment_modes?.find((mode) => mode !== 'default'))
+        )
+          return true;
+        return false;
+      },
+      [isAgentlessEnabled]
+    );
+
+    const packageInputStreamShouldBeVisible = useCallback(
+      (packageInputStream: RegistryStreamWithDataStream) => {
+        return packageInputStream.vars &&
+          packageInputStream.vars.length > 0 &&
+          !!packageInputStream.vars.find((registryVar: RegistryVarsEntry) =>
+            showRegistryVars(registryVar)
+          )
+          ? true
+          : false;
+      },
+      [showRegistryVars]
+    );
+
     // Errors state
     const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
@@ -109,9 +140,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       () => packageInputStreams.length > 0,
       [packageInputStreams.length]
     );
+
     const inputStreams = useMemo(
       () =>
         packageInputStreams
+          .filter((packageInputStream) => packageInputStreamShouldBeVisible(packageInputStream))
           .map((packageInputStream) => {
             return {
               packageInputStream,
@@ -121,7 +154,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             };
           })
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
-      [packageInputStreams, packagePolicyInput.streams]
+      [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
 
     const titleElementId = useMemo(() => htmlIdGenerator()(), []);
@@ -216,6 +249,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
+                  data-test-subj="PackagePolicy.InputStreamConfig"
                   packageInfo={packageInfo}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
