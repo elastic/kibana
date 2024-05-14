@@ -8,14 +8,13 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { getChangePointDetectionComponent } from './shared_components';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -28,21 +27,21 @@ export class AiopsPlugin
   ) {
     Promise.all([
       firstValueFrom(licensing.license$),
-      import('./embeddable/register_embeddable'),
+      import('./embeddables'),
       import('./ui_actions'),
       import('./cases/register_change_point_charts_attachment'),
       core.getStartServices(),
     ]).then(
       ([
         license,
-        { registerEmbeddable },
+        { registerEmbeddables },
         { registerAiopsUiActions },
         { registerChangePointChartsAttachment },
         [coreStart, pluginStart],
       ]) => {
         if (license.hasAtLeast('platinum')) {
           if (embeddable) {
-            registerEmbeddable(core, embeddable);
+            registerEmbeddables(embeddable, core);
           }
 
           if (uiActions) {
@@ -59,11 +58,7 @@ export class AiopsPlugin
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
-      EmbeddableChangePointChart: getEmbeddableChangePointChart(
-        EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-        core,
-        plugins
-      ),
+      ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
     };
   }
 
