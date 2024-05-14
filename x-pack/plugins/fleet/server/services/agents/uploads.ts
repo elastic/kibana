@@ -221,21 +221,37 @@ export async function deleteAgentUploadFile(
   id: string
 ): Promise<DeleteAgentUploadResponse> {
   try {
-    const fileClient = createEsFileClient({
-      blobStorageIndex: FILE_STORAGE_DATA_AGENT_INDEX,
-      metadataIndex: FILE_STORAGE_METADATA_AGENT_INDEX,
-      elasticsearchClient: esClient,
-      logger: appContextService.getLogger(),
-      indexIsAlias: true,
+    // We manually delete the documents from the data streams with `_delete_by_query`
+    // because data streams do not support single deletes. See:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html#data-streams-append-only
+
+    // Delete the file from the file storage data stream
+    const { deleted: filesDeleted } = await esClient.deleteByQuery({
+      index: FILE_STORAGE_DATA_AGENT_INDEX,
+      body: {
+        query: {
+          match: {
+            _id: id,
+          },
+        },
+      },
     });
 
-    await fileClient.delete({
-      id,
+    // Delete the metadata from the metadata data stream
+    const { deleted: metadataDeleted } = await esClient.deleteByQuery({
+      index: FILE_STORAGE_METADATA_AGENT_INDEX,
+      body: {
+        query: {
+          match: {
+            _id: id,
+          },
+        },
+      },
     });
 
     return {
       id,
-      deleted: true,
+      deleted: filesDeleted === 1 && metadataDeleted === 1,
     };
   } catch (error) {
     appContextService.getLogger().error(error);
