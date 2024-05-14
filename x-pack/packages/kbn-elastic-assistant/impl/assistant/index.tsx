@@ -772,6 +772,23 @@ const AssistantComponent: React.FC<Props> = ({
     refetchConversationsState,
   ]);
 
+  const disclaimer = useMemo(
+    () => (
+      <EuiText
+        data-test-subj="assistant-disclaimer"
+        textAlign="center"
+        color={euiThemeVars.euiColorMediumShade}
+        size="xs"
+        css={css`
+          margin: ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+        `}
+      >
+        {i18n.DISCLAIMER}
+      </EuiText>
+    ),
+    []
+  );
+
   const flyoutBodyContent = useMemo(() => {
     if (isWelcomeSetup) {
       return (
@@ -960,7 +977,10 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  {flyoutBodyContent}
+                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                  </EuiFlexGroup>
                   {/* <BlockBotCallToAction
                     connectorPrompt={connectorPrompt}
                     http={http}
@@ -1102,28 +1122,34 @@ const AssistantComponent: React.FC<Props> = ({
         )}
       </EuiModalHeader>
       <EuiModalBody>
-        {getWrapper(
-          <>
-            {comments}
-
-            {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {' '}
+            {getWrapper(
               <>
-                <EuiSpacer />
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <ConnectorMissingCallout
-                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                      isSettingsModalVisible={isSettingsModalVisible}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      isFlyoutMode={isFlyoutMode}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
+                {comments}
+
+                {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+                  <>
+                    <EuiSpacer />
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiFlexItem grow={false}>
+                        <ConnectorMissingCallout
+                          isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                          isSettingsModalVisible={isSettingsModalVisible}
+                          setIsSettingsModalVisible={setIsSettingsModalVisible}
+                          isFlyoutMode={isFlyoutMode}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                )}
+              </>,
+              !embeddedLayout
             )}
-          </>,
-          !embeddedLayout
-        )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalBody>
       <EuiModalFooter
         css={css`
