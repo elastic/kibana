@@ -6,10 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
-// import { transformError } from '@kbn/securitysolution-es-utils';
-// import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
-import { defineQueryForAllPodsMemoryUtilisation, calulcateAllPodsMemoryUtilisation } from '../lib/pods_memory_utils';
+import { defineQueryForAllPodsMemoryUtilisation, calulcateAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_MEMORY_ROUTE,
@@ -89,43 +87,44 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           const time = extractFieldValue(fields['@timestamp']);
           for (var entries of hitsPodsAggs) {
             const podName = entries.key;
-            console.log(podName);
-            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
-            const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsMemoryUtilisation(podName, namespace, esResponsePodsCpu)
+            console.log("name"+podName);
+            const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
+            //console.log(dslPodsMemory);
+            const esResponsePodsCpu = await client.search(dslPodsMemory);
+            const [reason, message] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu)
             pod_reasons.push(reason);
             pod_messages.push(message);
-
+          }
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name);
+                pods_medium.push(pod_reason.pod);
               } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name);
+                pods_high.push(pod_reason.pod);
               }
             }
-            if (pods_medium.length > 0) {
-              messages = "${resource} has Medium ${type} utilisation in following Pods:" + pods_medium.join(" , ");
-            }
+
+            console.log("medium" + pods_medium.length)
             if (pods_high.length > 0) {
               messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_high.join(" , ");
+            } else if (pods_medium.length > 0) {
+              messages = `${resource} has Medium ${type} utilisation in following Pods:` + pods_medium.join(" , ");
             } else {
               messages = `${resource} has Low ${type} utilisation in all Pods`;
             }
 
-            if (pods_medium.length > 0 && pods_high.length > 0) {
-              memory = "Medium";
-              reasons = "Medium "+type+" utilisation";
-            }
             if (pods_high.length > 0) {
               memory = "High";
-              reasons = "High "+type+" utilisation";
+              reasons = "High " + type + " utilisation";
+            } else if (pods_medium.length > 0 && pods_high.length == 0) {
+              memory = "Medium";
+              reasons = "Medium " + type + " utilisation";
             } else {
               memory = "Low";
-              reasons = "Low "+type+" utilisation";
+              reasons = "Low " + type + " utilisation";
             }
             //End of Create overall message for deployment
-          }
+
           return response.ok({
             body: {
               time: time,

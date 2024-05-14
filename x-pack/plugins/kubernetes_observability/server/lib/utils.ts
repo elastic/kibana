@@ -6,7 +6,6 @@
  */
 
 import { double } from "@elastic/elasticsearch/lib/api/types";
-import { object } from "joi";
 
 export type Event = {
     note: string;
@@ -20,16 +19,23 @@ export type Event = {
 export type Pod = {
     name: string;
     namespace: string;
-    memory_availabe: number | undefined;
-    memory_usage: number | undefined;
-    cpu_utilization: number| undefined;
+    memory_available: {
+        avg: number | undefined;
+    }
+    memory_usage:{
+        min: number | undefined;
+        max: number | undefined
+        avg: number | undefined
+        median_absolute_deviation: number | undefined;
+    } 
+    cpu_utilization: number | undefined;
 };
 
 export type Node = {
     name: string;
     memory_available: number | undefined;
     memory_usage: number | undefined;
-    cpu_utilization: number| undefined;
+    cpu_utilization: number | undefined;
 };
 
 export type Limits = {
@@ -94,7 +100,7 @@ export function median(arr: number[]): number | undefined {
     return s.length % 2 ? s[mid] : ((s[mid - 1] + s[mid]) / 2);
 };
 
-export function checkDefaultNamespace(namespace: string| undefined): string {
+export function checkDefaultNamespace(namespace: string | undefined): string {
     if (namespace == null || namespace == undefined || namespace == '') {
         return namespace = "default"
     } else {
