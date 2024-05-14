@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { ConfirmAgentEnrollment } from '../confirm_agent_enrollment';
 
@@ -47,6 +47,8 @@ export const AgentEnrollmentConfirmationStep = ({
   showLoading,
   poll = true,
   isLongEnrollment = false,
+  rootIntegrations = [],
+  unprivilegedAgentsCount = 0,
 }: {
   selectedPolicyId?: string;
   troubleshootLink: string;
@@ -55,6 +57,8 @@ export const AgentEnrollmentConfirmationStep = ({
   poll?: boolean;
   showLoading?: boolean;
   isLongEnrollment?: boolean;
+  rootIntegrations?: string[];
+  unprivilegedAgentsCount?: number;
 }): EuiContainedStepProps => {
   const isComplete = !!agentCount;
   return {
@@ -65,19 +69,43 @@ export const AgentEnrollmentConfirmationStep = ({
       : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
           defaultMessage: 'Confirm agent enrollment',
         }),
-    children:
-      !!isComplete || poll ? (
-        <ConfirmAgentEnrollment
-          policyId={selectedPolicyId}
-          troubleshootLink={troubleshootLink}
-          onClickViewAgents={onClickViewAgents}
-          agentCount={agentCount}
-          showLoading={!isComplete || showLoading}
-          isLongEnrollment={isLongEnrollment}
-        />
-      ) : (
-        <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
-      ),
+    children: (
+      <>
+        {rootIntegrations.length > 0 && unprivilegedAgentsCount > 0 ? (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={i18n.translate('xpack.fleet.agentEnrollmentCallout.unprivilegedAgentsTitle', {
+                defaultMessage: 'Unprivileged agents enrolled',
+              })}
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollmentCallout.unprivilegedAgentsMessage"
+                defaultMessage="This agent policy has integrations that require Elastic Agents to have root privileges: {rootIntegrations}. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
+                values={{
+                  rootIntegrations: rootIntegrations.join(', '),
+                  unprivilegedAgentsCount,
+                }}
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        {!!isComplete || poll ? (
+          <ConfirmAgentEnrollment
+            policyId={selectedPolicyId}
+            troubleshootLink={troubleshootLink}
+            onClickViewAgents={onClickViewAgents}
+            agentCount={agentCount}
+            showLoading={!isComplete || showLoading}
+            isLongEnrollment={isLongEnrollment}
+          />
+        ) : (
+          <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
+        )}
+      </>
+    ),
     status: !isComplete ? 'incomplete' : 'complete',
   };
 };
