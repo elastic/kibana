@@ -9,6 +9,7 @@
 import { camelCase } from 'lodash';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { FunctionDefinition } from '../definitions/types';
@@ -252,7 +253,7 @@ function generateIncorrectlyTypedParameters(
   return { wrongFieldMapping, expectedErrors };
 }
 
-function generateRowCommandTestsForFunction(
+function generateRowCommandTestsForEvalFunction(
   { name, alias, signatures, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
@@ -343,7 +344,7 @@ function generateRowCommandTestsForFunction(
   }
 }
 
-function generateWhereCommandTestsForFunction(
+function generateWhereCommandTestsForEvalFunction(
   { name, signatures, ...rest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
@@ -430,7 +431,7 @@ function generateWhereCommandTestsForAggFunction(
   }
 }
 
-function generateEvalCommandTestsForFunction(
+function generateEvalCommandTestsForEvalFunction(
   { name, signatures, alias, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
@@ -610,17 +611,412 @@ function generateEvalCommandTestsForFunction(
   }
 }
 
+function generateEvalCommandTestsForAggFunction(
+  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  for (const { params, ...signRest } of signatures) {
+    const fieldMapping = getFieldMapping(params);
+    testCases.set(
+      `from a_index | eval var = ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      [`EVAL does not support function ${name}`]
+    );
+
+    testCases.set(
+      `from a_index | eval var = ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      } > 0`,
+      [`EVAL does not support function ${name}`]
+    );
+
+    testCases.set(
+      `from a_index | eval ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      [`EVAL does not support function ${name}`]
+    );
+
+    testCases.set(
+      `from a_index | eval ${
+        getFunctionSignatures(
+          {
+            name,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration
+      } > 0`,
+      [`EVAL does not support function ${name}`]
+    );
+  }
+}
+
+function generateStatsCommandTestsForAggFunction(
+  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  for (const { params, ...signRest } of signatures) {
+    const fieldMapping = getFieldMapping(params);
+
+    const correctSignature = getFunctionSignatures(
+      { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+      { withTypes: false }
+    )[0].declaration;
+    testCases.set(`from a_index | stats var = ${correctSignature}`, []);
+    testCases.set(`from a_index | stats ${correctSignature}`, []);
+
+    if (signRest.returnType === 'number') {
+      testCases.set(`from a_index | stats var = round(${correctSignature})`, []);
+      testCases.set(`from a_index | stats round(${correctSignature})`, []);
+      testCases.set(
+        `from a_index | stats var = round(${correctSignature}) + ${correctSignature}`,
+        []
+      );
+      testCases.set(`from a_index | stats round(${correctSignature}) + ${correctSignature}`, []);
+    }
+
+    if (params.some(({ constantOnly }) => constantOnly)) {
+      const fieldReplacedType = params
+        .filter(({ constantOnly }) => constantOnly)
+        .map(({ type }) => type);
+      // create the mapping without the literal flag
+      // this will make the signature wrong on purpose where in place on constants
+      // the arg will be a column of the same type
+      const fieldMappingWithoutLiterals = getFieldMapping(
+        params.map(({ constantOnly, ...rest }) => rest)
+      );
+      testCases.set(
+        `from a_index | stats ${
+          getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+            },
+            { withTypes: false }
+          )[0].declaration
+        }`,
+        fieldReplacedType.map(
+          (type) => `Argument of [${name}] must be a constant, received [${type}Field]`
+        )
+      );
+    }
+
+    if (alias) {
+      for (const otherName of alias) {
+        const signatureStringWithAlias = getFunctionSignatures(
+          {
+            name: otherName,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration;
+
+        testCases.set(`from a_index | stats var = ${signatureStringWithAlias}`, []);
+      }
+    }
+
+    // test only numeric functions for now
+    if (params[0].type === 'number') {
+      const nestedBuiltin = 'numberField / 2';
+      const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
+      fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
+
+      const fnSignatureWithBuiltinString = getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMappingWithNestedBuiltinFunctions, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration;
+      // from a_index | STATS aggFn( numberField / 2 )
+      testCases.set(`from a_index | stats ${fnSignatureWithBuiltinString}`, []);
+      testCases.set(`from a_index | stats var0 = ${fnSignatureWithBuiltinString}`, []);
+      testCases.set(`from a_index | stats avg(numberField), ${fnSignatureWithBuiltinString}`, []);
+      testCases.set(
+        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithBuiltinString}`,
+        []
+      );
+
+      const nestedEvalAndBuiltin = 'round(numberField / 2)';
+      const fieldMappingWithNestedEvalAndBuiltinFunctions = getFieldMapping(params);
+      fieldMappingWithNestedBuiltinFunctions[0].name = nestedEvalAndBuiltin;
+
+      const fnSignatureWithEvalAndBuiltinString = getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMappingWithNestedEvalAndBuiltinFunctions, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration;
+      // from a_index | STATS aggFn( round(numberField / 2) )
+      testCases.set(`from a_index | stats ${fnSignatureWithEvalAndBuiltinString}`, []);
+      testCases.set(`from a_index | stats var0 = ${fnSignatureWithEvalAndBuiltinString}`, []);
+      testCases.set(
+        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString}`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
+        []
+      );
+      // from a_index | STATS aggFn(round(numberField / 2) ) BY round(numberField / 2)
+      testCases.set(
+        `from a_index | stats ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        []
+      );
+      testCases.set(
+        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        []
+      );
+    }
+
+    // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
+    // to_version is a bit harder to test exactly a combination of argument and predict the
+    // the right error message
+    if (params.every(({ type }) => type !== 'any') && !['to_version', 'mv_sort'].includes(name)) {
+      // now test nested functions
+      const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
+        useNestedFunction: true,
+        useLiterals: false,
+      });
+      const nestedAggsExpectedErrors = params
+        .filter(({ constantOnly }) => !constantOnly)
+        .map(
+          (_) =>
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+        );
+      testCases.set(
+        `from a_index | stats var = ${
+          getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedAggsFunctions, ...signRest }],
+            },
+            { withTypes: false }
+          )[0].declaration
+        }`,
+        nestedAggsExpectedErrors
+      );
+      testCases.set(
+        `from a_index | stats ${
+          getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedAggsFunctions, ...signRest }],
+            },
+            { withTypes: false }
+          )[0].declaration
+        }`,
+        nestedAggsExpectedErrors
+      );
+      const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
+        name,
+        signatures,
+        params,
+        {
+          stringField: 'stringField',
+          numberField: 'numberField',
+          booleanField: 'booleanField',
+        }
+      );
+      // and the message is case of wrong argument type is passed
+      testCases.set(
+        `from a_index | stats ${
+          getFunctionSignatures(
+            { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
+            { withTypes: false }
+          )[0].declaration
+        }`,
+        expectedErrors
+      );
+
+      // test that only count() accepts wildcard as arg
+      // just check that the function accepts only 1 arg as the parser cannot handle multiple args with * as start arg
+      if (fieldMapping.length === 1) {
+        const fieldMappingWithWildcard = [...fieldMapping];
+        fieldMappingWithWildcard[0].name = '*';
+
+        testCases.set(
+          `from a_index | stats var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMappingWithWildcard, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          name === 'count' ? [] : [`Using wildcards (*) in ${name} is not allowed`]
+        );
+      }
+    }
+  }
+}
+
+function generateStatsCommandTestsForGroupingFunction(
+  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  for (const { params, ...signRest } of signatures) {
+    const fieldMapping = getFieldMapping(params);
+
+    const correctSignature = getFunctionSignatures(
+      { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+      { withTypes: false }
+    )[0].declaration;
+    testCases.set(`from a_index | stats by ${correctSignature}`, []);
+
+    if (params.some(({ constantOnly }) => constantOnly)) {
+      const fieldReplacedType = params
+        .filter(({ constantOnly }) => constantOnly)
+        .map(({ type }) => type);
+      // create the mapping without the literal flag
+      // this will make the signature wrong on purpose where in place on constants
+      // the arg will be a column of the same type
+      const fieldMappingWithoutLiterals = getFieldMapping(
+        params.map(({ constantOnly, ...rest }) => rest)
+      );
+      testCases.set(
+        `from a_index | stats by ${
+          getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+            },
+            { withTypes: false }
+          )[0].declaration
+        }`,
+        fieldReplacedType
+          // if a param of type time_literal or chrono_literal it will always be a literal
+          // so no way to test the constantOnly thing
+          .filter((type) => !['time_literal', 'chrono_literal'].includes(type))
+          .map((type) => `Argument of [${name}] must be a constant, received [${type}Field]`)
+      );
+    }
+
+    if (alias) {
+      for (const otherName of alias) {
+        const signatureStringWithAlias = getFunctionSignatures(
+          {
+            name: otherName,
+            ...defRest,
+            signatures: [{ params: fieldMapping, ...signRest }],
+          },
+          { withTypes: false }
+        )[0].declaration;
+
+        testCases.set(`from a_index | stats by ${signatureStringWithAlias}`, []);
+      }
+    }
+  }
+}
+
+function generateSortCommandTestsForEvalFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  // should accept eval functions
+  const {
+    signatures: [firstSignature],
+  } = definition;
+  const fieldMapping = getFieldMapping(firstSignature.params);
+  const printedInvocation = getFunctionSignatures(
+    { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+    { withTypes: false }
+  )[0].declaration;
+
+  testCases.set(`from a_index | sort ${printedInvocation}`, []);
+}
+
+function generateSortCommandTestsForAggFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const {
+    name,
+    signatures: [firstSignature],
+  } = definition;
+  const fieldMapping = getFieldMapping(firstSignature.params);
+  const printedInvocation = getFunctionSignatures(
+    { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+    { withTypes: false }
+  )[0].declaration;
+
+  testCases.set(`from a_index | sort ${printedInvocation}`, [
+    `SORT does not support function ${name}`,
+  ]);
+}
+
+const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
+
 function main() {
   const testCases: Map<string, string[]> = new Map();
 
   for (const definition of evalFunctionsDefinitions) {
-    generateRowCommandTestsForFunction(definition, testCases);
-    generateWhereCommandTestsForFunction(definition, testCases);
-    generateEvalCommandTestsForFunction(definition, testCases);
+    generateRowCommandTestsForEvalFunction(definition, testCases);
+    generateWhereCommandTestsForEvalFunction(definition, testCases);
+    generateEvalCommandTestsForEvalFunction(definition, testCases);
+    generateSortCommandTestsForEvalFunction(definition, testCases);
   }
 
   for (const definition of statsAggregationFunctionDefinitions) {
+    generateStatsCommandTestsForAggFunction(definition, testCases);
+    generateSortCommandTestsForAggFunction(definition, testCases);
     generateWhereCommandTestsForAggFunction(definition, testCases);
+    generateEvalCommandTestsForAggFunction(definition, testCases);
+  }
+
+  for (const definition of groupingFunctionDefinitions) {
+    generateStatsCommandTestsForGroupingFunction(definition, testCases);
+    generateSortCommandTestsForGroupingFunction(definition, testCases);
   }
 
   console.log(testCases);
