@@ -12,13 +12,12 @@ import {
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiFieldNumber,
   EuiFieldText,
-  EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnomalyChartsEmbeddableInput } from '..';
@@ -49,21 +48,17 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
 
   return (
-    <EuiModal
-      initialFocus="[name=panelTitle]"
-      onClose={onCancel}
-      data-test-subj={'mlAnomalyChartsEmbeddableInitializer'}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
+    <div data-test-subj={'mlAnomalyChartsEmbeddableInitializer'}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
             defaultMessage="Anomaly explorer charts configuration"
           />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiForm>
           <EuiFormRow
             label={
@@ -112,9 +107,9 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             />
           </EuiFormRow>
         </EuiForm>
-      </EuiModalBody>
+      </EuiFlyoutBody>
 
-      <EuiModalFooter>
+      <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
@@ -136,7 +131,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             defaultMessage="Confirm configurations"
           />
         </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutFooter>
+    </div>
   );
 };

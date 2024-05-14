@@ -19,7 +19,6 @@ import {
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
-import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -33,7 +32,7 @@ import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+// import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -48,10 +47,12 @@ export interface EmbeddableAnomalyChartsContainerProps {
   onRenderComplete: () => void;
   onLoading: () => void;
   onError: (error: Error) => void;
+  severityThreshold?: number;
 }
 
 export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
+  severityThreshold,
   embeddableContext,
   embeddableInput,
   services,
@@ -62,18 +63,16 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   onError,
   onLoading,
 }) => {
-  useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
-    services[0].executionContext,
-    embeddableInput,
-    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    id
-  );
+  // useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
+  //   services[0].executionContext,
+  //   embeddableInput,
+  //   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  //   id
+  // );
 
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
-    optionValueToThreshold(
-      embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
-    )
+    optionValueToThreshold(severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING)
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
@@ -193,7 +192,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
             padding: '8px',
             height: containerHeight,
           }}
-          data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
+          data-test-subj={`mlExplorerEmbeddable_${id}`}
           ref={resizeRef}
         >
           {isExplorerLoading && (

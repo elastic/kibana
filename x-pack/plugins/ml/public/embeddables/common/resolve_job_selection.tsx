@@ -29,7 +29,8 @@ export async function resolveJobSelection(
   coreStart: CoreStart,
   dataViews: DataViewsContract,
   selectedJobIds?: JobId[],
-  singleSelection: boolean = false
+  singleSelection: boolean = false,
+  pushFlyout: boolean = false
 ): Promise<{ jobIds: string[]; groups: Array<{ groupId: string; jobIds: string[] }> }> {
   const {
     http,
@@ -88,6 +89,8 @@ export async function resolveJobSelection(
           startServices
         ),
         {
+          // @todo: pass in as functional arg
+          ...(pushFlyout ? { type: 'push' } : {}),
           'data-test-subj': 'mlFlyoutJobSelector',
           ownFocus: true,
           closeButtonProps: { 'aria-label': 'jobSelectorFlyout' },

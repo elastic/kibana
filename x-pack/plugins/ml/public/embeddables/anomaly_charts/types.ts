@@ -10,6 +10,38 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlEmbeddableBaseApi } from '../types';
 
+export interface AnomalyChartsComponentApi {
+  jobIds: JobId[];
+  maxSeriesToPlot: number;
+}
+
+export interface AnomalyChartsEmbeddableOverridableState
+  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
+  jobIds: JobId[];
+  maxSeriesToPlot: number;
+
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
+  severityThreshold?: number;
+}
+
+/**
+ * Persisted state for the Anomaly Charts Embeddable.
+ */
+export interface AnomalyChartsEmbeddableState
+  extends SerializedTitles,
+    AnomalyChartsEmbeddableOverridableState {}
+
+export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
+  PublishesDataViews &
+  PublishesUnifiedSearch &
+  PublishesWritablePanelTitle &
+  HasEditCapabilities &
+  AnomalyChartsComponentApi;
+
 export interface AnomalyChartsFieldSelectionApi {
   jobIds: PublishingSubject<JobId[]>;
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
