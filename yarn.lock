@@ -6494,6 +6494,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/try-in-console@link:packages/kbn-try-in-console":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ts-projects@link:packages/kbn-ts-projects":
   version "0.0.0"
   uid ""
