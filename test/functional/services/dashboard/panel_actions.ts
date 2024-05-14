@@ -101,7 +101,6 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async navigateToEditorFromFlyout() {
-    await this.openContextMenu();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
@@ -123,7 +122,8 @@ export class DashboardPanelActionsService extends FtrService {
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
   async clickEdit() {
@@ -145,7 +145,8 @@ export class DashboardPanelActionsService extends FtrService {
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
   async editPanelByTitle(title?: string) {

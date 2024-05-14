@@ -119,6 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('resetting description on a by reference panel sets it to the library title', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.navigateToEditorFromFlyout();
         // legacySaveToLibrary UI cannot set description
         await PageObjects.lens.save(
