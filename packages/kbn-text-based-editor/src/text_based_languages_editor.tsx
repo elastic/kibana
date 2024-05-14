@@ -41,6 +41,8 @@ import {
   EuiButton,
   EuiSpacer,
   EuiDescriptionList,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
@@ -208,6 +210,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   >([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPopoverlVisible, setIsPopoverVisible] = useState(false);
+  const [isEditorActionsPopover, setIsEditorActionsPopover] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -256,6 +259,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  const onSlashType = useCallback(() => {
+    const currentCursorPosition = editor1.current?.getPosition();
+    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
+
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
+      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      setIsPopoverVisible(true);
+      setIsEditorActionsPopover(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -978,6 +998,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           onQuerySubmit
                         );
 
+                        editor.addCommand(
+                          // eslint-disable-next-line no-bitwise
+                          monaco.KeyMod.Shift | monaco.KeyCode.Slash,
+                          onSlashType
+                        );
+
                         if (!isCodeEditorExpanded) {
                           editor.onDidContentSizeChange((e) => {
                             // @ts-expect-error the property _oldContentHeight exists on the event object received but
@@ -1165,14 +1191,27 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             }}
             ref={popoverRef}
           >
-            <EuiDescriptionList
-              listItems={integrations.map((i) => {
-                return {
-                  title: i.name,
-                  description: i.description,
-                };
-              })}
-            />
+            {isEditorActionsPopover ? (
+              <EuiListGroup>
+                <EuiListGroupItem
+                  label="Here is a list of actions items"
+                  color="primary"
+                  size="m"
+                />
+
+                <EuiListGroupItem href="#" label="Action 1" color="text" size="s" />
+                <EuiListGroupItem href="#" label="Action 2" color="text" size="s" />
+              </EuiListGroup>
+            ) : (
+              <EuiDescriptionList
+                listItems={integrations.map((i) => {
+                  return {
+                    title: i.name,
+                    description: i.description,
+                  };
+                })}
+              />
+            )}
           </div>
         ),
         document.body
