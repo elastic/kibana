@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-utility-types",
+  "@npm//listr2",
   "@npm//@types/glob",
   "@npm//@types/jest",
   "@npm//@types/lodash",

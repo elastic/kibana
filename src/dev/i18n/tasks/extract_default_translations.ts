@@ -8,7 +8,7 @@
 
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-utils';
-import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
+import { extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { I18nCheckTaskContext } from '../types';
 
 export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {
