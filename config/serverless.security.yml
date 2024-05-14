@@ -45,8 +45,6 @@ xpack.features.overrides:
           privileges: [ "read" ]
         - feature: "maps"
           privileges: [ "read" ]
-  ### Stack alerts is disabled since it's not needed.
-  stackAlerts.disabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
