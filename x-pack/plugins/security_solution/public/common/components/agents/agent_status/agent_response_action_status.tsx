@@ -11,7 +11,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@
 import type { EndpointPendingActions } from '../../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
-import { ISOLATING_LABEL, RELEASING_LABEL, ISOLATED_LABEL } from './endpoint/endpoint_agent_status';
+import { ISOLATED_LABEL, ISOLATING_LABEL, RELEASING_LABEL } from './endpoint/endpoint_agent_status';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
@@ -49,22 +49,20 @@ export const AgentResponseActionsStatus = memo<AgentResponseActionsStatusProps>(
     } = useMemo<PendingActionsState>(() => {
       const list: Array<{ label: string; count: number }> = [];
       let actionTotal = 0;
-      let actionTypesCount = 0;
+      const pendingActionEntries = Object.entries(pendingActions);
+      const actionTypesCount = pendingActionEntries.length;
 
-      Object.entries(pendingActions)
-        .sort()
-        .forEach(([actionName, actionCount]) => {
-          actionTotal += actionCount;
-          actionTypesCount += 1;
+      pendingActionEntries.sort().forEach(([actionName, actionCount]) => {
+        actionTotal += actionCount;
 
-          list.push({
-            count: actionCount,
-            label:
-              RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
-                actionName as ResponseActionsApiCommandNames
-              ] ?? actionName,
-          });
+        list.push({
+          count: actionCount,
+          label:
+            RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
+              actionName as ResponseActionsApiCommandNames
+            ] ?? actionName,
         });
+      });
 
       const pendingIsolate = pendingActions.isolate ?? 0;
       const pendingUnIsolate = pendingActions.unisolate ?? 0;
