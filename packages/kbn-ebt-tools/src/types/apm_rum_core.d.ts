@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './src/performance_metrics';
-
-export * from './src/performance_metric_events';
+declare module '@elastic/apm-rum-core' {
+  export function afterFrame(callback: () => void): void;
+}
