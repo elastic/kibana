@@ -12,5 +12,5 @@ export const useCasesContextState = () => {
   const { casesContextState$ } = useCasesContext();
   // the casesContextState$.getValue() is used to set the initial value,
   // preventing components using this hook from re-rendering when the first value is emitted
-  return useObservable(casesContextState$, casesContextState$.getValue()) ?? {};
+  return useObservable(casesContextState$, casesContextState$.getValue());
 };

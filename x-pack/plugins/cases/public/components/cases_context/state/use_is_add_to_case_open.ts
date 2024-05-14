@@ -11,5 +11,5 @@ export type UseIsAddToCaseOpen = () => boolean;
 
 export const useIsAddToCaseOpen: UseIsAddToCaseOpen = () => {
   const { selectCaseModal, createCaseFlyout } = useCasesContextState();
-  return (selectCaseModal?.isModalOpen || createCaseFlyout?.isFlyoutOpen) ?? false;
+  return selectCaseModal.isModalOpen || createCaseFlyout.isFlyoutOpen;
 };

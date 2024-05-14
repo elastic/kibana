@@ -17,13 +17,8 @@ import { TimelineId } from '../../../../common/types';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useTourContext } from './tour';
-import {
-  AlertsCasesTourSteps,
-  hiddenWhenCaseFlyoutExpanded,
-  SecurityStepId,
-  securityTourConfig,
-} from './tour_config';
-import { useKibana } from '../../lib/kibana';
+import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
+import { useHiddenByFlyout } from './use_hidden_by_flyout';
 
 interface SecurityTourStep {
   children?: React.ReactElement;
@@ -54,7 +49,6 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
   const showTimeline = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
   );
-
   const onClickNext = useCallback(
     // onClick should call incrementStep itself
     () => (onClick ? onClick() : incrementStep(tourId)),
@@ -146,8 +140,6 @@ interface GuidedOnboardingTourStep extends SecurityTourStep {
   // can be false if the anchor is an iterative element
   // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
   isTourAnchor?: boolean;
-
-  hidden?: boolean;
 }
 
 // wraps tour anchor component
@@ -158,20 +150,12 @@ export const GuidedOnboardingTourStep = ({
   // can be false if the anchor is an iterative element
   // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
   isTourAnchor = true,
-  hidden = false,
   ...props
 }: GuidedOnboardingTourStep) => {
-  const { useIsAddToCaseOpen } = useKibana().services.cases.hooks;
   const { hidden: allStepsHidden } = useTourContext();
+  const hiddenByFlyout = useHiddenByFlyout({ tourId: props.tourId, step: props.step });
 
-  const isAddToCaseOpen = useIsAddToCaseOpen();
-
-  const hiddenWhenCasesModalFlyoutExpanded = useMemo(
-    () => isAddToCaseOpen && hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),
-    [isAddToCaseOpen, props.tourId, props.step]
-  );
-
-  return isTourAnchor && !hidden && !allStepsHidden && !hiddenWhenCasesModalFlyoutExpanded ? (
+  return isTourAnchor && !allStepsHidden && !hiddenByFlyout ? (
     <SecurityTourStep {...props}>{children}</SecurityTourStep>
   ) : (
     <>{children}</>

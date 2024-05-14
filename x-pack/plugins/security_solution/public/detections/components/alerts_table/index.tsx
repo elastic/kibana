@@ -22,7 +22,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -111,7 +110,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
   const { from, to, setQuery } = useGlobalTime();
-  const panels = useExpandableFlyoutState();
 
   const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
 
@@ -260,13 +258,12 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const cellContext = useMemo(() => {
     return {
-      isLeftExpandableFlyoutExpanded: !!panels.left,
       rowRenderers: defaultRowRenderers,
       isDetails: false,
       truncate: true,
       isDraggable: false,
     };
-  }, [panels.left]);
+  }, []);
 
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({

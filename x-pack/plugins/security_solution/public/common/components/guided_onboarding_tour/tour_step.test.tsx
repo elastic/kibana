@@ -13,16 +13,31 @@ import { useTourContext } from './tour';
 import { mockGlobalState, TestProviders, createMockStore } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { useKibana } from '../../lib/kibana';
+import { useKibana as mockUseKibana } from '../../lib/kibana';
+
+const mockedUseKibana = mockUseKibana();
+const mockCasesContract = casesPluginMock.createStartContract();
+const mockUseIsAddToCaseOpen = mockCasesContract.hooks.useIsAddToCaseOpen as jest.Mock;
+mockUseIsAddToCaseOpen.mockReturnValue(false);
+const mockUseTourContext = useTourContext as jest.Mock;
+
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+  return {
+    ...original,
+    useToasts: jest.fn().mockReturnValue({ addWarning: jest.fn() }),
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: mockCasesContract,
+      },
+    }),
+  };
+});
 
 jest.mock('./tour');
-const mockTourStep = jest
-  .fn()
-  .mockImplementation(({ children, footerAction }: EuiTourStepProps) => (
-    <span data-test-subj="tourStepMock">
-      {children} {footerAction}
-    </span>
-  ));
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -31,7 +46,15 @@ jest.mock('@elastic/eui', () => {
     EuiTourStep: (props: any) => mockTourStep(props),
   };
 });
-jest.mock('../../lib/kibana');
+
+const mockTourStep = jest
+  .fn()
+  .mockImplementation(({ children, footerAction }: EuiTourStepProps) => (
+    <span data-test-subj="tourStepMock">
+      {children} {footerAction}
+    </span>
+  ));
+
 const defaultProps = {
   isTourAnchor: true,
   step: 1,
@@ -39,24 +62,19 @@ const defaultProps = {
 };
 
 const mockChildren = <h1 data-test-subj="h1">{'random child element'}</h1>;
-const casesServiceMock = casesPluginMock.createStartContract();
+
+const defaultUseTourContextValue = {
+  activeStep: AlertsCasesTourSteps.viewCase,
+  incrementStep: jest.fn(),
+  endTourStep: jest.fn(),
+  isTourShown: () => true,
+};
 
 describe('GuidedOnboardingTourStep', () => {
   const incrementStep = jest.fn();
   beforeEach(() => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep,
-      isTourShown: () => true,
-    });
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        cases: {
-          ...casesServiceMock,
-          hooks: { ...casesServiceMock.hooks },
-        },
-      },
-    });
+    mockUseTourContext.mockReturnValue(defaultUseTourContextValue);
+
     jest.clearAllMocks();
   });
   it('renders as a tour step', () => {
@@ -70,17 +88,7 @@ describe('GuidedOnboardingTourStep', () => {
     expect(header).toBeInTheDocument();
   });
   it('hiddenWhenCasesModalFlyoutExpanded={true}, just render children', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        cases: {
-          ...casesServiceMock,
-          hooks: {
-            ...casesServiceMock.hooks,
-            useIsAddToCaseOpen: jest.fn(() => true),
-          },
-        },
-      },
-    });
+    mockUseIsAddToCaseOpen.mockReturnValue(true);
 
     const { getByTestId, queryByTestId } = render(
       <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
@@ -91,12 +99,10 @@ describe('GuidedOnboardingTourStep', () => {
     expect(tourStep).not.toBeInTheDocument();
     expect(header).toBeInTheDocument();
   });
-  it('allStepsHidden={true}, just render children', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
+  it('hidden={true} from the tour context, just render children', () => {
+    mockUseTourContext.mockReturnValue({
+      ...defaultUseTourContextValue,
       hidden: true,
-      incrementStep,
-      isTourShown: () => true,
     });
     const { getByTestId, queryByTestId } = render(
       <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
@@ -161,19 +167,13 @@ describe('GuidedOnboardingTourStep', () => {
 describe('SecurityTourStep', () => {
   const { isTourAnchor: _, ...stepDefaultProps } = defaultProps;
   beforeEach(() => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
-    });
+    (useTourContext as jest.Mock).mockReturnValue(defaultUseTourContextValue);
     jest.clearAllMocks();
   });
 
   it('does not render if tour step does not exist', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 99,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
     });
     render(
       <SecurityTourStep {...stepDefaultProps} step={99}>
@@ -195,11 +195,6 @@ describe('SecurityTourStep', () => {
   });
 
   it('does not render if security tour step is not shown', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep: jest.fn(),
-      isTourShown: () => false,
-    });
     render(<SecurityTourStep {...stepDefaultProps}>{mockChildren}</SecurityTourStep>, {
       wrapper: TestProviders,
     });
@@ -227,11 +222,6 @@ describe('SecurityTourStep', () => {
   });
 
   it('renders next button', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 3,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
-    });
     const { getByTestId } = render(
       <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}>
         {mockChildren}
@@ -243,9 +233,8 @@ describe('SecurityTourStep', () => {
 
   it('if a step has an anchor declared, the tour step should be a sibling of the mockChildren', () => {
     (useTourContext as jest.Mock).mockReturnValue({
+      ...defaultUseTourContextValue,
       activeStep: 3,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
     });
     const { container } = render(
       <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}>
@@ -264,11 +253,6 @@ describe('SecurityTourStep', () => {
   });
 
   it('if a step does not an anchor declared, the tour step should be the parent of the mockChildren', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 2,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
-    });
     const { container } = render(
       <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.expandEvent}>
         {mockChildren}
@@ -326,9 +310,8 @@ describe('SecurityTourStep', () => {
 
   it('does not render next button if step hideNextButton=true ', () => {
     (useTourContext as jest.Mock).mockReturnValue({
+      ...defaultUseTourContextValue,
       activeStep: 6,
-      incrementStep: jest.fn(),
-      isTourShown: () => true,
     });
     const { queryByTestId } = render(
       <SecurityTourStep {...stepDefaultProps} step={6}>

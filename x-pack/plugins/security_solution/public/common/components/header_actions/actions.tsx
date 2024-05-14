@@ -11,7 +11,6 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
   eventHasNotes,
   getEventType,
@@ -37,11 +36,7 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { useTourContext } from '../guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-  hiddenWhenLeftExpandableFlyoutExpanded,
-} from '../guided_onboarding_tour/tour_config';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
@@ -86,17 +81,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  const panels = useExpandableFlyoutState();
-  const isExpandableFlyoutExpanded: boolean = !!panels.left;
-
-  const hiddenWhenExpandableFlyoutOpened = useMemo(
-    () =>
-      isExpandableFlyoutExpanded &&
-      hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
-        AlertsCasesTourSteps.expandEvent
-      ),
-    [isExpandableFlyoutExpanded]
-  );
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
@@ -274,7 +258,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
             onClick={onExpandEvent}
             step={AlertsCasesTourSteps.expandEvent}
             tourId={SecurityStepId.alertsCases}
-            hidden={hiddenWhenExpandableFlyoutOpened}
           >
             <div key="expand-event">
               <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

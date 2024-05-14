@@ -20,7 +20,6 @@ import { GuidedOnboardingTourStep } from '../../../common/components/guided_onbo
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
   AlertsCasesTourSteps,
-  hiddenWhenLeftExpandableFlyoutExpanded,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -54,7 +53,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       isExpandable,
       isDraggable = false,
       isExpanded,
-      isLeftExpandableFlyoutExpanded,
       colIndex,
       eventId,
       setCellProps,
@@ -119,15 +117,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
     }, [ecsData, data]);
 
-    const hiddenWhenLeftExpandableFlyoutOpened = useMemo(
-      () =>
-        !!isLeftExpandableFlyoutExpanded &&
-        hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
-          AlertsCasesTourSteps.pointToAlertName
-        ),
-      [isLeftExpandableFlyoutExpanded]
-    );
-
     const Renderer = useMemo(() => {
       const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
       const colHeader = columnHeaders.find((col) => col.id === columnId);
@@ -137,7 +126,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
           isTourAnchor={isTourAnchor}
           step={AlertsCasesTourSteps.pointToAlertName}
           tourId={SecurityStepId.alertsCases}
-          hidden={hiddenWhenLeftExpandableFlyoutOpened}
         >
           <DefaultCellRenderer
             browserFields={browserFields}
@@ -169,7 +157,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       columnHeaders,
       ecsData,
       isTourAnchor,
-      hiddenWhenLeftExpandableFlyoutOpened,
       browserFields,
       finalData,
       eventId,
