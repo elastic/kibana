@@ -221,12 +221,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('required_fields', () => {
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-        });
-
         it('creates a rule with required_fields defaulted to an empty array when not present', async () => {
-          const customQueryRuleParams = getCustomQueryRuleParams();
+          const customQueryRuleParams = getCustomQueryRuleParams({
+            rule_id: 'rule-without-required-fields',
+          });
 
           expect(customQueryRuleParams.required_fields).toBeUndefined();
 
@@ -237,6 +235,14 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(body.required_fields).toEqual([]);
+
+          const { body: createdRule } = await securitySolutionApi
+            .readRule({
+              query: { rule_id: 'rule-without-required-fields' },
+            })
+            .expect(200);
+
+          expect(createdRule.required_fields).toEqual([]);
         });
       });
     });
