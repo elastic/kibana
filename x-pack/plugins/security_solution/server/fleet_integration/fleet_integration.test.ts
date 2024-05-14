@@ -562,7 +562,8 @@ describe('ingest_integration tests ', () => {
       });
     });
 
-    describe('when the license is at least enterprise', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183348
+    describe.skip('when the license is at least enterprise', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
