@@ -117,8 +117,16 @@ export const LinkContent = ({
     <>
       <EuiForm>
         <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="share.link.helpText"
+            defaultMessage="Share a direct link to this {objectType}."
+            values={{ objectType }}
+          />
+        </EuiText>
         {isDirty && objectType === 'lens' && (
           <>
+            <EuiSpacer size="m" />
             <EuiCallOut
               color="warning"
               title={
@@ -130,16 +138,8 @@ export const LinkContent = ({
                 defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
               />
             </EuiCallOut>
-            <EuiSpacer size="m" />
           </>
         )}
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.link.helpText"
-            defaultMessage="Share a direct link to this {objectType}."
-            values={{ objectType }}
-          />
-        </EuiText>
         <EuiSpacer size="l" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>

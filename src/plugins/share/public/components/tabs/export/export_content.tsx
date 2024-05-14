@@ -12,6 +12,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -200,6 +201,22 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>
+        {isDirty && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              color="warning"
+              title={
+                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+              }
+            >
+              <FormattedMessage
+                id="share.postURLWatcherMessage.unsavedChanges"
+                defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
+              />
+            </EuiCallOut>
+          </>
+        )}
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">
