@@ -7,29 +7,25 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import {
-  GetSLOResponse,
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
-} from '@kbn/slo-schema';
-import { APMEmbeddableRoot } from './embeddable_root';
+  APMEmbeddableRoot,
+  APMTransactionDurationSLOResponse,
+  APMErrorRateSLOResponse,
+} from './embeddable_root';
 import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
 
-interface APMAlertDetailsProps {
-  slo: APMTransactionDurationSLOResponse;
+interface APMAlertDetailsProps<IndicatorType> {
+  slo: IndicatorType;
   alert: BurnRateAlert;
   rule: BurnRateRule;
   dataTimeRange: TimeRange;
 }
 
-export type APMTransactionDurationSLOResponse = GetSLOResponse & {
-  indicator: APMTransactionDurationIndicator;
-};
-
-export type APMErrorRateSLOResponse = GetSLOResponse & {
-  indicator: APMTransactionErrorRateIndicator;
-};
-
-export function APMLatencyAlertDetails({ slo, dataTimeRange, alert, rule }: APMAlertDetailsProps) {
+export function APMLatencyAlertDetails({
+  slo,
+  dataTimeRange,
+  alert,
+  rule,
+}: APMAlertDetailsProps<APMTransactionDurationSLOResponse>) {
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <APMEmbeddableRoot
@@ -68,7 +64,7 @@ export function APMAvailabilityAlertDetails({
   dataTimeRange,
   alert,
   rule,
-}: APMAlertDetailsProps) {
+}: APMAlertDetailsProps<APMErrorRateSLOResponse>) {
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <APMEmbeddableRoot

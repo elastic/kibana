@@ -14,7 +14,7 @@ import type { BurnRateAlert, BurnRateRule } from '../../types';
 import type {
   APMTransactionDurationSLOResponse,
   APMErrorRateSLOResponse,
-} from './apm/apm_alert_details';
+} from './apm/embeddable_root';
 
 interface Props {
   alert: BurnRateAlert;
