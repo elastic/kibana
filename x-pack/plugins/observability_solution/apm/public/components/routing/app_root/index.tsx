@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -71,36 +72,37 @@ export function ApmAppRoot({
               <i18nCore.Context>
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>
-                    <ApmErrorBoundary>
-                      <RedirectDependenciesToDependenciesInventory>
-                        <RedirectWithDefaultEnvironment>
-                          <RedirectWithDefaultDateRange>
-                            <RedirectWithOffset>
-                              <TrackPageview>
-                                <UpdateExecutionContextOnRouteChange>
-                                  <BreadcrumbsContextProvider>
-                                    <UrlParamsProvider>
-                                      <LicenseProvider>
-                                        <AnomalyDetectionJobsContextProvider>
-                                          <InspectorContextProvider>
-                                            <ApmThemeProvider>
-                                              <MountApmHeaderActionMenu />
-
-                                              <Route component={ScrollToTopOnPathChange} />
-                                              <RouteRenderer />
-                                            </ApmThemeProvider>
-                                          </InspectorContextProvider>
-                                        </AnomalyDetectionJobsContextProvider>
-                                      </LicenseProvider>
-                                    </UrlParamsProvider>
-                                  </BreadcrumbsContextProvider>
-                                </UpdateExecutionContextOnRouteChange>
-                              </TrackPageview>
-                            </RedirectWithOffset>
-                          </RedirectWithDefaultDateRange>
-                        </RedirectWithDefaultEnvironment>
-                      </RedirectDependenciesToDependenciesInventory>
-                    </ApmErrorBoundary>
+                    <PerformanceContextProvider>
+                      <ApmErrorBoundary>
+                        <RedirectDependenciesToDependenciesInventory>
+                          <RedirectWithDefaultEnvironment>
+                            <RedirectWithDefaultDateRange>
+                              <RedirectWithOffset>
+                                <TrackPageview>
+                                  <UpdateExecutionContextOnRouteChange>
+                                    <BreadcrumbsContextProvider>
+                                      <UrlParamsProvider>
+                                        <LicenseProvider>
+                                          <AnomalyDetectionJobsContextProvider>
+                                            <InspectorContextProvider>
+                                              <ApmThemeProvider>
+                                                <MountApmHeaderActionMenu />
+                                                <Route component={ScrollToTopOnPathChange} />
+                                                <RouteRenderer />
+                                              </ApmThemeProvider>
+                                            </InspectorContextProvider>
+                                          </AnomalyDetectionJobsContextProvider>
+                                        </LicenseProvider>
+                                      </UrlParamsProvider>
+                                    </BreadcrumbsContextProvider>
+                                  </UpdateExecutionContextOnRouteChange>
+                                </TrackPageview>
+                              </RedirectWithOffset>
+                            </RedirectWithDefaultDateRange>
+                          </RedirectWithDefaultEnvironment>
+                        </RedirectDependenciesToDependenciesInventory>
+                      </ApmErrorBoundary>
+                    </PerformanceContextProvider>
                   </RouterProvider>
                 </TimeRangeIdContextProvider>
               </i18nCore.Context>
