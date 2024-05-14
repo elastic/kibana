@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { entityDefinition, SO_ENTITY_DEFINITION_TYPE } from './entity_definition';
+export class EntityDefinitionNotFound extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EntityDefinitionNotFound';
+  }
+}

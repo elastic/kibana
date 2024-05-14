@@ -21,11 +21,11 @@ import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { oamBaseComponentTemplateConfig } from './templates/components/base';
-import { oamEventComponentTemplateConfig } from './templates/components/event';
-import { oamIndexTemplateConfig } from './templates/oam_template';
-import { oamDefinition } from './saved_objects';
-import { oamEntityComponentTemplateConfig } from './templates/components/entity';
+import { entitiesBaseComponentTemplateConfig } from './templates/components/base';
+import { entitiesEventComponentTemplateConfig } from './templates/components/event';
+import { entitiesIndexTemplateConfig } from './templates/entities_template';
+import { entityDefinition } from './saved_objects';
+import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -61,7 +61,7 @@ export class AssetManagerServerPlugin
 
     this.logger.info('Server is enabled');
 
-    core.savedObjects.registerType(oamDefinition);
+    core.savedObjects.registerType(entityDefinition);
 
     const assetClient = new AssetClient({
       sourceIndices: this.config.sourceIndices,
@@ -90,22 +90,26 @@ export class AssetManagerServerPlugin
       logger: this.logger,
     }).catch(() => {}); // it shouldn't reject, but just in case
 
-    // Install OAM compoent templates and index template
+    // Install entities compoent templates and index template
     Promise.all([
-      upsertComponent({ esClient, logger: this.logger, component: oamBaseComponentTemplateConfig }),
       upsertComponent({
         esClient,
         logger: this.logger,
-        component: oamEventComponentTemplateConfig,
+        component: entitiesBaseComponentTemplateConfig,
       }),
       upsertComponent({
         esClient,
         logger: this.logger,
-        component: oamEntityComponentTemplateConfig,
+        component: entitiesEventComponentTemplateConfig,
+      }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: entitiesEntityComponentTemplateConfig,
       }),
     ])
       .then(() =>
-        upsertTemplate({ esClient, logger: this.logger, template: oamIndexTemplateConfig })
+        upsertTemplate({ esClient, logger: this.logger, template: entitiesIndexTemplateConfig })
       )
       .catch(() => {});
 

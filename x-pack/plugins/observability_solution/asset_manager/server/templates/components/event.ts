@@ -7,8 +7,8 @@
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const oamEventComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: 'oam_v1_event',
+export const entitiesEventComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
+  name: 'entities_v1_event',
   _meta: {
     documentation: 'https://www.elastic.co/guide/en/ecs/current/ecs-event.html',
     ecs_version: '8.0.0',

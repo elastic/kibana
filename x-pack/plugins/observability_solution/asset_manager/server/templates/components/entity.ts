@@ -7,8 +7,8 @@
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const oamEntityComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: 'oam_v1_entity',
+export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
+  name: 'entities_v1_entity',
   _meta: {
     ecs_version: '8.0.0',
   },

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './src/schema/oam_definition';
-export * from './src/schema/asset';
+export * from './src/schema/entity_definition';
+export * from './src/schema/entity';
 export * from './src/schema/common';

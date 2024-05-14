@@ -14,9 +14,9 @@ import { hostsRoutes } from './assets/hosts';
 import { servicesRoutes } from './assets/services';
 import { containersRoutes } from './assets/containers';
 import { podsRoutes } from './assets/pods';
-import { createOAMDefinitionRoute } from './oam/create';
-import { deleteOAMDefinitionRoute } from './oam/delete';
-import { resetOAMDefinitionRoute } from './oam/reset';
+import { createEntityDefinitionRoute } from './entities/create';
+import { deleteEntityDefinitionRoute } from './entities/delete';
+import { resetEntityDefinitionRoute } from './entities/reset';
 
 export function setupRoutes<T extends RequestHandlerContext>({
   router,
@@ -30,7 +30,7 @@ export function setupRoutes<T extends RequestHandlerContext>({
   servicesRoutes<T>({ router, assetClient, logger });
   containersRoutes<T>({ router, assetClient, logger });
   podsRoutes<T>({ router, assetClient, logger });
-  createOAMDefinitionRoute<T>({ router, assetClient, logger });
-  deleteOAMDefinitionRoute<T>({ router, assetClient, logger });
-  resetOAMDefinitionRoute<T>({ router, assetClient, logger });
+  createEntityDefinitionRoute<T>({ router, assetClient, logger });
+  deleteEntityDefinitionRoute<T>({ router, assetClient, logger });
+  resetEntityDefinitionRoute<T>({ router, assetClient, logger });
 }

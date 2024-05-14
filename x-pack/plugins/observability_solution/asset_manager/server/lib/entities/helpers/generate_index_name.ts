@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { entityDefinition, SO_ENTITY_DEFINITION_TYPE } from './entity_definition';
+import { EntityDefinition } from '@kbn/oam-schema';
+import { ENTITY_BASE_PREFIX } from '../../../../common/constants_entities';
+
+export function generateIndexName(definition: EntityDefinition) {
+  return `${ENTITY_BASE_PREFIX}.${definition.id}`;
+}
