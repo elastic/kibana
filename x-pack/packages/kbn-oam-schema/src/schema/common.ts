@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import moment from 'moment';
 
-export enum AssetType {
+export enum EntityType {
   service = 'service',
   host = 'host',
   pod = 'pod',
@@ -17,7 +17,7 @@ export enum AssetType {
 
 export const arrayOfStringsSchema = z.array(z.string());
 
-export const assetTypeSchema = z.nativeEnum(AssetType);
+export const entityTypeSchema = z.nativeEnum(EntityType);
 
 export enum BasicAggregations {
   avg = 'avg',

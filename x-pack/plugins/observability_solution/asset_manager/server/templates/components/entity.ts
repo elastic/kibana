@@ -7,15 +7,15 @@
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const oamAssetComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: 'oam_v1_asset',
+export const oamEntityComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
+  name: 'oam_v1_entity',
   _meta: {
     ecs_version: '8.0.0',
   },
   template: {
     mappings: {
       properties: {
-        asset: {
+        entity: {
           properties: {
             id: {
               ignore_above: 1024,

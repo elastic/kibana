@@ -20,7 +20,7 @@ export async function createAndInstallTransform(
   try {
     await retryTransientEsErrors(() => esClient.transform.putTransform(transform), { logger });
   } catch (e) {
-    logger.error(`Cannot create OAM transform for [${definition.id}] asset definition`);
+    logger.error(`Cannot create OAM transform for [${definition.id}] entity definition`);
     if (e.meta?.body?.error?.type === 'security_exception') {
       throw new OAMSecurityException(e.meta.body.error.reason, definition);
     }

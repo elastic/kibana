@@ -8,6 +8,6 @@
 export class OAMDefinitionNotFound extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'OAMNotFound';
+    this.name = 'OAMDefinitionNotFound';
   }
 }

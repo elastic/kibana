@@ -112,7 +112,7 @@ export function generateMetricAggregations(definition: OAMDefinition) {
     return {
       ...aggs,
       ...buildMetricAggregations(keyMetric, definition.timestampField),
-      [`asset.metric.${keyMetric.name}`]: buildMetricEquation(keyMetric),
+      [`entity.metric.${keyMetric.name}`]: buildMetricEquation(keyMetric),
     };
   }, {});
 }

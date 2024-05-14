@@ -10,7 +10,7 @@ import { generateIndexName } from '../helpers/generate_index_name';
 
 function createIdTemplate(definition: OAMDefinition) {
   return definition.identityFields.reduce((template, field) => {
-    return template.replaceAll(field, `asset.identity.${field}`);
+    return template.replaceAll(field, `entity.identity.${field}`);
   }, definition.identityTemplate);
 }
 
@@ -20,7 +20,7 @@ function mapDesitnationToPainless(destination: string, source: string) {
     if (currentIndex + 1 === parts.length) {
       return `${acc}\n  ctx${parts
         .map((s) => `["${s}"]`)
-        .join('')} = ctx.asset.metadata.${source}.keySet();`;
+        .join('')} = ctx.entity.metadata.${source}.keySet();`;
     }
     return `${acc}\n  ctx${parts
       .slice(0, currentIndex + 1)
@@ -36,7 +36,7 @@ function createMetadataPainlessScript(definition: OAMDefinition) {
   return definition.metadata.reduce((script, def) => {
     const source = def.source;
     const destination = def.destination || def.source;
-    return `${script}if (ctx.asset?.metadata?.${source.replaceAll(
+    return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
       '.',
       '?.'
     )} != null) {${mapDesitnationToPainless(destination, source)}\n}\n`;
@@ -53,24 +53,24 @@ export function generateProcessors(definition: OAMDefinition) {
     },
     {
       set: {
-        field: 'asset.definitionId',
+        field: 'entity.definitionId',
         value: definition.id,
       },
     },
     {
       set: {
-        field: 'asset.indexPatterns',
+        field: 'entity.indexPatterns',
         value: JSON.stringify(definition.indexPatterns),
       },
     },
     {
       json: {
-        field: 'asset.indexPatterns',
+        field: 'entity.indexPatterns',
       },
     },
     {
       set: {
-        field: 'asset.id',
+        field: 'entity.id',
         value: createIdTemplate(definition),
       },
     },
@@ -84,7 +84,7 @@ export function generateProcessors(definition: OAMDefinition) {
       : []),
     {
       remove: {
-        field: 'asset.metadata',
+        field: 'entity.metadata',
         ignore_missing: true,
       },
     },

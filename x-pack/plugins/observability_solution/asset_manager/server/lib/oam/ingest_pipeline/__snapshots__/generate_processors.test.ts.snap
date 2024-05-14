@@ -10,25 +10,25 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "asset.definitionId",
+      "field": "entity.definitionId",
       "value": "admin-console-logs-service",
     },
   },
   Object {
     "set": Object {
-      "field": "asset.indexPatterns",
+      "field": "entity.indexPatterns",
       "value": "[\\"kbn-data-forge-fake_stack.*\\"]",
     },
   },
   Object {
     "json": Object {
-      "field": "asset.indexPatterns",
+      "field": "entity.indexPatterns",
     },
   },
   Object {
     "set": Object {
-      "field": "asset.id",
-      "value": "service:{{asset.identity.log.logger}}",
+      "field": "entity.id",
+      "value": "service:{{entity.identity.log.logger}}",
     },
   },
   Object {
@@ -39,31 +39,31 @@ Array [
   },
   Object {
     "script": Object {
-      "source": "if (ctx.asset?.metadata?.tags != null) {
-  ctx[\\"tags\\"] = ctx.asset.metadata.tags.keySet();
+      "source": "if (ctx.entity?.metadata?.tags != null) {
+  ctx[\\"tags\\"] = ctx.entity.metadata.tags.keySet();
 }
-if (ctx.asset?.metadata?.host?.name != null) {
+if (ctx.entity?.metadata?.host?.name != null) {
   ctx[\\"host\\"] = new HashMap();
-  ctx[\\"host\\"][\\"name\\"] = ctx.asset.metadata.host.name.keySet();
+  ctx[\\"host\\"][\\"name\\"] = ctx.entity.metadata.host.name.keySet();
 }
-if (ctx.asset?.metadata?.kubernetes?.pod?.name != null) {
+if (ctx.entity?.metadata?.kubernetes?.pod?.name != null) {
   ctx[\\"kubernetes\\"] = new HashMap();
   ctx[\\"kubernetes\\"][\\"pod\\"] = new HashMap();
-  ctx[\\"kubernetes\\"][\\"pod\\"][\\"name\\"] = ctx.asset.metadata.kubernetes.pod.name.keySet();
+  ctx[\\"kubernetes\\"][\\"pod\\"][\\"name\\"] = ctx.entity.metadata.kubernetes.pod.name.keySet();
 }
 ",
     },
   },
   Object {
     "remove": Object {
-      "field": "asset.metadata",
+      "field": "entity.metadata",
       "ignore_missing": true,
     },
   },
   Object {
     "set": Object {
       "field": "_index",
-      "value": ".oam-observability.asset-v1.admin-console-logs-service",
+      "value": ".oam-observability.entities-v1.admin-console-logs-service",
     },
   },
 ]

@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import {
   arrayOfStringsSchema,
-  assetTypeSchema,
+  entityTypeSchema,
   keyMetricSchema,
   metadataSchema,
   filterSchema,
@@ -19,7 +19,7 @@ export const oamDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
   name: z.string(),
   description: z.optional(z.string()),
-  type: assetTypeSchema,
+  type: entityTypeSchema,
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: arrayOfStringsSchema,

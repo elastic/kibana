@@ -8,9 +8,9 @@
 import { z } from 'zod';
 import { arrayOfStringsSchema } from './common';
 
-export const assetSchema = z.intersection(
+export const entitySchema = z.intersection(
   z.object({
-    asset: z.object({
+    entity: z.object({
       id: z.string(),
       indexPatterns: arrayOfStringsSchema,
       identityFields: arrayOfStringsSchema,

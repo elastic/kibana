@@ -4,8 +4,8 @@ exports[`generateTransform(definition) should generate a valid summary transform
 Object {
   "defer_validation": true,
   "dest": Object {
-    "index": ".oam-observability.asset-v1.noop",
-    "pipeline": ".oam-observability.asset-v1.admin-console-logs-service",
+    "index": ".oam-observability.entities-v1.noop",
+    "pipeline": ".oam-observability.entities-v1.admin-console-logs-service",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -38,30 +38,30 @@ Object {
           },
         },
       },
-      "asset.latestTimestamp": Object {
+      "entity.latestTimestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },
       },
-      "asset.metadata.host.name": Object {
+      "entity.metadata.host.name": Object {
         "terms": Object {
           "field": "host.name",
           "size": 1000,
         },
       },
-      "asset.metadata.kubernetes.pod.name": Object {
+      "entity.metadata.kubernetes.pod.name": Object {
         "terms": Object {
           "field": "kubernetes.pod.name",
           "size": 1000,
         },
       },
-      "asset.metadata.tags": Object {
+      "entity.metadata.tags": Object {
         "terms": Object {
           "field": "tags",
           "size": 1000,
         },
       },
-      "asset.metric.errorRate": Object {
+      "entity.metric.errorRate": Object {
         "bucket_script": Object {
           "buckets_path": Object {
             "A": "_errorRate_A>_count",
@@ -72,7 +72,7 @@ Object {
           },
         },
       },
-      "asset.metric.logRate": Object {
+      "entity.metric.logRate": Object {
         "bucket_script": Object {
           "buckets_path": Object {
             "A": "_logRate_A>_count",
@@ -85,7 +85,7 @@ Object {
       },
     },
     "group_by": Object {
-      "asset.identity.log.logger": Object {
+      "entity.identity.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
         },
@@ -120,6 +120,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": "oam-observability-asset-v1-admin-console-logs-service",
+  "transform_id": "oam-observability-entities-v1-admin-console-logs-service",
 }
 `;

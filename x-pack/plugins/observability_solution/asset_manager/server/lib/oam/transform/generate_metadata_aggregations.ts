@@ -14,7 +14,7 @@ export function generateMetadataAggregations(definition: OAMDefinition) {
   return definition.metadata.reduce(
     (aggs, metadata) => ({
       ...aggs,
-      [`asset.metadata.${metadata.destination ?? metadata.source}`]: {
+      [`entity.metadata.${metadata.destination ?? metadata.source}`]: {
         terms: {
           field: metadata.source,
           size: metadata.limit ?? 1000,

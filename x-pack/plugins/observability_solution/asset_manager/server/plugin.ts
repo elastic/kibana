@@ -22,10 +22,10 @@ import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { oamBaseComponentTemplateConfig } from './templates/components/base';
-import { oamAssetComponentTemplateConfig } from './templates/components/asset';
 import { oamEventComponentTemplateConfig } from './templates/components/event';
 import { oamIndexTemplateConfig } from './templates/oam_template';
 import { oamDefinition } from './saved_objects';
+import { oamEntityComponentTemplateConfig } from './templates/components/entity';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -101,7 +101,7 @@ export class AssetManagerServerPlugin
       upsertComponent({
         esClient,
         logger: this.logger,
-        component: oamAssetComponentTemplateConfig,
+        component: oamEntityComponentTemplateConfig,
       }),
     ])
       .then(() =>

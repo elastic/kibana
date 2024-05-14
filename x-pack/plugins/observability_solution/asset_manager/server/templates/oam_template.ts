@@ -13,8 +13,8 @@ export const oamIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
     description: 'The OAM index template',
     ecs_version: '8.0.0',
   },
-  composed_of: ['oam_v1_base', 'oam_v1_event', 'oam_v1_asset'],
-  index_patterns: ['.oam-observability.asset-v1.*'],
+  composed_of: ['oam_v1_base', 'oam_v1_event', 'oam_v1_entity'],
+  index_patterns: ['.oam-observability.entities-v1.*'],
   priority: 1,
   template: {
     mappings: {
@@ -33,12 +33,12 @@ export const oamIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
           },
         },
         {
-          asset_metrics: {
+          entity_metrics: {
             mapping: {
               type: '{dynamic_type}',
             },
             match_mapping_type: ['long', 'double'],
-            path_match: 'asset.metric.*',
+            path_match: 'entity.metric.*',
           },
         },
       ],

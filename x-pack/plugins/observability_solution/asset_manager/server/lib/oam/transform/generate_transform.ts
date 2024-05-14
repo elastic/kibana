@@ -66,14 +66,14 @@ export function generateTransform(definition: OAMDefinition): TransformPutTransf
       group_by: definition.identityFields.reduce(
         (acc, field) => ({
           ...acc,
-          [`asset.identity.${field}`]: { terms: { field } },
+          [`entity.identity.${field}`]: { terms: { field } },
         }),
         {}
       ),
       aggs: {
         ...generateMetricAggregations(definition),
         ...generateMetadataAggregations(definition),
-        'asset.latestTimestamp': {
+        'entity.latestTimestamp': {
           max: {
             field: definition.timestampField,
           },
