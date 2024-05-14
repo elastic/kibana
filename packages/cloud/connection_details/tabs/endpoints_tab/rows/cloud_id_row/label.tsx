@@ -59,7 +59,7 @@ export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => 
               defaultMessage="Get started with Elastic Agent or Logstash quickly. The Cloud ID simplifies sending data to Elastic. {link}"
               values={{
                 link: (
-                  <EuiLink href={learnMoreUrl}>
+                  <EuiLink href={learnMoreUrl} external>
                     {i18n.translate(
                       'cloud.connectionDetails.tab.endpoints.cloudIdField.learnMore',
                       {
