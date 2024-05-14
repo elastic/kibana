@@ -188,11 +188,47 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
     const accessToken = this.secrets.accessToken;
     const data = JSON.stringify(JSON.parse(body)['messages']);
+    let text = "";
+    let formattedData = {}
+
+    if ('content' in JSON.parse(data)[0]) {
+      console.log('CONTENT', JSON.parse(data)[0].content);
+      text = JSON.parse(data)[0].content.split('\n').pop().trim();
+      console.log('TEXT', text); 
+      // Creating the desired output JSON
+      formattedData = {
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text
+                }
+              ]
+            }
+          ],
+          generation_config: {
+            temperature: 0,
+            maxOutputTokens: 8192
+          }
+      };
+    } 
+  
+    let payload = '';
+
+    if (text != "") {
+      payload = JSON.stringify(formattedData);
+    } else {
+      payload = data;
+    }
+
+    console.log('FORMAT', formattedData); 
+    console.log('PAYLOAD', payload)
 
     const requestArgs = {
       url: `${this.url}${path}`,
       method: 'post' as Method,
-      data: data,
+      data: payload,
       headers: { 
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
@@ -204,14 +240,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
+
   public async invokeAI({
     messages,
     model,
-    // temperature,
+    temperature,
+    timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
         body: JSON.stringify({messages}),
         model,
+        timeout,
     });
 
     return { message: res.completion };
