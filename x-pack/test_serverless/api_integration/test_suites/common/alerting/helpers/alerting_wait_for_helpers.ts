@@ -6,15 +6,13 @@
  */
 
 import pRetry from 'p-retry';
+import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { runRule } from './alerting_api_helper';
-import type { SupertestWithoutAuthType } from '../../../../../shared/services';
-import { RoleCredentials } from '../../../../../shared/services';
-import { InternalRequestHeader } from '../../../../../shared/services';
 
 export async function waitForDocumentInIndex({
   esClient,
@@ -368,17 +366,13 @@ export async function waitForExecutionEventLog({
 }
 
 export async function waitForNumRuleRuns({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   numOfRuns,
   ruleId,
   esClient,
   testStart,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTest<Test>;
   numOfRuns: number;
   ruleId: string;
   esClient: Client;
@@ -387,7 +381,7 @@ export async function waitForNumRuleRuns({
   for (let i = 0; i < numOfRuns; i++) {
     await pRetry(
       async () => {
-        await runRule({ supertestWithoutAuth, roleAuthc, internalReqHeader, ruleId });
+        await runRule({ supertest, ruleId });
         await waitForExecutionEventLog({
           esClient,
           filter: testStart,
