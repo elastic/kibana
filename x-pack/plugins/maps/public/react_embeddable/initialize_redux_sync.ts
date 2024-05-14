@@ -32,6 +32,7 @@ import {
   setIsLayerTOCOpen,
   setMapSettings,
   setOpenTOCDetails,
+  setQuery,
   setReadOnly,
 } from '../actions';
 import type { MapSerializedState } from './types';
@@ -187,6 +188,13 @@ export function initializeReduxSync({
         })
       ),
       query$,
+      reload: () => {
+        store.dispatch<any>(
+          setQuery({
+            forceRefresh: true
+          })
+        );
+      },
       setEventHandlers: (eventHandlers: EventHandlers) => {
         store.dispatch(setEventHandlers(eventHandlers));
       },

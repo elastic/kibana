@@ -15,6 +15,7 @@ export interface ResultTerm {
   name?: string;
   value?: string;
   score?: number;
+  template?: { __raw?: boolean; value?: string; [key: string]: unknown };
 }
 
 export interface DataAutoCompleteRulesOneOf {

@@ -53,9 +53,9 @@ export type MapSerializedState = SerializedTitles &
     isMovementSynchronized?: boolean;
 
     // Configuration item that are never persisted
-    // Putting in state as a temporary work around until
-    // MapApi and React component are seperated from embeddable
+    // Putting in state as a temporary work around
     isSharable?: boolean;
+    tooltipRenderer?: RenderToolTipContent
   };
 
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
@@ -68,9 +68,9 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   PublishesUnifiedSearch &
   HasLibraryTransforms<MapSerializedState> & {
     getLayerList: () => ILayer[];
+    reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;
     setLayerList: (layerList: LayerDescriptor[]) => void;
-    setRenderTooltipContent: (renderTooltipContent: RenderToolTipContent) => void;
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;
     onRenderComplete$: Observable<void>;
   };

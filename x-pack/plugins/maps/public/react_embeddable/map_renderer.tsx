@@ -14,6 +14,7 @@ import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../commo
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { MapApi, MapSerializedState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 
 function getLayers(layerList: LayerDescriptor[]) {
   const basemapLayer = createBasemapLayerDescriptor();
@@ -31,6 +32,8 @@ export interface Props {
   isLayerTOCOpen?: boolean;
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
+  getTooltipRenderer?: () => RenderToolTipContent;
+  onApiAvailable?: (api: MapApi) => void;
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
@@ -43,20 +46,24 @@ export function MapRenderer(props: Props) {
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
 
   const initialState = useMemo(() => {
-    return {
-      rawState: {
-        attributes: {
-          title: props.title ?? '',
-          layerListJSON: JSON.stringify(getLayers(props.layerList)),
-        },
-        hidePanelTitles: !Boolean(props.title),
-        isLayerTOCOpen: typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
-        hideFilterActions:
-          typeof props.hideFilterActions === 'boolean' ? props.hideFilterActions : false,
-        mapCenter: props.mapCenter,
-        mapSettings: props.mapSettings ?? {},
-        isSharable: props.isSharable,
+    const rawState: MapSerializedState = {
+      attributes: {
+        title: props.title ?? '',
+        layerListJSON: JSON.stringify(getLayers(props.layerList)),
       },
+      hidePanelTitles: !Boolean(props.title),
+      isLayerTOCOpen: typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
+      hideFilterActions:
+        typeof props.hideFilterActions === 'boolean' ? props.hideFilterActions : false,
+      mapCenter: props.mapCenter,
+      mapSettings: props.mapSettings ?? {},
+      isSharable: props.isSharable,
+    };
+    if (props.getTooltipRenderer) {
+      rawState.tooltipRenderer = props.getTooltipRenderer();
+    }
+    return {
+      rawState,
       references: [],
     };
     // only run onMount
@@ -100,6 +107,10 @@ export function MapRenderer(props: Props) {
           mapApiRef.current = api;
           if (beforeApiReadyLayerListRef.current) {
             api.setLayerList(beforeApiReadyLayerListRef.current);
+          }
+
+          if (props.onApiAvailable) {
+            props.onApiAvailable(api);
           }
 
           if (props.onInitialRenderComplete) {

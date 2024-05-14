@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import {
-  registerReactEmbeddableFactory,
-  registerReactEmbeddableSavedObject,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 
-export function setupMapEmbeddable() {
-  registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
+export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
+  embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
     const { mapEmbeddableFactory } = await import('./map_react_embeddable');
     return mapEmbeddableFactory;
   });
 
-  registerReactEmbeddableSavedObject<MapAttributes>({
+  embeddableSetup.registerReactEmbeddableSavedObject<MapAttributes>({
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MAP_SAVED_OBJECT_TYPE,

@@ -30,5 +30,6 @@
     "@kbn/es-types",
     "@kbn/esql-utils",
     "@kbn/data-views-plugin",
+    "@kbn/search-types",
   ]
 }

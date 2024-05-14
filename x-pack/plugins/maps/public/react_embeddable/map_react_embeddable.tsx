@@ -35,7 +35,6 @@ import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_
 import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { initializeEditApi } from './initialize_edit_api';
 import { extractReferences } from '../../common/migrations/references';
 
@@ -63,7 +62,6 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
     // eslint-disable-next-line prefer-const
     let api: MapApi | undefined;
     const getApi = () => api;
-    let renderTooltipContent: RenderToolTipContent | undefined;
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
@@ -140,9 +138,6 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
-        setRenderTooltipContent: (nextValue: RenderToolTipContent) => {
-          renderTooltipContent = nextValue;
-        },
         supportedTriggers: () => {
           return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
         },
@@ -157,11 +152,12 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
         ...reduxSync.comparators,
         // readonly comparators
         attributes: getUnchangingComparator(),
-        isSharable: getUnchangingComparator(),
         mapBuffer: getUnchangingComparator(),
         savedObjectId: getUnchangingComparator(),
         mapSettings: getUnchangingComparator(),
         hideFilterActions: getUnchangingComparator(),
+        isSharable: getUnchangingComparator(),
+        tooltipRenderer: getUnchangingComparator(),
       }
     );
 
@@ -206,7 +202,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
               addFilters={state.hideFilterActions ? null : actionHandlers.addFilters}
               getFilterActions={actionHandlers.getFilterActions}
               getActionContext={actionHandlers.getActionContext}
-              renderTooltipContent={renderTooltipContent}
+              renderTooltipContent={state.tooltipRenderer}
               title="title"
               description="description"
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
