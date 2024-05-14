@@ -864,6 +864,7 @@ x-pack/plugins/translations @elastic/kibana-localization
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
+packages/kbn-try-in-console @elastic/enterprise-search-frontend
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team

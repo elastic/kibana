@@ -13,8 +13,10 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
+
+const TRY_IN_CONSOLE = i18n.translate('tryInConsole.button', { defaultMessage: 'Try in Console' });
 
 export interface TryInConsoleButtonProps {
   request?: string;
@@ -64,29 +66,20 @@ export const TryInConsoleButton = ({
 
   if (link) {
     return (
-      <EuiLink onClick={onClick}>
-        {content ? (
-          content
-        ) : (
-          <FormattedMessage
-            id="searchApiPanels.welcomeBanner.tryInConsoleButton"
-            defaultMessage="Try in Console"
-          />
-        )}
+      <EuiLink data-test-subj="tryInConsoleLink" onClick={onClick}>
+        {content ?? TRY_IN_CONSOLE}
       </EuiLink>
     );
   }
 
   return (
-    <EuiButtonEmpty onClick={onClick} iconType={showIcon ? 'popout' : undefined} size="s">
-      {content ? (
-        content
-      ) : (
-        <FormattedMessage
-          id="searchApiPanels.welcomeBanner.tryInConsoleButton"
-          defaultMessage="Try in Console"
-        />
-      )}
+    <EuiButtonEmpty
+      data-test-subj="tryInConsoleButton"
+      onClick={onClick}
+      iconType={showIcon ? 'popout' : undefined}
+      size="s"
+    >
+      {content ?? TRY_IN_CONSOLE}
     </EuiButtonEmpty>
   );
 };
