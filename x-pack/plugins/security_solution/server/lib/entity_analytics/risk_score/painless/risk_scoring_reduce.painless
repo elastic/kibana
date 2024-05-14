@@ -3,7 +3,7 @@ results['notes'] = [];
 results['category_1_score'] = 0.0;
 results['category_1_count'] = 0;
 results['risk_inputs'] = [];
-results['score'] = 0;
+results['score'] = 0.0;
 
 List inputs = [];
 for (state in states) {
