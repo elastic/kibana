@@ -385,8 +385,8 @@ export class MonacoEditorActionsProvider {
     const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
 
     this.editor.executeEdits(
-      i18n.translate('console.monaco.applyIndentationCall', {
-        defaultMessage: 'Apply indentations.',
+      i18n.translate('console.monaco.applyIndentationsCallName', {
+        defaultMessage: 'Apply indentations',
       }),
       [
         {
