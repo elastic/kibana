@@ -55,44 +55,37 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
 
   public readonly getLocation = async (params: InventoryLocatorParams) => {
     const paramsWithDefaults = {
-      waffleFilter: params.waffleFilter ?? { kind: 'kuery', expression: '' },
-      waffleTime: params.waffleTime ?? {
-        currentTime: new Date().getTime(),
-        isAutoReloading: false,
-      },
-      waffleOptions: params.waffleOptions ?? {
-        accountId: '',
-        autoBounds: true,
-        boundsOverride: { max: 1, min: 0 },
-      },
-      customMetrics: params.customMetrics ?? 'cpu',
-      customOptions: params.customOptions ?? '',
-      groupBy: params.groupBy ?? {},
-      legend: params.legend ?? { palette: 'cool', reverseColors: false, steps: 10 },
-      metric: params.metric,
-      nodeType: params.nodeType,
-      region: params.region ?? '',
-      sort: params.sort ?? { by: 'name', direction: 'desc' },
-      timelineOpen: params.timelineOpen ?? false,
-      view: params.view ?? 'map',
+      waffleFilter: rison.encodeUnknown(params.waffleFilter ?? { kind: 'kuery', expression: '' }),
+      waffleTime: rison.encodeUnknown(
+        params.waffleTime ?? {
+          currentTime: new Date().getTime(),
+          isAutoReloading: false,
+        }
+      ),
+      waffleOptions: rison.encodeUnknown(
+        params.waffleOptions ?? {
+          accountId: '',
+          autoBounds: true,
+          boundsOverride: { max: 1, min: 0 },
+        }
+      ),
+      customMetrics: rison.encodeUnknown(params.customMetrics ?? 'cpu'),
+      customOptions: rison.encodeUnknown(params.customOptions ?? ''),
+      groupBy: rison.encodeUnknown(params.groupBy ?? {}),
+      legend: rison.encodeUnknown(
+        params.legend ?? { palette: 'cool', reverseColors: false, steps: 10 }
+      ),
+      metric: rison.encodeUnknown(params.metric),
+      nodeType: rison.encodeUnknown(params.nodeType),
+      region: rison.encodeUnknown(params.region ?? ''),
+      sort: rison.encodeUnknown(params.sort ?? { by: 'name', direction: 'desc' }),
+      timelineOpen: rison.encodeUnknown(params.timelineOpen ?? false),
+      view: rison.encodeUnknown(params.view ?? 'map'),
     };
-    const waffleFilter = rison.encodeUnknown(paramsWithDefaults.waffleFilter);
-    const waffleTime = rison.encodeUnknown(paramsWithDefaults.waffleTime);
-    const waffleOptions = rison.encodeUnknown(paramsWithDefaults.waffleOptions);
-    const customMetrics = rison.encodeUnknown(paramsWithDefaults.customMetrics);
-    const customOptions = rison.encodeUnknown(paramsWithDefaults.customOptions);
-    const groupBy = rison.encodeUnknown(paramsWithDefaults.groupBy);
-    const legend = rison.encodeUnknown(paramsWithDefaults.legend);
-    const metric = rison.encodeUnknown(paramsWithDefaults.metric);
-    const nodeType = rison.encodeUnknown(paramsWithDefaults.nodeType);
-    const region = rison.encodeUnknown(paramsWithDefaults.region);
-    const sort = rison.encodeUnknown(paramsWithDefaults.sort);
-    const timelineOpen = rison.encodeUnknown(paramsWithDefaults.timelineOpen);
-    const view = rison.encodeUnknown(paramsWithDefaults.view);
 
     return {
       app: 'metrics',
-      path: `/inventory?waffleFilter=${waffleFilter}&waffleTime=${waffleTime}&waffleOptions=${waffleOptions}&customMetrics=${customMetrics}&customOptions=${customOptions}&groupBy=${groupBy}&legend=${legend}&metric=${metric}&nodeType=${nodeType}&region=${region}&sort=${sort}&timelineOpen=${timelineOpen}&view=${view}`,
+      path: `/inventory?waffleFilter=${paramsWithDefaults.waffleFilter}&waffleTime=${paramsWithDefaults.waffleTime}&waffleOptions=${paramsWithDefaults.waffleOptions}&customMetrics=${paramsWithDefaults.customMetrics}&customOptions=${paramsWithDefaults.customOptions}&groupBy=${paramsWithDefaults.groupBy}&legend=${paramsWithDefaults.legend}&metric=${paramsWithDefaults.metric}&nodeType=${paramsWithDefaults.nodeType}&region=${paramsWithDefaults.region}&sort=${paramsWithDefaults.sort}&timelineOpen=${paramsWithDefaults.timelineOpen}&view=${paramsWithDefaults.view}`,
       state: params.state ? params.state : {},
     };
   };
