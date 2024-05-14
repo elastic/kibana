@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TaskStatus } from '../task';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -65,6 +66,8 @@ export const InactiveTasks: MustNotCondition = {
       {
         bool: {
           should: [{ term: { 'task.status': 'running' } }, { term: { 'task.status': 'claiming' } }],
+          // needed since default value is 0 when there is a `must` in the `bool`
+          minimum_should_match: 1,
           must: { range: { 'task.retryAt': { gt: 'now' } } },
         },
       },
@@ -84,6 +87,18 @@ export const EnabledTask: MustCondition = {
   },
 };
 
+export const RecognizedTask: MustNotCondition = {
+  bool: {
+    must_not: [
+      {
+        term: {
+          'task.status': TaskStatus.Unrecognized,
+        },
+      },
+    ],
+  },
+};
+
 export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   bool: {
     must: [
@@ -95,6 +110,20 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
       { range: { 'task.retryAt': { lte: 'now' } } },
     ],
   },
+};
+
+export const OneOfTaskTypes = (field: string, types: string[]): MustCondition => {
+  return {
+    bool: {
+      must: [
+        {
+          terms: {
+            [field]: types,
+          },
+        },
+      ],
+    },
+  };
 };
 
 const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {

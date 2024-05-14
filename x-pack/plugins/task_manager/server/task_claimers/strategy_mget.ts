@@ -42,6 +42,8 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   EnabledTask,
+  OneOfTaskTypes,
+  RecognizedTask,
 } from '../queries/mark_available_tasks_as_claimed';
 
 import { TaskStore, SearchOpts } from '../task_store';
@@ -51,11 +53,11 @@ interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
   size: number;
   taskTypes: Set<string>;
+  removedTypes: Set<string>;
+  excludedTypes: Set<string>;
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
-  excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
 }
 
@@ -102,15 +104,17 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
 
+  const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
+  const excludedTypes = new Set(excludedTaskTypes); // excluded via config
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
-    excludedTaskTypes,
+    taskTypes: new Set(definitions.getAllTypes()),
+    excludedTypes,
+    removedTypes,
     taskStore,
     events$,
     claimOwnershipUntil,
     size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
-    taskTypes: new Set(),
-    unusedTypes,
     taskMaxAttempts,
   });
 
@@ -119,10 +123,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const currentTasks = new Set<ConcreteTaskInstance>();
   const staleTasks = new Set<ConcreteTaskInstance>();
   const missingTasks = new Set<ConcreteTaskInstance>();
+  const removedTasks = new Set<ConcreteTaskInstance>();
 
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
   for (const searchDoc of docs) {
+    if (removedTypes.has(searchDoc.taskType)) {
+      removedTasks.add(searchDoc);
+      continue;
+    }
+
     const searchVersion = versionMap.get(searchDoc.id);
     const latestVersion = docLatestVersions.get(`task:${searchDoc.id}`);
     if (!searchVersion || !latestVersion) {
@@ -183,6 +193,31 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     logger.warn(`Error updating tasks during claim: ${err}`, logMeta);
   }
 
+  // separate update for removed tasks; shouldn't happen often, so unlikely
+  // a performance concern, and keeps the rest of the logic simpler
+  if (removedTasks.size > 0) {
+    const tasksToRemove = Array.from(removedTasks);
+    for (const task of tasksToRemove) {
+      task.status = TaskStatus.Unrecognized;
+    }
+
+    // don't worry too much about errors, we'll get them next time
+    try {
+      const removeResults = await taskStore.bulkUpdate(tasksToRemove, { validate: false });
+      for (const removeResult of removeResults) {
+        if (!isOk(removeResult)) {
+          const { id, type, error } = removeResult.error;
+          logger.warn(
+            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${error.message}`,
+            logMeta
+          );
+        }
+      }
+    } catch (err) {
+      logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
+    }
+  }
+
   return {
     stats: {
       tasksUpdated: finalResults.length,
@@ -200,33 +235,33 @@ interface SearchAvailableTasksResponse {
 
 async function searchAvailableTasks({
   definitions,
-  excludedTaskTypes,
+  taskTypes,
+  removedTypes,
+  excludedTypes,
   taskStore,
   claimOwnershipUntil,
   size,
-  taskTypes,
-  unusedTypes,
   taskMaxAttempts,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
-  // TODO: handle excludedTaskTypes
-  // const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
-  //   definitions.getAllTypes(),
-  //   (type) =>
-  //     taskTypes.has(type) && !isTaskTypeExcluded(excludedTaskTypes, type)
-  //       ? 'taskTypesToClaim'
-  //       : 'taskTypesToSkip'
-  // );
+  const searchedTypes = Array.from(taskTypes)
+    .concat(Array.from(removedTypes))
+    .filter((type) => !excludedTypes.has(type));
   const queryForScheduledTasks = mustBeAllOf(
     // Task must be enabled
     EnabledTask,
+    // a task type that's not excluded (may be removed or not)
+    OneOfTaskTypes('task.taskType', searchedTypes),
     // Either a task with idle status and runAt <= now or
     // status running or claiming with a retryAt <= now.
-    shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
+    shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+    // must have a status that isn't 'unrecognized'
+    RecognizedTask
   );
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
 
+  // console.log(`query: ${JSON.stringify(query, null, 4)}`);
   return await taskStore.fetch({
     query,
     sort,
