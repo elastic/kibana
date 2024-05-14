@@ -192,28 +192,31 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     let text = "";
     let formattedData = {}
 
-    if ('content' in JSON.parse(data)[0]) {
-      console.log('CONTENT', JSON.parse(data)[0].content);
-      text = JSON.parse(data)[0].content.split('\n').pop().trim();
-      console.log('TEXT', text); 
-      // Creating the desired output JSON
-      formattedData = {
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text
-                }
-              ]
+    if (JSON.parse(data)[0] != undefined) {
+      if ('content' in JSON.parse(data)[0]) {
+        console.log('CONTENT', JSON.parse(data)[0].content);
+        text = JSON.parse(data)[0].content.split('\n').pop().trim();
+        console.log('TEXT', text); 
+        // Creating the desired output JSON
+        formattedData = {
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  {
+                    text
+                  }
+                ]
+              }
+            ],
+            generation_config: {
+              temperature: 0,
+              maxOutputTokens: 8192
             }
-          ],
-          generation_config: {
-            temperature: 0,
-            maxOutputTokens: 8192
-          }
-      };
-    } 
+        };
+      } 
+    }
+    
   
     let payload = '';
 
