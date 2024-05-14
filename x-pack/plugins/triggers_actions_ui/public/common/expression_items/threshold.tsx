@@ -61,9 +61,10 @@ export const ThresholdExpression = ({
   popupPosition,
   unit = '',
 }: ThresholdExpressionProps) => {
+  console.log('test');
   const [comparators, setComparators] = useState<{ [key: string]: Comparator }>({
     ...builtInComparators,
-    // ...BC_OUTSIDE_RANG,
+    ...BC_OUTSIDE_RANG,
   });
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
