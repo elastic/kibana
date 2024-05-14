@@ -88,7 +88,6 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
   }
 
   const indexData = data.index;
-  const dataSize = indexData?.indexCat['dataset.size'] ?? 0;
 
   return (
     <>
@@ -218,23 +217,10 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
                 </EuiFlexGroup>
               }
             >
-              <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <IndexOverviewPanelStat>{numeral(dataSize).format('0 b')}</IndexOverviewPanelStat>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.primaryLabel"
-                        defaultMessage="Primary"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
+              <EuiFlexGroup alignItems="baseline" justifyContent="" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <IndexOverviewPanelStat>
-                    {numeral(parseFloat(dataSize.toString()) * 2).format('0 b')}
+                    {numeral(indexData?.indexCat['dataset.size'] ?? 0).format('0 b')}
                   </IndexOverviewPanelStat>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

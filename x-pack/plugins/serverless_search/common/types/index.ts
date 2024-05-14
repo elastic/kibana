@@ -7,7 +7,6 @@
 
 import {
   IndicesIndexState,
-  IndicesStatsIndicesStats,
   CatIndicesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Connector } from '@kbn/search-connectors/types/connectors';
@@ -32,7 +31,6 @@ export interface FetchIndexResult {
   index: IndicesIndexState & {
     connector?: Connector;
     count: number;
-    stats?: IndicesStatsIndicesStats;
     indexCat: Record<string, CatIndicesResponse | undefined>;
   };
 }

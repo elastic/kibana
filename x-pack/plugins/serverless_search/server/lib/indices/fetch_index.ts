@@ -15,10 +15,9 @@ export async function fetchIndex(
   client: ElasticsearchClient,
   indexName: string
 ): Promise<FetchIndexResult | undefined> {
-  const [indexDataResult, indexStatsResult, indexCatResult, indexCountResult, connectorResult] =
+  const [indexDataResult, indexCatResult, indexCountResult, connectorResult] =
     await Promise.allSettled([
       client.indices.get({ index: indexName }),
-      client.indices.stats({ index: indexName }),
       client.cat.indices({ index: indexName, format: 'json' }),
       client.count({ index: indexName }),
       fetchConnectorByIndexName(client, indexName),
@@ -33,10 +32,6 @@ export async function fetchIndex(
   const index = indexData[indexName];
   const count = indexCountResult.status === 'fulfilled' ? indexCountResult.value.count : 0;
   const connector = connectorResult.status === 'fulfilled' ? connectorResult.value : undefined;
-  const stats =
-    indexStatsResult.status === 'fulfilled'
-      ? indexStatsResult.value.indices?.[indexName]
-      : undefined;
   const cat = indexCatResult.status === 'fulfilled' ? indexCatResult.value : undefined;
   const indexCat: Record<string, CatIndicesResponse | undefined> =
     indexCatResult.status === 'fulfilled' ? Object.assign({}, ...indexCatResult.value) : {};
@@ -46,7 +41,6 @@ export async function fetchIndex(
       ...index,
       count,
       connector,
-      stats,
       indexCat,
     },
   };
