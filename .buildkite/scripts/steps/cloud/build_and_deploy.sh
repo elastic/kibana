@@ -88,8 +88,10 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
     retry 5 30 vault login -no-print "$VAULT_TOKEN"
     vault_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
   else
     vault_kv_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
   fi
 
   echo "Enabling Stack Monitoring..."
@@ -120,13 +122,6 @@ else
 
   echo "Updating deployment..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
-fi
-
-# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-  VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
-else
-  VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
