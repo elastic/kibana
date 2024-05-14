@@ -1066,6 +1066,7 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
+          root_integrations: [],
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
