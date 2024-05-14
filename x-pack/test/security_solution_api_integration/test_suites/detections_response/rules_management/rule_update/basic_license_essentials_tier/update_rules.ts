@@ -281,19 +281,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('required_fields', () => {
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-        });
-
         it('should reset required fields field to default value on update when not present', async () => {
           const expectedRule = getCustomQueryRuleParams({
-            rule_id: 'rule-1',
+            rule_id: 'required-fields-default-value-test',
             required_fields: [],
           });
 
           await securitySolutionApi.createRule({
             body: getCustomQueryRuleParams({
-              rule_id: 'rule-1',
+              rule_id: 'required-fields-default-value-test',
               required_fields: [{ name: 'host.name', type: 'keyword' }],
             }),
           });
@@ -301,8 +297,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: updatedRuleResponse } = await securitySolutionApi
             .updateRule({
               body: getCustomQueryRuleParams({
-                rule_id: 'rule-1',
-                max_signals: undefined,
+                rule_id: 'required-fields-default-value-test',
+                required_fields: undefined,
               }),
             })
             .expect(200);
