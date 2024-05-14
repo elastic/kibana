@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/serverless_search'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/serverless_search',
+  roots: ['<rootDir>/x-pack/search/serverless_search'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/search/serverless_search',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/serverless_search/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/search/serverless_search/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

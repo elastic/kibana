@@ -12,7 +12,7 @@ const execa = require('execa');
 const Listr = require('listr');
 const { resolve } = require('path');
 
-const root = resolve(__dirname, '../../../..');
+const root = resolve(__dirname, '../../..');
 
 const execaOpts = { cwd: root, stderr: 'pipe' };
 

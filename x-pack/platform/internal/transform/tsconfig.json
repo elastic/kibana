@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -7,7 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../typings/**/*",
+    "../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
   ],

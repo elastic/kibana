@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/discover_enhanced'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/discover_enhanced',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/platform/internal/discover_enhanced'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/discover_enhanced',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/discover_enhanced/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/discover_enhanced/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

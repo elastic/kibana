@@ -3065,7 +3065,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-plugin@link:x-pack/plugins/actions":
+"@kbn/actions-plugin@link:x-pack/platform/actions":
   version "0.0.0"
   uid ""
 
@@ -3093,7 +3093,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-plugin@link:x-pack/plugins/aiops":
+"@kbn/aiops-plugin@link:x-pack/platform/aiops":
   version "0.0.0"
   uid ""
 
@@ -3121,7 +3121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-plugin@link:x-pack/plugins/alerting":
+"@kbn/alerting-plugin@link:x-pack/platform/alerting":
   version "0.0.0"
   uid ""
 
@@ -3201,11 +3201,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/observability/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
+"@kbn/apm-plugin@link:x-pack/observability/apm":
   version "0.0.0"
   uid ""
 
@@ -3229,7 +3229,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+"@kbn/assetManager-plugin@link:x-pack/observability/asset_manager":
   version "0.0.0"
   uid ""
 
@@ -3253,7 +3253,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/banners-plugin@link:x-pack/plugins/banners":
+"@kbn/banners-plugin@link:x-pack/platform/internal/banners":
   version "0.0.0"
   uid ""
 
@@ -3281,7 +3281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/canvas-plugin@link:x-pack/plugins/canvas":
+"@kbn/canvas-plugin@link:x-pack/platform/internal/canvas":
   version "0.0.0"
   uid ""
 
@@ -3293,7 +3293,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-plugin@link:x-pack/plugins/cases":
+"@kbn/cases-plugin@link:x-pack/platform/cases":
   version "0.0.0"
   uid ""
 
@@ -3337,23 +3337,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-chat-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat":
+"@kbn/cloud-chat-plugin@link:x-pack/platform/internal/cloud_integrations/cloud_chat":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
+"@kbn/cloud-data-migration-plugin@link:x-pack/platform/internal/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+"@kbn/cloud-defend-plugin@link:x-pack/security/cloud_defend":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/plugins/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/cloud_experiments":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
+"@kbn/cloud-full-story-plugin@link:x-pack/platform/internal/cloud_integrations/cloud_full_story":
   version "0.0.0"
   uid ""
 
@@ -3361,15 +3361,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-links-plugin@link:x-pack/plugins/cloud_integrations/cloud_links":
+"@kbn/cloud-links-plugin@link:x-pack/platform/internal/cloud_integrations/cloud_links":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-plugin@link:x-pack/plugins/cloud":
+"@kbn/cloud-plugin@link:x-pack/platform/cloud":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
+"@kbn/cloud-security-posture-plugin@link:x-pack/security/cloud_security_posture":
   version "0.0.0"
   uid ""
 
@@ -4289,7 +4289,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cross-cluster-replication-plugin@link:x-pack/plugins/cross_cluster_replication":
+"@kbn/cross-cluster-replication-plugin@link:x-pack/platform/internal/cross_cluster_replication":
   version "0.0.0"
   uid ""
 
@@ -4301,7 +4301,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
+"@kbn/custom-branding-plugin@link:x-pack/platform/internal/custom_branding":
   version "0.0.0"
   uid ""
 
@@ -4321,7 +4321,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-enhanced-plugin@link:x-pack/plugins/dashboard_enhanced":
+"@kbn/dashboard-enhanced-plugin@link:x-pack/platform/internal/dashboard_enhanced":
   version "0.0.0"
   uid ""
 
@@ -4373,11 +4373,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-visualizer-plugin@link:x-pack/plugins/data_visualizer":
+"@kbn/data-visualizer-plugin@link:x-pack/platform/internal/data_visualizer":
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/observability/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -4453,7 +4453,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-enhanced-plugin@link:x-pack/plugins/discover_enhanced":
+"@kbn/discover-enhanced-plugin@link:x-pack/platform/internal/discover_enhanced":
   version "0.0.0"
   uid ""
 
@@ -4481,7 +4481,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/plugins/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/security/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
@@ -4497,7 +4497,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant-plugin@link:x-pack/plugins/elastic_assistant":
+"@kbn/elastic-assistant-plugin@link:x-pack/security/elastic_assistant":
   version "0.0.0"
   uid ""
 
@@ -4513,7 +4513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-enhanced-plugin@link:x-pack/plugins/embeddable_enhanced":
+"@kbn/embeddable-enhanced-plugin@link:x-pack/platform/internal/embeddable_enhanced":
   version "0.0.0"
   uid ""
 
@@ -4533,7 +4533,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/encrypted-saved-objects-plugin@link:x-pack/plugins/encrypted_saved_objects":
+"@kbn/encrypted-saved-objects-plugin@link:x-pack/platform/encrypted_saved_objects":
   version "0.0.0"
   uid ""
 
@@ -4613,7 +4613,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
+"@kbn/event-annotation-listing-plugin@link:src/platform/internal/event_annotation_listing":
   version "0.0.0"
   uid ""
 
@@ -4625,7 +4625,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+"@kbn/event-log-plugin@link:x-pack/platform/event_log":
   version "0.0.0"
   uid ""
 
@@ -4641,7 +4641,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
+"@kbn/exploratory-view-plugin@link:x-pack/observability/exploratory_view":
   version "0.0.0"
   uid ""
 
@@ -4717,7 +4717,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-plugin@link:x-pack/plugins/features":
+"@kbn/features-plugin@link:x-pack/platform/features":
   version "0.0.0"
   uid ""
 
@@ -4741,7 +4741,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
+"@kbn/file-upload-plugin@link:x-pack/platform/internal/file_upload":
   version "0.0.0"
   uid ""
 
@@ -4749,7 +4749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/files-management-plugin@link:src/plugins/files_management":
+"@kbn/files-management-plugin@link:src/platform/internal/files_management":
   version "0.0.0"
   uid ""
 
@@ -4761,7 +4761,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fleet-plugin@link:x-pack/plugins/fleet":
+"@kbn/fleet-plugin@link:x-pack/platform/fleet":
   version "0.0.0"
   uid ""
 
@@ -4777,7 +4777,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-apis-plugin@link:src/plugins/ftr_apis":
+"@kbn/ftr-apis-plugin@link:src/platform/internal/ftr_apis":
   version "0.0.0"
   uid ""
 
@@ -4817,15 +4817,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-bar-plugin@link:x-pack/plugins/global_search_bar":
+"@kbn/global-search-bar-plugin@link:x-pack/platform/internal/global_search_bar":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-plugin@link:x-pack/plugins/global_search":
+"@kbn/global-search-plugin@link:x-pack/platform/global_search":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-providers-plugin@link:x-pack/plugins/global_search_providers":
+"@kbn/global-search-providers-plugin@link:x-pack/platform/internal/global_search_providers":
   version "0.0.0"
   uid ""
 
@@ -4833,11 +4833,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/graph-plugin@link:x-pack/plugins/graph":
+"@kbn/graph-plugin@link:x-pack/platform/internal/graph":
   version "0.0.0"
   uid ""
 
-"@kbn/grokdebugger-plugin@link:x-pack/plugins/grokdebugger":
+"@kbn/grokdebugger-plugin@link:x-pack/platform/internal/grokdebugger":
   version "0.0.0"
   uid ""
 
@@ -4913,7 +4913,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/index_management":
   version "0.0.0"
   uid ""
 
@@ -4941,7 +4941,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interactive-setup-plugin@link:src/plugins/interactive_setup":
+"@kbn/interactive-setup-plugin@link:src/platform/internal/interactive_setup":
   version "0.0.0"
   uid ""
 
@@ -4997,7 +4997,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-overview-plugin@link:src/plugins/kibana_overview":
+"@kbn/kibana-overview-plugin@link:src/platform/internal/kibana_overview":
   version "0.0.0"
   uid ""
 
@@ -5005,7 +5005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-usage-collection-plugin@link:src/plugins/kibana_usage_collection":
+"@kbn/kibana-usage-collection-plugin@link:src/platform/internal/kibana_usage_collection":
   version "0.0.0"
   uid ""
 
@@ -5013,7 +5013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+"@kbn/kubernetes-security-plugin@link:x-pack/security/kubernetes_security":
   version "0.0.0"
   uid ""
 
@@ -5037,23 +5037,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-plugin@link:x-pack/plugins/lens":
+"@kbn/lens-plugin@link:x-pack/platform/lens":
   version "0.0.0"
   uid ""
 
-"@kbn/license-api-guard-plugin@link:x-pack/plugins/license_api_guard":
+"@kbn/license-api-guard-plugin@link:x-pack/platform/internal/license_api_guard":
   version "0.0.0"
   uid ""
 
-"@kbn/license-management-plugin@link:x-pack/plugins/license_management":
+"@kbn/license-management-plugin@link:x-pack/platform/license_management":
   version "0.0.0"
   uid ""
 
-"@kbn/licensing-plugin@link:x-pack/plugins/licensing":
+"@kbn/licensing-plugin@link:x-pack/platform/licensing":
   version "0.0.0"
   uid ""
 
-"@kbn/links-plugin@link:src/plugins/links":
+"@kbn/links-plugin@link:src/platform/internal/links":
   version "0.0.0"
   uid ""
 
@@ -5065,7 +5065,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lists-plugin@link:x-pack/plugins/lists":
+"@kbn/lists-plugin@link:x-pack/security/lists":
   version "0.0.0"
   uid ""
 
@@ -5085,7 +5085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/observability/logs_explorer":
   version "0.0.0"
   uid ""
 
@@ -5093,7 +5093,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+"@kbn/logstash-plugin@link:x-pack/observability/logstash":
   version "0.0.0"
   uid ""
 
@@ -5177,7 +5177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-plugin@link:x-pack/plugins/maps":
+"@kbn/maps-plugin@link:x-pack/platform/maps":
   version "0.0.0"
   uid ""
 
@@ -5185,7 +5185,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-access-plugin@link:x-pack/plugins/metrics_data_access":
+"@kbn/metrics-data-access-plugin@link:x-pack/observability/metrics_data_access":
   version "0.0.0"
   uid ""
 
@@ -5265,7 +5265,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-plugin@link:x-pack/plugins/ml":
+"@kbn/ml-plugin@link:x-pack/platform/ml":
   version "0.0.0"
   uid ""
 
@@ -5321,7 +5321,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
+"@kbn/monitoring-plugin@link:x-pack/observability/monitoring":
   version "0.0.0"
   uid ""
 
@@ -5341,7 +5341,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+"@kbn/notifications-plugin@link:x-pack/platform/notifications":
   version "0.0.0"
   uid ""
 
@@ -5349,11 +5349,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+"@kbn/observability-ai-assistant-app-plugin@link:x-pack/observability/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/observability/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -5373,19 +5373,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/observability/observability_logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/observability/observability_onboarding":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
+"@kbn/observability-plugin@link:x-pack/observability/observability":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/observability/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -5425,7 +5425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
+"@kbn/painless-lab-plugin@link:x-pack/platform/internal/painless_lab":
   version "0.0.0"
   uid ""
 
@@ -5489,11 +5489,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/observability/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
+"@kbn/profiling-plugin@link:x-pack/observability/profiling":
   version "0.0.0"
   uid ""
 
@@ -5533,7 +5533,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
+"@kbn/remote-clusters-plugin@link:x-pack/platform/internal/remote_clusters":
   version "0.0.0"
   uid ""
 
@@ -5605,7 +5605,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+"@kbn/reporting-plugin@link:x-pack/platform/internal/reporting":
   version "0.0.0"
   uid ""
 
@@ -5637,7 +5637,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+"@kbn/rollup-plugin@link:x-pack/platform/internal/rollup":
   version "0.0.0"
   uid ""
 
@@ -5657,11 +5657,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-registry-plugin@link:x-pack/plugins/rule_registry":
+"@kbn/rule-registry-plugin@link:x-pack/platform/rule_registry":
   version "0.0.0"
   uid ""
 
-"@kbn/runtime-fields-plugin@link:x-pack/plugins/runtime_fields":
+"@kbn/runtime-fields-plugin@link:x-pack/platform/internal/runtime_fields":
   version "0.0.0"
   uid ""
 
@@ -5717,7 +5717,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-plugin@link:x-pack/plugins/saved_objects_tagging":
+"@kbn/saved-objects-tagging-plugin@link:x-pack/platform/internal/saved_objects_tagging":
   version "0.0.0"
   uid ""
 
@@ -5737,7 +5737,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-plugin@link:x-pack/plugins/screenshotting":
+"@kbn/screenshotting-plugin@link:x-pack/platform/internal/screenshotting":
   version "0.0.0"
   uid ""
 
@@ -5765,7 +5765,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/searchprofiler-plugin@link:x-pack/plugins/searchprofiler":
+"@kbn/searchprofiler-plugin@link:x-pack/platform/searchprofiler":
   version "0.0.0"
   uid ""
 
@@ -5789,11 +5789,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin@link:x-pack/plugins/security":
+"@kbn/security-plugin@link:x-pack/platform/security":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+"@kbn/security-solution-ess@link:x-pack/security/security_solution_ess":
   version "0.0.0"
   uid ""
 
@@ -5809,11 +5809,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+"@kbn/security-solution-plugin@link:x-pack/security/security_solution":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
+"@kbn/security-solution-serverless@link:x-pack/security/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -5921,7 +5921,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+"@kbn/serverless-observability@link:x-pack/observability/serverless_observability":
   version "0.0.0"
   uid ""
 
@@ -5933,7 +5933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+"@kbn/serverless-search@link:x-pack/search/serverless_search":
   version "0.0.0"
   uid ""
 
@@ -5949,7 +5949,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless@link:x-pack/plugins/serverless":
+"@kbn/serverless@link:x-pack/platform/serverless":
   version "0.0.0"
   uid ""
 
@@ -5957,7 +5957,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+"@kbn/session-view-plugin@link:x-pack/security/session_view":
   version "0.0.0"
   uid ""
 
@@ -6169,7 +6169,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+"@kbn/slo-plugin@link:x-pack/observability/slo":
   version "0.0.0"
   uid ""
 
@@ -6177,7 +6177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+"@kbn/snapshot-restore-plugin@link:x-pack/platform/internal/snapshot_restore":
   version "0.0.0"
   uid ""
 
@@ -6201,7 +6201,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/spaces-plugin@link:x-pack/plugins/spaces":
+"@kbn/spaces-plugin@link:x-pack/platform/spaces":
   version "0.0.0"
   uid ""
 
@@ -6213,11 +6213,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
+"@kbn/stack-alerts-plugin@link:x-pack/platform/stack_alerts":
   version "0.0.0"
   uid ""
 
-"@kbn/stack-connectors-plugin@link:x-pack/plugins/stack_connectors":
+"@kbn/stack-connectors-plugin@link:x-pack/platform/stack_connectors":
   version "0.0.0"
   uid ""
 
@@ -6249,7 +6249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/observability/synthetics":
   version "0.0.0"
   uid ""
 
@@ -6261,7 +6261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-plugin@link:x-pack/plugins/task_manager":
+"@kbn/task-manager-plugin@link:x-pack/platform/task_manager":
   version "0.0.0"
   uid ""
 
@@ -6269,7 +6269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-xpack-plugin@link:x-pack/plugins/telemetry_collection_xpack":
+"@kbn/telemetry-collection-xpack-plugin@link:x-pack/platform/internal/telemetry_collection_xpack":
   version "0.0.0"
   uid ""
 
@@ -6329,11 +6329,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/threat-intelligence-plugin@link:x-pack/plugins/threat_intelligence":
+"@kbn/threat-intelligence-plugin@link:x-pack/security/threat_intelligence":
   version "0.0.0"
   uid ""
 
-"@kbn/timelines-plugin@link:x-pack/plugins/timelines":
+"@kbn/timelines-plugin@link:x-pack/security/timelines":
   version "0.0.0"
   uid ""
 
@@ -6353,11 +6353,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transform-plugin@link:x-pack/plugins/transform":
+"@kbn/transform-plugin@link:x-pack/platform/internal/transform":
   version "0.0.0"
   uid ""
 
-"@kbn/translations-plugin@link:x-pack/plugins/translations":
+"@kbn/translations-plugin@link:x-pack/platform/internal/translations":
   version "0.0.0"
   uid ""
 
@@ -6365,7 +6365,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-plugin@link:x-pack/plugins/triggers_actions_ui":
+"@kbn/triggers-actions-ui-plugin@link:x-pack/platform/triggers_actions_ui":
   version "0.0.0"
   uid ""
 
@@ -6465,11 +6465,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
+"@kbn/uptime-plugin@link:x-pack/observability/uptime":
   version "0.0.0"
   uid ""
 
-"@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
+"@kbn/url-drilldown-plugin@link:x-pack/platform/internal/drilldowns/url_drilldown":
   version "0.0.0"
   uid ""
 
@@ -6513,7 +6513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
+"@kbn/ux-plugin@link:x-pack/observability/ux":
   version "0.0.0"
   uid ""
 
@@ -6589,7 +6589,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/watcher-plugin@link:x-pack/plugins/watcher":
+"@kbn/watcher-plugin@link:x-pack/platform/internal/watcher":
   version "0.0.0"
   uid ""
 

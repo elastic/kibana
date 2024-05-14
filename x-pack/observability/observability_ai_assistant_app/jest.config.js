@@ -7,18 +7,18 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/observability_solution/observability_ai_assistant_app/public',
-    '<rootDir>/x-pack/plugins/observability_solution/observability_ai_assistant_app/common',
-    '<rootDir>/x-pack/plugins/observability_solution/observability_ai_assistant_app/server',
+    '<rootDir>/x-pack/observability/observability_ai_assistant_app/public',
+    '<rootDir>/x-pack/observability/observability_ai_assistant_app/common',
+    '<rootDir>/x-pack/observability/observability_ai_assistant_app/server',
   ],
   setupFiles: [
-    '<rootDir>/x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook/jest_setup.js',
+    '<rootDir>/x-pack/observability/observability_ai_assistant_app/.storybook/jest_setup.js',
   ],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/observability_ai_assistant_app/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/observability/observability_ai_assistant_app/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

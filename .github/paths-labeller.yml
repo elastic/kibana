@@ -2,28 +2,28 @@
 - 'Feature:Embedding':
     - 'src/platform/embeddable/**/*.*'
 - 'Feature:Drilldowns':
-    - 'x-pack/plugins/drilldowns/**/*.*'
-    - 'x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*'
+    - 'x-pack/platform/internal/drilldowns/**/*.*'
+    - 'x-pack/platform/internal/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
     - 'src/platform/expressions/**/*.*'
     - 'src/platform/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
-    - 'x-pack/plugins/observability_solution/apm/**/*.*'
+    - 'x-pack/observability/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'packages/kbn-apm-synthtrace/**/*.*'
     - 'packages/kbn-apm-synthtrace-client/**/*.*'
     - 'packages/kbn-apm-utils/**/*.*'
-    - 'x-pack/plugins/observability_solution/synthetics/**/*.*'
-    - 'x-pack/plugins/observability_solution/ux/**/*.*'
-    - 'x-pack/plugins/observability_solution/exploratory_view/**/*.*'
+    - 'x-pack/observability/synthetics/**/*.*'
+    - 'x-pack/observability/ux/**/*.*'
+    - 'x-pack/observability/exploratory_view/**/*.*'
 - 'Team:Fleet':
-    - 'x-pack/plugins/fleet/**/*.*'
+    - 'x-pack/platform/fleet/**/*.*'
     - 'x-pack/test/fleet_api_integration/**/*.*'
 - 'Team:obs-ux-management':
-    - 'x-pack/plugins/observability_solution/observability/**/*.*'
+    - 'x-pack/observability/observability/**/*.*'
 - 'Team:obs-knowledge':
     - 'src/plugins/ai_assistant_management/observability/**/*.*'
-    - 'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.*'
-    - 'x-pack/plugins/observability_solution/observability_ai_assistant_app/**/*.*'
+    - 'x-pack/observability/observability_ai_assistant/**/*.*'
+    - 'x-pack/observability/observability_ai_assistant_app/**/*.*'
     - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'

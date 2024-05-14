@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../',
-  roots: ['<rootDir>/x-pack/plugins/cloud_integrations/cloud_data_migration'],
+  rootDir: '../../../../../',
+  roots: ['<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_data_migration'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cloud_integrations/cloud_data_migration',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/cloud_integrations/cloud_data_migration',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/cloud_integrations/cloud_data_migration/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_data_migration/{common,public}/**/*.{ts,tsx}',
   ],
 };

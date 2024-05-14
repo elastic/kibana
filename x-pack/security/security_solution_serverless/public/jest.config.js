@@ -10,20 +10,20 @@ module.exports = {
   rootDir: '../../../..',
   /** all nested directories have their own Jest config file */
   testMatch: [
-    '<rootDir>/x-pack/plugins/security_solution_serverless/public/**/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/security/security_solution_serverless/public/**/*.test.{js,mjs,ts,tsx}',
   ],
-  roots: ['<rootDir>/x-pack/plugins/security_solution_serverless/public'],
+  roots: ['<rootDir>/x-pack/security/security_solution_serverless/public'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution_serverless/public',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/security/security_solution_serverless/public',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/security_solution_serverless/public/**/*.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/*.test.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/*mock*.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/*.test.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/*.d.ts',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/*.config.ts',
-    '!<rootDir>/x-pack/plugins/security_solution_serverless/public/index.{js,ts,tsx}',
+    '<rootDir>/x-pack/security/security_solution_serverless/public/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/*mock*.{ts,tsx}',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/*.d.ts',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/*.config.ts',
+    '!<rootDir>/x-pack/security/security_solution_serverless/public/index.{js,ts,tsx}',
   ],
 };

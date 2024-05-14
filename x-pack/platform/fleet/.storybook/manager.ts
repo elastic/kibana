@@ -13,7 +13,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Fleet Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/fleet',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/platform/fleet',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

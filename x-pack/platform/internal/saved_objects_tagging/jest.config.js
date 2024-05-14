@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/saved_objects_tagging'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/saved_objects_tagging',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/platform/internal/saved_objects_tagging'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/saved_objects_tagging',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/saved_objects_tagging/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/saved_objects_tagging/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/logstash'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/logstash',
+  roots: ['<rootDir>/x-pack/observability/logstash'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/observability/logstash',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/logstash/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/observability/logstash/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

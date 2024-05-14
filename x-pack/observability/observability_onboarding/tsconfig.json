@@ -1,10 +1,10 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": [
-    "../../../../typings/**/*",
+    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "typings/**/*",

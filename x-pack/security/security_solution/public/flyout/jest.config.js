@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution/public/flyout'],
+  roots: ['<rootDir>/x-pack/security/security_solution/public/flyout'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/public/flyout',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/security/security_solution/public/flyout',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/security_solution/public/flyout/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/security/security_solution/public/flyout/**/*.{ts,tsx}'],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };

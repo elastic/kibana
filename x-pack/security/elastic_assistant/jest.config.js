@@ -7,11 +7,11 @@
 
 module.exports = {
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/elastic_assistant/{common,lib,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/security/elastic_assistant/{common,lib,server}/**/*.{ts,tsx}',
   ],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/elastic_assistant',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/security/elastic_assistant',
   coverageReporters: ['text', 'html'],
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/elastic_assistant'],
+  roots: ['<rootDir>/x-pack/security/elastic_assistant'],
   preset: '@kbn/test',
 };

@@ -7,12 +7,12 @@
 
 module.exports = {
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/ecs_data_quality_dashboard/{common,lib,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/security/ecs_data_quality_dashboard/{common,lib,server}/**/*.{ts,tsx}',
   ],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/ecs_data_quality_dashboard',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/security/ecs_data_quality_dashboard',
   coverageReporters: ['text', 'html'],
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/ecs_data_quality_dashboard'],
+  roots: ['<rootDir>/x-pack/security/ecs_data_quality_dashboard'],
   preset: '@kbn/test',
 };

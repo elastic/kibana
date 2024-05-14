@@ -8,11 +8,11 @@
 // See: https://github.com/elastic/kibana/issues/117255, this moduleNameMapper creates
 // mocks to avoid memory leaks from kibana core.
 module.exports = {
-  '^@kbn/core/server$': '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/core.mock.ts',
+  '^@kbn/core/server$': '<rootDir>/x-pack/security/security_solution/server/__mocks__/core.mock.ts',
   '^@kbn/task-manager-plugin/server$':
-    '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/task_manager.mock.ts',
+    '<rootDir>/x-pack/security/security_solution/server/__mocks__/task_manager.mock.ts',
   '^@kbn/alerting-plugin/server$':
-    '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/alert.mock.ts',
+    '<rootDir>/x-pack/security/security_solution/server/__mocks__/alert.mock.ts',
   '^@kbn/actions-plugin/server$':
-    '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/action.mock.ts',
+    '<rootDir>/x-pack/security/security_solution/server/__mocks__/action.mock.ts',
 };

@@ -9,8 +9,6 @@ const path = require('path');
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: [
-    '<rootDir>/x-pack/plugins/observability_solution/observability_onboarding',
-  ],
+  rootDir: path.resolve(__dirname, '../../..'),
+  roots: ['<rootDir>/x-pack/observability/observability_onboarding'],
 };

@@ -1,11 +1,11 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
     "public/**/*",
-    "../../../typings/**/*",
+    "../../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

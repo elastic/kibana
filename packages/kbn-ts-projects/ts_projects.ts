@@ -19,6 +19,6 @@ export const TS_PROJECTS = TsProject.loadAll({
     // type check is explicitly disabled in this project for now
     '.buildkite/tsconfig.json',
 
-    'x-pack/plugins/threat_intelligence/cypress/tsconfig.json',
+    'x-pack/security/threat_intelligence/cypress/tsconfig.json',
   ],
 });

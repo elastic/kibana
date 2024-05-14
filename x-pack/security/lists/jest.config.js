@@ -6,10 +6,10 @@
  */
 
 module.exports = {
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/lists/{common,public,server}/**/*.{ts,tsx}'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/lists',
+  collectCoverageFrom: ['<rootDir>/x-pack/security/lists/{common,public,server}/**/*.{ts,tsx}'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/security/lists',
   coverageReporters: ['text', 'html'],
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/lists'],
+  roots: ['<rootDir>/x-pack/security/lists'],
 };

@@ -13,7 +13,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Cloud Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/cloud',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/platform/cloud',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

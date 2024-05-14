@@ -7,9 +7,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/rollup'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/rollup',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/platform/internal/rollup'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/rollup',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/rollup/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/internal/rollup/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

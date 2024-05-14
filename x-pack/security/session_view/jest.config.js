@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/session_view'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/session_view',
+  roots: ['<rootDir>/x-pack/security/session_view'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/security/session_view',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/session_view/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/security/session_view/{common,public,server}/**/*.{ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

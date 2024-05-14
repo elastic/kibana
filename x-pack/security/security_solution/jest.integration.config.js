@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution'],
+  roots: ['<rootDir>/x-pack/security/security_solution'],
 };

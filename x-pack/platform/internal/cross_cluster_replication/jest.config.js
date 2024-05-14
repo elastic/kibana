@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/cross_cluster_replication'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/platform/internal/cross_cluster_replication'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cross_cluster_replication',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/cross_cluster_replication',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/cross_cluster_replication/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/cross_cluster_replication/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

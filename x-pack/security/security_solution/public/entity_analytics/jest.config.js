@@ -8,12 +8,12 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution/public/entity_analytics'],
+  roots: ['<rootDir>/x-pack/security/security_solution/public/entity_analytics'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/public/entity_analytics',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/security/security_solution/public/entity_analytics',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/security_solution/public/entity_analytics/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/security/security_solution/public/entity_analytics/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };

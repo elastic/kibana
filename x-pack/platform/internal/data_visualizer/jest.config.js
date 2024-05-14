@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/data_visualizer'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/data_visualizer',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/platform/internal/data_visualizer'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/data_visualizer',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/data_visualizer/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/data_visualizer/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

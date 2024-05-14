@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
 
@@ -12,7 +12,7 @@
     "allowJs": false
   },
   "include": [
-    "../../../typings/**/*",
+    "../../../../typings/**/*",
     "__fixtures__/**/*",
     "canvas_plugin_src/**/*",
     "common/**/*",
@@ -25,7 +25,7 @@
     "types/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    { "path": "../../../../src/setup_node_env/tsconfig.json" },
     "@kbn/core",
     "@kbn/bfetch-plugin",
     "@kbn/charts-plugin",

@@ -39,7 +39,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Canvas Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/canvas',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/platform/internal/canvas',
   }),
   showPanel: true,
   isFullscreen: false,

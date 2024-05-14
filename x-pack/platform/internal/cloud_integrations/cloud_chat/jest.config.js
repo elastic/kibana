@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../',
-  roots: ['<rootDir>/x-pack/plugins/cloud_integrations/cloud_chat'],
+  rootDir: '../../../../../',
+  roots: ['<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_chat'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cloud_integrations/cloud_chat',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/cloud_integrations/cloud_chat',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/cloud_integrations/cloud_chat/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_chat/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

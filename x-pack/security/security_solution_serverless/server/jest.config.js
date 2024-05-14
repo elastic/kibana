@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution_serverless/server/'],
+  roots: ['<rootDir>/x-pack/security/security_solution_serverless/server/'],
 };

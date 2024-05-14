@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution/server/client'],
+  roots: ['<rootDir>/x-pack/security/security_solution/server/client'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/server/client',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/security/security_solution/server/client',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/security_solution/server/client/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/security/security_solution/server/client/**/*.{ts,tsx}'],
   moduleNameMapper: require('../__mocks__/module_name_map'),
 };

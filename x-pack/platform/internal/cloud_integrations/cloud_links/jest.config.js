@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../',
-  roots: ['<rootDir>/x-pack/plugins/cloud_integrations/cloud_links'],
+  rootDir: '../../../../../',
+  roots: ['<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_links'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cloud_integrations/cloud_links',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/internal/cloud_integrations/cloud_links',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/cloud_integrations/cloud_links/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/internal/cloud_integrations/cloud_links/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
