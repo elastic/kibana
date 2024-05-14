@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { cliOptionsToPartialConfig } from './lib/cli_to_partial_config';
 import { createConfig, readConfig } from './lib/create_config';
 import { getEsClient } from './lib/get_es_client';
 import { parseCliOptions } from './lib/parse_cli_options';
 import { run } from './run';
+import { logger } from './lib/logger';
 
 export async function cli() {
   const options = parseCliOptions();
   const partialConfig = options.config
     ? await readConfig(options.config)
     : cliOptionsToPartialConfig(options);
-  const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
   const config = createConfig(partialConfig);
   const client = getEsClient(config);
   logger.info(

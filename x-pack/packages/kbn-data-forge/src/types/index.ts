@@ -122,6 +122,12 @@ export const ConfigRT = rt.type({
     alignEventsToInterval: rt.boolean,
   }),
   schedule: rt.array(ScheduleRT),
+  apm: rt.type({
+    enabled: rt.boolean,
+    server: rt.string,
+    apiKey: rt.string,
+    secretToken: rt.string,
+  }),
 });
 
 export type Config = rt.TypeOf<typeof ConfigRT>;
@@ -131,6 +137,7 @@ export const PartialConfigRT = rt.partial({
   kibana: rt.partial(ConfigRT.props.kibana.props),
   indexing: rt.partial(ConfigRT.props.indexing.props),
   schedule: rt.array(ScheduleRT),
+  apm: rt.partial(ConfigRT.props.apm.props),
 });
 export type PartialConfig = rt.TypeOf<typeof PartialConfigRT>;
 
@@ -179,4 +186,8 @@ export interface CliOptions {
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
+  enableApm: boolean;
+  apmServer: string;
+  apmApiKey: string;
+  apmSecretToken: string;
 }
