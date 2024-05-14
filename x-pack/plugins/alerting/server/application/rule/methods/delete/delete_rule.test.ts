@@ -7,7 +7,7 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -15,21 +15,21 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup } from './lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };
@@ -40,7 +40,7 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   resultedReferences: [],
 });
 
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
@@ -140,7 +140,11 @@ describe('delete()', () => {
   test('successfully removes an alert', async () => {
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      undefined
+    );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -163,10 +167,18 @@ describe('delete()', () => {
 
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      undefined
+    );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      undefined
+    );
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );
