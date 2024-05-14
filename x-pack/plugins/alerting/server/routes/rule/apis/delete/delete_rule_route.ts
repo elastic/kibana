@@ -6,14 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import {
+  deleteRuleRequestParamsSchemaV1,
+  DeleteRuleRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/delete';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const deleteRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -23,14 +22,16 @@ export const deleteRuleRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       validate: {
-        params: paramSchema,
+        params: deleteRuleRequestParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
-        await rulesClient.delete({ id });
+
+        const params: DeleteRuleRequestParamsV1 = req.params;
+
+        await rulesClient.delete({ id: params.id });
         return res.noContent();
       })
     )
