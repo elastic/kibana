@@ -188,6 +188,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
     const accessToken = this.secrets.accessToken;
     const data = JSON.stringify(JSON.parse(body)['messages']);
+    console.log('DATA', data);
     let text = "";
     let formattedData = {}
 
