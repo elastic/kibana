@@ -50,7 +50,16 @@ const mockEsqlDatatable = {
 describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getESQLQueryColumnsMock.mockResolvedValue(mockEsqlDatatable.columns);
+    getESQLQueryColumnsMock.mockImplementation(({ esqlQuery }) =>
+      Promise.resolve(
+        esqlQuery === 'deduplicate_test'
+          ? [
+              { id: 'agent.name', name: 'agent.name', meta: { type: 'string' } }, // agent.name is already present in mockIndexPatternFields
+              { id: '_custom_field_0', name: '_custom_field_0', meta: { type: 'string' } },
+            ]
+          : mockEsqlDatatable.columns
+      )
+    );
     parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
   });
 
@@ -131,6 +140,37 @@ describe('useAllEsqlRuleFields', () => {
       expect(result.current.fields).toEqual([
         {
           name: '_custom_field',
+          type: 'string',
+        },
+      ]);
+    });
+  });
+
+  it('should deduplicate index pattern fields and ES|QL fields when fields have same name', async () => {
+    //  getESQLQueryColumnsMock.mockClear();
+    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
+
+    const { result, waitFor } = renderHook(
+      () =>
+        useAllEsqlRuleFields({
+          esqlQuery: 'deduplicate_test',
+          indexPatternsFields: mockIndexPatternFields,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.fields).toEqual([
+        {
+          name: 'agent.name',
+          type: 'string',
+        },
+        {
+          name: '_custom_field_0',
+          type: 'string',
+        },
+        {
+          name: 'agent.type',
           type: 'string',
         },
       ]);

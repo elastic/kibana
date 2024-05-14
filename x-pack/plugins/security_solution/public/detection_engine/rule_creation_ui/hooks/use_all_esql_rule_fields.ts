@@ -60,6 +60,18 @@ export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
   };
 };
 
+/**
+ * if ES|QL fields and index pattern fields have same name, duplicates will be removed and the rest of fields merged
+ * ES|QL fields are first in order, since these are the fields that returned in ES|QL response
+ * */
+const deduplicateAndMergeFields = (
+  esqlFields: DataViewFieldBase[],
+  indexPatternsFields: DataViewFieldBase[]
+) => {
+  const esqlFieldsSet = new Set<string>(esqlFields.map((field) => field.name));
+  return [...esqlFields, ...indexPatternsFields.filter((field) => !esqlFieldsSet.has(field.name))];
+};
+
 type UseAllEsqlRuleFields = (params: {
   esqlQuery: string | undefined;
   indexPatternsFields: DataViewFieldBase[];
@@ -94,7 +106,9 @@ export const useAllEsqlRuleFields: UseAllEsqlRuleFields = ({ esqlQuery, indexPat
     if (!debouncedEsqlQuery) {
       return indexPatternsFields;
     }
-    return isEsqlQueryAggregating ? esqlFields : [...esqlFields, ...indexPatternsFields];
+    return isEsqlQueryAggregating
+      ? esqlFields
+      : deduplicateAndMergeFields(esqlFields, indexPatternsFields);
   }, [esqlFields, debouncedEsqlQuery, indexPatternsFields, isEsqlQueryAggregating]);
 
   return {
