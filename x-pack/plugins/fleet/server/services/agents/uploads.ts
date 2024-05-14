@@ -20,7 +20,7 @@ import {
   AGENT_ACTIONS_RESULTS_INDEX,
   agentRouteService,
 } from '../../../common';
-
+import type { DeleteAgentUploadResponse } from '../../../common/types';
 import {
   FILE_STORAGE_DATA_AGENT_INDEX,
   FILE_STORAGE_METADATA_AGENT_INDEX,
@@ -209,6 +209,33 @@ export async function getAgentUploadFile(
     return {
       body: await file.downloadContent(),
       headers: getDownloadHeadersForFile(fileName),
+    };
+  } catch (error) {
+    appContextService.getLogger().error(error);
+    throw error;
+  }
+}
+
+export async function deleteAgentUploadFile(
+  esClient: ElasticsearchClient,
+  id: string
+): Promise<DeleteAgentUploadResponse> {
+  try {
+    const fileClient = createEsFileClient({
+      blobStorageIndex: FILE_STORAGE_DATA_AGENT_INDEX,
+      metadataIndex: FILE_STORAGE_METADATA_AGENT_INDEX,
+      elasticsearchClient: esClient,
+      logger: appContextService.getLogger(),
+      indexIsAlias: true,
+    });
+
+    await fileClient.delete({
+      id,
+    });
+
+    return {
+      id,
+      deleted: true,
     };
   } catch (error) {
     appContextService.getLogger().error(error);
