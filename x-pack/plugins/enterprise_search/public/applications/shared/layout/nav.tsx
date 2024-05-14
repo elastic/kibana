@@ -39,10 +39,16 @@ import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
-export const useEnterpriseSearchNav = () => {
+/**
+ * Hook to generate the Enterprise Search navigation items
+ *
+ * @param alwaysReturn Flag to always return the nav items, even if the sidebar is disabled
+ * @returns The Enterprise Search navigation items
+ */
+export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
   const indicesNavItems = useIndicesNav();
-  if (!isSidebarEnabled) return undefined;
+  if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
     {
@@ -225,9 +231,10 @@ export const useEnterpriseSearchNav = () => {
 export const useEnterpriseSearchApplicationNav = (
   searchApplicationName?: string,
   isEmptyState?: boolean,
-  hasSchemaConflicts?: boolean
+  hasSchemaConflicts?: boolean,
+  alwaysReturn?: boolean
 ) => {
-  const navItems = useEnterpriseSearchNav();
+  const navItems = useEnterpriseSearchNav(alwaysReturn);
   if (!navItems) return undefined;
   if (!searchApplicationName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'build');

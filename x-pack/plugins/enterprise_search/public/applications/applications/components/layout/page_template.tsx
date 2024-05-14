@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useLayoutEffect } from 'react';
 
 import { useValues } from 'kea';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
@@ -42,12 +44,16 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   docLink = 'search_application',
   ...pageTemplateProps
 }) => {
+  const { renderHeaderActions, updateSideNavDefinition, getChromeStyle$ } = useValues(KibanaLogic);
+  const chromeStyle = useObservable(getChromeStyle$(), 'classic');
+  const alwaysReturnNavItems = true;
+
   const navItems = useEnterpriseSearchApplicationNav(
     searchApplicationName,
     pageTemplateProps.isEmptyState,
-    hasSchemaConflicts
+    hasSchemaConflicts,
+    alwaysReturnNavItems
   );
-  const { renderHeaderActions, updateSideNavDefinition } = useValues(KibanaLogic);
 
   const getSelectedAppItems = useCallback(
     (
@@ -91,7 +97,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: navItems,
+        items: chromeStyle === 'classic' ? navItems : undefined,
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth={restrictWidth}

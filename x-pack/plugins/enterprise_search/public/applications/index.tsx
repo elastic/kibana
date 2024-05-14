@@ -126,6 +126,7 @@ export const renderApp = (
     console: plugins.console,
     data: plugins.data,
     esConfig,
+    getChromeStyle$: chrome.getChromeStyle$,
     guidedOnboarding,
     history,
     indexMappingComponent,

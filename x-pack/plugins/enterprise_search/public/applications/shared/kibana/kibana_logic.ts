@@ -18,6 +18,7 @@ import {
   ChromeBreadcrumb,
   ScopedHistory,
   IUiSettingsClient,
+  ChromeStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -50,6 +51,7 @@ export interface KibanaLogicProps {
   console?: ConsolePluginStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
@@ -81,6 +83,7 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
@@ -115,6 +118,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    getChromeStyle$: [props.getChromeStyle$, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
