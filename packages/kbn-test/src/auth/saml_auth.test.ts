@@ -21,15 +21,6 @@ const axiosRequestMock = jest.spyOn(axios, 'request');
 const axiosGetMock = jest.spyOn(axios, 'get');
 
 const log = new ToolingLog();
-const mockedHostname = 'cloud';
-const mockedEmail = 'viewer@elastic.co';
-const mockedPassword = 'changeme';
-const mockedKbnHost = 'https://kbn.test.co';
-const mockedKbnVersion = '8.12.0';
-const mockedToken = 'mocked_token';
-const mockedLocation = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
-const mockedSid = 'Fe26.2**1234567890';
-const mockedSamlResponse = 'PD94bWluc2U+';
 
 const mockRequestOnce = (mockedPath: string, response: any) => {
   axiosRequestMock.mockImplementationOnce((config: AxiosRequestConfig) => {
@@ -52,15 +43,15 @@ const mockGetOnce = (mockedUrl: string, response: any) => {
 describe('saml_auth', () => {
   describe('createCloudSession', () => {
     test('returns token value', async () => {
-      mockRequestOnce('/api/v1/saas/auth/_login', { data: { token: mockedToken } });
+      mockRequestOnce('/api/v1/saas/auth/_login', { data: { token: 'mocked_token' } });
 
       const sessionToken = await createCloudSession({
-        hostname: mockedHostname,
-        email: mockedEmail,
-        password: mockedPassword,
+        hostname: 'cloud',
+        email: 'viewer@elastic.co',
+        password: 'changeme',
         log,
       });
-      expect(sessionToken).toBe(mockedToken);
+      expect(sessionToken).toBe('mocked_token');
     });
 
     test('throws error when response has no token', async () => {
@@ -68,9 +59,9 @@ describe('saml_auth', () => {
 
       await expect(
         createCloudSession({
-          hostname: mockedHostname,
-          email: mockedEmail,
-          password: mockedPassword,
+          hostname: 'cloud',
+          email: 'viewer@elastic.co',
+          password: 'changeme',
           log,
         })
       ).rejects.toThrow('Unable to create Cloud session, token is missing.');
@@ -81,43 +72,45 @@ describe('saml_auth', () => {
     test('returns { location, sid }', async () => {
       mockRequestOnce('/internal/security/login', {
         data: {
-          location: mockedLocation,
+          location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
         },
         headers: {
-          'set-cookie': [`sid=${mockedSid}; Secure; HttpOnly; Path=/`],
+          'set-cookie': [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
         },
       });
 
-      const response = await createSAMLRequest(mockedKbnHost, mockedKbnVersion, log);
-      expect(response).toStrictEqual({ location: mockedLocation, sid: mockedSid });
+      const response = await createSAMLRequest('https://kbn.test.co', '8.12.0', log);
+      expect(response).toStrictEqual({
+        location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
+        sid: 'Fe26.2**1234567890',
+      });
     });
 
     test(`throws error when response has no 'set-cookie' header`, async () => {
       mockRequestOnce('/internal/security/login', {
         data: {
-          location: mockedLocation,
+          location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
         },
         headers: {},
       });
 
-      expect(createSAMLRequest(mockedKbnHost, mockedKbnVersion, log)).rejects.toThrow(
+      expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
         `Failed to parse 'set-cookie' header`
       );
     });
 
     test('throws error when location is not a valid url', async () => {
-      const invalidLocation = 'http/.test';
       mockRequestOnce('/internal/security/login', {
         data: {
-          location: invalidLocation,
+          location: 'http/.test',
         },
         headers: {
-          'set-cookie': [`sid=${mockedSid}; Secure; HttpOnly; Path=/`],
+          'set-cookie': [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
         },
       });
 
-      expect(createSAMLRequest(mockedKbnHost, mockedKbnVersion, log)).rejects.toThrow(
-        `Location from Kibana SAML request is not a valid url: ${location}`
+      expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
+        `Location from Kibana SAML request is not a valid url: http/.test`
       );
     });
 
@@ -126,11 +119,11 @@ describe('saml_auth', () => {
       mockRequestOnce('/internal/security/login', {
         data,
         headers: {
-          'set-cookie': [`sid=${mockedSid}; Secure; HttpOnly; Path=/`],
+          'set-cookie': [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
         },
       });
 
-      expect(createSAMLRequest(mockedKbnHost, mockedKbnVersion, log)).rejects.toThrow(
+      expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
         `Failed to get location from SAML response data: ${JSON.stringify(data)}`
       );
     });
@@ -138,32 +131,41 @@ describe('saml_auth', () => {
 
   describe('createSAMLResponse', () => {
     test('returns valid saml response', async () => {
-      mockGetOnce(mockedLocation, {
-        data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body><input type="hidden" name="SAMLResponse" value="${mockedSamlResponse}"></body></html>`,
+      const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
+      mockGetOnce(location, {
+        data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body><input type="hidden" name="SAMLResponse" value="PD94bWluc2U+"></body></html>`,
       });
 
       const actualResponse = await createSAMLResponse(
-        mockedLocation,
-        mockedToken,
-        mockedEmail,
-        mockedKbnHost,
+        location,
+        'mocked_token',
+        'viewer@elastic.co',
+        'https://kbn.test.co',
         log
       );
-      expect(actualResponse).toBe(mockedSamlResponse);
+      expect(actualResponse).toBe('PD94bWluc2U+');
     });
 
     test('throws error when failed to parse SAML response value', async () => {
-      mockGetOnce(mockedLocation, {
+      const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
+      mockGetOnce(location, {
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body></body></html>`,
       });
 
-      await expect(createSAMLResponse(mockedLocation, mockedToken, mockedEmail, mockedKbnHost, log))
-        .rejects
-        .toThrowError(`Failed to parse SAML response value.\nMost likely the '${mockedEmail}' user has no access to the cloud deployment.
+      await expect(
+        createSAMLResponse(
+          location,
+          'mocked_token',
+          'viewer@elastic.co',
+          'https://kbn.test.co',
+          log
+        )
+      ).rejects
+        .toThrowError(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
 Login to ${
-        new URL(mockedLocation).hostname
+        new URL(location).hostname
       } with the user from '.ftr/role_users.json' file and try to load
-${mockedKbnHost} in the same window.`);
+https://kbn.test.co in the same window.`);
     });
   });
 
@@ -177,9 +179,9 @@ ${mockedKbnHost} in the same window.`);
       });
 
       const response = await finishSAMLHandshake({
-        kbnHost: mockedKbnHost,
-        samlResponse: mockedSamlResponse,
-        sid: mockedSid,
+        kbnHost: 'https://kbn.test.co',
+        samlResponse: 'PD94bWluc2U+',
+        sid: 'Fe26.2**1234567890',
         log,
       });
       expect(response.key).toEqual('sid');
@@ -191,9 +193,9 @@ ${mockedKbnHost} in the same window.`);
 
       await expect(
         finishSAMLHandshake({
-          kbnHost: mockedKbnHost,
-          samlResponse: mockedSamlResponse,
-          sid: mockedSid,
+          kbnHost: 'https://kbn.test.co',
+          samlResponse: 'PD94bWluc2U+',
+          sid: 'Fe26.2**1234567890',
           log,
         })
       ).rejects.toThrow(`Failed to parse 'set-cookie' header`);
