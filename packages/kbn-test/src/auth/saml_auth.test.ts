@@ -160,7 +160,9 @@ describe('saml_auth', () => {
       await expect(createSAMLResponse(mockedLocation, mockedToken, mockedEmail, mockedKbnHost, log))
         .rejects
         .toThrowError(`Failed to parse SAML response value.\nMost likely the '${mockedEmail}' user has no access to the cloud deployment.
-Login to ${new URL(mockedLocation).hostname} with the user from '.ftr/role_users.json' file and try to load
+Login to ${
+        new URL(mockedLocation).hostname
+      } with the user from '.ftr/role_users.json' file and try to load
 ${mockedKbnHost} in the same window.`);
     });
   });
