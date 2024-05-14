@@ -35,11 +35,6 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
-{{#serverless}}
-# Exclude serverless.yml disabled assets
-  --exclude=screenshotting-plugin/chromium \
-  --exclude=screenshotting-plugin/server/assets \
-{{/serverless}}
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz {{#serverless}}&& \
 # Exclude serverless.yml disabled assets
