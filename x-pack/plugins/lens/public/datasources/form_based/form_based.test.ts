@@ -3146,7 +3146,7 @@ describe('IndexPattern Data Source', () => {
                 },
               ],
               "fixableInEditor": true,
-              "longMessage": <FormattedMessage
+              "longMessage": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 id="xpack.lens.indexPattern.layerErrorWrapper"
                 values={
@@ -3168,7 +3168,7 @@ describe('IndexPattern Data Source', () => {
                 },
               ],
               "fixableInEditor": true,
-              "longMessage": <FormattedMessage
+              "longMessage": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 id="xpack.lens.indexPattern.layerErrorWrapper"
                 values={

@@ -44,6 +44,6 @@ const i18nLoader = {
   getRegisteredLocales: getRegisteredLocalesForLoader,
 };
 
-export type { Translation } from './src/translation';
+export type { Translation, TranslationInput } from './src/translation';
 export type { Formats, TranslateArguments } from './src/core';
 export { i18n, i18nLoader };

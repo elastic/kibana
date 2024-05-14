@@ -13,46 +13,10 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ComponentType, ReactElement, ValidationMap } from 'react';
+import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
-
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = (
-  mount(
-    <I18nProvider>
-      <br />
-    </I18nProvider>
-  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
-)
-  .instance()
-  .getChildContext();
-
-function getOptions(context = {}, childContextTypes = {}, props = {}) {
-  return {
-    context: {
-      ...context,
-      intl,
-    },
-    childContextTypes: {
-      ...childContextTypes,
-      intl: intlShape,
-    },
-    ...props,
-  };
-}
-
-/**
- * When using @kbn/i18n `injectI18n` on components, props.intl is required.
- */
-// This function is exported solely to fix the types output in TS 4.5.2, likely a bug
-// Otherwise, InjectedIntl is missing from the output
-export function nodeWithIntlProp<T>(
-  node: ReactElement<T>
-): ReactElement<T & { intl: InjectedIntl }> {
-  return React.cloneElement<any>(node, { intl });
-}
 
 /**
  *  Creates the wrapper instance using shallow with provided intl object into context
@@ -61,20 +25,15 @@ export function nodeWithIntlProp<T>(
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-  } = {}
-) {
-  const options = getOptions(context, childContextTypes, props);
-
-  return shallow(nodeWithIntlProp(node), options);
+export function shallowWithIntl(node: React.ReactElement) {
+  return shallow(node, {
+    wrappingComponent: I18nProvider,
+    wrappingComponentProps: {
+      locale: 'en',
+      defaultLocale: 'en',
+      messages: {},
+    },
+  });
 }
 
 /**
@@ -84,23 +43,15 @@ export function shallowWithIntl<T>(
  *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function mountWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    attachTo?: HTMLElement;
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-    wrappingComponent?: ComponentType<any> | undefined;
-    wrappingComponentProps?: {} | undefined;
-  } = {}
-) {
-  const options = getOptions(context, childContextTypes, props);
-
-  return mount(nodeWithIntlProp(node), options);
+export function mountWithIntl(node: React.ReactElement) {
+  return mount(node, {
+    wrappingComponent: I18nProvider,
+    wrappingComponentProps: {
+      locale: 'en',
+      defaultLocale: 'en',
+      messages: {},
+    },
+  });
 }
 
 /**
@@ -110,20 +61,15 @@ export function mountWithIntl<T>(
  *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function renderWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-  } = {}
-): any {
-  const options = getOptions(context, childContextTypes, props);
-
-  return render(nodeWithIntlProp(node), options);
+export function renderWithIntl<T>(node: React.ReactElement<T>) {
+  return render(node, {
+    wrappingComponent: I18nProvider,
+    wrappingComponentProps: {
+      locale: 'en',
+      defaultLocale: 'en',
+      messages: {},
+    },
+  });
 }
 
 /**
@@ -157,7 +103,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ReactElement,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
@@ -184,6 +130,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
   const TestComponent: React.FunctionComponent<Args> = (args) =>
     WrapperComponent ? (
+      // @ts-ignore
       <WrapperComponent>
         <HookComponent {...args} />
       </WrapperComponent>
@@ -192,6 +139,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     );
 
   reactAct(() => {
+    // @ts-ignore
     component = mount(<TestComponent {...initialArgs} />);
   });
 
