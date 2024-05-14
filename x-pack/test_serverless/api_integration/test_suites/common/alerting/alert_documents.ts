@@ -42,14 +42,21 @@ import {
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
 import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
-import { ObjectRemover } from '../../../../shared/lib';
+import { add, removeAll, type ObjectToRemove } from '../../../../shared/lib';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
+  const log = getService('log');
+
   const esClient = getService('es');
-  const objectRemover = new ObjectRemover(supertest);
+  let objectsToRemove: ObjectToRemove[] = [];
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
@@ -58,13 +65,30 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
 
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
     afterEach(async () => {
-      objectRemover.removeAll();
+      objectsToRemove = await removeAll(
+        log.debug.bind(log),
+        internalReqHeader,
+        roleAuthc,
+        supertestWithoutAuth,
+        objectsToRemove
+      );
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should generate an alert document for an active alert', async () => {
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -80,12 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      objectRemover.add('default', ruleId, 'rule', 'alerting');
+      objectsToRemove = add('default', ruleId, 'rule', 'alerting')(objectsToRemove);
 
       // get the first alert document written
       const testStart1 = new Date();
       await waitForNumRuleRuns({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
@@ -184,7 +210,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should update an alert document for an ongoing alert', async () => {
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -200,12 +228,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      objectRemover.add('default', ruleId, 'rule', 'alerting');
+      objectsToRemove = add('default', ruleId, 'rule', 'alerting')(objectsToRemove);
 
       // get the first alert document written
       const testStart1 = new Date();
       await waitForNumRuleRuns({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
@@ -223,7 +253,9 @@ export default function ({ getService }: FtrProviderContext) {
       // wait for another run, get the updated alert document
       const testStart2 = new Date();
       await waitForNumRuleRuns({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
