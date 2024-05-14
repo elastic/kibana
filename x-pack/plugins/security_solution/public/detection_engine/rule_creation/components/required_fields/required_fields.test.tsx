@@ -239,7 +239,7 @@ describe('RequiredFields form part', () => {
       expect(nameWarningIcon).toBeVisible();
 
       /* Make sure only one warning icon is displayed - the one for name */
-      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
+      expect(document.querySelectorAll('[data-test-subj="warningIcon"]')).toHaveLength(1);
     });
 
     it('displays a warning when a selected field type is not found within index patterns', async () => {
@@ -266,7 +266,7 @@ describe('RequiredFields form part', () => {
       expect(typeWarningIcon).toBeVisible();
 
       /* Make sure only one warning icon is displayed - the one for type */
-      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
+      expect(document.querySelectorAll('[data-test-subj="warningIcon"]')).toHaveLength(1);
     });
 
     it('displays a warning only for field name when both field name and type are not found within index patterns', async () => {
@@ -295,7 +295,7 @@ describe('RequiredFields form part', () => {
       expect(nameWarningIcon).toBeVisible();
 
       /* Make sure only one warning icon is displayed - the one for name */
-      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
+      expect(document.querySelectorAll('[data-test-subj="warningIcon"]')).toHaveLength(1);
     });
 
     it(`doesn't display a warning when all selected fields are found within index patterns`, async () => {
