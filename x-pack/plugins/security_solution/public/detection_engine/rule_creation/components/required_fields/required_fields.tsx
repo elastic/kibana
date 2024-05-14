@@ -116,29 +116,30 @@ const RequiredFieldsList = ({
     [fieldsWithTypes]
   );
 
-  const nameWarnings = fieldValue
-    /* Not creating a warning for empty "name" value */
-    .filter(({ name }) => name !== '')
-    .reduce<Record<string, string>>((warnings, { name }) => {
-      if (!isIndexPatternLoading && !allFieldNames.includes(name)) {
-        warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
-      }
-      return warnings;
-    }, {});
+  const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
+    if (
+      !isIndexPatternLoading &&
+      /* Creating a warning only if "name" value is filled in */
+      name !== '' &&
+      !allFieldNames.includes(name)
+    ) {
+      warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
+    }
+    return warnings;
+  }, {});
 
-  const typeWarnings = fieldValue
-    /* Not creating a warning for "type" if there's no "name" value */
-    .filter(({ name }) => name !== '')
-    .reduce<Record<string, string>>((warnings, { name, type }) => {
-      if (
-        !isIndexPatternLoading &&
-        typesByFieldName[name] &&
-        !typesByFieldName[name].includes(type)
-      ) {
-        warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
-      }
-      return warnings;
-    }, {});
+  const typeWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name, type }) => {
+    if (
+      !isIndexPatternLoading &&
+      /* Creating a warning for "type" only if "name" value is filled in */
+      name !== '' &&
+      typesByFieldName[name] &&
+      !typesByFieldName[name].includes(type)
+    ) {
+      warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
+    }
+    return warnings;
+  }, {});
 
   const getWarnings = ({ name, type }: { name: string; type: string }) => ({
     nameWarning: nameWarnings[name] || '',
