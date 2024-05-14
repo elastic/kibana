@@ -21,7 +21,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import { convertSOQueriesToPack, convertPackQueriesToSO, getInitialPolicies } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -112,8 +112,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
+
+      const { policiesList, invalidPolicies } = getInitialPolicies(packagePolicies, policy_ids);
+
+      if (invalidPolicies?.length) {
+        return response.badRequest({
+          body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
+        });
+      }
+
+      const agentPolicies = policiesList
+        ? mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
+            'id'
+          )
         : {};
       const agentPolicyIds = Object.keys(agentPolicies);
 
@@ -128,10 +140,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           updated_at: moment().toISOString(),
           updated_by: currentUser,
         },
-        policy_ids
+        policiesList
           ? {
               refresh: 'wait_for',
-              references: policy_ids.map((id) => ({
+              references: policiesList.map((id) => ({
                 id,
                 name: agentPolicies[id].name,
                 type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -161,7 +173,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {
-          const policyIds = policy_ids ? agentPolicyIds : currentAgentPolicyIds;
+          const policyIds = policiesList ? agentPolicyIds : currentAgentPolicyIds;
 
           await Promise.all(
             policyIds.map((agentPolicyId) => {
