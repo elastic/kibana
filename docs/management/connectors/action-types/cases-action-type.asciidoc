@@ -17,8 +17,8 @@ The Cases connector creates cases in {kib} when alerts occur.
 === Create connectors in {kib}
 
 To use this connector you must have `All` {kib} privileges for the *Cases* feature.
+Depending on the type of rule you want to create and its role visibility, you must have privileges for *Management* or *{observability}* case features.
 For more details, refer to <<kibana-privileges>>.
-// TBD: Do Stack rules require require Management > Cases feature privileges and Observability rules require Observability > Cases feature privileges? 
 
 You cannot manage this connector in *{stack-manage-app} > {connectors-ui}* or by using APIs.
 You also cannot create a Cases <<pre-configured-connectors,preconfigured connector>>.
@@ -46,8 +46,6 @@ If this option is enabled, closed cases are re-opened when an alert occurs.
 
 Time window::
 By default, alerts are added to an existing case only if they occur within a 7 day time window.
-You can change this time window to affect the duration of your cases.
-//TBD Are they automatically closed at the end of this time window?
 
 [float]
 [[cases-action-configuration]]
