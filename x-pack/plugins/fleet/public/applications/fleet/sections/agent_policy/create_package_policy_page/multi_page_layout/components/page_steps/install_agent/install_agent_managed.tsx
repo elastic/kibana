@@ -100,7 +100,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
-      rootIntegrations: agentPolicy?.rootIntegrations ?? [],
+      rootIntegrations: agentPolicy?.root_integrations ?? [],
       unprivilegedAgentsCount: agentPolicy?.unprivileged_agents ?? 0,
     })
   );

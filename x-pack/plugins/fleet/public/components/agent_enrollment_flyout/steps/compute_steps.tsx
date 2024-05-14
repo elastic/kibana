@@ -321,7 +321,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
-          rootIntegrations: selectedPolicy?.rootIntegrations ?? [],
+          rootIntegrations: selectedPolicy?.root_integrations ?? [],
           unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
         })
       );

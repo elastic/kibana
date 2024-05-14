@@ -425,7 +425,7 @@ class AgentPolicyService {
       { concurrency: 5 }
     );
 
-    agentPolicy.rootIntegrations = packageInfos
+    agentPolicy.root_integrations = packageInfos
       .filter((packageInfo: any) => {
         if (!packageInfo) return false;
         return packageInfo.agent?.privileges?.root || false;

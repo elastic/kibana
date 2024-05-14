@@ -57,7 +57,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   unprivileged_agents?: number;
   is_protected: boolean;
   // package policies where the package requires root privileges
-  rootIntegrations: Array<{ name: string; title: string }>;
+  root_integrations?: Array<{ name: string; title: string }>;
 }
 
 export interface FullAgentPolicyInputStream {
