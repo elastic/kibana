@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  type EuiBasicTableColumn,
-  EuiBadge,
-  EuiCode,
-  EuiIcon,
-  EuiIconTip,
-  EuiText,
-} from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiBadge, EuiIcon, EuiIconTip } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +19,7 @@ import {
   getLogRateChange,
   LOG_RATE_ANALYSIS_TYPE,
 } from '@kbn/aiops-log-rate-analysis';
+import { getFieldValueColumn } from '@kbn/aiops-components';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -36,7 +30,6 @@ import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_ana
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
 
-const TRUNCATE_TEXT_LINES = 3;
 const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
 
@@ -260,31 +253,7 @@ export const useColumns = (
         sortable: true,
         valign: 'middle',
       },
-      ['Field value']: {
-        'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldValue',
-        field: 'fieldValue',
-        width: skippedColumns.length < 3 ? '17%' : '25%',
-        name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
-          defaultMessage: 'Field value',
-        }),
-        render: (_, { fieldValue, type }) => (
-          <span title={String(fieldValue)}>
-            {type === 'keyword' ? (
-              String(fieldValue)
-            ) : (
-              <EuiText size="xs">
-                <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                  {String(fieldValue)}
-                </EuiCode>
-              </EuiText>
-            )}
-          </span>
-        ),
-        sortable: true,
-        textOnly: true,
-        truncateText: { lines: TRUNCATE_TEXT_LINES },
-        valign: 'middle',
-      },
+      ['Field value']: getFieldValueColumn(skippedColumns.length < 3),
       ['Log rate']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRate',
         width: '8%',

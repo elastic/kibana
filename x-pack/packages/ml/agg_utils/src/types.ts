@@ -161,6 +161,9 @@ export interface SignificantItem extends FieldValuePair {
   /** The normalized score for the significant item. */
   normalizedScore: number;
 
+  /** A human readable description of the log rate change. */
+  changeDescription?: string;
+
   /** An optional histogram for the significant item. */
   histogram?: SignificantItemHistogramItem[];
 
