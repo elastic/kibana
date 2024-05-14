@@ -128,7 +128,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 const { threshold, comparator } = criteria;
                 let formattedComparator = comparator.toUpperCase();
                 if (comparator === COMPARATORS.NOT_BETWEEN) {
-                  // Not need for i18n as we are using the enum value, we only need a space.
+                  // No need for i18n as we are using the enum value, we only need a space.
                   formattedComparator = 'NOT BETWEEN';
                 }
                 return (
