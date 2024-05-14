@@ -30,6 +30,7 @@ export const registerCreateDataTableAction = (uiActions: UiActionsStart) => {
       embeddable.addNewPanel(
         {
           panelType: DATA_TABLE_ID,
+          initialState: {},
         },
         true
       );

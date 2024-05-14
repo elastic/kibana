@@ -9,7 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
-import type { HasChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
@@ -75,7 +75,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   const parentApi = useMemo<
     PublishesWritableUnifiedSearch & {
       executionContext: KibanaExecutionContext;
-    } & HasChildState<AnomalySwimLaneEmbeddableState>
+    } & HasSerializedChildState<AnomalySwimLaneEmbeddableState>
   >(() => {
     const filters$ = new BehaviorSubject<Filter[] | undefined>(filters);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(query);

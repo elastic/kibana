@@ -9,7 +9,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
 import { PublishesViewMode } from '@kbn/presentation-publishing';
-import { CanAddNewPanel, HasChildState } from '@kbn/presentation-containers';
+import { CanAddNewPanel, HasSerializedChildState } from '@kbn/presentation-containers';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;
@@ -17,4 +17,4 @@ export type EmbeddableInput = Input & {
   savedObjectId?: string;
 };
 
-export type CanvasContainerApi = PublishesViewMode & CanAddNewPanel & HasChildState;
+export type CanvasContainerApi = PublishesViewMode & CanAddNewPanel & HasSerializedChildState;

@@ -27,6 +27,7 @@ export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) =
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       embeddable.addNewPanel<FieldListSerializedStateState>({
         panelType: FIELD_LIST_ID,
+        initialState: {},
       });
     },
     getDisplayName: () =>
