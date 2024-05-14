@@ -184,11 +184,11 @@ describe('Infra Locators', () => {
         autoBounds: true,
         boundsOverride: { max: 1, min: 0 },
       },
-      customMetrics: 'cpu',
+      customMetrics: '',
       customOptions: '',
       groupBy: { field: 'cloud.provider' },
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
-      metric: { type: 'cpu' },
+      metric: '(type:cpu)',
       nodeType: 'host',
       region: '',
       sort: { by: 'name', direction: 'desc' as const },
@@ -203,7 +203,7 @@ describe('Infra Locators', () => {
     const customOptions = rison.encodeUnknown(params.customOptions);
     const groupBy = rison.encodeUnknown(params.groupBy);
     const legend = rison.encodeUnknown(params.legend);
-    const metric = rison.encodeUnknown(params.metric);
+    const metric = params.metric;
     const nodeType = rison.encodeUnknown(params.nodeType);
     const region = rison.encodeUnknown(params.region);
     const sort = rison.encodeUnknown(params.sort);

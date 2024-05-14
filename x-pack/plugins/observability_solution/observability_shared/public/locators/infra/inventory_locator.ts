@@ -28,15 +28,15 @@ export interface InventoryLocatorParams extends SerializableRecord {
       min: number;
     };
   };
-  customMetrics: string;
-  customOptions?: string;
+  customMetrics?: string; // encoded value
+  customOptions?: string; // encoded value
   groupBy?: { field: string };
   legend?: {
     palette: string;
     reverseColors: boolean;
     steps: number;
   };
-  metric: { type: string };
+  metric: string; // encoded value
   nodeType: string;
   region?: string;
   sort: {
@@ -48,7 +48,7 @@ export interface InventoryLocatorParams extends SerializableRecord {
   state?: SerializableRecord;
 }
 
-const INVENTORY_LOCATOR_ID = 'INVENTORY_LOCATOR';
+export const INVENTORY_LOCATOR_ID = 'INVENTORY_LOCATOR';
 
 export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLocatorParams> {
   public readonly id = INVENTORY_LOCATOR_ID;
@@ -69,13 +69,13 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
           boundsOverride: { max: 1, min: 0 },
         }
       ),
-      customMetrics: rison.encodeUnknown(params.customMetrics ?? 'cpu'),
-      customOptions: rison.encodeUnknown(params.customOptions ?? ''),
+      customMetrics: params.customMetrics || rison.encodeUnknown(''),
+      customOptions: params.customOptions || rison.encodeUnknown(''),
       groupBy: rison.encodeUnknown(params.groupBy ?? {}),
       legend: rison.encodeUnknown(
         params.legend ?? { palette: 'cool', reverseColors: false, steps: 10 }
       ),
-      metric: rison.encodeUnknown(params.metric),
+      metric: params.metric,
       nodeType: rison.encodeUnknown(params.nodeType),
       region: rison.encodeUnknown(params.region ?? ''),
       sort: rison.encodeUnknown(params.sort ?? { by: 'name', direction: 'desc' }),
