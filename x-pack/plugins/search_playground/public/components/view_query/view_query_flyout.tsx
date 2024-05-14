@@ -144,6 +144,17 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
               defaultMessage="This query will be used to search your indices. Customize by choosing which
             fields in your Elasticsearch documents to search."
             />
+            {` `}
+            <EuiLink
+              href={docLinks.retrievalOptimize}
+              target="_blank"
+              data-test-subj="query-optimize-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.viewQuery.flyout.learnMoreQueryOptimizeLink"
+                defaultMessage="Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
@@ -236,9 +247,9 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <EuiLink
-                                href={docLinks.chatPlayground}
+                                href={docLinks.hiddenFields}
                                 target="_blank"
-                                data-test-subj="context-optimization-documentation-link"
+                                data-test-subj="hidden-fields-documentation-link"
                               >
                                 <FormattedMessage
                                   id="xpack.searchPlayground.viewQuery.flyout.learnMoreLink"
