@@ -112,7 +112,7 @@ export const createRuntimeServices = async ({
   esPassword: _esPassword,
   log = createToolingLogger(),
   asSuperuser = false,
-  noCertForSsl,
+  noCertForSsl = true,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
   let password = _password;
@@ -222,7 +222,7 @@ export const createEsClient = ({
   password,
   apiKey,
   log,
-  noCertForSsl,
+  noCertForSsl = true,
 }: {
   url: string;
   username: string;
@@ -265,7 +265,7 @@ export const createKbnClient = ({
   password,
   apiKey,
   log = createToolingLogger(),
-  noCertForSsl,
+  noCertForSsl = true,
 }: {
   url: string;
   username: string;
