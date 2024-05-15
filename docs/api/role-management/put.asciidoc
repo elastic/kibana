@@ -116,7 +116,7 @@ Grant dashboard-only access to only the Marketing space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "description": "my_kibana_role_description",
+  "description": "Grants dashboard-only access to only the Marketing space.",
   "metadata": {
     "version": 1
   },
@@ -143,7 +143,7 @@ Grant full access to all features in the Default space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "description": "my_kibana_role_description",
+  "description": "Grants full access to all features in the Default space.",
   "metadata": {
     "version": 1
   },
@@ -168,7 +168,7 @@ Grant different access to different spaces:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "description": "my_kibana_role_description",
+  "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing, and sales spaces.",
   "metadata": {
     "version": 1
   },
@@ -200,7 +200,7 @@ Grant access to {kib} and {es}:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "description": "my_kibana_role_description",
+  "description": "Grants all cluster privileges and full access to index1 and index2. Grants full access to remote_index1 and remote_index2, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
   "metadata": {
     "version": 1
   },

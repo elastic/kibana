@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -259,12 +260,18 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Role Description',
         }),
         sortable: true,
-        truncateText: { lines: 2 },
+        truncateText: { lines: 3 },
         render: (description: string, record: Role) => {
           return (
-            <EuiText color="subdued" size="s" data-test-subj={`roleRowDescription-${record.name}`}>
-              {description}
-            </EuiText>
+            <EuiToolTip position="top" content={description} display="block">
+              <EuiText
+                color="subdued"
+                size="s"
+                data-test-subj={`roleRowDescription-${record.name}`}
+              >
+                {description}
+              </EuiText>
+            </EuiToolTip>
           );
         },
       },

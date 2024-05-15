@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
@@ -505,13 +506,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 />
               }
             >
-              <EuiFieldText
-                name="description"
-                value={role.description ?? ''}
-                onChange={onDescriptionChange}
-                data-test-subj="roleFormDescriptionInput"
-                disabled={isRoleReserved || isRoleReadOnly}
-              />
+              <EuiToolTip content={role.description} display="block">
+                <EuiFieldText
+                  name="description"
+                  value={role.description ?? ''}
+                  onChange={onDescriptionChange}
+                  data-test-subj="roleFormDescriptionInput"
+                  disabled={isRoleReserved || isRoleReadOnly}
+                />
+              </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -537,7 +540,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRole({
       ...role,
-      description: e.target.value,
+      description: e.target.value.trim().length ? e.target.value.trim() : undefined,
     });
 
   const getElasticsearchPrivileges = () => {
