@@ -143,15 +143,6 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
                     id="share.postURLWatcherMessage"
                     defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
                   />
-                  {isDirty && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <FormattedMessage
-                        id="share.postURLWatcherMessage.unsavedChanges"
-                        defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
-                      />
-                    </>
-                  )}
                 </EuiText>
               }
             >
@@ -160,7 +151,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, isDirty, renderCopyURLButton]);
+  }, [absoluteUrl, renderCopyURLButton]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
