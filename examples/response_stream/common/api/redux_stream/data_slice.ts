@@ -11,8 +11,8 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { getInitialState } from '../stream_state';
 
-export const devStreamSlice = createSlice({
-  name: 'developmentStream',
+export const dataSlice = createSlice({
+  name: 'development',
   initialState: getInitialState(),
   reducers: {
     updateProgress: (state, action: PayloadAction<number>) => {
@@ -40,7 +40,7 @@ export const devStreamSlice = createSlice({
   },
 });
 
-export const { updateProgress, addToEntity, deleteEntity, error, reset } = devStreamSlice.actions;
+export const { updateProgress, addToEntity, deleteEntity, error, reset } = dataSlice.actions;
 export type ReduxStreamApiAction = ReturnType<
-  typeof devStreamSlice.actions[keyof typeof devStreamSlice.actions]
+  typeof dataSlice.actions[keyof typeof dataSlice.actions]
 >;

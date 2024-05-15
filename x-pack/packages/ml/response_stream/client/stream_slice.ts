@@ -7,7 +7,6 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { fetchStream } from '.';
@@ -16,7 +15,7 @@ import { fetchStream } from '.';
  * Async thunk to start the stream.
  */
 export const startStream = createAsyncThunk(
-  'startStream',
+  'stream/start',
   async (
     options: {
       http: HttpSetup;
@@ -26,17 +25,11 @@ export const startStream = createAsyncThunk(
       body?: any;
       headers?: HttpFetchOptions['headers'];
     },
-    { dispatch, getState }
+    thunkApi
   ) => {
     const { http, endpoint, apiVersion, abortCtrl, body, headers } = options;
-    const state = getState() as StreamState;
 
-    // If the `pending` action resolved in adding an error, don't run the stream.
-    if (state.errors.length > 0) {
-      return;
-    }
-
-    for await (const [fetchStreamError, actions] of fetchStream(
+    for await (const [fetchStreamError, action] of fetchStream(
       http,
       endpoint,
       apiVersion,
@@ -46,15 +39,36 @@ export const startStream = createAsyncThunk(
       headers
     )) {
       if (fetchStreamError !== null) {
-        dispatch(addError(fetchStreamError));
-      } else if (Array.isArray(actions) && actions.length > 0) {
-        batch(() => {
-          for (const action of actions) {
-            dispatch(action);
-          }
-        });
+        thunkApi.dispatch(addError(fetchStreamError));
+      } else if (action) {
+        thunkApi.dispatch(action);
       }
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      // This is a bit of a hack to prevent instant restarts while the stream is running.
+      // The problem is that in RTK v1, async thunks cannot be made part of the slice,
+      // so they will not know the namespace used where they run in. We just assume
+      // `stream` here as the namespace, if it's a custom one, this will not work.
+      // RTK v2 will allow async thunks to be part of the slice, a draft PR to upgrade
+      // is up there: https://github.com/elastic/kibana/pull/178986
+      try {
+        const s = getState() as { stream?: StreamState };
+
+        if (s.stream === undefined) {
+          return true;
+        }
+
+        // If the stream was running, the extra reducers will also have set
+        // and error, so we need to prevent the stream from starting again.
+        if (s.stream.isRunning && s.stream.errors.length > 0) {
+          return false;
+        }
+      } catch (e) {
+        return true;
+      }
+    },
   }
 );
 

@@ -15,9 +15,11 @@ import {
   deleteEntity,
   error,
   type ReduxStreamApiAction,
-} from '../../common/api/redux_stream/dev_stream_slice';
+} from '../../common/api/redux_stream/data_slice';
 import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
+
+import { entities, getActions } from './shared';
 
 export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -64,23 +66,7 @@ export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
           request.body.flushFix
         );
 
-        const entities = [
-          'kimchy',
-          's1monw',
-          'martijnvg',
-          'jasontedor',
-          'nik9000',
-          'javanna',
-          'rjernst',
-          'jrodewig',
-        ];
-
-        const actions = [...Array(19).fill('add'), 'delete'];
-
-        if (simulateError) {
-          actions.push('throw-error');
-          actions.push('emit-error');
-        }
+        const actions = getActions(simulateError);
 
         let progress = 0;
 

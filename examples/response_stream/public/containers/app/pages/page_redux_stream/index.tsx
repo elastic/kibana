@@ -32,7 +32,7 @@ import {
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
-import { reset } from '../../../../../common/api/redux_stream/dev_stream_slice';
+import { reset } from '../../../../../common/api/redux_stream/data_slice';
 
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
@@ -51,19 +51,17 @@ export const PageReduxStream: FC = () => {
   const [flushFix, setFlushFix] = useState(false);
 
   const dispatch = useAppDispatch();
-  const isRunning = useAppSelector((s) => s.stream.isRunning);
-  const isCancelled = useAppSelector((s) => s.stream.isCancelled);
-  const streamErrors = useAppSelector((s) => s.stream.errors);
-  const progress = useAppSelector((s) => s.dev.progress);
-  const entities = useAppSelector((s) => s.dev.entities);
-  const errors = useAppSelector((s) => s.dev.errors);
+  const { isRunning, isCancelled, errors: streamErrors } = useAppSelector((s) => s.stream);
+  const { progress, entities, errors } = useAppSelector((s) => s.data);
 
   const abortCtrl = useRef(new AbortController());
 
   const onClickHandler = async () => {
     if (isRunning) {
+      abortCtrl.current.abort();
       dispatch(cancelStream());
     } else {
+      abortCtrl.current = new AbortController();
       dispatch(reset());
       dispatch(
         startStream({
@@ -96,7 +94,7 @@ export const PageReduxStream: FC = () => {
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
-    <Page title={'Reducer stream'}>
+    <Page title={'Redux Toolkit stream'}>
       <EuiText>
         <p>
           This demonstrates integration of a single endpoint with streaming support with Redux

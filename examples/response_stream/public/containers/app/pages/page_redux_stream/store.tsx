@@ -12,14 +12,14 @@ import { Provider } from 'react-redux';
 
 import { streamSlice } from '@kbn/ml-response-stream/client';
 
-import { devStreamSlice } from '../../../../../common/api/redux_stream/dev_stream_slice';
+import { dataSlice } from '../../../../../common/api/redux_stream/data_slice';
 
 const reduxStore = configureStore({
   reducer: {
-    // State of the stream, like is it running, has it errored, etc.
+    // State of the stream: is it running, has it errored, etc.
     stream: streamSlice.reducer,
     // The actual data returned by the stream.
-    dev: devStreamSlice.reducer,
+    data: dataSlice.reducer,
   },
 });
 
