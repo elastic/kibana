@@ -20,3 +20,11 @@ export const BETA = i18n.translate(
     defaultMessage: 'Beta',
   }
 );
+
+export const BETA_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.pageTitle.betaTooltip',
+  {
+    defaultMessage:
+      'This functionality is in beta and is subject to change. Please use Attack Discovery with caution in production environments.',
+  }
+);
