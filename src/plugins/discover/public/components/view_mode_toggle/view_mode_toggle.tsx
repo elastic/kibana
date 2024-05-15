@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect, useState, type ReactElement } from 'react';
+import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import useMountedState from 'react-use/lib/useMountedState';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -49,6 +50,16 @@ export const DocumentViewModeToggle = ({
     () => uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
     [dataVisualizerService, uiSettings]
   );
+  const isMounted = useMountedState();
+
+  const setShowPatternAnalysisTabWrapper = useCallback(
+    (value: boolean) => {
+      if (isMounted()) {
+        setShowPatternAnalysisTab(value);
+      }
+    },
+    [isMounted]
+  );
 
   useEffect(
     function checkForPatternAnalysis() {
@@ -60,12 +71,12 @@ export const DocumentViewModeToggle = ({
         .getPatternAnalysisAvailable()
         .then((patternAnalysisAvailable) => {
           patternAnalysisAvailable(dataView)
-            .then(setShowPatternAnalysisTab)
-            .catch(() => setShowPatternAnalysisTab(false));
+            .then(setShowPatternAnalysisTabWrapper)
+            .catch(() => setShowPatternAnalysisTabWrapper(false));
         })
-        .catch(() => setShowPatternAnalysisTab(false));
+        .catch(() => setShowPatternAnalysisTabWrapper(false));
     },
-    [aiopsService, dataView]
+    [aiopsService, dataView, setShowPatternAnalysisTabWrapper]
   );
 
   useEffect(() => {

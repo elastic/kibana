@@ -26,33 +26,31 @@ export const TableHeader: FC<Props> = ({
 }) => {
   const euiTheme = useEuiTheme();
   return (
-    <>
-      <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.euiSizeXL }}>
-        <EuiFlexItem>
-          <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
-            <FormattedMessage
-              id="xpack.aiops.logCategorization.counts"
-              defaultMessage="{count} {count, plural, one {pattern} other {patterns}} found"
-              values={{ count: categoriesCount }}
-            />
-            {selectedCategoriesCount > 0 ? (
-              <>
-                <FormattedMessage
-                  id="xpack.aiops.logCategorization.selectedCounts"
-                  defaultMessage=" | {count} selected"
-                  values={{ count: selectedCategoriesCount }}
-                />
-              </>
-            ) : null}
-          </EuiText>
+    <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.euiSizeXL }}>
+      <EuiFlexItem>
+        <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
+          <FormattedMessage
+            id="xpack.aiops.logCategorization.counts"
+            defaultMessage="{count} {count, plural, one {pattern} other {patterns}} found"
+            values={{ count: categoriesCount }}
+          />
+          {selectedCategoriesCount > 0 ? (
+            <>
+              <FormattedMessage
+                id="xpack.aiops.logCategorization.selectedCounts"
+                defaultMessage=" | {count} selected"
+                values={{ count: selectedCategoriesCount }}
+              />
+            </>
+          ) : null}
+        </EuiText>
+      </EuiFlexItem>
+      {selectedCategoriesCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <OpenInDiscoverButtons openInDiscover={openInDiscover} />
         </EuiFlexItem>
-        {selectedCategoriesCount > 0 ? (
-          <EuiFlexItem grow={false}>
-            <OpenInDiscoverButtons openInDiscover={openInDiscover} />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </>
+      ) : null}
+    </EuiFlexGroup>
   );
 };
 
@@ -61,19 +59,11 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
   showText = true,
 }) => {
   const { labels, openFunction } = openInDiscover;
-  const TooltipWrapper: FC<PropsWithChildren<{ text: string }>> = ({ text, children }) => {
-    return showText ? (
-      <>{children}</>
-    ) : (
-      <EuiToolTip content={text}>
-        <>{children}</>
-      </EuiToolTip>
-    );
-  };
+
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
-        <TooltipWrapper text={labels.multiSelect.in}>
+        <TooltipWrapper text={labels.multiSelect.in} showText={showText}>
           <EuiButtonEmpty
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
             size="s"
@@ -86,7 +76,7 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
         </TooltipWrapper>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TooltipWrapper text={labels.multiSelect.out}>
+        <TooltipWrapper text={labels.multiSelect.out} showText={showText}>
           <EuiButtonEmpty
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
             size="s"
@@ -99,5 +89,19 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
         </TooltipWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+const TooltipWrapper: FC<PropsWithChildren<{ text: string; showText: boolean }>> = ({
+  text,
+  showText,
+  children,
+}) => {
+  return showText ? (
+    <>{children}</>
+  ) : (
+    <EuiToolTip content={text}>
+      <>{children}</>
+    </EuiToolTip>
   );
 };
