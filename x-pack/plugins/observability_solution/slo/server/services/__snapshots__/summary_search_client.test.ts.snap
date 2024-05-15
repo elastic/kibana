@@ -1,40 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Summary Search Client handles hideStale filter 1`] = `
-Array [
-  Object {
-    "from": 0,
-    "index": Array [
-      ".slo-observability.summary-v3*",
-    ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "spaceId": "default",
-            },
-          },
-          Object {
-            "match_all": Object {},
-          },
-        ],
-        "must_not": Array [],
-      },
-    },
-    "size": 40,
-    "sort": Object {
-      "isTempDoc": Object {
-        "order": "asc",
-      },
-      "sliValue": Object {
-        "order": "asc",
-      },
-    },
-    "track_total_hits": true,
-  },
-]
-`;
 
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
