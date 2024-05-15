@@ -36,12 +36,12 @@ describe('getFileDownloadId()', () => {
     expect(getFileDownloadId(action)).toEqual(`${action.id}.foo`);
   });
 
-  it('should return expected if for non-endpoint agent types when agentId is passed as an argument', () => {
+  it('should return expected ID for non-endpoint agent types when agentId is passed as an argument', () => {
     action.agentType = 'sentinel_one';
     expect(getFileDownloadId(action, agentId)).toEqual(agentId);
   });
 
-  it('should return expected if for non-endpoint agent types when agentId is NOT passed as an argument', () => {
+  it('should return expected ID for non-endpoint agent types when agentId is NOT passed as an argument', () => {
     action.agentType = 'sentinel_one';
     action.agents = ['foo', 'foo2'];
 

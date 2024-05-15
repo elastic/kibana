@@ -317,13 +317,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agentIds,
     });
 
-    return responseDocs.reduce((acc, response) => {
-      const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+    return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
+      (acc, response) => {
+        const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
 
-      acc[agentId] = response;
+        acc[agentId] = response;
 
-      return acc;
-    }, {} as FetchActionResponseEsDocsResponse<TOutputContent, TMeta>);
+        return acc;
+      },
+      {}
+    );
   }
 
   /**

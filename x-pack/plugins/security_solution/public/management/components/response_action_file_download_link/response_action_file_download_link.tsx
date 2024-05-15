@@ -186,9 +186,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           data-test-subj={getTestId('passcodeMessage')}
           className="eui-displayInline"
         >
-          {FILE_PASSCODE_INFO_MESSAGE(
-            RESPONSE_ACTIONS_ZIP_PASSCODE[fileInfo?.data.agentType ?? 'endpoint']
-          )}
+          {FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE[action.agentType])}
         </EuiText>
         <EuiText size={textSize} color="warning" data-test-subj={getTestId('fileDeleteMessage')}>
           {FILE_DELETED_MESSAGE}
