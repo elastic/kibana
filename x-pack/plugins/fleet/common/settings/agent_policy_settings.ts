@@ -104,27 +104,27 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.monitoring.http',
-    hidden: true,
     api_field: {
       name: 'agent_monitoring_http',
     },
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle', {
-      defaultMessage: 'Agent HTTP monitoring',
+      defaultMessage: 'HTTP monitoring endpoint',
     }),
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription',
       {
-        defaultMessage: 'Agent HTTP monitoring settings.',
+        defaultMessage:
+          'Enables a liveness HTTP endpoint that returns the overall health of Elastic Agent. This can be used by Kubernetes to restart the container, for example.',
       }
     ),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
     schema: z
       .object({
-        enabled: z.boolean().describe('Enabled').default(false),
+        // enabled: z.boolean().describe('Enabled').default(false),
         host: z.string().describe('Host').default('localhost'),
         port: z.number().describe('Port').min(0).max(65353).default(6791),
-        'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
+        // 'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
       })
       .default({}),
   },
