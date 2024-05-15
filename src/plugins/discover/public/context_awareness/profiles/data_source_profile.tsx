@@ -9,6 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import React from 'react';
 import { DataSourceType, DiscoverDataSource, isDataSourceType } from '../../../common/data_sources';
 import { Profile } from '../composable_profile';
 import { ProfileService } from '../profile_service';
@@ -48,6 +49,46 @@ dataSourceProfileService.registerProvider({
         },
         ...prev(),
       ],
+    getCellRenderers: (prev) => () => ({
+      ...prev(),
+      ['@timestamp']: (props) => {
+        const date = new Date((props.row.flattened['@timestamp'] as string[])[0]);
+
+        return (
+          <>
+            <span style={{ color: 'red' }}>{date.getFullYear()}</span>-
+            <span style={{ color: 'green' }}>{date.getMonth() + 1}</span>-
+            <span style={{ color: 'blue' }}>{date.getDate()}</span>{' '}
+            <span style={{ color: 'purple' }}>
+              {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}
+            </span>
+          </>
+        );
+      },
+      timestamp: (props) => {
+        const date = new Date((props.row.flattened['@timestamp'] as string[])[0]);
+
+        return (
+          <>
+            <span style={{ color: 'red' }}>{date.getFullYear()}</span>-
+            <span style={{ color: 'green' }}>{date.getMonth() + 1}</span>-
+            <span style={{ color: 'blue' }}>{date.getDate()}</span>{' '}
+            <span style={{ color: 'purple' }}>
+              {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}
+            </span>
+          </>
+        );
+      },
+      message: (props) => {
+        const message = (props.row.flattened.message as string[])[0];
+
+        return (
+          <div style={{ border: '1px solid #c1c1c1', padding: '2px', borderRadius: '4px' }}>
+            {message}
+          </div>
+        );
+      },
+    }),
   },
   resolve: (params) => {
     let indices: string[] = [];
