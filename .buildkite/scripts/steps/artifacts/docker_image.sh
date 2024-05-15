@@ -35,8 +35,7 @@ node scripts/build \
   --skip-docker-chainguard \
   --skip-docker-ubi \
   --skip-docker-fips \
-  --skip-docker-cloud \
-  --skip-docker-contexts
+  --skip-docker-cloud
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
