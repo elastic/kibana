@@ -77,23 +77,24 @@ export const getKnowledgeBaseStatusRoute = (
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
           // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+          let isSetupInProgress = false;
           if (enableKnowledgeBaseByDefault) {
-            const knowledgeBaseDataClient =
-              await assistantContext.getAIAssistantKnowledgeBaseDataClient(false);
-            if (!knowledgeBaseDataClient) {
+            const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
+            if (!kbDataClient) {
               return response.custom({ body: { success: false }, statusCode: 500 });
             }
 
             // Use old status checks by overriding esStore to use kbDataClient
             esStore = new ElasticsearchStore(
               esClient,
-              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
+              kbDataClient.indexTemplateAndPattern.alias,
               logger,
               telemetry,
               elserId,
               kbResource,
-              knowledgeBaseDataClient
+              kbDataClient
             );
+            isSetupInProgress = kbDataClient.isSetupInProgress;
           }
 
           const indexExists = await esStore.indexExists();
@@ -103,6 +104,7 @@ export const getKnowledgeBaseStatusRoute = (
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
             index_exists: indexExists,
+            is_setup_in_progress: isSetupInProgress,
             pipeline_exists: pipelineExists,
           };
 

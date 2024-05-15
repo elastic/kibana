@@ -31,10 +31,14 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ingestPipelineResourceName: string;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
-  private setupInProgress: boolean = false;
+  private _isSetupInProgress: boolean = false;
 
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
     super(options);
+  }
+
+  public get isSetupInProgress() {
+    return this._isSetupInProgress;
   }
 
   /**
@@ -156,13 +160,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     esStore: ElasticsearchStore;
     soClient: SavedObjectsClientContract;
   }): Promise<void> => {
-    if (this.setupInProgress) {
+    if (this._isSetupInProgress) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
 
     this.options.logger.debug('Starting Knowledge Base setup...');
-    this.setupInProgress = true;
+    this._isSetupInProgress = true;
     const elserId = await this.options.getElserId();
 
     try {
@@ -208,7 +212,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     } catch (e) {
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
     }
-    this.setupInProgress = false;
+    this._isSetupInProgress = false;
   };
 
   /**

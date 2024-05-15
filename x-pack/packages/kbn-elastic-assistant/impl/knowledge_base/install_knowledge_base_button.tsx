@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 
 const ESQL_RESOURCE = 'esql';
 
@@ -25,8 +26,10 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
     http,
   } = useAssistantContext();
 
-  // const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
+
+  const isLoading = kbStatus?.is_setup_in_progress || isSettingUpKB;
 
   const onInstallKnowledgeBase = useCallback(() => {
     setupKB(ESQL_RESOURCE);
@@ -41,7 +44,7 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
       color="primary"
       data-test-subj="install-knowledge-base-button"
       fill
-      isLoading={isSettingUpKB}
+      isLoading={isLoading}
       iconType="importAction"
       onClick={onInstallKnowledgeBase}
     >
