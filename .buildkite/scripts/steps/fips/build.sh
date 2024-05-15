@@ -23,6 +23,7 @@ node scripts/build \
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-ubuntu \
+    --skip-docker-chainguard \
     --skip-docker-cloud \
     --skip-docker-serverless \
     --skip-docker-contexts
