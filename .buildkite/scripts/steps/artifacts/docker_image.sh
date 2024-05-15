@@ -102,8 +102,9 @@ ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/val
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 
