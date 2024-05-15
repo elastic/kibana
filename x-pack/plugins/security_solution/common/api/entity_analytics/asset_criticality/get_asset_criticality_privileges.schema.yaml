@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Asset Criticality Privileges Schema
-  version: 1.0.0
+  version: '1'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:

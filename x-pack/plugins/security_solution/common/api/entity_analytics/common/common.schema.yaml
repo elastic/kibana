@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Entity Analytics Common Schema
   description: Common schema for Entity Analytics
-  version: 1.0.0
+  version: '1'
 paths: {}
 components:
   schemas:
