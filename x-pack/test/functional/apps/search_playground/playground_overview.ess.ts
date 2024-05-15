@@ -19,9 +19,9 @@ export default function (ftrContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
-  let closeOpenAIConnector: () => Promise<void>;
+  let removeOpenAIConnector: () => Promise<void>;
   const createConnector = async () => {
-    closeOpenAIConnector = await createOpenAIConnector({
+    removeOpenAIConnector = await createOpenAIConnector({
       supertest,
       requestHeader: commonAPI.getCommonRequestHeader(),
     });
@@ -34,7 +34,7 @@ export default function (ftrContext: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload(esArchiveIndex);
-      await closeOpenAIConnector?.();
+      await removeOpenAIConnector?.();
     });
 
     describe('start chat page', () => {

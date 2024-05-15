@@ -28,7 +28,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectCreateIndexButtonToMissed() {
         await testSubjects.missingOrFail('createIndexButton');
-        await testSubjects.existOrFail('createIndexButton23');
       },
 
       async expectCreateIndexButtonToExists() {

@@ -84,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await removeOpenAIConnector();
+      await removeOpenAIConnector?.();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
       await pageObjects.svlCommonPage.forceLogout();
     });
