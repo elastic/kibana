@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
   const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
-  describe('Dataset quality flyout', () => {
+  // Failing https://github.com/elastic/kibana/issues/183495
+  describes.skip('Dataset quality flyout', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
@@ -43,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
     it.skip('opens the flyout for the right dataset', async () => {
       const testDatasetName = datasetNames[1];
 
@@ -54,8 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // Fails on Serverless. TODO: Need to update the UI as well as the test
-    it.skip('shows the correct last activity', async () => {
+    it('shows the correct last activity', async () => {
       const testDatasetName = datasetNames[0];
 
       // Update last activity for the dataset
@@ -86,8 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(lastActivityTextExists).to.eql(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180994
-    it.skip('reflects the breakdown field state in url', async () => {
+    it('reflects the breakdown field state in url', async () => {
       const testDatasetName = datasetNames[0];
       await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
@@ -110,8 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('shows the integration details', async () => {
+    it('shows the integration details', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationId = 'apache';
@@ -152,8 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetSelectorText).to.eql(testDatasetName);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('shows summary KPIs', async () => {
+    it('shows summary KPIs', async () => {
       await PageObjects.datasetQuality.navigateTo();
 
       const apacheAccessDatasetHumanName = 'Apache access logs';
@@ -297,8 +293,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchTab(0);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('Integration actions menu is present with correct actions', async () => {
+    it('Integration actions menu is present with correct actions', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -326,8 +321,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(actions.length).to.eql(3);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('Integration dashboard action hidden for integrations without dashboards', async () => {
+    it('Integration dashboard action hidden for integrations without dashboards', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
       const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
@@ -354,8 +348,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('Integration overview action should navigate to the integration overview page', async () => {
+    it('Integration overview action should navigate to the integration overview page', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
       const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
@@ -389,8 +382,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('Integration template action should navigate to the index template page', async () => {
+    it('Integration template action should navigate to the index template page', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -424,8 +416,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('Integration dashboard action should navigate to the selected dashboard', async () => {
+    it('Integration dashboard action should navigate to the selected dashboard', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
