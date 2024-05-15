@@ -7,8 +7,6 @@
 
 import type { Criteria, EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
-import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
-import moment from 'moment';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -25,7 +23,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
-import type { CategorizedApiKey } from './api_keys_table';
+import type { CategorizedApiKey, QueryFilters } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
@@ -39,87 +37,18 @@ interface ApiKeysTableState {
   from: number;
   size: number;
   sort: QueryApiKeySortOptions;
+  filters: QueryFilters;
 }
 
-const parseSearchBarQuery = (query: Query): QueryContainer => {
-  let parsedQuery = query;
-
-  const ownerQueryValue = parsedQuery.getSimpleFieldClause('owner')?.value;
-  if (ownerQueryValue) {
-    parsedQuery = parsedQuery
-      .removeSimpleFieldClauses('owner')
-      .addSimpleFieldValue('username', `${ownerQueryValue}`);
-  }
-
-  if (query.text.includes('type:managed')) {
-    const subQuery = query.text.replace('type:managed', '');
-    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} (metadata.managed:true OR Alerting*)`);
-  } else if (query.text.includes('type:rest') || query.text.includes('type:cross_cluster')) {
-    parsedQuery = EuiSearchBar.Query.parse(`${query.text} -metadata.managed:true -Alerting*`);
-  }
-
-  if (query.text.includes('expired:true')) {
-    const subQuery = query.text.replace('expired:true', '');
-    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration<=${moment.now()}`);
-  } else if (query.text.includes('expired:false')) {
-    const subQuery = query.text.replace('expired:false', '');
-    parsedQuery = EuiSearchBar.Query.parse(subQuery);
-    const queryContainer = EuiSearchBar.Query.toESQuery(parsedQuery);
-
-    const activeKeysQueryDSL = {
-      bool: {
-        must: [
-          {
-            term: {
-              invalidated: false,
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    expiration: {
-                      gt: 'now',
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'expiration',
-                      },
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    };
-
-    const merged = {
-      bool: { must: [queryContainer, activeKeysQueryDSL] },
-    };
-    return merged as QueryContainer;
-  }
-
-  parsedQuery = parsedQuery.addSimpleFieldValue('invalidated', false);
-
-  return EuiSearchBar.Query.toESQuery(parsedQuery);
-};
-
 const DEFAULT_TABLE_STATE = {
-  query: EuiSearchBar.Query.parse(''),
+  query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
     field: 'creation' as const,
     direction: 'desc' as const,
   },
   from: 0,
   size: 25,
+  filters: {},
 };
 
 export const APIKeysGridPage: FunctionComponent = () => {
@@ -134,7 +63,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [tableState, setTableState] = useState<ApiKeysTableState>(DEFAULT_TABLE_STATE);
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
-    const queryContainer = parseSearchBarQuery(tableStateArgs.query);
+    const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
 
     const requestBody = {
       ...tableStateArgs,
@@ -172,6 +101,18 @@ export const APIKeysGridPage: FunctionComponent = () => {
       setTableState(newState);
       queryApiKeysAndAggregations(newState);
     }
+  };
+
+  const onFilterChange = (filters: QueryFilters) => {
+    const newState = {
+      ...tableState,
+      filters: {
+        ...tableState.filters,
+        ...filters,
+      },
+    };
+    setTableState(newState);
+    queryApiKeysAndAggregations(newState);
   };
 
   useEffect(() => {
@@ -356,6 +297,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   apiKeys={categorizedApiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
                   query={tableState.query}
+                  queryFilters={tableState.filters}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
                       apiKeysToDelete.map(({ name, id }) => ({ name, id })),
@@ -373,6 +315,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   pagination={pagination}
                   onTableChange={onTableChange}
                   onSearchChange={onSearchChange}
+                  onFilterChange={onFilterChange}
                   aggregations={aggregations}
                   sortingOptions={tableState.sort}
                   queryErrors={queryError}

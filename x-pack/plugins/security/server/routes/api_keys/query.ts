@@ -12,6 +12,10 @@ import type { QueryApiKeyResult } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+interface QueryClause {
+  [key: string]: any;
+}
+
 export function defineQueryApiKeysAndAggregationsRoute({
   router,
   getAuthenticationService,
@@ -30,6 +34,19 @@ export function defineQueryApiKeysAndAggregationsRoute({
             schema.object({
               field: schema.string(),
               direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+            })
+          ),
+          filters: schema.maybe(
+            schema.object({
+              usernames: schema.maybe(schema.arrayOf(schema.string())),
+              type: schema.maybe(
+                schema.oneOf([
+                  schema.literal('rest'),
+                  schema.literal('cross_cluster'),
+                  schema.literal('managed'),
+                ])
+              ),
+              expired: schema.maybe(schema.boolean()),
             })
           ),
         }),
@@ -60,13 +77,91 @@ export function defineQueryApiKeysAndAggregationsRoute({
             },
           });
         }
-        const { query, size, from, sort } = request.body;
+        const { query, size, from, sort, filters } = request.body;
+
+        const queryPayload: {
+          bool: { must: QueryClause[]; should: QueryClause[]; must_not: QueryClause[] };
+        } = { bool: { must: [], should: [], must_not: [] } };
+
+        if (query) {
+          queryPayload.bool.must.push(query);
+        }
+        queryPayload.bool.must.push({ term: { invalidated: false } });
+
+        if (filters) {
+          const { usernames, type, expired } = filters;
+
+          if (type) {
+            if (type === 'managed') {
+              queryPayload.bool.must.push({
+                bool: {
+                  should: [
+                    { prefix: { name: { value: 'Alerting:' } } },
+                    { term: { 'metadata.managed': true } },
+                  ],
+                },
+              });
+            } else if (type === 'rest' || type === 'cross_cluster') {
+              queryPayload.bool.must.push({ term: { type } });
+              queryPayload.bool.must_not.push(
+                { prefix: { name: 'Alerting:' } },
+                { term: { 'metadata.managed': true } }
+              );
+            }
+          }
+
+          if (expired === false) {
+            // Active API keys are those that have an expiration date in the future or no expiration date at all
+            const activeKeysDsl = {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          range: {
+                            expiration: {
+                              gt: 'now',
+                            },
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'expiration',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            };
+            queryPayload.bool.must.push(activeKeysDsl);
+          } else if (expired === true) {
+            queryPayload.bool.must.push({ range: { expiration: { lte: 'now' } } });
+          }
+
+          if (usernames && usernames.length > 0) {
+            queryPayload.bool.must.push({
+              bool: {
+                should: usernames.map((username) => ({
+                  match: { username: { query: username, operator: 'or' } },
+                })),
+              },
+            });
+          }
+        }
 
         const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
         let queryResult: Partial<QueryApiKeyResult>;
         try {
           const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
-            query,
+            query: queryPayload,
             sort: transformedSort,
             size,
             from,

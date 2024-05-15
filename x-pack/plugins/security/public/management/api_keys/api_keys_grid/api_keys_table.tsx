@@ -50,6 +50,7 @@ export interface TablePagination {
 
 export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
+  queryFilters: QueryFilters;
   currentUser: AuthenticatedUser;
   createdApiKey?: CreateAPIKeyResult;
   query: Query;
@@ -68,10 +69,22 @@ export interface ApiKeysTableProps {
   sortingOptions: QueryApiKeySortOptions;
   queryErrors?: Error;
   resetQuery: () => void;
+  onFilterChange: (filters: QueryFilters) => void;
+}
+
+export interface QueryFilters {
+  usernames?: string[];
+  type?: 'rest' | 'managed' | 'cross_cluster';
+  expired?: boolean;
 }
 
 export const MAX_PAGINATED_ITEMS = 10000;
-const FiltersContext = createContext<Record<string, string[]>>({ types: [], usernames: [] });
+const FiltersContext = createContext<{
+  types: string[];
+  usernames: string[];
+  filters: QueryFilters;
+  onFilterChange: (filters: QueryFilters) => void;
+}>({ types: [], usernames: [], filters: {}, onFilterChange: () => {} });
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   apiKeys,
@@ -92,6 +105,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   queryErrors,
   resetQuery,
   query,
+  queryFilters,
+  onFilterChange,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
@@ -233,22 +248,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   if (expired > 0) {
     filters.push({
-      type: 'field_value_toggle_group',
-      field: 'expired',
-      items: [
-        {
-          value: false,
-          name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
-            defaultMessage: 'Active',
-          }),
-        },
-        {
-          value: true,
-          name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
-            defaultMessage: 'Expired',
-          }),
-        },
-      ],
+      type: 'custom_component',
+      component: ExpiredFilterButton,
     });
   }
 
@@ -263,7 +264,14 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   return (
     <>
-      <FiltersContext.Provider value={{ types: [...typeFilters], usernames: [...usernameFilters] }}>
+      <FiltersContext.Provider
+        value={{
+          types: [...typeFilters],
+          usernames: [...usernameFilters],
+          filters: queryFilters,
+          onFilterChange,
+        }}
+      >
         <EuiSearchBar
           query={query}
           box={{
@@ -369,7 +377,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 };
 
 export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ query, onChange }) => {
-  const { types } = useContext(FiltersContext);
+  const { types, filters, onFilterChange } = useContext(FiltersContext);
 
   if (!onChange) {
     return null;
@@ -381,14 +389,14 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="user"
           iconSide="left"
-          hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
-          onClick={() =>
-            onChange(
-              query.hasSimpleFieldClause('type', 'rest')
-                ? query.removeSimpleFieldClauses('type')
-                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'rest')
-            )
-          }
+          hasActiveFilters={filters.type === 'rest'}
+          onClick={() => {
+            if (filters.type === 'rest') {
+              onFilterChange({ ...filters, type: undefined });
+            } else {
+              onFilterChange({ ...filters, type: 'rest' });
+            }
+          }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
         >
           <FormattedMessage
@@ -401,16 +409,14 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="cluster"
           iconSide="left"
-          hasActiveFilters={query.hasSimpleFieldClause('type', 'cross_cluster')}
-          onClick={() =>
-            onChange(
-              query.hasSimpleFieldClause('type', 'cross_cluster')
-                ? query.removeSimpleFieldClauses('type')
-                : query
-                    .removeSimpleFieldClauses('type')
-                    .addSimpleFieldValue('type', 'cross_cluster')
-            )
-          }
+          hasActiveFilters={filters.type === 'cross_cluster'}
+          onClick={() => {
+            if (filters.type === 'cross_cluster') {
+              onFilterChange({ ...filters, type: undefined });
+            } else {
+              onFilterChange({ ...filters, type: 'cross_cluster' });
+            }
+          }}
           withNext={types.includes('managed')}
         >
           <FormattedMessage
@@ -423,14 +429,14 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="gear"
           iconSide="left"
-          hasActiveFilters={query.hasSimpleFieldClause('type', 'managed')}
-          onClick={() =>
-            onChange(
-              query.hasSimpleFieldClause('type', 'managed')
-                ? query.removeSimpleFieldClauses('type')
-                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'managed')
-            )
-          }
+          hasActiveFilters={filters.type === 'managed'}
+          onClick={() => {
+            if (filters.type === 'managed') {
+              onFilterChange({ ...filters, type: undefined });
+            } else {
+              onFilterChange({ ...filters, type: 'managed' });
+            }
+          }}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
@@ -442,8 +448,57 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
   );
 };
 
+export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
+  query,
+  onChange,
+}) => {
+  const { filters, onFilterChange } = useContext(FiltersContext);
+
+  if (!onChange) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiFilterButton
+        hasActiveFilters={filters.expired === false}
+        onClick={() => {
+          if (filters.expired === false) {
+            onFilterChange({ ...filters, expired: undefined });
+          } else {
+            onFilterChange({ ...filters, expired: false });
+          }
+        }}
+        withNext={true}
+      >
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.activeFilter"
+          defaultMessage="Active"
+        />
+      </EuiFilterButton>
+      <EuiFilterButton
+        hasActiveFilters={filters.expired === true}
+        onClick={() => {
+          if (filters.expired === true) {
+            onFilterChange({ ...filters, expired: undefined });
+          } else {
+            onFilterChange({ ...filters, expired: true });
+          }
+        }}
+      >
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.expiredFilter"
+          defaultMessage="Expired"
+        />
+      </EuiFilterButton>
+    </>
+  );
+};
+
 export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ query, onChange }) => {
-  const { usernames } = useContext(FiltersContext);
+  const { usernames, filters, onFilterChange } = useContext(FiltersContext);
+
+  const filteredUsernames = filters.usernames || [];
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -453,13 +508,9 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
   }
 
   let numActiveFilters = 0;
-  const clause = query.getOrFieldClause('username');
-  if (clause) {
-    if (Array.isArray(clause.value)) {
-      numActiveFilters = clause.value.length;
-    } else {
-      numActiveFilters = 1;
-    }
+  const clause = filters.usernames || [];
+  if (clause.length) {
+    numActiveFilters = clause.length;
   }
 
   const usernamesMatchingSearchTerm = searchTerm
@@ -497,7 +548,7 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         })),
         onSearchChange: setSearchTerm,
         selectedOptions: usernames
-          .filter((username) => query.hasOrFieldClause('username', username))
+          .filter((username) => filteredUsernames.includes(username))
           .map((username) => ({
             uid: username,
             user: { username },
@@ -505,11 +556,8 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             data: {},
           })),
         onChange: (nextSelectedOptions) => {
-          const nextQuery = nextSelectedOptions.reduce(
-            (acc, option) => acc.addOrFieldValue('username', option.user.username),
-            query.removeOrFieldClauses('username')
-          );
-          onChange(nextQuery);
+          const nextFilters = nextSelectedOptions.map((option) => option.user.username);
+          onFilterChange({ ...filters, usernames: nextFilters });
         },
       }}
     />
