@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { Subject } from 'rxjs';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import {
@@ -24,6 +25,9 @@ import { useDispatch } from '../redux';
 import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
 
 export type { ExpandableFlyoutApi };
+
+// observable to notify when the flyout is closed
+const onCloseObs$ = new Subject<string>();
 
 /**
  * This hook allows you to interact with the flyout, open panels and previews etc.
@@ -80,7 +84,13 @@ export const useExpandableFlyoutApi = () => {
     [dispatch, id]
   );
 
-  const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
+  const closePanels = useCallback(() => {
+    dispatch(closePanelsAction({ id }));
+    // notify that the flyout is closed by emitting its id
+    onCloseObs$.next(id);
+  }, [dispatch, id]);
+
+  const onClose$ = onCloseObs$;
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({
@@ -93,6 +103,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closeFlyout: closePanels,
       previousPreviewPanel,
+      onClose$,
     }),
     [
       openPanels,
@@ -104,6 +115,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closePanels,
       previousPreviewPanel,
+      onClose$,
     ]
   );
 
