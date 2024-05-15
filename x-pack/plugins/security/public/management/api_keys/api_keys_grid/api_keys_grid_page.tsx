@@ -161,12 +161,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
     ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
     : [];
 
-  const displayedPageCount =
-    totalKeys > MAX_PAGINATED_ITEMS && filteredItemTotal > MAX_PAGINATED_ITEMS
-      ? MAX_PAGINATED_ITEMS
-      : totalKeys <= MAX_PAGINATED_ITEMS || totalKeys === filteredItemTotal
-      ? totalKeys
-      : filteredItemTotal;
+  const displayedPageCount = Math.min(filteredItemTotal, totalKeys, MAX_PAGINATED_ITEMS);
 
   const pagination = {
     pageIndex: tableState.from / tableState.size,
