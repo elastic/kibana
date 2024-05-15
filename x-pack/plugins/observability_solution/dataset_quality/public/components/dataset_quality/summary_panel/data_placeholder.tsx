@@ -16,19 +16,14 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-interface LastDayDataPlaceholderParams {
+interface DataPlaceholderParams {
   title: string;
   tooltip: string;
   value: string | number;
   isLoading: boolean;
 }
 
-export function LastDayDataPlaceholder({
-  title,
-  tooltip,
-  value,
-  isLoading,
-}: LastDayDataPlaceholderParams) {
+export function DataPlaceholder({ title, tooltip, value, isLoading }: DataPlaceholderParams) {
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="m" direction="column">
