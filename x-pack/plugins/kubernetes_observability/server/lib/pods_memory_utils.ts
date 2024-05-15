@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { round, Pod, Limits } from './utils';
+import { round, PodMem, Limits, } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise memory utilisation
@@ -72,15 +72,14 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
     var message = undefined;
     var reasons = undefined;
     var alarm = '';
-    var memory_available = undefined;
-    var memory_usage = undefined;
     var memory_utilization = undefined;
+    var pod = {} as PodMem;
+
     //console.log("esResponsePods:"+ esResponsePods.aggregations?.memory_usage);
 
     if (Object.keys(esResponsePods.aggregations).length > 0) {
         const hitsall = esResponsePods.aggregations;
         //console.log(hitsall);
-        var pod = {} as Pod;
 
         var memory_usage_median_absolute_deviation = hitsall?.memory_usage_variability.value;
         const memory_usage_min = hitsall?.memory_usage.min;
@@ -101,12 +100,6 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 'avg': memory_usage_avg,
                 'median_absolute_deviation': memory_usage_median_absolute_deviation,
             },
-            'cpu_utilization': {
-                'min': undefined,
-                'max': undefined,
-                'avg': undefined,
-                'median_absolute_deviation': undefined,
-            },
         };
 
         var deviation_alarm = "Low"
@@ -116,9 +109,9 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
 
         if (memory_available_count == 0) {
             reasons = {
-                'pod': podName, reason: [
-                    { 'value': undefined, 'desc': ' No memory available value defined ' },
-                    { 'value': deviation_alarm, 'desc': ' Memory usage median absolute deviation ' }],
+                'pod': podName, reason: {
+                    'memory': 'Metric memory_available value is not defined',
+                    'memory_usage_median_absolute_deviation': deviation_alarm }
             };
             message = { 'pod': podName, 'memory_usage': pod.memory_usage, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'desc': ' Pod Memory usage in  Bytes' };
         } else {
@@ -132,13 +125,12 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 alarm = "High";
             }
             reasons = {
-                'pod': podName, reason: [
-                    { 'value': alarm, 'desc': ' Memory utilisation' },
-                    { 'value': deviation_alarm, 'desc': ' Memory usage median absolute deviation ' }]
+                'pod': podName, reason: {
+                    'memory': alarm,
+                    'memory_usage_median_absolute_deviation': deviation_alarm }
             };
-            message = { 'pod': podName, 'memory_available': pod.memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'Desc': '% - Percentage of Memory utilisation' };
 
         }
     }
-    return [reasons, message, memory_usage, memory_usage_median_absolute_deviation, memory_available, memory_utilization];
+    return [reasons, pod];
 }

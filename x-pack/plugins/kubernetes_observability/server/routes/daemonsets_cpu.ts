@@ -6,8 +6,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
-// import { transformError } from '@kbn/securitysolution-es-utils';
-// import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
 import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 
@@ -16,7 +14,7 @@ import {
   DAEMONSET_CPU_ROUTE,
 } from '../../common/constants';
 
-const resource = "daemonset"
+const resource = "Daemonset"
 const type = "cpu"
 export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -77,68 +75,77 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
         //console.log(musts);
         //console.log(dsl);
         const esResponsePods = await client.search(dsl);
-        console.log(esResponsePods.hits);
+        //console.log(esResponsePods.hits);
         if (esResponsePods.hits.hits.length > 0) {
+
+          var pod_reasons = new Array();
+          var pod_metrics = new Array();
+          var pods_cpu_medium = new Array();
+          var pods_cpu_high = new Array();
+          var pods_deviation_high = new Array();
+          var messages = '';
+          var cpu = '';
+          var deviation_alarm = '';
+
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
           const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
 
           const time = extractFieldValue(fields['@timestamp']);
-          var messages = '';
-          var reasons = '';
-          var pod_reasons = new Array();
-          var pod_messages = new Array();
-          var pods_medium = new Array();
-          var pods_high = new Array();
-          var cpu = '';
+
 
           for (const entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log(podName);
-            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
-            const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
+            const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
+            const esResponsePods = await client.search(dslPods);
+            const [reason, pod] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
             pod_reasons.push(reason);
-            pod_messages.push(message);
+            pod_metrics.push(pod);
+
             //Create overall message for daemonset
             for (var pod_reason of pod_reasons) {
-              if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name);
-              } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name);
+              //Check for cpu utlisation in pod_reason.reason[0]
+              if (pod_reason.reason.reason == "Medium") {
+                pods_cpu_medium.push(pod_reason.pod);
+              } else if (pod_reason.reason.reason == "High") {
+                pods_cpu_high.push(pod_reason.pod);
+              }
+
+              //Check for cpu_utilization_median_absolute_deviation pod_reason.reason[1]
+              if (pod_reason.reason.cpu_utilisation_median_absolute_deviation == "High") {
+                pods_deviation_high.push(pod_reason.pod);
               }
             }
-            if (pods_medium.length > 0) {
-              messages = `${resource} has Medium ${type} utilisation in following Pods:` + pods_medium.join(" , ");
-            }
-            if (pods_high.length > 0) {
-              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_high.join(" , ");
+
+            if (pods_cpu_high.length > 0) {
+              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_cpu_high.join(" , ");
+              cpu = "High";
+            } else if (pods_cpu_medium.length > 0) {
+              messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_cpu_medium.join(" , ");
+              cpu = "Medium";
             } else {
               messages = `${resource} has Low ${type} utilisation in all Pods`;
+              cpu = "Low";
             }
 
-            if (pods_medium.length > 0 && pods_high.length > 0) {
-              cpu = "Medium";
-              reasons = "Medium " + type + " utilisation";
-            }
-            if (pods_high.length > 0) {
-              cpu = "High"
-              reasons = "High " + type + " utilisation";
-            } else {
-              cpu = "Low"
-              reasons = "Low " + type + " utilisation";
-            }
-            //End of Create overall message for daemonset
+            if (pods_deviation_high.length > 0) {
+              messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+              deviation_alarm = "High";
+            } else { deviation_alarm = "Low" }
+            //End of Create overall message for deployment
           }
           return response.ok({
             body: {
               time: time,
               name: request.query.name,
               namespace: namespace,
-              pod: { reasons: pod_reasons, messages: pod_messages },
-              cpu: cpu,
+              pods: pod_metrics,
+              cpu: {
+                utilization: cpu,
+                deviation: deviation_alarm
+              },
               message: messages,
-              reason: reasons,
             },
           });
         } else {
