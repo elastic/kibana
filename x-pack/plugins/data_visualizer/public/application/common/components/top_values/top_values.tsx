@@ -160,7 +160,7 @@ export const TopValues: FC<Props> = ({
       typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
   }));
 
-  const shouldShowOtherCount = approximate !== true && topValues.length >= 10;
+  const shouldShowOtherCount = approximate !== true;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
