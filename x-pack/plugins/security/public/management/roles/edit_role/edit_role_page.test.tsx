@@ -186,7 +186,7 @@ function getProps({
       }
       return buildSpaces();
     }
-    if (path === '/internal/security/_check_role_mapping_features') {
+    if (path === '/internal/security/_check_security_features') {
       return { canUseRemoteIndices };
     }
     if (path === REMOTE_CLUSTERS_PATH) {
