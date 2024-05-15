@@ -506,15 +506,27 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 />
               }
             >
-              <EuiToolTip content={role.description} display="block">
+              {isRoleReserved || isRoleReadOnly ? (
+                <EuiToolTip
+                  content={role.description}
+                  display="block"
+                  data-test-subj="roleFormDescriptionTooltip"
+                >
+                  <EuiFieldText
+                    name="description"
+                    value={role.description ?? ''}
+                    data-test-subj="roleFormDescriptionInput"
+                    disabled
+                  />
+                </EuiToolTip>
+              ) : (
                 <EuiFieldText
                   name="description"
                   value={role.description ?? ''}
                   onChange={onDescriptionChange}
                   data-test-subj="roleFormDescriptionInput"
-                  disabled={isRoleReserved || isRoleReadOnly}
                 />
-              </EuiToolTip>
+              )}
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
