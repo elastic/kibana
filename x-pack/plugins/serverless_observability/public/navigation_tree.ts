@@ -81,6 +81,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              id: 'ml:anomalyDetection',
               renderAs: 'item',
               children: [
                 {
