@@ -66,6 +66,18 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
         options: [0, 20, 50, 'full'],
       },
     },
+    enableTooltipSupport: {
+      control: 'boolean',
+      defaultValue: false,
+    },
+    validateLinks: {
+      control: 'boolean',
+      defaultValue: false,
+    },
+    enableSoftLineBreaks: {
+      control: 'boolean',
+      defaultValue: false,
+    },
   };
 
   serviceArguments = {};
