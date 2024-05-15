@@ -46,6 +46,7 @@ interface Props {
   tableState: UseTableState<Category>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
+  fieldName?: string;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -60,6 +61,7 @@ export const CategoryTable: FC<Props> = ({
   tableState,
   enableRowActions = true,
   displayExamples = true,
+  fieldName,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -122,9 +124,15 @@ export const CategoryTable: FC<Props> = ({
       width: '80px',
     },
     {
-      name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
-        defaultMessage: 'Examples',
-      }),
+      name:
+        fieldName === undefined
+          ? i18n.translate('xpack.aiops.logCategorization.column.examples', {
+              defaultMessage: 'Examples',
+            })
+          : i18n.translate('xpack.aiops.logCategorization.column.examplesWithFieldName', {
+              defaultMessage: '{fieldName} examples',
+              values: { fieldName },
+            }),
       sortable: true,
       render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },

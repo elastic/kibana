@@ -445,6 +445,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
                   setSelectedCategories={setSelectedCategories}
                   openInDiscover={openInDiscover}
                   tableState={tableState}
+                  fieldName={selectedField.name}
                 />
               ) : null}
             </>
