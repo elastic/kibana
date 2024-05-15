@@ -10,7 +10,7 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { CellActionsProvider } from '../context';
 import { makeAction } from '../mocks/helpers';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { HoverActionsPopover } from './hover_actions_popover';
 
 const defaultProps = {

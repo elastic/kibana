@@ -66,7 +66,7 @@ export const SentinelOneGetAgentsResponseSchema = schema.object({
         registeredAt: schema.string(),
         lastIpToMgmt: schema.string(),
         storageName: schema.nullable(schema.string()),
-        osUsername: schema.string(),
+        osUsername: schema.nullable(schema.string()),
         groupIp: schema.string(),
         createdAt: schema.string(),
         remoteProfilingState: schema.string(),

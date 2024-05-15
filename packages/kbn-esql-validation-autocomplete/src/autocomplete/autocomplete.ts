@@ -1151,9 +1151,14 @@ async function getFunctionArgsSuggestions(
         ? Math.max(command.args.length - 1, 0)
         : commandArgIndex;
 
+    const finalCommandArg = command.args[finalCommandArgIndex];
+
     const fnToIgnore = [];
     // just ignore the current function
-    if (command.name !== 'stats') {
+    if (
+      command.name !== 'stats' ||
+      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+    ) {
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
