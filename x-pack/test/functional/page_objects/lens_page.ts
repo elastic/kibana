@@ -747,7 +747,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -755,6 +756,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -775,7 +777,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -786,7 +789,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 

@@ -330,7 +330,7 @@ export const reportingExportModalProvider = ({
     };
 
     const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
-      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'printablePdfV2')();
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'pngV2')();
       let dimensions = outerLayout?.dimensions;
       if (!dimensions) {
         const el = document.querySelector('[data-shared-items-container]');

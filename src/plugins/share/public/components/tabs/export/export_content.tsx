@@ -12,6 +12,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -142,15 +143,6 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
                     id="share.postURLWatcherMessage"
                     defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
                   />
-                  {isDirty && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <FormattedMessage
-                        id="share.postURLWatcherMessage.unsavedChanges"
-                        defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
-                      />
-                    </>
-                  )}
                 </EuiText>
               }
             >
@@ -159,13 +151,13 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, isDirty, renderCopyURLButton]);
+  }, [absoluteUrl, renderCopyURLButton]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        color="primary"
+        color={isDirty ? 'warning' : 'primary'}
         onClick={getReport}
         data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
@@ -173,7 +165,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
         {generateExportButton}
       </EuiButton>
     );
-  }, [generateExportButton, getReport, isCreatingExport]);
+  }, [generateExportButton, getReport, isCreatingExport, isDirty]);
 
   const renderRadioOptions = () => {
     if (radioOptions.length > 1) {
@@ -200,6 +192,22 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>
+        {isDirty && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              color="warning"
+              title={
+                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+              }
+            >
+              <FormattedMessage
+                id="share.postURLWatcherMessage.unsavedChanges"
+                defaultMessage="URL may change if you upgrade Kibana."
+              />
+            </EuiCallOut>
+          </>
+        )}
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">

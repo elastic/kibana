@@ -9,6 +9,7 @@
 import {
   copyToClipboard,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -123,21 +124,29 @@ export const LinkContent = ({
             values={{ objectType }}
           />
         </EuiText>
+        {isDirty && objectType === 'lens' && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              color="warning"
+              title={
+                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+              }
+            >
+              <FormattedMessage
+                id="share.link.warning.lens"
+                defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
+              />
+            </EuiCallOut>
+          </>
+        )}
         <EuiSpacer size="l" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={
-              isDirty && objectType === 'lens'
-                ? i18n.translate('share.link.unsaved', {
-                    defaultMessage:
-                      'There are unsaved changes. Before you generate a link, save the {objectType}.',
-                    values: {
-                      objectType,
-                    },
-                  })
-                : isTextCopied
+              isTextCopied
                 ? i18n.translate('share.link.copied', { defaultMessage: 'Text copied' })
                 : null
             }
