@@ -15,7 +15,7 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
-} from '../embeddable/slo/alerts_new/constants';
+} from '../embeddable/slo/alerts/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 
@@ -34,7 +34,7 @@ export function createAddAlertsPanelAction(
       const [coreStart, deps] = await getStartServices();
       try {
         const { openSloConfiguration } = await import(
-          '../embeddable/slo/alerts_new/slo_alerts_open_configuration'
+          '../embeddable/slo/alerts/slo_alerts_open_configuration'
         );
         const initialState = await openSloConfiguration(coreStart, deps);
         embeddable.addNewPanel(

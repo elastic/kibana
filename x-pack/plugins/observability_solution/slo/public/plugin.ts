@@ -28,7 +28,7 @@ import { ExperimentalFeatures, SloConfig } from '../common/config';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
 import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts_new/constants';
+import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
@@ -122,7 +122,7 @@ export class SloPlugin
             const deps = { ...coreStart, ...pluginsStart };
 
             const { getAlertsEmbeddableFactory } = await import(
-              './embeddable/slo/alerts_new/slo_alerts_embeddable_factory'
+              './embeddable/slo/alerts/slo_alerts_embeddable_factory'
             );
 
             return getAlertsEmbeddableFactory(deps, kibanaVersion);

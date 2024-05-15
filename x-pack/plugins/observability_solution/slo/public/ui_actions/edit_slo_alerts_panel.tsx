@@ -18,12 +18,12 @@ import {
   HasType,
 } from '@kbn/presentation-publishing';
 import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { SLO_ALERTS_EMBEDDABLE_ID } from '../embeddable/slo/alerts_new/constants';
+import { SLO_ALERTS_EMBEDDABLE_ID } from '../embeddable/slo/alerts/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import {
   HasSloAlertsConfig,
   SloAlertsEmbeddableActionContext,
-} from '../embeddable/slo/alerts_new/types';
+} from '../embeddable/slo/alerts/types';
 export const EDIT_SLO_ALERTS_ACTION = 'editSloAlertsPanelAction';
 type EditSloAlertsPanelApi = CanAccessViewMode & HasType & HasSloAlertsConfig;
 const isEditSloAlertsPanelApi = (api: unknown): api is EditSloAlertsPanelApi =>
@@ -56,7 +56,7 @@ export function createEditSloAlertsPanelAction(
 
       try {
         const { openSloConfiguration } = await import(
-          '../embeddable/slo/alerts_new/slo_alerts_open_configuration'
+          '../embeddable/slo/alerts/slo_alerts_open_configuration'
         );
 
         const result = await openSloConfiguration(
