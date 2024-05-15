@@ -14,7 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -32,6 +32,7 @@ export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly appMountParameters$ = new Subject<AppMountParameters<unknown>>();
   private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
 
   constructor(private readonly initContext: PluginInitializerContext<SloConfig>) {
@@ -56,6 +57,7 @@ export class SloPlugin
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
+      this.appMountParameters$.next(params);
 
       return renderApp({
         appMountParameters: params,
@@ -88,7 +90,7 @@ export class SloPlugin
     registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
 
     const assertPlatinumLicense = async () => {
-      const licensing = await pluginsSetup.licensing;
+      const licensing = pluginsSetup.licensing;
       const license = await firstValueFrom(licensing.license$);
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
@@ -164,6 +166,7 @@ export class SloPlugin
         observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        getAppMountParameters: () => firstValueFrom(this.appMountParameters$),
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
       }),
