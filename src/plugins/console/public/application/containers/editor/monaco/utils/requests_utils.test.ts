@@ -8,29 +8,13 @@
 
 import {
   getCurlRequest,
-  getDocumentationLink,
-  removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
-} from './utils';
-import { MetricsTracker } from '../../../../types';
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+} from './requests_utils';
+import { MetricsTracker } from '../../../../../types';
 
-/*
- * Mock the function "populateContext" that accesses the autocomplete definitions
- */
-const mockPopulateContext = jest.fn();
-
-jest.mock('../../../../lib/autocomplete/engine', () => {
-  return {
-    populateContext: (...args: any) => {
-      mockPopulateContext(args);
-    },
-  };
-});
-
-describe('monaco editor utils', () => {
+describe('requests_utils', () => {
   const dataObjects = [
     {
       query: {
@@ -41,24 +25,6 @@ describe('monaco editor utils', () => {
       test: 'test',
     },
   ];
-  describe('removeTrailingWhitespaces', () => {
-    it(`works with an empty string`, () => {
-      const url = '';
-      const result = removeTrailingWhitespaces(url);
-      expect(result).toBe(url);
-    });
-    it(`doesn't change the string if no trailing whitespaces`, () => {
-      const url = '_search';
-      const result = removeTrailingWhitespaces(url);
-      expect(result).toBe(url);
-    });
-    it(`removes any text after the first whitespace`, () => {
-      const url = '_search some_text';
-      const result = removeTrailingWhitespaces(url);
-      expect(result).toBe('_search');
-    });
-  });
-
   describe('stringifyRequest', () => {
     const request = {
       startOffset: 0,
@@ -192,51 +158,6 @@ describe('monaco editor utils', () => {
       expect(mockMetricsTracker.count).toHaveBeenCalledTimes(2);
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(1, 'GET__search');
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(2, 'POST__test');
-    });
-  });
-
-  describe('getDocumentationLink', () => {
-    const mockRequest = { method: 'GET', url: '_search', data: [] };
-    const version = '8.13';
-    const expectedLink = 'http://elastic.co/8.13/_search';
-
-    it('correctly replaces {branch} with the version', () => {
-      const endpoint = {
-        documentation: 'http://elastic.co/{branch}/_search',
-      } as AutoCompleteContext['endpoint'];
-      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
-      mockPopulateContext.mockImplementation((...args) => {
-        const context = args[0][1];
-        context.endpoint = endpoint;
-      });
-      const link = getDocumentationLink(mockRequest, version);
-      expect(link).toBe(expectedLink);
-    });
-
-    it('correctly replaces /master/ with the version', () => {
-      const endpoint = {
-        documentation: 'http://elastic.co/master/_search',
-      } as AutoCompleteContext['endpoint'];
-      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
-      mockPopulateContext.mockImplementation((...args) => {
-        const context = args[0][1];
-        context.endpoint = endpoint;
-      });
-      const link = getDocumentationLink(mockRequest, version);
-      expect(link).toBe(expectedLink);
-    });
-
-    it('correctly replaces /current/ with the version', () => {
-      const endpoint = {
-        documentation: 'http://elastic.co/current/_search',
-      } as AutoCompleteContext['endpoint'];
-      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
-      mockPopulateContext.mockImplementation((...args) => {
-        const context = args[0][1];
-        context.endpoint = endpoint;
-      });
-      const link = getDocumentationLink(mockRequest, version);
-      expect(link).toBe(expectedLink);
     });
   });
 });
