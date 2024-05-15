@@ -14,8 +14,7 @@ import {
   contentHeaderTooltipParagraph2,
   contentLabel,
 } from '../../common/translations';
-import { HoverPopover } from '../../common/hover_popover';
-import { TooltipButtonComponent } from './tooltip_button';
+import { TooltipButton } from './tooltip_button';
 import { FieldWithToken } from './field_with_token';
 import * as constants from '../../../../common/constants';
 
@@ -26,14 +25,10 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
   `;
 
   return (
-    <HoverPopover
-      button={
-        <TooltipButtonComponent
-          displayText={column.displayAsText}
-          headerRowHeight={headerRowHeight}
-        />
-      }
-      title={contentLabel}
+    <TooltipButton
+      displayText={column.displayAsText}
+      headerRowHeight={headerRowHeight}
+      popoverTitle={contentLabel}
     >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
@@ -45,6 +40,6 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
         <FieldWithToken field={constants.ERROR_MESSAGE_FIELD} />
         <FieldWithToken field={constants.EVENT_ORIGINAL_FIELD} iconType="tokenEvent" />
       </div>
-    </HoverPopover>
+    </TooltipButton>
   );
 };
