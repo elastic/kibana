@@ -45,7 +45,7 @@ export class EditPanelAction
     return i18n.translate('presentationPanel.action.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {
-        value: embeddable.getTypeDisplayName(),
+        value: embeddable.getTypeDisplayNameLowerCase?.() ?? embeddable.getTypeDisplayName(),
       },
     });
   }
