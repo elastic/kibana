@@ -42,6 +42,12 @@ export interface NewAgentPolicy {
   advanced_settings?: { [key: string]: any } | null;
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
+  global_data_tags?: GlobalDataTag[];
+}
+
+export interface GlobalDataTag {
+  name: string;
+  value: string | number;
 }
 
 // SO definition for this type is declared in server/types/interfaces
@@ -80,7 +86,17 @@ export interface FullAgentPolicyInput {
     [key: string]: unknown;
   };
   streams?: FullAgentPolicyInputStream[];
+  processors?: Array<FullAgentPolicyAddFields>;
   [key: string]: any;
+}
+
+export interface FullAgentPolicyAddFields {
+  add_fields: {
+    target: string;
+    fields: {
+      [key: string]: string | number;
+    };
+  };
 }
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
