@@ -82,7 +82,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
