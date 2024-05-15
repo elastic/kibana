@@ -45,7 +45,9 @@ deploy() {
   echo "--- Create $PROJECT_TYPE_LABEL project"
 
   echo "Checking if project already exists..."
+  PROJECT_DEPLOY_LOGS=$(mktemp --suffix ".json")
   PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
+  PROJECT_UPDATE_LOGS=$(mktemp --suffix ".json")
   curl -s \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
@@ -68,7 +70,6 @@ deploy() {
 
   if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
     echo "Creating project..."
-    PROJECT_DEPLOY_LOGS=$(mktemp --suffix ".json")
     curl -s \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
@@ -99,7 +100,6 @@ deploy() {
 
   else
     echo "Updating project..."
-    PROJECT_UPDATE_LOGS=$(mktemp --suffix ".json")
     curl -s \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
