@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiCommentProps } from '@elastic/eui';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
@@ -21,19 +20,15 @@ import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
-  onSetupComplete?: () => void;
   onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
 }
 
-export const useConnectorSetup = ({
+export const ConnectorSetup = ({
   conversation: defaultConversation,
   onConversationUpdate,
   updateConversationsOnSaveConnector = true,
-}: ConnectorSetupProps): {
-  comments: EuiCommentProps[];
-  prompt: React.ReactElement;
-} => {
+}: ConnectorSetupProps) => {
   const conversation = useMemo(
     () => defaultConversation || WELCOME_CONVERSATION,
     [defaultConversation]
@@ -87,20 +82,17 @@ export const useConnectorSetup = ({
     setSelectedActionType(null);
   }, []);
 
-  return {
-    comments: [],
-    prompt: (
-      <div data-test-subj="prompt">
-        <AddConnectorModal
-          actionTypeRegistry={actionTypeRegistry}
-          actionTypes={actionTypes}
-          onClose={handleClose}
-          onSaveConnector={onSaveConnector}
-          onSelectActionType={setSelectedActionType}
-          selectedActionType={selectedActionType}
-          actionTypeSelectorInline={true}
-        />
-      </div>
-    ),
-  };
+  return (
+    <div data-test-subj="prompt">
+      <AddConnectorModal
+        actionTypeRegistry={actionTypeRegistry}
+        actionTypes={actionTypes}
+        onClose={handleClose}
+        onSaveConnector={onSaveConnector}
+        onSelectActionType={setSelectedActionType}
+        selectedActionType={selectedActionType}
+        actionTypeSelectorInline={true}
+      />
+    </div>
+  );
 };

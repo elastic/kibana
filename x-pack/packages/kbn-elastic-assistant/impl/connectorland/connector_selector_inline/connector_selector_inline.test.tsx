@@ -11,7 +11,6 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
-import * as i18n from '../translations';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 
@@ -68,7 +67,7 @@ describe('ConnectorSelectorInline', () => {
     jest.clearAllMocks();
   });
   it('renders empty view if no selected conversation is provided', () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
@@ -78,11 +77,11 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
-    expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
 
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
@@ -92,7 +91,7 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
-    expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
   it('Clicking add connector button opens the connector selector', () => {
     const { getByTestId, queryByTestId } = render(
@@ -106,7 +105,7 @@ describe('ConnectorSelectorInline', () => {
       </TestProviders>
     );
     expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('addNewConnectorButton'));
     expect(getByTestId('connector-selector')).toBeInTheDocument();
   });
   it('On connector change, update conversation API config', () => {
@@ -121,7 +120,7 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('addNewConnectorButton'));
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId(connectorTwo.id));
     expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
@@ -153,7 +152,7 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('addNewConnectorButton'));
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId('addNewConnectorButton'));
     expect(getByTestId('connector-selector')).toBeInTheDocument();

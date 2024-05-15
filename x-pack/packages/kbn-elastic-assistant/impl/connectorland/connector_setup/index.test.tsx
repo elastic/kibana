@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
-import { useConnectorSetup } from '.';
+import { ConnectorSetup } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EuiCommentList } from '@elastic/eui';
 
-const onSetupComplete = jest.fn();
 const onConversationUpdate = jest.fn();
 
 const defaultProps = {
   conversation: welcomeConvo,
-  onSetupComplete,
   onConversationUpdate,
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
@@ -50,7 +48,7 @@ jest.mock('../../assistant/use_conversation', () => ({
 }));
 
 jest.spyOn(global, 'clearTimeout');
-describe('useConnectorSetup', () => {
+describe('ConnectorSetup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -86,7 +84,6 @@ describe('useConnectorSetup', () => {
         wrapper: TestProviders,
       });
       expect(getByTestId('connectorButton')).toBeInTheDocument();
-      expect(queryByTestId('skip-setup-button')).not.toBeInTheDocument();
       fireEvent.click(getByTestId('connectorButton'));
 
       rerender(result.current.prompt);
@@ -112,7 +109,6 @@ describe('useConnectorSetup', () => {
         wrapper: TestProviders,
       });
       expect(getByTestId('connectorButton')).toBeInTheDocument();
-      expect(queryByTestId('skip-setup-button')).not.toBeInTheDocument();
       fireEvent.click(getByTestId('connectorButton'));
 
       rerender(result.current.prompt);
@@ -149,11 +145,10 @@ describe('useConnectorSetup', () => {
       const { getByTestId, queryByTestId } = render(result.current.prompt, {
         wrapper: TestProviders,
       });
-      expect(getByTestId('skip-setup-button')).toBeInTheDocument();
       expect(queryByTestId('connectorButton')).not.toBeInTheDocument();
     });
   });
-  it('should call onSetupComplete and setConversations when onHandleMessageStreamingComplete', async () => {
+  it('should call setConversations when onHandleMessageStreamingComplete', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -164,7 +159,6 @@ describe('useConnectorSetup', () => {
       });
 
       expect(clearTimeout).toHaveBeenCalled();
-      expect(onSetupComplete).toHaveBeenCalled();
     });
   });
 });

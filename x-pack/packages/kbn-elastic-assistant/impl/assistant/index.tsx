@@ -51,7 +51,7 @@ import { useConversation } from './use_conversation';
 import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
+import { ConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
@@ -74,7 +74,6 @@ import {
   CONVERSATIONS_QUERY_KEYS,
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
-import { clearPresentationData } from '../connectorland/connector_setup/helpers';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
@@ -375,16 +374,6 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
-
-  const { prompt: connectorPrompt } = useConnectorSetup({
-    conversation: blockBotConversation,
-    onConversationUpdate: handleOnConversationSelected,
-    onSetupComplete: () => {
-      if (currentConversation) {
-        setCurrentConversation(clearPresentationData(currentConversation));
-      }
-    },
-  });
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {
@@ -693,7 +682,10 @@ const AssistantComponent: React.FC<Props> = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} data-test-subj="connector-prompt">
-                  {connectorPrompt}
+                  <ConnectorSetup
+                    conversation={blockBotConversation}
+                    onConversationUpdate={handleOnConversationSelected}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -750,10 +742,11 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiPanel>
     );
   }, [
+    blockBotConversation,
     comments,
-    connectorPrompt,
     currentConversation,
     editingSystemPromptId,
+    handleOnConversationSelected,
     handleOnSystemPromptSelectionChange,
     isSettingsModalVisible,
     isWelcomeSetup,

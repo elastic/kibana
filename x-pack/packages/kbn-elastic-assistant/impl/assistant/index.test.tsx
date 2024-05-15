@@ -12,7 +12,6 @@ import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
 
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
@@ -73,10 +72,6 @@ const mockUseConversation = {
 describe('Assistant', () => {
   beforeAll(() => {
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
-    jest.mocked(useConnectorSetup).mockReturnValue({
-      comments: [],
-      prompt: <></>,
-    });
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
