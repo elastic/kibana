@@ -15,18 +15,14 @@ import {
   useBatchedPublishingSubjects,
   fetch$,
   FetchContext,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
-import {
-  SloEmbeddableDeps,
-  SloAlertsEmbeddableState,
-  SloAlertsApi,
-  EmbeddableSloProps,
-} from './types';
+import { SloEmbeddableDeps, SloAlertsEmbeddableState, SloAlertsApi } from './types';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
@@ -46,7 +42,6 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const slos$ = new BehaviorSubject(state.slos);
-      const timeRange$ = new BehaviorSubject(state.timeRange ?? { from: 'now-15m/m', to: 'now' });
       const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
       const reload$ = new Subject<FetchContext>();
       const api = buildApi(
@@ -58,7 +53,6 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
               rawState: {
                 ...serializeTitles(),
                 slos: slos$.getValue(),
-                timeRange: timeRange$.getValue(),
                 showAllGroupByInstances: showAllGroupByInstances$.getValue(),
               },
             };
@@ -76,7 +70,6 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
         },
         {
           slos: [slos$, (value) => slos$.next(value)],
-          timeRange: [timeRange$, (value) => timeRange$.next(value)],
           showAllGroupByInstances: [
             showAllGroupByInstances$,
             (value) => showAllGroupByInstances$.next(value),
@@ -95,11 +88,11 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
       return {
         api,
         Component: () => {
-          const [slos, timeRange, showAllGroupByInstances] = useBatchedPublishingSubjects(
+          const [slos, showAllGroupByInstances] = useBatchedPublishingSubjects(
             slos$,
-            timeRange$,
             showAllGroupByInstances$
           );
+          const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
           useEffect(() => {
@@ -123,7 +116,7 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
                       embeddable={api}
                       deps={deps}
                       slos={slos}
-                      timeRange={timeRange}
+                      timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
                       showAllGroupByInstances={showAllGroupByInstances}
                     />

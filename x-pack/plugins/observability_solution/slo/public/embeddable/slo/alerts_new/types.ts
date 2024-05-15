@@ -36,8 +36,6 @@ export interface SloItem {
 
 export interface EmbeddableSloProps {
   slos: SloItem[];
-  timeRange?: TimeRange | undefined;
-  lastReloadRequestTime?: number | undefined;
   showAllGroupByInstances?: boolean;
 }
 

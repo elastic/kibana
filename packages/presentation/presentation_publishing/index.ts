@@ -33,7 +33,7 @@ export {
   initializeTimeRange,
   type SerializedTimeRange,
 } from './interfaces/fetch/initialize_time_range';
-export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
   apiPublishesPartialUnifiedSearch,
   apiPublishesTimeRange,
