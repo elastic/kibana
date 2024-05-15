@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    it.skip('opens the flyout for the right dataset', async () => {
+    it('opens the flyout for the right dataset', async () => {
       const testDatasetName = datasetNames[1];
 
       await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
@@ -55,7 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('shows the correct last activity', async () => {
+    // Fails on Serverless. TODO: Need to update the UI as well as the test
+    it.skip('shows the correct last activity', async () => {
       const testDatasetName = datasetNames[0];
 
       // Update last activity for the dataset
@@ -86,7 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(lastActivityTextExists).to.eql(true);
     });
 
-    it('reflects the breakdown field state in url', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/180994
+    it.skip('reflects the breakdown field state in url', async () => {
       const testDatasetName = datasetNames[0];
       await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
