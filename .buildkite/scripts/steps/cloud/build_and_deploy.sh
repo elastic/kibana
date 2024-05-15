@@ -24,7 +24,6 @@ ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERS
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 set +e
 DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
 set -e
@@ -44,11 +43,10 @@ else
     --skip-docker-ubi \
     --skip-docker-fips \
     --skip-docker-ubuntu \
+    --skip-docker-chainguard \
     --skip-docker-serverless \
     --skip-docker-contexts
 fi
-
-docker logout docker.elastic.co
 
 if is_pr_with_label "ci:cloud-redeploy"; then
   echo "--- Shutdown Previous Deployment"

@@ -41,13 +41,11 @@ export function SearchEmbeddableRenderer(props: Props) {
   }, [props.timeRange, parentApi.timeRange$]);
 
   return (
-    <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
-        type={SEARCH_EMBEDDABLE_ID}
-        state={initialState}
-        parentApi={parentApi}
-        hidePanelChrome={true}
-      />
-    </div>
+    <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+      type={SEARCH_EMBEDDABLE_ID}
+      state={initialState}
+      parentApi={parentApi}
+      hidePanelChrome={true}
+    />
   );
 }

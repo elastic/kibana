@@ -25,7 +25,6 @@
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
     "@kbn/ui-theme",
-    "@kbn/core-notifications-browser",
     "@kbn/data-service",
     "@kbn/observability-shared-plugin",
     "@kbn/data-plugin",
