@@ -116,6 +116,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
+    getReactEmbeddableSavedObjects: jest.fn(),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
