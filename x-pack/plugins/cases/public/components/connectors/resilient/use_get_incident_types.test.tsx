@@ -19,7 +19,8 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-describe('useGetIncidentTypes', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/182845
+describe.skip('useGetIncidentTypes', () => {
   const { http } = useKibanaMock().services;
   let appMockRender: AppMockRenderer;
 
