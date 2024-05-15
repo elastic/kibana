@@ -16,7 +16,10 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
 import { EditControlAction } from './react_controls/actions/edit_control_action';
 import { registerControlFactory } from './react_controls/control_factory_registry';
-import { SearchControlState, SEARCH_CONTROL_TYPE } from './react_controls/search_control/types';
+import {
+  SearchControlState,
+  SEARCH_CONTROL_TYPE,
+} from './react_controls/data_controls/search_control/types';
 import img from './control_group_image.png';
 
 interface SetupDeps {
@@ -53,7 +56,7 @@ export class ControlsExamplePlugin
   }
 
   public start(core: CoreStart, deps: ControlsExampleStartDeps) {
-    const editControlAction = new EditControlAction({ core, dataViews: deps.data.dataViews });
+    const editControlAction = new EditControlAction();
     deps.uiActions.registerAction(editControlAction);
     deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
 
@@ -63,24 +66,19 @@ export class ControlsExamplePlugin
       );
       return getControlGroupEmbeddableFactory({
         overlays: core.overlays,
-        dataViewsService: deps.data.dataViews,
+        dataViews: deps.data.dataViews,
       });
     });
 
-    // core.overlays.
-    registerControlFactory<SearchControlState>(SEARCH_CONTROL_TYPE, async () => {
+    registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const { getSearchEmbeddableFactory } = await import(
-        './react_controls/search_control/get_search_control_factory'
+        './react_controls/data_controls/search_control/get_search_control_factory'
       );
-      return getSearchEmbeddableFactory({ dataViewsService: deps.data.dataViews });
+      return getSearchEmbeddableFactory({
+        core,
+        dataViewsService: deps.data.dataViews,
+      });
     });
-
-    // registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
-    //   const { markdownEmbeddableFactory } = await import(
-    //     './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
-    //   );
-    //   return markdownEmbeddableFactory;
-    // });
   }
 
   public stop() {}

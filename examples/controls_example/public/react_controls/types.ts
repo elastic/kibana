@@ -9,7 +9,6 @@
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
-  HasEditCapabilities,
   HasParentApi,
   HasType,
   HasUniqueId,
@@ -17,13 +16,11 @@ import {
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilter,
-  PublishesPanelTitle,
   PublishesTimeslice,
   PublishesUnsavedChanges,
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { ControlGroupApi } from './control_group/types';
 
 export interface PublishesControlDisplaySettings {
@@ -40,37 +37,21 @@ export type DefaultControlApi = PublishesDataLoading &
   Partial<PublishesFilter & PublishesTimeslice> & // can publish either filters or timeslice
   HasType &
   HasUniqueId &
-  HasParentApi<ControlGroupApi>;
+  HasParentApi<ControlGroupApi> & { setDataLoading: (loading: boolean) => void };
 
 export interface DefaultControlState {
   grow?: boolean;
   width?: ControlWidth;
 }
 
-export type DataControlApi = DefaultControlApi &
-  Pick<PublishesPanelTitle, 'panelTitle' | 'defaultPanelTitle'> & // does not need to be writable because control group does not have control - internally writable but not externally
-  HasEditCapabilities &
-  PublishesDataView;
-
-// {
-//   customSettings?: PublishingSubject<object | undefined>;
-//   fieldName: PublishingSubject<string>;
-// };
-
-export interface DefaultDataControlState extends DefaultControlState {
-  dataViewId: string;
-  fieldName: string;
-  title?: string; // custom label
-}
-
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'grow' | 'width'
+  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' // | 'grow' | 'width'
 >;
 
-export type ControlStateRegistration<
-  ControlState extends DefaultControlState = DefaultControlState
-> = Omit<ControlState, 'grow' | 'width'>;
+// export type ControlStateRegistration<
+//   ControlState extends DefaultControlState = DefaultControlState
+// > = Omit<ControlState, 'grow' | 'width'>;
 
 export interface ControlFactory<
   State extends object = object,
@@ -91,10 +72,4 @@ export interface ControlFactory<
     uuid: string,
     parentApi: ControlGroupApi
   ) => { api: ControlApi; Component: React.FC<{}> };
-}
-
-export interface DataControlFactory<State extends object = object>
-  extends ControlFactory<State, DataControlApi> {
-  isFieldCompatible: (field: DataViewField) => boolean;
-  CustomOptionsComponent?: React.FC<{ stateManager: unknown }>; // internal api manages state
 }

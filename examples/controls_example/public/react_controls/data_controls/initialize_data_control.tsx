@@ -6,45 +6,53 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
-import {
-  DataControlApi,
-  DefaultControlApi,
-  DefaultControlState,
-  DefaultDataControlState,
-} from './types';
+import { ControlGroupApi } from '../control_group/types';
+import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import { ControlApiRegistration } from '../types';
+import { openDataControlEditor } from './open_data_control_editor';
+import { DataControlApi, DefaultDataControlState } from './types';
 
-type DiffDefaultDataControlState = Omit<DefaultDataControlState, keyof DefaultControlState>;
-type DiffDefaultDataControlApi = Omit<DataControlApi, keyof DefaultControlApi>;
+// type DiffDefaultDataControlState = Omit<DefaultDataControlState, keyof DefaultControlState>;
+// type DiffDefaultDataControlApi = Omit<DataControlApi, keyof DefaultControlApi>;
+
+export type DataControlStateManager = {
+  [key in keyof Required<DefaultDataControlState>]: BehaviorSubject<DefaultDataControlState[key]>;
+};
 
 export const initializeDataControl = <State extends DefaultDataControlState>(
   state: State,
-  dataViewsService: DataViewsPublicPluginStart
+  controlGroup: ControlGroupApi,
+  services: {
+    core: CoreStart;
+    dataViews: DataViewsPublicPluginStart;
+  }
 ): {
-  dataControlApi: DiffDefaultDataControlApi;
-  dataControlComparators: StateComparators<DiffDefaultDataControlState>;
-  stateManager: {
-    [key in keyof Required<DiffDefaultDataControlState>]: BehaviorSubject<
-      DiffDefaultDataControlState[key]
-    >;
-  };
+  dataControlApi: ControlApiRegistration<DataControlApi>;
+  dataControlComparators: StateComparators<DefaultDataControlState>;
 } => {
+  const { defaultControlApi, defaultControlComparators, defaultControlStateManager } =
+    initializeDefaultControlApi(controlGroup, state);
+
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataView = new BehaviorSubject<DataView | undefined>(undefined);
 
-  const dataControlComparators: StateComparators<DiffDefaultDataControlState> = {
+  const dataControlComparators: StateComparators<DefaultDataControlState> = {
+    ...defaultControlComparators,
     title: [panelTitle, (value: string | undefined) => panelTitle.next(value)],
     dataViewId: [dataViewId, (value: string) => dataViewId.next(value)],
     fieldName: [fieldName, (value: string) => fieldName.next(value)],
   };
 
-  const stateManager = {
+  const stateManager: DataControlStateManager = {
+    ...defaultControlStateManager,
     dataViewId,
     fieldName,
     title: panelTitle,
@@ -62,42 +70,17 @@ export const initializeDataControl = <State extends DefaultDataControlState>(
    * Fetch the data view whenever the selected id changes
    */
   dataViewId.pipe(distinctUntilChanged()).subscribe(async (id: string) => {
-    // defaultApi.dataLoading.next(true);
-    dataView.next(await dataViewsService.get(id));
-    // defaultApi.dataLoading.next(false);
+    defaultControlApi.setDataLoading(true);
+    dataView.next(await services.dataViews.get(id));
+    defaultControlApi.setDataLoading(false);
   });
 
   const onEdit = async () => {
-    console.log('on edit');
-
-    //   const flyoutInstance = this.overlays.openFlyout(
-    //     toMountPoint(
-    //       <ControlEditor
-    //         api={embeddable}
-    //         parentApi={embeddable.parentApi}
-    //         stateManager={stateManager}
-    //         closeFlyout={() => {
-    //           setFlyoutRef(undefined);
-    //           flyoutInstance.close();
-    //         }}
-    //       />,
-    //       { theme: this.theme, i18n: this.i18n }
-    //     ),
-    //     {
-    //       'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
-    //       outsideClickCloses: false,
-    //       onClose: (flyout) => {
-    //         setFlyoutRef(undefined);
-    //         flyout.close();
-    //       },
-    //       ownFocus: true,
-    //     }
-    //   );
-    //   setFlyoutRef(flyoutInstance);
-    // }
+    openDataControlEditor(stateManager, false, controlGroup, services);
   };
 
-  const dataControlApi: DiffDefaultDataControlApi = {
+  const dataControlApi: ControlApiRegistration<DataControlApi> = {
+    ...defaultControlApi,
     panelTitle,
     defaultPanelTitle,
     dataView,
@@ -107,7 +90,6 @@ export const initializeDataControl = <State extends DefaultDataControlState>(
   };
 
   return {
-    stateManager,
     dataControlApi,
     dataControlComparators,
   };

@@ -7,16 +7,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DataControlFactory } from './data_controls/types';
 import { ControlFactory, DefaultControlApi } from './types';
 
-const registry: { [key: string]: ControlFactory<any> } = {};
+type ControlFactoryType<
+  State extends object = object,
+  ApiType extends DefaultControlApi = DefaultControlApi
+> = ControlFactory<State, ApiType> | DataControlFactory<State>;
+
+const registry: { [key: string]: ControlFactoryType<any, any> } = {};
 
 export const registerControlFactory = async <
   State extends object = object,
-  Factory extends ControlFactory<State> = ControlFactory<State>
+  ApiType extends DefaultControlApi = DefaultControlApi
 >(
   type: string,
-  getFactory: () => Promise<Factory>
+  getFactory: () => Promise<ControlFactoryType<State, ApiType>>
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
@@ -25,16 +31,15 @@ export const registerControlFactory = async <
         values: { key: type },
       })
     );
-  registry[type] = await getFactory();
+  registry[type] = (await getFactory()) as ControlFactoryType<any, any>;
 };
 
 export const getControlFactory = <
   State extends object = object,
-  ApiType extends DefaultControlApi = DefaultControlApi,
-  Factory extends ControlFactory<State, ApiType> = ControlFactory<State, ApiType>
+  ApiType extends DefaultControlApi = DefaultControlApi
 >(
   key: string
-): Factory => {
+): ControlFactoryType<State, ApiType> => {
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('controlFactoryRegistry.factoryNotFoundError', {
@@ -42,7 +47,7 @@ export const getControlFactory = <
         values: { key },
       })
     );
-  return registry[key];
+  return registry[key] as ControlFactoryType<State, ApiType>;
 };
 
 export const getAllControlTypes = () => {

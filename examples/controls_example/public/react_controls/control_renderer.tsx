@@ -65,17 +65,18 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<ControlStateRegistration<StateType>>
         ) => {
-          const grow = new BehaviorSubject<boolean | undefined>(state.grow);
-          const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
+          // const grow = new BehaviorSubject<boolean | undefined>(state.grow);
+          // const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges<StateType>(
               uuid,
               parentApi,
-              {
-                ...comparators,
-                grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
-                width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
-              },
+              comparators,
+              // {
+              //   ...comparators,
+              // grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
+              // width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
+              // },
               (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
             );
           // const panelTitle = new BehaviorSubject<string | undefined>(state.title);
@@ -97,8 +98,8 @@ export const ControlRenderer = <
             resetUnsavedChanges,
             type: factory.type,
             // defaultPanelTitle,
-            grow,
-            width,
+            // grow,
+            // width,
           };
 
           cleanupFunction.current = () => cleanup();

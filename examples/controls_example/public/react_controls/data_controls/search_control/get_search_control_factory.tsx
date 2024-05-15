@@ -7,6 +7,8 @@
  */
 
 import { EuiFieldText } from '@elastic/eui';
+import { OverlayStart } from '@kbn/core-overlays-browser';
+import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -16,8 +18,10 @@ import { DataControlFactory } from '../types';
 import { SearchControlState, SEARCH_CONTROL_TYPE } from './types';
 
 export const getSearchEmbeddableFactory = ({
+  core,
   dataViewsService,
 }: {
+  core: CoreStart;
   dataViewsService: DataViewsPublicPluginStart;
 }): DataControlFactory<SearchControlState> => {
   return {
@@ -25,35 +29,30 @@ export const getSearchEmbeddableFactory = ({
     getIconType: () => 'search',
     getDisplayName: () =>
       i18n.translate('controlsExamples.searchControl.displayName', { defaultMessage: 'Search' }),
-    // getSupportedFieldTypes: () => ['string'],
     isFieldCompatible: (field) => {
-      return true;
+      return (
+        field.searchable &&
+        field.spec.type === 'string' &&
+        (field.spec.esTypes ?? []).includes('text')
+      );
     },
     CustomOptionsComponent: () => {
       return <>Custom Options</>;
     },
     buildControl: (initialState, buildApi, uuid, parentApi) => {
       // console.log('build control');
-      const searchString$ = new BehaviorSubject<string>(initialState.searchString);
-      // const grow = new BehaviorSubject<boolean | undefined>(initialState.grow);
-      // const width = new BehaviorSubject<ControlWidth | undefined>(initialState.width);
-      const dataLoading = new BehaviorSubject<boolean | undefined>(false);
-      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
-
       const { dataControlApi, dataControlComparators } = initializeDataControl(
         initialState,
-        dataViewsService
+        parentApi,
+        { core, dataViews: dataViewsService }
       );
-      const api = buildApi(
-        { ...dataControlApi, dataLoading, blockingError, parentApi },
-        {
-          ...dataControlComparators,
-          searchString: [searchString$, (newString) => searchString$.next(newString)],
-          // grow: [grow, (newGrow) => grow.next(newGrow)],
-          // width: [width, (newWidth) => width.next(newWidth)],
-        }
-      );
-      // console.log('api', api);
+      const searchString$ = new BehaviorSubject<string>(initialState.searchString);
+
+      const api = buildApi(dataControlApi, {
+        ...dataControlComparators,
+        searchString: [searchString$, (newString: string) => searchString$.next(newString)],
+      });
+
       return {
         api,
         Component: () => {
