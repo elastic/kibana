@@ -13,6 +13,7 @@ import {
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getValueForSelectedField } from '../utils/get_value_for_selected_field';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
@@ -87,8 +88,11 @@ export class ElasticsearchRetriever extends BaseRetriever {
             ? this.content_field
             : this.content_field[hit._index as string];
 
+        // we need to iterate over the _source object to get the value of complex key definition such as metadata.source
+        const valueForSelectedField = getValueForSelectedField(hit._source, pageContentFieldKey);
+
         return new Document({
-          pageContent: hit._source[pageContentFieldKey],
+          pageContent: valueForSelectedField,
           metadata: {
             _score: hit._score,
             _id: hit._id,

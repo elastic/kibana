@@ -1724,6 +1724,8 @@
       "@kbn/triggers-actions-ui-plugin/*": ["x-pack/plugins/triggers_actions_ui/*"],
       "@kbn/triggers-actions-ui-types": ["packages/kbn-triggers-actions-ui-types"],
       "@kbn/triggers-actions-ui-types/*": ["packages/kbn-triggers-actions-ui-types/*"],
+      "@kbn/try-in-console": ["packages/kbn-try-in-console"],
+      "@kbn/try-in-console/*": ["packages/kbn-try-in-console/*"],
       "@kbn/ts-projects": ["packages/kbn-ts-projects"],
       "@kbn/ts-projects/*": ["packages/kbn-ts-projects/*"],
       "@kbn/ts-type-check-cli": ["packages/kbn-ts-type-check-cli"],
