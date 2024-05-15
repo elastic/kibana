@@ -423,8 +423,9 @@ export class MonacoEditorActionsProvider {
         position = { column: 1, lineNumber: requests[requests.length - 1].endLineNumber + 1 };
       }
     } else {
+      // if not inside a request, insert the request at the cursor position
       if (!position) {
-        // if no cursor/selection, insert at the beginning
+        // if no cursor position, insert at the beginning
         position = { lineNumber: 1, column: 1 };
       }
     }
