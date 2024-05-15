@@ -8,4 +8,4 @@
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { timeIntervalInputValidator } from '../../common/util/validators';
 export const validateLookbackInterval = timeIntervalInputValidator();
-export const validateTopNBucket = numberValidator({ min: 1 });
+export const validateTopNBucket = numberValidator({ min: 1, integerOnly: true });

@@ -1106,12 +1106,16 @@ async function getFunctionArgsSuggestions(
     new Set(
       fnDefinition.signatures.reduce<string[]>((acc, signature) => {
         const p = signature.params[argIndex];
-        const _suggestions: string[] =
-          p && p.literalSuggestions
-            ? p.literalSuggestions
-            : p && p.literalOptions
-            ? p.literalOptions
-            : [];
+        if (!p) {
+          return acc;
+        }
+
+        const _suggestions: string[] = p.literalSuggestions
+          ? p.literalSuggestions
+          : p.literalOptions
+          ? p.literalOptions
+          : [];
+
         return acc.concat(_suggestions);
       }, [] as string[])
     )
@@ -1147,9 +1151,14 @@ async function getFunctionArgsSuggestions(
         ? Math.max(command.args.length - 1, 0)
         : commandArgIndex;
 
+    const finalCommandArg = command.args[finalCommandArgIndex];
+
     const fnToIgnore = [];
     // just ignore the current function
-    if (command.name !== 'stats') {
+    if (
+      command.name !== 'stats' ||
+      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+    ) {
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
