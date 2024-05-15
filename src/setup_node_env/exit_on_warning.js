@@ -53,6 +53,20 @@ var IGNORE_WARNINGS = [
     message:
       'The URL https://github.com:crypto-browserify/browserify-rsa.git is invalid. Future versions of Node.js will throw an error.',
   },
+  // supertest in HTTP2 mode uses 0.0.0.0 as the server's name
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0123',
+    message:
+      'Setting the TLS ServerName to an IP address is not permitted by RFC 6066. This will be ignored in a future version.',
+  },
+  {
+    // emitted whenever a header not supported by http2 is set. it's not actionable for the end user.
+    // HAPI sets a connection: close header - see https://github.com/hapijs/hapi/issues/3830
+    name: 'UnsupportedWarning',
+    messageContains:
+      'header is not valid, the value will be dropped from the header and will never be in use.',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
@@ -87,10 +101,11 @@ if (process.noProcessWarnings !== true) {
 
 function shouldIgnore(warn) {
   warn = parseWarn(warn);
-  return IGNORE_WARNINGS.some(function ({ name, code, message, file, line, col }) {
+  return IGNORE_WARNINGS.some(function ({ name, code, message, messageContains, file, line, col }) {
     if (name && name !== warn.name) return false;
     if (code && code !== warn.code) return false;
     if (message && message !== warn.message) return false;
+    if (messageContains && !warn.message.includes(messageContains)) return false;
     if (file && !warn.frames[0].file.endsWith(file)) return false;
     if (line && line !== warn.frames[0].line) return false;
     if (col && col !== warn.frames[0].col) return false;
