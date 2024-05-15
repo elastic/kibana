@@ -117,6 +117,8 @@ export {
   toElasticsearchQuery,
   escapeKuery,
   escapeQuotes,
+  getKqlFieldNames,
+  getKqlFieldNamesFromExpression,
 } from './src/kuery';
 
 export {
