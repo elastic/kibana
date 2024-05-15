@@ -237,6 +237,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     return responseWithHeaders;
   }
 
+  const {
+    end: streamEnd,
+    push,
+    responseWithHeaders,
+  } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+
+  let didEnd = false;
+
+  const handleStreamEnd = (finalResponse: string, isError = false) => {
+    if (onLlmResponse) {
+      onLlmResponse(
+        finalResponse,
+        {
+          // transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+          // traceId: streamingSpan?.ids?.['trace.id'],
+        },
+        isError
+      ).catch(() => {});
+    }
+    streamEnd();
+    didEnd = true;
+  };
+
+  const message = '';
+  const tokenParentRunId = '';
   let currentOutput = '';
   let finalOutputIndex = -1;
   let streamedFinalOutput = '';
@@ -244,13 +269,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
   // Match unescaped quotes
   const finalOutputStopRegex = /(?<!\\)\"/;
-  const result = await executor.invoke(
+  executor.invoke(
     { input: latestMessage[0].content },
     {
       callbacks: [
         {
           handleLLMNewToken(token) {
-            console.log('heyo handleLLMNewToken', token);
             if (finalOutputIndex === -1) {
               // Remove whitespace to simplify parsing
               currentOutput += token.replace(/\s/g, '');
@@ -263,20 +287,19 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                 const streamableOutput = token.slice(0, finalOutputEndIndex);
                 streamedFinalOutput += streamableOutput;
                 streamingFinished = true;
-                console.log('heyo streamableOutput', streamableOutput);
+                handleStreamEnd(streamedFinalOutput);
               } else {
                 streamedFinalOutput += token;
-                console.log('heyo token', token);
+                push({ payload: token, type: 'content' });
               }
-              streamedFinalOutput += token;
             }
           },
         },
       ],
     }
   );
-  console.log('heyo result', result);
-  console.log('heyo streamedFinalOutput', streamedFinalOutput);
+
+  return responseWithHeaders;
   //
   //
   // // Wrap executor call with an APM span for instrumentation

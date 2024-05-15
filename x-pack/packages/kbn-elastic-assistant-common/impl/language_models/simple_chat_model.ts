@@ -94,6 +94,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
+    console.log('heyo args', {
+      messages,
+      options,
+      runManager,
+    });
     const formattedMessages = [];
     if (messages.length === 2) {
       messages.forEach((message, i) => {
@@ -127,29 +132,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       },
     };
 
-    if (!this.streaming) {
-      // create an actions client from the authenticated request context:
-      const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-
-      const actionResult = await actionsClient.execute(requestBody);
-
-      if (actionResult.status === 'error') {
-        throw new Error(
-          `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-        );
-      }
-
-      const content = get('data.message', actionResult);
-
-      if (typeof content !== 'string') {
-        throw new Error(
-          `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
-        );
-      }
-
-      return content; // per the contact of _call, return a string
-    }
-
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
@@ -161,35 +143,36 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       );
     }
 
+    if (!this.streaming) {
+      const content = get('data.message', actionResult);
+
+      if (typeof content !== 'string') {
+        throw new Error(
+          `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
+    }
+
     const readable = get('data', actionResult) as Readable;
+
     if (typeof readable?.read !== 'function') {
       throw new Error('Action result status is error: result is not streamable');
     }
 
-    // Trigger the appropriate callback for new chunks
-    // await runManager?.handleLLMNewToken(token);
+    const handleLLMNewToken = (token: string) => runManager?.handleLLMNewToken(token);
 
     // do not await, blocks stream for UI
     const parsed = await parseBedrockStream(
       readable,
       this.#logger,
       this.#signal,
-      runManager?.handleLLMNewToken
+      handleLLMNewToken
     );
+    console.log('heyo parsed', parsed);
 
     // return readable.pipe(new PassThrough());
     return parsed; // per the contact of _call, return a string
   }
-  async *_streamResponseChunks() {
-    console.log('heyo _streamResponseChunks');
-    return 'hi';
-  }
-  // async *_streamIterator() {
-  //   console.log('heyo _streamIterator');
-  //   return 'hi';
-  // }
-  //
-  // async completionWithRetry() {
-  //   return 'hi';
-  // }
 }

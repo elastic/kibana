@@ -55,7 +55,9 @@ export const handleBedrockChunk = ({
         Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
       );
       const decodedContent = prepareBedrockOutput(body, logger);
-      if (chunkHandler) chunkHandler(decodedContent);
+      if (chunkHandler) {
+        chunkHandler(decodedContent);
+      }
       return decodedContent;
     })
     .join('');

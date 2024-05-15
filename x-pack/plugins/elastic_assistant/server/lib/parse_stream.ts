@@ -105,7 +105,11 @@ export const parseBedrockStream: StreamParser = async (
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
-    tokenHandler?.(chunk);
+    if (tokenHandler) {
+      // Initialize an empty Uint8Array to store the concatenated buffer.
+      const bedrockBuffer: Uint8Array = new Uint8Array(0);
+      handleBedrockChunk({ chunk, bedrockBuffer, logger, chunkHandler: tokenHandler });
+    }
   });
 
   await finished(responseStream).catch((err) => {
