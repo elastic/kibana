@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -12,6 +12,7 @@ import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_sampl
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
+import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 
 export function TraceExplorerWaterfall() {
   const history = useHistory();
@@ -52,39 +53,55 @@ export function TraceExplorerWaterfall() {
     end,
   });
 
+  const onSampleClick = useCallback(
+    (sample: any) => {
+      push(history, {
+        query: {
+          traceId: sample.traceId,
+          transactionId: sample.transactionId,
+          waterfallItemId: '',
+        },
+      });
+    },
+    [history]
+  );
+
+  const onTabClick = useCallback(
+    (nextDetailTab: TransactionTab) => {
+      push(history, {
+        query: {
+          detailTab: nextDetailTab,
+        },
+      });
+    },
+    [history]
+  );
+
+  const onShowCriticalPathChange = useCallback(
+    (nextShowCriticalPath: boolean) => {
+      push(history, {
+        query: {
+          showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+        },
+      });
+    },
+    [history]
+  );
+
   return (
     <WaterfallWithSummary
-      waterfallFetchResult={waterfallFetchResult}
+      waterfallFetchResult={waterfallFetchResult.waterfall}
+      waterfallFetchStatus={waterfallFetchResult.status}
       traceSamples={traceSamplesFetchResult.data.traceSamples}
       traceSamplesFetchStatus={traceSamplesFetchResult.status}
       environment={environment}
-      onSampleClick={(sample) => {
-        push(history, {
-          query: {
-            traceId: sample.traceId,
-            transactionId: sample.transactionId,
-            waterfallItemId: '',
-          },
-        });
-      }}
-      onTabClick={(nextDetailTab) => {
-        push(history, {
-          query: {
-            detailTab: nextDetailTab,
-          },
-        });
-      }}
+      onSampleClick={onSampleClick}
+      onTabClick={onTabClick}
       detailTab={detailTab}
       waterfallItemId={waterfallItemId}
       serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
       showCriticalPath={showCriticalPath}
-      onShowCriticalPathChange={(nextShowCriticalPath) => {
-        push(history, {
-          query: {
-            showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
-          },
-        });
-      }}
+      onShowCriticalPathChange={onShowCriticalPathChange}
     />
   );
 }

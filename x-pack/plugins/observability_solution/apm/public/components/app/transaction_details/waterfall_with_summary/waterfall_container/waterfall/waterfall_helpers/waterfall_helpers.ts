@@ -222,7 +222,7 @@ export function getOrderedWaterfallItems(
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.doc.timestamp.us - entryTimestamp;
+    item.offset = item.doc.timestamp.us - entryTimestamp; // Math.min(entryTimestamp, item.parent?.doc.timestamp.us ?? 0); // entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 

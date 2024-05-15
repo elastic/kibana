@@ -59,27 +59,37 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   if (!entryId) {
     return 0;
   }
+
   let maxLevel = 1;
-  function countLevels(id: string, currentLevel: number) {
+  const visited: Set<string> = new Set(); // Set to track visited nodes
+
+  // Queue to perform breadth-first search
+  const queue: Array<{ id: string; level: number }> = [{ id: entryId, level: 1 }];
+
+  while (queue.length > 0) {
+    const { id, level } = queue.shift()!;
     const children = waterfall.childrenByParentId[id] || [];
-    if (children.length) {
-      children.forEach((child) => {
-        // Skip processing when a child node has the same ID as its parent
-        // to prevent infinite loop
-        if (child.id !== id) {
-          countLevels(child.id, currentLevel + 1);
-        }
-      });
-    } else {
-      if (maxLevel < currentLevel) {
-        maxLevel = currentLevel;
+
+    // Update maxLevel if necessary
+    maxLevel = Math.max(maxLevel, level);
+
+    // Mark current node as visited
+    visited.add(id);
+
+    // Add unvisited children to the queue
+    children.forEach((child) => {
+      // Skip processing when a child node has the same ID as its parent
+      // or if it has been visited already
+      if (child.id !== id && !visited.has(child.id)) {
+        queue.push({ id: child.id, level: level + 1 });
+        visited.add(child.id); // Mark child as visited to avoid duplicate enqueueing
       }
-    }
+    });
   }
 
-  countLevels(entryId, 1);
   return maxLevel;
 }
+
 // level starts with 0
 const maxLevelOpen = 2;
 

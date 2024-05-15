@@ -17,7 +17,9 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useRef, useState } from 'react';
+import useIntersection from 'react-use/lib/useIntersection';
+import useThrottle from 'react-use/lib/useThrottle';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
@@ -40,7 +42,7 @@ interface AccordionWaterfallProps {
 
 const ACCORDION_HEIGHT = '48px';
 
-const StyledAccordion = euiStyled(EuiAccordion).withConfig({
+const StyledAccordion = euiStyled(React.memo(EuiAccordion)).withConfig({
   shouldForwardProp: (prop) => !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
 })<
   EuiAccordionProps & {
@@ -78,46 +80,199 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   }
 `;
 
-export function AccordionWaterfall(props: AccordionWaterfallProps) {
+const useWaterfall = ({
+  item,
+  waterfall,
+  showCriticalPath,
+}: Pick<AccordionWaterfallProps, 'item' | 'waterfall' | 'showCriticalPath'>) => {
+  const criticalPath = useMemo(
+    () => (showCriticalPath ? getCriticalPath(waterfall) : undefined),
+    [showCriticalPath, waterfall]
+  );
+
+  const criticalPathSegmentsById = useMemo(
+    () => groupBy(criticalPath?.segments, (segment) => segment.item.id),
+    [criticalPath?.segments]
+  );
+
+  const children = useMemo(
+    () => waterfall.childrenByParentId[item.id] || [],
+    [item.id, waterfall.childrenByParentId]
+  );
+
+  const filteredChildren = useMemo(
+    () =>
+      showCriticalPath
+        ? children.filter((child) => criticalPathSegmentsById[child.id]?.length)
+        : children,
+    [children, criticalPathSegmentsById, showCriticalPath]
+  );
+
+  const errorCount = useMemo(() => waterfall.getErrorCount(item.id), [item.id, waterfall]);
+
+  return { filteredChildren, criticalPathSegmentsById, errorCount };
+};
+
+export function useLazyNodeLoader({
+  item,
+  level,
+  waterfall,
+  showCriticalPath,
+  pageSize,
+  throttle = 100,
+}: Pick<AccordionWaterfallProps, 'item' | 'level' | 'waterfall' | 'showCriticalPath'> & {
+  pageSize: number;
+  throttle?: number;
+}) {
+  const [nodes, setNodes] = useState<Array<Pick<AccordionWaterfallProps, 'level' | 'item'>>>([]);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+
+  const intersection = useIntersection(sentinelRef, {
+    root: null,
+    rootMargin: '0px', // Height of 4 rows of monitors, minus the gutters
+    threshold: 1,
+  });
+
+  const hasIntersected = (intersection && intersection.intersectionRatio > 0) ?? false;
+
+  const { filteredChildren } = useWaterfall({
+    item,
+    showCriticalPath,
+    waterfall,
+  });
+
+  useThrottle(() => {
+    if (
+      hasIntersected &&
+      nodes.length === page * pageSize &&
+      nodes.length !== filteredChildren.length
+    ) {
+      let requestId;
+
+      const loadMore = () => {
+        const newNodes = filteredChildren
+          .slice(page, page + pageSize)
+          .map((child) => ({ level: level + 1, item: child }));
+
+        setNodes((prevState) => [...prevState, ...newNodes]);
+        setPage((prevState) => (prevState += 1));
+
+        requestId = requestAnimationFrame(loadMore);
+      };
+
+      loadMore();
+      if (requestId) {
+        cancelAnimationFrame(requestId);
+      }
+    }
+  }, throttle);
+
+  return {
+    nodes,
+    sentinelRef,
+  };
+}
+
+export function AccordionWaterfall({ maxLevelOpen, level, ...props }: AccordionWaterfallProps) {
+  const { nodes, sentinelRef } = useLazyNodeLoader({
+    level,
+    ...props,
+    pageSize: 10,
+  });
+
+  return (
+    <>
+      <WaterfallAccordion {...props} level={level}>
+        {nodes.map((node, index) => (
+          <WaterfallNode
+            key={`${node.item.id}-${index}`}
+            {...props}
+            {...node}
+            isOpen={maxLevelOpen > level}
+            maxLevelOpen={maxLevelOpen}
+          />
+        ))}
+      </WaterfallAccordion>
+      <div ref={sentinelRef} />
+    </>
+  );
+}
+
+function WaterfallNode({ maxLevelOpen, level, ...props }: AccordionWaterfallProps) {
+  const { nodes, sentinelRef } = useLazyNodeLoader({
+    level,
+    ...props,
+    pageSize: 10,
+    throttle: 50,
+  });
+
+  const shouldRenderNestedNodes = maxLevelOpen > level;
+
+  return (
+    <>
+      <WaterfallAccordion {...props} level={level}>
+        {shouldRenderNestedNodes &&
+          nodes.map((node, index) => (
+            <WaterfallNode
+              key={`${node.item.id}-${index}`}
+              {...props}
+              {...node}
+              isOpen={shouldRenderNestedNodes}
+              maxLevelOpen={maxLevelOpen}
+            />
+          ))}
+      </WaterfallAccordion>
+      <div ref={sentinelRef} />
+    </>
+  );
+}
+
+type WaterfallAccordion = Pick<
+  AccordionWaterfallProps,
+  | 'item'
+  | 'level'
+  | 'duration'
+  | 'waterfallItemId'
+  | 'timelineMargins'
+  | 'onClickWaterfallItem'
+  | 'waterfall'
+  | 'showCriticalPath'
+  | 'isOpen'
+  | 'timelineMargins'
+>;
+
+function WaterfallAccordion(props: PropsWithChildren<WaterfallAccordion>) {
   const {
     item,
     level,
     duration,
-    waterfall,
     waterfallItemId,
-    timelineMargins,
     onClickWaterfallItem,
+    children,
+    waterfall,
     showCriticalPath,
-    maxLevelOpen,
+    timelineMargins,
   } = props;
   const theme = useTheme();
-
   const [isOpen, setIsOpen] = useState(props.isOpen);
 
-  let children = waterfall.childrenByParentId[item.id] || [];
+  const { filteredChildren, criticalPathSegmentsById, errorCount } = useWaterfall({
+    item,
+    showCriticalPath,
+    waterfall,
+  });
 
-  const criticalPath = showCriticalPath ? getCriticalPath(waterfall) : undefined;
-
-  const criticalPathSegmentsById = groupBy(criticalPath?.segments, (segment) => segment.item.id);
-
-  let displayedColor = item.color;
-
-  if (showCriticalPath) {
-    children = children.filter((child) => criticalPathSegmentsById[child.id]?.length);
-    displayedColor = transparentize(0.5, item.color);
-  }
-
-  const errorCount = waterfall.getErrorCount(item.id);
-
-  // To indent the items creating the parent/child tree
-  const marginLeftLevel = 8 * level;
-
-  function toggleAccordion() {
+  const toggleAccordion = useCallback(() => {
     setIsOpen((isCurrentOpen) => !isCurrentOpen);
-  }
+  }, []);
 
-  const hasToggle = !!children.length;
+  const displayedColor = props.showCriticalPath ? transparentize(0.5, item.color) : item.color;
+  const marginLeftLevel = 8 * level;
+  const spanTotalCount = filteredChildren.length;
+  const hasToggle = React.Children.count(children) > 0;
 
+  // console.log('a', children);
   return (
     <StyledAccordion
       data-test-subj="waterfallItem"
@@ -128,7 +283,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       id={item.id}
       hasError={item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
-      childrenCount={children.length}
+      childrenCount={spanTotalCount}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={
         <EuiFlexGroup gutterSize="none">
@@ -136,7 +291,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={isOpen}
-              childrenCount={children.length}
+              childrenCount={spanTotalCount}
               onClick={toggleAccordion}
             />
           </EuiFlexItem>
@@ -170,16 +325,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={toggleAccordion}
     >
-      {isOpen &&
-        children.map((child) => (
-          <AccordionWaterfall
-            {...props}
-            key={child.id}
-            isOpen={maxLevelOpen > level}
-            level={level + 1}
-            item={child}
-          />
-        ))}
+      {children}
     </StyledAccordion>
   );
 }
@@ -235,3 +381,42 @@ function ToggleAccordionButton({
     </div>
   );
 }
+
+// const handleScrollFn = useCallback(
+//   () =>
+//     debounce(() => {
+//       // const sentinel = sentinelRef.current;
+//       if (window.innerHeight + window.scrollY >= document.body.scrollHeight) {
+//         loadMore();
+//       }
+//     }),
+//   [loadMore]
+// );
+
+// useEffect(() => {
+//   const handleScroll = handleScrollFn();
+//   window.addEventListener('scroll', handleScroll);
+//   return () => {
+//     window.removeEventListener('scroll', handleScroll);
+//   };
+// }, [handleScrollFn]);
+
+// useEffect(() => {
+//   const observer = observerRef.current;
+//   const sentinel = sentinelRef.current;
+//   if (observer && sentinel) {
+//     observer.observe(sentinel);
+//   }
+
+//   return () => {
+//     if (observer && sentinel) {
+//       observer.unobserve(sentinel);
+//     }
+//   };
+// }, []);
+
+// useEffect(() => {
+//   if (intersectionObserverEntry?.isIntersecting) {
+//     loadMore();
+//   }
+// }, [intersectionObserverEntry?.isIntersecting, loadMore]);
