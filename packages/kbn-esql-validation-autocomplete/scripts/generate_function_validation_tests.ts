@@ -10,8 +10,6 @@ import { readFileSync, writeFileSync } from 'fs';
 import { camelCase } from 'lodash';
 import { join } from 'path';
 import * as recast from 'recast';
-const b = recast.types.builders;
-const n = recast.types.namedTypes;
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionsDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
@@ -1066,6 +1064,9 @@ function generateIncorrectlyTypedParameters(
  * @param testCasesByFunction
  */
 function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>>) {
+  const b = recast.types.builders;
+  const n = recast.types.namedTypes;
+
   const buildTestCase = (testQuery: string, expectedErrors: string[]) => {
     return b.expressionStatement(
       b.callExpression(b.identifier('testErrorsAndWarnings'), [
