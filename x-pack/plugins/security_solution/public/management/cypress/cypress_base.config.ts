@@ -81,6 +81,14 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          on('before:browser:launch', (browser, launchOptions) => {
+            if (browser.family === 'chromium') {
+              launchOptions.args.push(
+                '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
+              );
+            }
+            return launchOptions;
+          });
           registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
