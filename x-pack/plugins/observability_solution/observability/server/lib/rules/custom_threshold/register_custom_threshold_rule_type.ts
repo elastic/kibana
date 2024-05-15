@@ -17,7 +17,11 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { observabilityFeatureId, observabilityPaths } from '../../../../common';
+import {
+  LEGACY_OUTSIDE_RANGE,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '../../../../common';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -76,9 +80,11 @@ export function thresholdRuleType(
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
+  const comparators: string[] = Object.values(COMPARATORS);
+  comparators.push(LEGACY_OUTSIDE_RANGE);
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(Object.values(COMPARATORS)),
+    comparator: oneOfLiterals(comparators),
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };

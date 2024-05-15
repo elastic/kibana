@@ -8,13 +8,8 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import {
-  GetViewInAppRelativeUrlFnOpts,
-  PluginSetupContract,
-  RuleType,
-} from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { LEGACY_OUTSIDE_RANGE, observabilityPaths } from '@kbn/observability-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -49,13 +44,6 @@ import {
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
-type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
->;
-export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
-  ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
-};
-
 export function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
@@ -64,10 +52,11 @@ export function registerMetricThresholdRuleType(
   if (!featureFlags.metricThresholdAlertRuleEnabled) {
     return;
   }
-
+  const comparators: string[] = Object.values(COMPARATORS);
+  comparators.push(LEGACY_OUTSIDE_RANGE);
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(Object.values(COMPARATORS)),
+    comparator: oneOfLiterals(comparators),
     timeUnit: schema.string(),
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),

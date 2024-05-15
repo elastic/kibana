@@ -9,7 +9,7 @@ import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { LEGACY_OUTSIDE_RANGE, observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   InventoryItemType,
@@ -52,9 +52,11 @@ import {
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
+const comparators: string[] = Object.values(COMPARATORS);
+comparators.push(LEGACY_OUTSIDE_RANGE);
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(Object.values(COMPARATORS)) as Type<COMPARATORS>,
+  comparator: oneOfLiterals(comparators),
   timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,

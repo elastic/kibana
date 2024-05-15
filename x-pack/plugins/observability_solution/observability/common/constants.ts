@@ -29,3 +29,4 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
 ];
 
 export const EventsAsUnit = 'events';
+export const LEGACY_OUTSIDE_RANGE = 'outside';

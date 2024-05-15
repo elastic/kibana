@@ -290,7 +290,6 @@ const comparatorMap = {
   [COMPARATORS.GREATER_THAN]: (a: number, [b]: number[]) => a > b,
   [COMPARATORS.LESS_THAN]: (a: number, [b]: number[]) => a < b,
   [COMPARATORS.NOT_BETWEEN]: (value: number, [a, b]: number[]) => value < a || value > b,
-  [COMPARATORS.BC_OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
   [COMPARATORS.GREATER_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a >= b,
   [COMPARATORS.LESS_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a <= b,
 };

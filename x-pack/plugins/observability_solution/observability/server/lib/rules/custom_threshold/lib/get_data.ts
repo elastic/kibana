@@ -194,7 +194,6 @@ export const getData = async (
   const fieldsExisted = groupBy?.includes(KUBERNETES_POD_UID)
     ? await doFieldsExist(esClient, [CONTAINER_ID], index)
     : null;
-
   const request = {
     index,
     allow_no_indices: true,

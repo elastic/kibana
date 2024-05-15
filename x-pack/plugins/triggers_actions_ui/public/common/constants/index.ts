@@ -73,14 +73,3 @@ export const builtInComparators: { [key: string]: Comparator } = {
     requiredValues: 2,
   },
 };
-// BC_OUTSIDE_RANGE is added only for Backward Compatibility purposes
-// For the old rules are active and using "outside"
-export const BC_OUTSIDE_RANG: { [key: string]: Comparator } = {
-  [COMPARATORS.BC_OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.outsideRangeLabel', {
-      defaultMessage: 'Is outside',
-    }),
-    value: COMPARATORS.BC_OUTSIDE_RANGE,
-    requiredValues: 2,
-  },
-};

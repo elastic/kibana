@@ -19,7 +19,7 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -119,6 +119,14 @@ export const createMetricThresholdExecutor =
     } = options;
 
     const { criteria } = params;
+    criteria.forEach((criteriaItem: Record<string, any>) => {
+      // For backwards-compatibility check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+      // Then, change it on-the-fly to NOT_BETWEEN
+      // @ts-ignore
+      if (criteriaItem.comparator === LEGACY_OUTSIDE_RANGE) {
+        criteriaItem.comparator = COMPARATORS.NOT_BETWEEN;
+      }
+    });
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {

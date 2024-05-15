@@ -24,6 +24,7 @@ import {
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_OUTSIDE_RANGE } from '../../../../common';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
@@ -61,7 +62,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   } = props;
 
   const { metrics, comparator = COMPARATORS.GREATER_THAN, threshold = [] } = expression;
-
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
@@ -198,10 +198,18 @@ const ThresholdElement: React.FC<{
     return threshold;
   }, [threshold, isMetricPct]);
 
+  const thresholdComparator = useCallback(() => {
+    if (!comparator) return COMPARATORS.GREATER_THAN;
+    // Check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+    // Then, change it on-the-fly to NOT_BETWEEN
+    // @ts-ignore
+    if (comparator === LEGACY_OUTSIDE_RANGE) return COMPARATORS.NOT_BETWEEN;
+    return comparator;
+  }, [comparator]);
   return (
     <>
       <ThresholdExpression
-        thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
+        thresholdComparator={thresholdComparator()}
         threshold={displayedThreshold}
         onChangeSelectedThresholdComparator={updateComparator}
         onChangeSelectedThreshold={updateThreshold}

@@ -9,18 +9,17 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
-  EuiFieldNumber,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
   EuiSelect,
+  EuiFieldNumber,
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
-import { Comparator, COMPARATORS } from '@kbn/alerting-comparators';
-import { BC_OUTSIDE_RANG } from '../constants';
-import { builtInComparators } from '../..';
+import { Comparator } from '@kbn/alerting-comparators';
+import { builtInComparators } from '../constants';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
@@ -61,10 +60,7 @@ export const ThresholdExpression = ({
   popupPosition,
   unit = '',
 }: ThresholdExpressionProps) => {
-  const [comparators, setComparators] = useState<{ [key: string]: Comparator }>({
-    ...builtInComparators,
-    ...BC_OUTSIDE_RANG,
-  });
+  const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
   const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
@@ -77,19 +73,6 @@ export const ThresholdExpression = ({
       defaultMessage: 'AND',
     }
   );
-
-  useEffect(() => {
-    // BC_OUTSIDE_RANGE is added only for Backward Compatibility purposes
-    // For the old rules are active and using "outside"
-    if (customComparators) {
-      setComparators(customComparators);
-    } else if (thresholdComparator === COMPARATORS.BC_OUTSIDE_RANGE) {
-      delete builtInComparators[COMPARATORS.NOT_BETWEEN];
-      setComparators({ ...builtInComparators, ...BC_OUTSIDE_RANG });
-    } else {
-      setComparators({ ...builtInComparators });
-    }
-  }, [customComparators, thresholdComparator]);
 
   useEffect(() => {
     const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
