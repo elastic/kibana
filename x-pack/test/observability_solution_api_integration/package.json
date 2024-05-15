@@ -8,6 +8,10 @@
     "alerting_burn_rate:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/burn_rate/configs/serverless.config.ts",
     "alerting_burn_rate:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/burn_rate/configs/serverless.config.ts --grep @serverless --grep  @skipInServerless --invert",
     "alerting_burn_rate:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/burn_rate/configs/ess.config.ts",
-    "alerting_burn_rate:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/burn_rate/configs/ess.config.ts --grep @ess --grep  @skipInEss --invert"
+    "alerting_burn_rate:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/burn_rate/configs/ess.config.ts --grep @ess --grep  @skipInEss --invert",
+    "slo:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/slo/configs/serverless.config.ts",
+    "slo:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/slo/configs/serverless.config.ts --grep @serverless --grep  @skipInServerless --invert",
+    "slo:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/slo/configs/ess.config.ts",
+    "slo:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/slo/configs/ess.config.ts --grep @ess --grep  @skipInEss --invert"
   }
 }

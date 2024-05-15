@@ -10,6 +10,6 @@ import { createTestConfig } from '../../../../config/ess/config.base';
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'SLO - Burn rate Integration Tests - ESS Env',
+    reportName: 'SLO - Burn Rate Integration Tests - ESS Env',
   },
 });

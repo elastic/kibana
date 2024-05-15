@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../config/serverless/config.base';
+import { GenericFtrProviderContext } from '@kbn/test';
 
-export default createTestConfig({
-  testFiles: [require.resolve('..')],
-  junit: {
-    reportName: 'SLO - Burn Rate Integration Tests - Serverless Env',
-  },
-});
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services>;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../config/serverless/config.base';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'SLO - Burn Rate Integration Tests - Serverless Env',
+    reportName: 'SLO - Integration Tests - Serverless Env',
   },
 });
