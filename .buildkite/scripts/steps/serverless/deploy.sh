@@ -89,13 +89,13 @@ deploy() {
     PROJECT_PASSWORD=$(jq -r --slurp '.[2].password' $DEPLOY_LOGS)
 
     echo "Write to vault..."
-    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-    VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-    VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    retry 5 30 vault login -no-print "$VAULT_TOKEN"
 
     # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
     if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+      VAULT_ROLE_ID="$(get_vault_role_id)"
+      VAULT_SECRET_ID="$(get_vault_secret_id)"
+      VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+      retry 5 30 vault login -no-print "$VAULT_TOKEN"
       vault_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
     else
       vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
@@ -142,7 +142,7 @@ create_github_issue_oblt_test_environments() {
 
 echo "--- Create GitHub issue for deploying in the oblt test env"
 
-GITHUB_ISSUE=$(mktemp --suffix ".md") 
+GITHUB_ISSUE=$(mktemp --suffix ".md")
 cat <<EOF > "$GITHUB_ISSUE"
 ### Kibana image
 
