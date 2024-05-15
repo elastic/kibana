@@ -70,6 +70,7 @@ export class AIAssistantService {
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
+  private _isKBSetupInProgress: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -106,6 +107,13 @@ export class AIAssistantService {
 
   public isInitialized() {
     return this.initialized;
+  }
+
+  public get isKBSetupInProgress() {
+    return this._isKBSetupInProgress;
+  }
+  public set isKBSetupInProgress(inProgress: boolean) {
+    this._isKBSetupInProgress = inProgress;
   }
 
   private createDataStream: CreateDataStream = ({ resource, kibanaVersion, fieldMap }) => {
@@ -316,15 +324,16 @@ export class AIAssistantService {
     }
 
     return new AIAssistantKnowledgeBaseDataClient({
+      assistantService: this,
       logger: this.options.logger.get('knowledgeBase'),
+      currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
-      spaceId: opts.spaceId,
-      kibanaVersion: this.options.kibanaVersion,
       indexPatternsResourceName: this.resourceNames.aliases.knowledgeBase,
       ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
-      currentUser: opts.currentUser,
-      ml: this.options.ml,
       getElserId: this.getElserId,
+      kibanaVersion: this.options.kibanaVersion,
+      ml: this.options.ml,
+      spaceId: opts.spaceId,
     });
   }
 

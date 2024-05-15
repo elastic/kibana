@@ -29,13 +29,18 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
 
-  const isLoading = kbStatus?.is_setup_in_progress || isSettingUpKB;
+  const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
+  const isSetupComplete =
+    kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    kbStatus?.esql_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
     setupKB(ESQL_RESOURCE);
   }, [setupKB]);
 
-  if (!enableKnowledgeBaseByDefault) {
+  if (!enableKnowledgeBaseByDefault || isSetupComplete) {
     return null;
   }
 
@@ -44,7 +49,7 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
       color="primary"
       data-test-subj="install-knowledge-base-button"
       fill
-      isLoading={isLoading}
+      isLoading={isSetupInProgress}
       iconType="importAction"
       onClick={onInstallKnowledgeBase}
     >
