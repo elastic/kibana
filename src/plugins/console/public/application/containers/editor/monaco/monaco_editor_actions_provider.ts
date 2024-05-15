@@ -39,6 +39,8 @@ import {
 
 import type { AdjustedParsedRequest } from './types';
 
+const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
+
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
@@ -367,7 +369,10 @@ export class MonacoEditorActionsProvider {
     return model.getValue();
   }
 
-  public async autoIndent(event: React.MouseEvent) {
+  /**
+   * This function applies indentations to the request in the selected text.
+   */
+  public async autoIndent() {
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -387,16 +392,11 @@ export class MonacoEditorActionsProvider {
 
     const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
 
-    this.editor.executeEdits(
-      i18n.translate('console.monaco.applyIndentationsCallName', {
-        defaultMessage: 'Apply indentations',
-      }),
-      [
-        {
-          range: selectedRange,
-          text: autoIndentedText,
-        },
-      ]
-    );
+    this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
+      {
+        range: selectedRange,
+        text: autoIndentedText,
+      },
+    ]);
   }
 }

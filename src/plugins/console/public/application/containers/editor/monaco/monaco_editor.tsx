@@ -74,8 +74,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
   }, [docLinkVersion]);
 
-  const autoIndentCallback = useCallback(async (event: React.MouseEvent) => {
-    return actionsProvider.current!.autoIndent(event);
+  const autoIndentCallback = useCallback(async () => {
+    return actionsProvider.current!.autoIndent();
   }, []);
 
   const sendRequestsCallback = useCallback(async () => {
