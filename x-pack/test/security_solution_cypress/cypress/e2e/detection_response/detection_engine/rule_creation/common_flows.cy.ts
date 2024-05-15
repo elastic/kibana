@@ -52,7 +52,9 @@ import { visit } from '../../../../tasks/navigation';
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
 // in the creation form. For any rule type specific functionalities, please include
 // them in the relevant /rule_creation/[RULE_TYPE].cy.ts test.
-describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => {
+
+// FLAKY: https://github.com/elastic/kibana/issues/183437
+describe.skip('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
