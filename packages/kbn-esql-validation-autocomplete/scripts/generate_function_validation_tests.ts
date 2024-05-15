@@ -12,14 +12,14 @@ import { join } from 'path';
 import * as recast from 'recast';
 const b = recast.types.builders;
 const n = recast.types.namedTypes;
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionsDefinitions } from '../definitions/functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { FunctionDefinition } from '../definitions/types';
-import { nonNullable } from '../shared/helpers';
-import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
+import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
+import { evalFunctionsDefinitions } from '../src/definitions/functions';
+import { groupingFunctionDefinitions } from '../src/definitions/grouping';
+import { getFunctionSignatures } from '../src/definitions/helpers';
+import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
+import { FunctionDefinition } from '../src/definitions/types';
+import { nonNullable } from '../src/shared/helpers';
+import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
@@ -1149,7 +1149,7 @@ function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>
     return functionsDescribeCallExpression.arguments[1].body;
   }
 
-  const testFilePath = join(__dirname, 'validation.test.ts');
+  const testFilePath = join(__dirname, '../src/validation/validation.test.ts');
 
   const ast = recast.parse(readFileSync(testFilePath).toString(), {
     parser: require('recast/parsers/typescript'),
