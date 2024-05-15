@@ -80,8 +80,10 @@ import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetc
 
 export interface Props {
   conversationTitle?: string;
+  embeddedLayout?: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
+  showTitle?: boolean;
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
@@ -95,8 +97,10 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationTitle,
+  embeddedLayout = false,
   promptContextId = '',
   shouldRefocusPrompt = false,
+  showTitle = true,
   setConversationTitle,
   onCloseFlyout,
   chatHistoryVisible,
@@ -209,14 +213,28 @@ const AssistantComponent: React.FC<Props> = ({
 
         if (deepEqual(prev, nextConversation)) return prev;
 
-        return (
+        const conversationToReturn =
           (nextConversation &&
             conversations[
               nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
-        );
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+
+        if (
+          prev &&
+          prev.id === conversationToReturn.id &&
+          // if the conversation id has not changed and the previous conversation has more messages
+          // it is because the local conversation has a readable stream running
+          // and it has not yet been persisted to the stored conversation
+          prev.messages.length > conversationToReturn.messages.length
+        ) {
+          return {
+            ...conversationToReturn,
+            messages: prev.messages,
+          };
+        }
+        return conversationToReturn;
       });
     }
   }, [
@@ -396,6 +414,11 @@ const AssistantComponent: React.FC<Props> = ({
   const onToggleShowAnonymizedValues = useCallback(() => {
     setShowAnonymizedValues((prevValue) => !prevValue);
   }, [setShowAnonymizedValues]);
+
+  const isNewConversation = useMemo(
+    () => currentConversation?.messages.length === 0,
+    [currentConversation?.messages.length]
+  );
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
@@ -655,6 +678,24 @@ const AssistantComponent: React.FC<Props> = ({
     refetchConversationsState,
   ]);
 
+  const disclaimer = useMemo(
+    () =>
+      isNewConversation && (
+        <EuiText
+          data-test-subj="assistant-disclaimer"
+          textAlign="center"
+          color={euiThemeVars.euiColorMediumShade}
+          size="xs"
+          css={css`
+            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+          `}
+        >
+          {i18n.DISCLAIMER}
+        </EuiText>
+      ),
+    [isNewConversation]
+  );
+
   const flyoutBodyContent = useMemo(() => {
     if (isWelcomeSetup) {
       return (
@@ -843,7 +884,10 @@ const AssistantComponent: React.FC<Props> = ({
                   )
                 }
               >
-                {flyoutBodyContent}
+                <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                </EuiFlexGroup>
                 {/* <BlockBotCallToAction
                     connectorPrompt={connectorPrompt}
                     http={http}
