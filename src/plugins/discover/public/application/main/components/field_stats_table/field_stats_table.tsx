@@ -47,6 +47,14 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
 
   const services = useDiscoverServices();
+
+  // Other apps consuming Discover UI might inject their own proxied data services
+  // so we need override the kibana context services with the injected proxied services
+  // to make sure the table use the right service
+  const overridableServices = useMemo(() => {
+    return { data: services.data };
+  }, [services.data]);
+
   const dataVisualizerService = services.dataVisualizer;
 
   // State from Discover we want the embeddable to reflect
@@ -106,6 +114,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
         esql={isPlainRecord}
+        overridableServices={overridableServices}
       />
     </EuiFlexItem>
   );

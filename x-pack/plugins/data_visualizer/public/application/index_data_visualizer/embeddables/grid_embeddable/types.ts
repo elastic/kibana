@@ -12,6 +12,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
@@ -91,6 +92,10 @@ export interface FieldStatisticTableEmbeddableProps {
   shouldGetSubfields?: boolean;
   lastReloadRequestTime?: number;
   onTableUpdate?: (update: Partial<DataVisualizerTableState>) => void;
+  /**
+   * Inject Kibana services to override in Kibana provider context
+   */
+  overridableServices?: { data: DataPublicPluginStart };
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

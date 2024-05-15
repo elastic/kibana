@@ -101,17 +101,27 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
     unifiedSearch,
   };
 
+  const { overridableServices, ...restProps } = props;
+
   const kibanaRenderServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+  const servicesWithOverrides = { ...services, ...(overridableServices ?? {}) };
+
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(servicesWithOverrides, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
-
   return (
     <KibanaRenderContextProvider {...kibanaRenderServices}>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={servicesWithOverrides}>
         <DatePickerContextProvider {...datePickerDeps}>
-          <FieldStatisticsWrapperContent {...props} />
+          <FieldStatisticsWrapperContent {...restProps} />
         </DatePickerContextProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

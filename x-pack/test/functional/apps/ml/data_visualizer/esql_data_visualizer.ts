@@ -175,7 +175,7 @@ const esqlSampleLogData: TestData = {
         aggregatable: true,
         loading: false,
         docCountFormatted: '143 (100%)',
-        exampleCount: 11,
+        exampleCount: 10,
         viewableInLens: false,
       },
     ],

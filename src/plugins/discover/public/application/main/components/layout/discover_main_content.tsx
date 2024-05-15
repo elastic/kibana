@@ -61,7 +61,7 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+  const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
