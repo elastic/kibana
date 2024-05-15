@@ -107,7 +107,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
-interface StepDefineRuleProps extends RuleStepProps {
+export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;

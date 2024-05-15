@@ -87,4 +87,26 @@ describe('NewChat', () => {
 
     expect(newChatLink).toBeInTheDocument();
   });
+
+  it('calls onShowOverlay callback on click', () => {
+    const onShowOverlaySpy = jest.fn();
+    render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
+
+    const newChatButton = screen.getByTestId('newChat');
+
+    userEvent.click(newChatButton);
+
+    expect(onShowOverlaySpy).toHaveBeenCalled();
+  });
+
+  it('calls onShowOverlay callback on click for link', () => {
+    const onShowOverlaySpy = jest.fn();
+    render(<NewChat {...defaultProps} asLink={true} onShowOverlay={onShowOverlaySpy} />);
+
+    const newChatLink = screen.getByTestId('newChatLink');
+
+    userEvent.click(newChatLink);
+
+    expect(onShowOverlaySpy).toHaveBeenCalled();
+  });
 });

@@ -17,7 +17,7 @@ export type Props = Omit<PromptContext, 'id'> & {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
   conversationId?: string;
-  /** Defaults to `discuss`. If null, the button will not have an icon */
+  /** Defaults to `discuss`. If null, the button will not have an icon. Not available for link */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
