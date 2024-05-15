@@ -195,14 +195,6 @@ const processFile = async ({
 
   const fileData = await fs.readFileSync(file).toString().split('\n');
 
-  // console.error(
-  //   fileData.reduce((acc, item) => {
-  //     if (!item.length) return acc;
-
-  //     return acc.concat(`{ "index" : { "_index" : "${indexName}" } }\n${item}\n`);
-  //   }, '')
-  // );
-
   try {
     const response = await esClient.bulk<string>({
       pipeline: PIPELINE_NAME,
@@ -296,6 +288,7 @@ const checkDeleteIndices = async ({ esClient, log }: { esClient: Client; log: To
           )}`
         );
 
+        // TODO: add deletion logic
         // for (const index of existingIndices) {
         //   await esClient.indices.delete({ index: pattern });
 
