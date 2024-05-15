@@ -34,7 +34,6 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/utility-types-jest",
-    "@kbn/safer-lodash-set",
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
