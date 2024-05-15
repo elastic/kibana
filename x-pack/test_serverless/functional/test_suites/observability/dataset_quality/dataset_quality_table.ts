@@ -88,7 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    it('shows the updated size of the index', async () => {
+    // https://github.com/elastic/kibana/issues/178954
+    it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
