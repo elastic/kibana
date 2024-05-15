@@ -14,6 +14,9 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
@@ -120,12 +123,31 @@ export const EmbeddableMenu: FC<Props> = ({
 
         <EuiFormRow
           data-test-subj="aiopsRandomSamplerOptionsFormRow"
-          label={i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowLabel',
-            {
-              defaultMessage: 'Minimum time range',
-            }
-          )}
+          label={
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem css={{ textWrap: 'nowrap' }}>
+                {i18n.translate(
+                  'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowLabel',
+                  {
+                    defaultMessage: 'Minimum time range',
+                  }
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRange.tooltip',
+                    {
+                      defaultMessage:
+                        'Adds a wider time range to the analysis to improve pattern accuracy.',
+                    }
+                  )}
+                >
+                  <EuiIcon type="questionInCircle" color="subdued" />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           helpText={
             <>
               {categoryCount !== undefined && minimumTimeRangeOption !== 'No minimum' ? (
