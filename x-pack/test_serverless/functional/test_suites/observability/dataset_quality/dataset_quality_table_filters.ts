@@ -22,6 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality table filters', () => {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+    
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -87,8 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('filters for integration', async () => {
+    it('filters for integration', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationName = 'Apache HTTP Server';
@@ -119,8 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('filters for namespace', async () => {
+    it('filters for namespace', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const datasetNamespace = 'prod';
 
@@ -157,8 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('filters for quality', async () => {
+    it('filters for quality', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const expectedQuality = 'Poor';
 
