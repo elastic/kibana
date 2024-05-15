@@ -106,7 +106,7 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
       <FormattedMessage
         id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.probabilityLabel"
         defaultMessage="Probability used: {samplingProbability}%"
-        values={{ samplingProbability: samplingProbability * 100 }}
+        values={{ samplingProbability: Number((samplingProbability * 100).toPrecision(3)) }}
       />
     </div>
   ) : null;
