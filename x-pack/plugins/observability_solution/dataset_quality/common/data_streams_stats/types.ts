@@ -48,11 +48,6 @@ export type GetNonAggregatableDataStreamsParams =
 export type GetNonAggregatableDataStreamsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/non_aggregatable`>;
 
-export type GetDataStreamsEstimatedDataInBytesParams =
-  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/estimated_data`>['params'];
-export type GetDataStreamsEstimatedDataInBytesResponse =
-  APIReturnType<`GET /internal/dataset_quality/data_streams/estimated_data`>;
-
 export type GetIntegrationDashboardsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];
 export type GetIntegrationDashboardsResponse =
