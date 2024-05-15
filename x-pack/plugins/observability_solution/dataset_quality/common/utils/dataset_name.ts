@@ -39,14 +39,8 @@ export const indexNameToDataStreamParts = (dataStreamName: string) => {
   };
 };
 
-export const extractIndexNameFromBackingIndex = (
-  indexString: string,
-  type: DataStreamType
-): string => {
-  const pattern: RegExp = new RegExp(
-    `(?:\\.ds-)?(${type}-(?:[^-.]+(?:\\.[^.]+)+)-[^-]+)-\\d{4}\\.\\d{2}\\.\\d{2}-\\d{6}`
-  );
-
+export const extractIndexNameFromBackingIndex = (indexString: string): string => {
+  const pattern = /.ds-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/;
   const match = indexString.match(pattern);
 
   return match ? match[1] : indexString;

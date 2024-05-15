@@ -19,7 +19,8 @@ describe('conversational chain', () => {
     expectedFinalAnswer: string,
     expectedDocs: any,
     expectedTokens: any,
-    expectedSearchRequest: any
+    expectedSearchRequest: any,
+    contentField: Record<string, string> = { index: 'field', website: 'body_content' }
   ) => {
     const searchMock = jest.fn().mockImplementation(() => {
       return {
@@ -37,6 +38,9 @@ describe('conversational chain', () => {
               _id: '1',
               _source: {
                 body_content: 'value2',
+                metadata: {
+                  source: 'value3',
+                },
               },
             },
           ],
@@ -69,7 +73,7 @@ describe('conversational chain', () => {
             },
           },
         }),
-        content_field: { index: 'field', website: 'body_content' },
+        content_field: contentField,
         size: 3,
       },
       prompt: 'you are a QA bot',
@@ -144,6 +148,41 @@ describe('conversational chain', () => {
           body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ]
+    );
+  });
+
+  it('should be able to create a conversational chain with nested field', async () => {
+    await createTestChain(
+      ['the final answer'],
+      [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      'the final answer',
+      [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value3' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      [
+        { type: 'context_token_count', count: 15 },
+        { type: 'prompt_token_count', count: 5 },
+      ],
+      [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      { index: 'field', website: 'metadata.source' }
     );
   });
 
