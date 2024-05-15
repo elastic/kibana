@@ -74,6 +74,7 @@ const getDefaultFieldConfig = (
 interface SeriesControlsProps {
   appStateHandler: Function;
   bounds: any;
+  direction?: 'column' | 'row';
   functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
@@ -89,6 +90,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   appStateHandler,
   bounds,
   children,
+  direction = 'row',
   functionDescription,
   job,
   selectedDetectorIndex,
@@ -297,7 +299,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
 
   return (
     <div data-test-subj="mlSingleMetricViewerSeriesControls">
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={
