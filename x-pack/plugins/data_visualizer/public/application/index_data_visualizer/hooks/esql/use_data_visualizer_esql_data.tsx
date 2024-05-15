@@ -82,8 +82,7 @@ export const getDefaultESQLDataVisualizerListState = (
 });
 export const useESQLDataVisualizerData = (
   input: ESQLDataVisualizerGridEmbeddableState,
-  dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
-  setQuery?: React.Dispatch<React.SetStateAction<ESQLQuery>>
+  dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
@@ -591,8 +590,8 @@ export const useESQLDataVisualizerData = (
     [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = useCallback(
-    async (q?: AggregateQuery) => {
+  const resetData = useCallback(
+    (q?: AggregateQuery) => {
       // When user submits a new query
       // resets all current requests and other data
       if (cancelOverallStatsRequest) {
@@ -605,11 +604,8 @@ export const useESQLDataVisualizerData = (
       setFieldStatFieldsToFetch(undefined);
       setMetricConfigs(defaults.metricConfigs);
       setNonMetricConfigs(defaults.nonMetricConfigs);
-      if (isESQLQuery(q) && setQuery) {
-        setQuery(q);
-      }
     },
-    [cancelFieldStatsRequest, cancelOverallStatsRequest, setQuery]
+    [cancelFieldStatsRequest, cancelOverallStatsRequest]
   );
 
   return {
@@ -628,7 +624,7 @@ export const useESQLDataVisualizerData = (
     getItemIdToExpandedRowMap,
     cancelOverallStatsRequest,
     cancelFieldStatsRequest,
-    onQueryUpdate,
+    resetData,
     limitSize,
     showEmptyFields,
     fieldsCountStats,

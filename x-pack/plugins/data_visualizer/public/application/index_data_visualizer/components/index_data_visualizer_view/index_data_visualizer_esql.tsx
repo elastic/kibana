@@ -52,13 +52,16 @@ import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
-
+const DEFAULT_ESQL_QUERY = { esql: '' };
+const expandCodeEditor = () => true;
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
+  // Query that has been typed, but has not submitted with cmd + enter
+  const [localQuery, setLocalQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
+  const [query, setQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
   const toggleShowEmptyFields = () => {
@@ -92,9 +95,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
   };
 
-  // Query that has been typed, but has not submitted with cmd + enter
-  const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
-
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
     if (isESQLQuery(query)) {
@@ -105,7 +105,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       return undefined;
     }
     return indexPatternFromQuery;
-  }, [query]);
+  }, [query?.esql]);
 
   useEffect(
     function updateAdhocDataViewFromQuery() {
@@ -169,11 +169,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     metricsStats,
     timefilter,
     getItemIdToExpandedRowMap,
-    onQueryUpdate,
+    resetData,
     limitSize,
     showEmptyFields,
     fieldsCountStats,
-  } = useESQLDataVisualizerData(input, dataVisualizerListState, setQuery);
+  } = useESQLDataVisualizerData(input, dataVisualizerListState);
 
   const hasValidTimeField = useMemo(
     () => currentDataView?.timeFieldName !== undefined,
@@ -199,6 +199,15 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       setLocalQuery(q);
     }
   }, []);
+  const onTextLangQuerySubmit = useCallback(
+    async (q: AggregateQuery | undefined) => {
+      if (isESQLQuery(q)) {
+        resetData();
+        setQuery(q);
+      }
+    },
+    [resetData]
+  );
 
   return (
     <EuiPageTemplate
@@ -253,8 +262,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         <TextBasedLangEditor
           query={localQuery}
           onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onQueryUpdate}
-          expandCodeEditor={() => false}
+          onTextLangQuerySubmit={onTextLangQuerySubmit}
+          expandCodeEditor={expandCodeEditor}
           isCodeEditorExpanded={true}
           detectTimestamp={true}
           hideMinimizeButton={true}
