@@ -56,7 +56,7 @@ interface Props {
   name?: string;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
-  securityFeaturesAPIClient: PublicMethodsOf<SecurityFeaturesAPIClient>;
+  securityFeaturesAPI: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -363,7 +363,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   private async loadAppData() {
     try {
       const [features, roleMapping] = await Promise.all([
-        this.props.securityFeaturesAPIClient.checkFeatures(),
+        this.props.securityFeaturesAPI.checkFeatures(),
         this.editingExistingRoleMapping() || this.cloningExistingRoleMapping()
           ? this.props.roleMappingsAPI.getRoleMapping(this.props.name!)
           : Promise.resolve({

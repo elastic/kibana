@@ -27,6 +27,7 @@ describe('RoleMappingsGridPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    securityFeaturesAPI: ReturnType<typeof securityFeaturesAPIClientMock.create>,
     rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create(),
     readOnly: boolean = false
   ) => {
@@ -41,6 +42,7 @@ describe('RoleMappingsGridPage', () => {
         <RoleMappingsGridPage
           rolesAPIClient={rolesAPI}
           roleMappingsAPI={roleMappingsAPI}
+          securityFeaturesAPI={securityFeaturesAPI}
           notifications={coreStart.notifications}
           docLinks={coreStart.docLinks}
           history={history}
@@ -66,7 +68,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -96,7 +98,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -124,7 +126,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -151,7 +153,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -176,7 +178,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -207,7 +209,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -262,7 +264,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI, roleAPIClient);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, roleAPIClient);
     await nextTick();
     wrapper.update();
 
@@ -297,7 +299,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -331,7 +333,7 @@ describe('RoleMappingsGridPage', () => {
         hasCompatibleRealms: true,
       });
 
-      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, undefined, true);
       expect(wrapper.find(SectionLoading)).toHaveLength(1);
       expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -372,7 +374,7 @@ describe('RoleMappingsGridPage', () => {
         },
       ]);
 
-      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, undefined, true);
       await nextTick();
       wrapper.update();
 

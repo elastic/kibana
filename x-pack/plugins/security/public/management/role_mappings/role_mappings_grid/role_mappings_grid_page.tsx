@@ -51,7 +51,7 @@ import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
-  securityFeaturesAPIClient: PublicMethodsOf<SecurityFeaturesAPIClient>;
+  securityFeaturesAPI: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -450,7 +450,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   private async checkPrivileges() {
     try {
       const { canReadSecurity, hasCompatibleRealms } =
-        await this.props.securityFeaturesAPIClient.checkFeatures();
+        await this.props.securityFeaturesAPI.checkFeatures();
 
       const canLoad = canReadSecurity || this.props.readOnly;
 

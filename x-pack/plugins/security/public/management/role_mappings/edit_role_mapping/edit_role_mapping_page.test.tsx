@@ -35,6 +35,7 @@ describe('EditRoleMappingPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    securityFeaturesAPI: ReturnType<typeof securityFeaturesAPIClientMock.create>,
     name?: string,
     readOnly: boolean = false
   ) => {
@@ -52,6 +53,7 @@ describe('EditRoleMappingPage', () => {
           action="edit"
           name={name}
           roleMappingsAPI={roleMappingsAPI}
+          securityFeaturesAPI={securityFeaturesAPI}
           rolesAPIClient={rolesAPI}
           notifications={coreStart.notifications}
           docLinks={coreStart.docLinks}
@@ -82,7 +84,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -135,7 +137,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -174,7 +176,7 @@ describe('EditRoleMappingPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -194,7 +196,7 @@ describe('EditRoleMappingPage', () => {
       hasCompatibleRealms: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -223,7 +225,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'deprecatedRolesAssigned')).toHaveLength(0);
 
     await nextTick();
@@ -254,7 +256,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -287,7 +289,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -332,7 +334,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -378,7 +380,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo');
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -413,7 +415,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI, 'foo', true);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo', true);
     await nextTick();
     wrapper.update();
 
