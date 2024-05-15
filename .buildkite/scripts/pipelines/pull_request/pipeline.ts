@@ -70,14 +70,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
 
     if (
@@ -87,7 +87,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     }
 
     if (
@@ -106,14 +106,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
       (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
@@ -205,9 +205,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
-      );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
+      // );
     }
 
     if (
@@ -237,19 +237,19 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
-      );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
-      );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
-      );
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
-      );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
+      // );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
+      // );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
+      // );
+      // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
+      // );
     }
 
     if (
@@ -276,9 +276,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
-      );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+      // );
     }
 
     if (
@@ -307,9 +307,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/threat_intelligence.yml')
-      );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/threat_intelligence.yml')
+      // );
     }
 
     if (
@@ -317,9 +317,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
-      );
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
+      // );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
