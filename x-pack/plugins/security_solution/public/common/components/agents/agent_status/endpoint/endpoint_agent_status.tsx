@@ -148,14 +148,12 @@ export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
       refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
     });
 
-    const emptyValue = (
-      <EuiText size="xs" data-test-subj={dataTestSubj}>
-        <p>{getEmptyValue()}</p>
-      </EuiText>
-    );
-
     if (!data) {
-      return emptyValue;
+      return (
+        <EuiText size="xs" data-test-subj={dataTestSubj}>
+          <p>{getEmptyValue()}</p>
+        </EuiText>
+      );
     }
 
     return (

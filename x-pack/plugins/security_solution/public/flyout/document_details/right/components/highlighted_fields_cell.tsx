@@ -6,7 +6,7 @@
  */
 
 import type { VFC } from 'react';
-import React, { useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -17,7 +17,6 @@ import {
 } from '../../../../common/components/agents/agent_status';
 import { useRightPanelContext } from '../context';
 import {
-  AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -80,7 +79,39 @@ export interface HighlightedFieldsCellProps {
   values: string[] | null | undefined;
 }
 
+const FieldsAgentStatus = memo(
+  ({
+    value,
+    isSentinelOneAgentIdField,
+  }: {
+    value: string | undefined;
+    isSentinelOneAgentIdField: boolean;
+  }) => {
+    const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+    if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
+      return (
+        <AgentStatus
+          agentId={String(value ?? '')}
+          agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
+          data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+        />
+      );
+    } else {
+      // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled and removed
+      return (
+        <EndpointAgentStatusById
+          endpointAgentId={String(value ?? '')}
+          data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+        />
+      );
+    }
+  }
+);
+
+FieldsAgentStatus.displayName = 'FieldsAgentStatus';
+
 /**
+ * console.log('c::*, values != null
  * Renders a component in the highlighted fields table cell based on the field name
  */
 export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
@@ -88,33 +119,9 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   field,
   originalField,
 }) => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-
-  const getAgentStatus = useCallback(
-    (value?: string) => {
-      if (field === AGENT_STATUS_FIELD_NAME) {
-        const isSentinelOneAgentIdField = originalField === SENTINEL_ONE_AGENT_ID_FIELD;
-        if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
-          return (
-            <AgentStatus
-              agentId={String(value ?? '')}
-              agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
-              data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-            />
-          );
-        } else {
-          // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled and removed
-          return (
-            <EndpointAgentStatusById
-              endpointAgentId={String(value ?? '')}
-              data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-            />
-          );
-        }
-      }
-      return <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>;
-    },
-    [field, originalField, agentStatusClientEnabled]
+  const isSentinelOneAgentIdField = useMemo(
+    () => originalField === SENTINEL_ONE_AGENT_ID_FIELD,
+    [originalField]
   );
 
   return (
@@ -129,8 +136,13 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
             >
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell value={value} />
+              ) : isSentinelOneAgentIdField ? (
+                <FieldsAgentStatus
+                  value={value}
+                  isSentinelOneAgentIdField={isSentinelOneAgentIdField}
+                />
               ) : (
-                getAgentStatus(value)
+                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
               )}
             </EuiFlexItem>
           );
