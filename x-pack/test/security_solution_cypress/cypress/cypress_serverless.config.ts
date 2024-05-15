@@ -11,6 +11,7 @@ import { samlAuthentication } from './support/saml_auth';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  chromeWebSecurity: false,
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,

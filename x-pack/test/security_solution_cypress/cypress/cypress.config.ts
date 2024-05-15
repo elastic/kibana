@@ -9,6 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 
 export default defineCypressConfig({
+  chromeWebSecurity: false,
   defaultCommandTimeout: 60000,
   env: {
     grepFilterSpecs: true,
