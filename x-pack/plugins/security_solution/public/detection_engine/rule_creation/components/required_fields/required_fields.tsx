@@ -68,7 +68,7 @@ const RequiredFieldsList = ({
     By default, the `useFormData` hook triggers a re-render whenever any form field changes.
     It also allows optimization by passing a "watch" array of field names. The component then only re-renders when these specified fields change.
 
-    Hovewer, it doesn't work with fields created using the `UseArray` component.
+    However, it doesn't work with fields created using the `UseArray` component.
     In `useFormData`, these array fields are stored as "flattened" objects with numbered keys, like { "requiredFields[0]": { ... }, "requiredFields[1]": { ... } }.
     The "watch" feature of `useFormData` only works if you pass these "flattened" field names, such as ["requiredFields[0]", "requiredFields[1]", ...], not just "requiredFields".
 
