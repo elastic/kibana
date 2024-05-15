@@ -12,6 +12,8 @@ import { SvlUserManagerProvider } from './svl_user_manager';
 import { DataViewApiProvider } from './data_view_api';
 
 export type { RoleCredentials } from './svl_user_manager';
+export type { InternalRequestHeader } from './svl_common_api';
+export type { SupertestWithoutAuthType } from './supertest';
 
 export const services = {
   supertest: SupertestProvider,
