@@ -13,6 +13,7 @@ import React from 'react';
 import {
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -74,6 +75,12 @@ export function FeaturesConfigurationPanel({
           isSavingEnabled={true}
           onFieldChange={handleFieldChange}
           unsavedChange={unsavedChanges[enableInfrastructureHostsView]}
+        />
+        <FieldRow
+          field={fields[enableInfrastructureAssetCustomDashboards]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureAssetCustomDashboards]}
         />
         {featureFlags.profilingEnabled && (
           <FieldRow
