@@ -275,7 +275,15 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ cluster: string[]; indices: ",
+              "{ cluster: string[]; remote_cluster?: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleRemoteClusterPrivilege",
+                "text": "RoleRemoteClusterPrivilege"
+              },
+              "[] | undefined; indices: ",
               {
                 "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
@@ -515,6 +523,48 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleRemoteClusterPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleRemoteClusterPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleRemoteClusterPrivilege.clusters",
+            "type": "Array",
+            "tags": [],
+            "label": "clusters",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleRemoteClusterPrivilege.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -833,6 +883,19 @@
             "label": "allowRoleRemoteIndexPrivileges",
             "description": [
               "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowRemoteClusterPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRemoteClusterPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote cluster privileges in roles."
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,

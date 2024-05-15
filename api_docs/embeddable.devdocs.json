@@ -8921,39 +8921,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.reactEmbeddableRegistryHasKey",
-        "type": "Function",
-        "tags": [],
-        "label": "reactEmbeddableRegistryHasKey",
-        "description": [],
-        "signature": [
-          "(key: string) => boolean"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.reactEmbeddableRegistryHasKey.$1",
-            "type": "string",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.ReactEmbeddableRenderer",
         "type": "Function",
         "tags": [],
@@ -9197,492 +9164,6 @@
                 "returnComment": []
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.registerReactEmbeddableFactory",
-        "type": "Function",
-        "tags": [],
-        "label": "registerReactEmbeddableFactory",
-        "description": [
-          "\nRegisters a new React embeddable factory. This should be called at plugin start time.\n"
-        ],
-        "signature": [
-          "<StateType extends object = object, APIType extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.DefaultEmbeddableApi",
-            "text": "DefaultEmbeddableApi"
-          },
-          "<StateType> = ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.DefaultEmbeddableApi",
-            "text": "DefaultEmbeddableApi"
-          },
-          "<StateType>>(type: string, getFactory: () => Promise<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReactEmbeddableFactory",
-            "text": "ReactEmbeddableFactory"
-          },
-          "<StateType, APIType, StateType>>) => void"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.registerReactEmbeddableFactory.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "The key to register the factory under. This should be the same as the `type` key in the factory definition."
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.registerReactEmbeddableFactory.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "getFactory",
-            "description": [
-              "an async function that gets the factory definition for this key. This should always async import the\nactual factory definition file to avoid polluting page load."
-            ],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.ReactEmbeddableFactory",
-                "text": "ReactEmbeddableFactory"
-              },
-              "<StateType, APIType, StateType>>"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.registerReactEmbeddableSavedObject",
-        "type": "Function",
-        "tags": [],
-        "label": "registerReactEmbeddableSavedObject",
-        "description": [
-          "\nRegister an embeddable API saved object with the Add from library flyout.\n"
-        ],
-        "signature": [
-          "<TSavedObjectAttributes extends ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.FinderAttributes",
-            "text": "FinderAttributes"
-          },
-          ">({ onAdd, embeddableType, savedObjectType, savedObjectName, getIconForSavedObject, getSavedObjectSubType, getTooltipForSavedObject, }: { onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.SavedObjectCommon",
-            "text": "SavedObjectCommon"
-          },
-          "<TSavedObjectAttributes>) => ",
-          "IconType",
-          "; getSavedObjectSubType?: ((savedObject: ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.SavedObjectCommon",
-            "text": "SavedObjectCommon"
-          },
-          "<TSavedObjectAttributes>) => string) | undefined; getTooltipForSavedObject?: ((savedObject: ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.SavedObjectCommon",
-            "text": "SavedObjectCommon"
-          },
-          "<TSavedObjectAttributes>) => string) | undefined; }) => void"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.registerReactEmbeddableSavedObject.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  onAdd,\n  embeddableType,\n  savedObjectType,\n  savedObjectName,\n  getIconForSavedObject,\n  getSavedObjectSubType,\n  getTooltipForSavedObject,\n}",
-            "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd",
-                "type": "Function",
-                "tags": [],
-                "label": "onAdd",
-                "description": [],
-                "signature": [
-                  "(container: ",
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PresentationContainer",
-                    "text": "PresentationContainer"
-                  },
-                  ", savedObject: ",
-                  {
-                    "pluginId": "savedObjectsFinder",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsFinderPluginApi",
-                    "section": "def-common.SavedObjectCommon",
-                    "text": "SavedObjectCommon"
-                  },
-                  "<TSavedObjectAttributes>) => void"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "container",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/presentation-containers",
-                        "scope": "common",
-                        "docId": "kibKbnPresentationContainersPluginApi",
-                        "section": "def-common.PresentationContainer",
-                        "text": "PresentationContainer"
-                      }
-                    ],
-                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd.$2",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "savedObject",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/content-management-utils",
-                        "scope": "common",
-                        "docId": "kibKbnContentManagementUtilsPluginApi",
-                        "section": "def-common.SOWithMetadata",
-                        "text": "SOWithMetadata"
-                      },
-                      "<TSavedObjectAttributes>"
-                    ],
-                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.embeddableType",
-                "type": "string",
-                "tags": [],
-                "label": "embeddableType",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.savedObjectType",
-                "type": "string",
-                "tags": [],
-                "label": "savedObjectType",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.savedObjectName",
-                "type": "string",
-                "tags": [],
-                "label": "savedObjectName",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.getIconForSavedObject",
-                "type": "Function",
-                "tags": [],
-                "label": "getIconForSavedObject",
-                "description": [],
-                "signature": [
-                  "(savedObject: ",
-                  {
-                    "pluginId": "savedObjectsFinder",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsFinderPluginApi",
-                    "section": "def-common.SavedObjectCommon",
-                    "text": "SavedObjectCommon"
-                  },
-                  "<TSavedObjectAttributes>) => ",
-                  "IconType"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getIconForSavedObject.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "savedObject",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "savedObjectsFinder",
-                        "scope": "common",
-                        "docId": "kibSavedObjectsFinderPluginApi",
-                        "section": "def-common.SavedObjectCommon",
-                        "text": "SavedObjectCommon"
-                      },
-                      "<TSavedObjectAttributes>"
-                    ],
-                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.getSavedObjectSubType",
-                "type": "Function",
-                "tags": [],
-                "label": "getSavedObjectSubType",
-                "description": [],
-                "signature": [
-                  "((savedObject: ",
-                  {
-                    "pluginId": "savedObjectsFinder",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsFinderPluginApi",
-                    "section": "def-common.SavedObjectCommon",
-                    "text": "SavedObjectCommon"
-                  },
-                  "<TSavedObjectAttributes>) => string) | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getSavedObjectSubType.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "savedObject",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "savedObjectsFinder",
-                        "scope": "common",
-                        "docId": "kibSavedObjectsFinderPluginApi",
-                        "section": "def-common.SavedObjectCommon",
-                        "text": "SavedObjectCommon"
-                      },
-                      "<TSavedObjectAttributes>"
-                    ],
-                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.registerReactEmbeddableSavedObject.$1.getTooltipForSavedObject",
-                "type": "Function",
-                "tags": [],
-                "label": "getTooltipForSavedObject",
-                "description": [],
-                "signature": [
-                  "((savedObject: ",
-                  {
-                    "pluginId": "savedObjectsFinder",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsFinderPluginApi",
-                    "section": "def-common.SavedObjectCommon",
-                    "text": "SavedObjectCommon"
-                  },
-                  "<TSavedObjectAttributes>) => string) | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getTooltipForSavedObject.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "savedObject",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "savedObjectsFinder",
-                        "scope": "common",
-                        "docId": "kibSavedObjectsFinderPluginApi",
-                        "section": "def-common.SavedObjectCommon",
-                        "text": "SavedObjectCommon"
-                      },
-                      "<TSavedObjectAttributes>"
-                    ],
-                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.registerSavedObjectToPanelMethod",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "registerSavedObjectToPanelMethod",
-        "description": [],
-        "signature": [
-          "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
-        ],
-        "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/plugin.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/plugin.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/plugin.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/plugin.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/plugin.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/plugin.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/plugin.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/plugin.ts"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.registerSavedObjectToPanelMethod.$1",
-            "type": "string",
-            "tags": [],
-            "label": "savedObjectType",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.registerSavedObjectToPanelMethod.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "method",
-            "description": [],
-            "signature": [
-              "SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>"
-            ],
-            "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -13396,7 +12877,7 @@
         "tags": [],
         "label": "ReactEmbeddableFactory",
         "description": [
-          "\nThe React Embeddable Factory interface is used to register a series of functions that\ncreate and manage an embeddable instance.\n\nEmbeddables are React components that manage their own state, can be serialized and\ndeserialized, and return an API that can be used to interact with them imperatively.\nprovided by the parent, and will not save any state to an external store."
+          "\nThe React Embeddable Factory interface is used to register a series of functions that\ncreate and manage an embeddable instance.\n\nEmbeddables are React components that manage their own state, can be serialized and\ndeserialized, and return an API that can be used to interact with them imperatively."
         ],
         "signature": [
           {
@@ -14139,6 +13620,37 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddableSavedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "ReactEmbeddableSavedObject",
+        "description": [],
+        "signature": [
+          "{ onAdd: SOToEmbeddable<TSavedObjectAttributes>; savedObjectMetaData: ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "public",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-public.SavedObjectMetaData",
+            "text": "SavedObjectMetaData"
+          },
+          "<",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.SELECT_RANGE_TRIGGER",
         "type": "string",
         "tags": [],
@@ -14490,9 +14002,279 @@
       "children": [
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerEmbeddableFactory",
+          "id": "def-public.EmbeddableSetup.registerReactEmbeddableSavedObject",
           "type": "Function",
           "tags": [],
+          "label": "registerReactEmbeddableSavedObject",
+          "description": [
+            "\nRegister an embeddable API saved object with the Add from library flyout.\n"
+          ],
+          "signature": [
+            "<TSavedObjectAttributes extends ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">({ onAdd, embeddableType, savedObjectType, savedObjectName, getIconForSavedObject, getSavedObjectSubType, getTooltipForSavedObject, }: { onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.SavedObjectCommon",
+              "text": "SavedObjectCommon"
+            },
+            "<TSavedObjectAttributes>) => ",
+            "IconType",
+            "; getSavedObjectSubType?: ((savedObject: ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.SavedObjectCommon",
+              "text": "SavedObjectCommon"
+            },
+            "<TSavedObjectAttributes>) => string) | undefined; getTooltipForSavedObject?: ((savedObject: ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.SavedObjectCommon",
+              "text": "SavedObjectCommon"
+            },
+            "<TSavedObjectAttributes>) => string) | undefined; }) => void"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerReactEmbeddableSavedObject.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "{ onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.SavedObjectCommon",
+                  "text": "SavedObjectCommon"
+                },
+                "<TSavedObjectAttributes>) => ",
+                "IconType",
+                "; getSavedObjectSubType?: ((savedObject: ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.SavedObjectCommon",
+                  "text": "SavedObjectCommon"
+                },
+                "<TSavedObjectAttributes>) => string) | undefined; getTooltipForSavedObject?: ((savedObject: ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.SavedObjectCommon",
+                  "text": "SavedObjectCommon"
+                },
+                "<TSavedObjectAttributes>) => string) | undefined; }"
+              ],
+              "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod",
+          "type": "Function",
+          "tags": [
+            "deprecated"
+          ],
+          "label": "registerSavedObjectToPanelMethod",
+          "description": [],
+          "signature": [
+            "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": true,
+          "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "savedSearch",
+              "path": "src/plugins/saved_search/public/plugin.ts"
+            },
+            {
+              "plugin": "visualizations",
+              "path": "src/plugins/visualizations/public/plugin.ts"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/plugin.ts"
+            },
+            {
+              "plugin": "maps",
+              "path": "x-pack/plugins/maps/public/plugin.ts"
+            }
+          ],
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$1",
+              "type": "string",
+              "tags": [],
+              "label": "savedObjectType",
+              "description": [],
+              "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "method",
+              "description": [],
+              "signature": [
+                "(savedObject: ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.SavedObjectCommon",
+                  "text": "SavedObjectCommon"
+                },
+                "<TSavedObjectAttributes>) => { savedObjectId: string; } | Partial<TByValueAttributes>"
+              ],
+              "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "embeddable",
+                  "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "savedObject",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "@kbn/content-management-utils",
+                      "scope": "common",
+                      "docId": "kibKbnContentManagementUtilsPluginApi",
+                      "section": "def-common.SOWithMetadata",
+                      "text": "SOWithMetadata"
+                    },
+                    "<TSavedObjectAttributes>"
+                  ],
+                  "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory",
+          "type": "Function",
+          "tags": [],
+          "label": "registerReactEmbeddableFactory",
+          "description": [
+            "\nRegisters an async {@link ReactEmbeddableFactory} getter."
+          ],
+          "signature": [
+            "<StateType extends object = object, APIType extends ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.DefaultEmbeddableApi",
+              "text": "DefaultEmbeddableApi"
+            },
+            "<StateType> = ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.DefaultEmbeddableApi",
+              "text": "DefaultEmbeddableApi"
+            },
+            "<StateType>>(type: string, getFactory: () => Promise<",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ReactEmbeddableFactory",
+              "text": "ReactEmbeddableFactory"
+            },
+            "<StateType, APIType, StateType>>) => void"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/embeddable/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "getFactory",
+              "description": [],
+              "signature": [
+                "() => Promise<",
+                {
+                  "pluginId": "embeddable",
+                  "scope": "public",
+                  "docId": "kibEmbeddablePluginApi",
+                  "section": "def-public.ReactEmbeddableFactory",
+                  "text": "ReactEmbeddableFactory"
+                },
+                "<StateType, APIType, StateType>>"
+              ],
+              "path": "src/plugins/embeddable/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableSetup.registerEmbeddableFactory",
+          "type": "Function",
+          "tags": [
+            "deprecated"
+          ],
           "label": "registerEmbeddableFactory",
           "description": [],
           "signature": [
@@ -14563,8 +14345,78 @@
             ">"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "visualizations",
+              "path": "src/plugins/visualizations/public/plugin.ts"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/plugin.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/plugin.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/plugin.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/plugin.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/plugin.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/plugin.tsx"
+            },
+            {
+              "plugin": "maps",
+              "path": "x-pack/plugins/maps/public/plugin.ts"
+            },
+            {
+              "plugin": "discover",
+              "path": "src/plugins/discover/public/plugin.tsx"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/embeddables/index.ts"
+            },
+            {
+              "plugin": "infra",
+              "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
+            },
+            {
+              "plugin": "slo",
+              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
+            },
+            {
+              "plugin": "links",
+              "path": "src/plugins/links/public/plugin.ts"
+            }
+          ],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14618,7 +14470,9 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerEnhancement",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "registerEnhancement",
           "description": [],
           "signature": [
@@ -14641,8 +14495,14 @@
             ">) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "uiActionsEnhanced",
+              "path": "src/plugins/ui_actions_enhanced/public/plugin.ts"
+            }
+          ],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14681,7 +14541,9 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.setCustomEmbeddableFactoryProvider",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "setCustomEmbeddableFactoryProvider",
           "description": [],
           "signature": [
@@ -14690,8 +14552,14 @@
             ") => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "embeddableEnhanced",
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
+            }
+          ],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14754,9 +14622,81 @@
       "children": [
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableStart.getEmbeddableFactory",
+          "id": "def-public.EmbeddableStart.reactEmbeddableRegistryHasKey",
           "type": "Function",
           "tags": [],
+          "label": "reactEmbeddableRegistryHasKey",
+          "description": [
+            "\nChecks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}"
+          ],
+          "signature": [
+            "(type: string) => boolean"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableStart.reactEmbeddableRegistryHasKey.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/embeddable/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.getReactEmbeddableSavedObjects",
+          "type": "Function",
+          "tags": [],
+          "label": "getReactEmbeddableSavedObjects",
+          "description": [
+            "\n"
+          ],
+          "signature": [
+            "<TSavedObjectAttributes extends ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">() => IterableIterator<[string, ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ReactEmbeddableSavedObject",
+              "text": "ReactEmbeddableSavedObject"
+            },
+            "<TSavedObjectAttributes>]>"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": [
+            "An iterator over all {@link ReactEmbeddableSavedObject }s that have been registered using {@link registerReactEmbeddableSavedObject }."
+          ]
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.getEmbeddableFactory",
+          "type": "Function",
+          "tags": [
+            "deprecated"
+          ],
           "label": "getEmbeddableFactory",
           "description": [],
           "signature": [
@@ -14827,8 +14767,118 @@
             "> | undefined"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/services/embeddable/types.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/services/embeddable/embeddable_service.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
+            },
+            {
+              "plugin": "observabilityShared",
+              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/profiling_embeddable.tsx"
+            },
+            {
+              "plugin": "observabilityShared",
+              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/embeddables/get_embeddable_component.tsx"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+            },
+            {
+              "plugin": "controls",
+              "path": "src/plugins/controls/public/services/embeddable/embeddable.story.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+            }
+          ],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14852,7 +14902,9 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactories",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "getEmbeddableFactories",
           "description": [],
           "signature": [
@@ -14915,8 +14967,30 @@
             ">>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_app/top_nav/editor_menu.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+            }
+          ],
           "children": [],
           "returnComment": []
         },

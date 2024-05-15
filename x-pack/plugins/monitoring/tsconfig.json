@@ -47,6 +47,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/flot-charts",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

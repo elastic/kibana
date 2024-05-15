@@ -58,7 +58,16 @@ const hasModelField = (field: string, indexDoc: any, nestedField: string | false
   return false;
 };
 
+// For input_output inferred fields, the model_id is at the top level
+const hasTopLevelModelField = (indexDoc: any) => {
+  return has(indexDoc.doc, `_source.model_id`);
+};
+
 const getModelField = (field: string, indexDoc: any, nestedField: string | false) => {
+  if (hasTopLevelModelField(indexDoc)) {
+    return get(indexDoc.doc, `_source.model_id`);
+  }
+
   // If the field is nested, we need to get the first occurrence as its an array
   const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
   return get(indexDoc.doc, `_source.${[path.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')]}`);
@@ -103,7 +112,7 @@ export const parseFieldsCapabilities = (
 
   // metadata fields that are ignored
   const shouldIgnoreField = (field: string) => {
-    return !field.endsWith('.model_id');
+    return !field.endsWith('model_id');
   };
 
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
@@ -120,7 +129,13 @@ export const parseFieldsCapabilities = (
         if ('rank_features' in field || 'sparse_vector' in field) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
-          if (!nestedField) {
+          // Check if the sparse vector field has a model_id associated with it
+          // skip this field if has no model associated with it
+          // and the vectors were embedded outside of stack
+          if (
+            (hasModelField(fieldKey, indexDoc, nestedField) || hasTopLevelModelField(indexDoc)) &&
+            !nestedField
+          ) {
             const elserModelField = {
               field: fieldKey,
               model_id: getModelField(fieldKey, indexDoc, nestedField),
@@ -137,7 +152,10 @@ export const parseFieldsCapabilities = (
           // Check if the dense vector field has a model_id associated with it
           // skip this field if has no model associated with it
           // and the vectors were embedded outside of stack
-          if (hasModelField(fieldKey, indexDoc, nestedField) && !nestedField) {
+          if (
+            (hasModelField(fieldKey, indexDoc, nestedField) || hasTopLevelModelField(indexDoc)) &&
+            !nestedField
+          ) {
             const denseVectorField = {
               field: fieldKey,
               model_id: getModelField(fieldKey, indexDoc, nestedField),

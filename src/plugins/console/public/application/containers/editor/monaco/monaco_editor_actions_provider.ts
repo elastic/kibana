@@ -9,12 +9,14 @@
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isQuotaExceededError } from '../../../../services/history';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
 import { sendRequest } from '../../../hooks';
+import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 
 import {
