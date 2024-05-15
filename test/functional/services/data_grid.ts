@@ -458,13 +458,13 @@ export class DataGridService extends FtrService {
   }
 
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
-    const openPopoverButtonSelector = `openFieldActionsButton-${fieldName}`;
-    const inlineButtonsGroupSelector = `fieldActionsGroup-${fieldName}`;
-    if (await this.testSubjects.exists(openPopoverButtonSelector)) {
-      await this.testSubjects.click(openPopoverButtonSelector);
-    } else {
-      await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
-    }
+    const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
+      ? `tableDocViewRow-${fieldName}-value`
+      : `tableDocViewRow-${fieldName}-name`;
+    await this.testSubjects.click(cellSelector);
+    await this.retry.waitFor('grid cell popover to appear', async () => {
+      return this.testSubjects.exists(`${actionName}-${fieldName}`);
+    });
     await this.testSubjects.click(`${actionName}-${fieldName}`);
   }
 

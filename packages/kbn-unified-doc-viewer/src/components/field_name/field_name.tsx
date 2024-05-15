@@ -47,7 +47,11 @@ export function FieldName({
       </EuiFlexItem>
 
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart" direction="row">
-        <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
+        <EuiFlexItem
+          className="kbnDocViewer__fieldName eui-textBreakAll"
+          grow={false}
+          data-test-subj={`tableDocViewRow-${fieldName}-name`}
+        >
           <EuiToolTip
             position="top"
             content={tooltip}

@@ -16,7 +16,6 @@ import {
   EuiSelectableMessage,
   EuiDataGrid,
   EuiDataGridProps,
-  EuiDataGridColumnCellActionProps,
   EuiI18n,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -41,14 +40,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
-import {
-  type TableRow,
-  FilterIn,
-  FilterOut,
-  FilterExist,
-  ToggleColumn,
-  PinToggle,
-} from './table_cell_actions';
+import { type TableRow, getFieldCellActions, getFieldValueCellActions } from './table_cell_actions';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
@@ -319,6 +311,15 @@ export const DocViewerTable = ({
 
   const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
+  const fieldCellActions = useMemo(
+    () => getFieldCellActions({ rows, filter, onToggleColumn }),
+    [rows, filter, onToggleColumn]
+  );
+  const fieldValueCellActions = useMemo(
+    () => getFieldValueCellActions({ rows, filter }),
+    [rows, filter]
+  );
+
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
@@ -326,28 +327,10 @@ export const DocViewerTable = ({
         displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
           defaultMessage: 'Field',
         }),
-        initialWidth: 200, // TODO: what should be the default width?
+        initialWidth: 200,
         actions: false,
         visibleCellActions: 3,
-        cellActions: [
-          ...(filter
-            ? [
-                ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-                  return <FilterExist row={rows[rowIndex]} Component={Component} />;
-                },
-              ]
-            : []),
-          ...(onToggleColumn
-            ? [
-                ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-                  return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
-                },
-              ]
-            : []),
-          ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-            return <PinToggle row={rows[rowIndex]} Component={Component} />;
-          },
-        ],
+        cellActions: fieldCellActions,
       },
       {
         id: 'value',
@@ -356,19 +339,10 @@ export const DocViewerTable = ({
         }),
         actions: false,
         visibleCellActions: 2,
-        cellActions: filter
-          ? [
-              ({ Component, rowIndex }) => {
-                return <FilterIn row={rows[rowIndex]} Component={Component} />;
-              },
-              ({ Component, rowIndex }) => {
-                return <FilterOut row={rows[rowIndex]} Component={Component} />;
-              },
-            ]
-          : [],
+        cellActions: fieldValueCellActions,
       },
     ],
-    [filter, rows, onToggleColumn]
+    [fieldCellActions, fieldValueCellActions]
   );
 
   const renderCellValue = useCallback(

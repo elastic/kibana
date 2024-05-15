@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
+import { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 
 export interface TableRow {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;
@@ -22,10 +22,14 @@ export interface TableRow {
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
-  row: TableRow;
+  row?: TableRow;
 }
 
 export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
   const {
     action: { onFilter, flattenedField },
     field: { field, fieldMapping },
@@ -66,6 +70,10 @@ export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
 };
 
 export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
   const {
     action: { onFilter, flattenedField },
     field: { field, fieldMapping },
@@ -106,6 +114,10 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
 };
 
 export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
   const {
     action: { onFilter },
     field: { field, fieldMapping },
@@ -153,6 +165,10 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
 };
 
 export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
   const {
     field: { field, pinned, onTogglePinned },
   } = row;
@@ -180,10 +196,18 @@ export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
 };
 
 export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
   const {
     action: { onToggleColumn, isAddedAsColumn },
     field: { field },
   } = row;
+
+  if (!onToggleColumn) {
+    return null;
+  }
 
   const isAdded = isAddedAsColumn(field);
 
@@ -201,9 +225,58 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
       data-test-subj={`toggleColumnButton-${field}`}
       iconType={isAdded ? 'list' : 'listAdd'}
       title={toggleColumnsLabel}
-      onClick={() => onToggleColumn?.(field)}
+      onClick={() => onToggleColumn(field)}
     >
       {toggleColumnsLabel}
     </Component>
   );
 };
+
+export function getFieldCellActions({
+  rows,
+  filter,
+  onToggleColumn,
+}: {
+  rows: TableRow[];
+  filter?: DocViewFilterFn;
+  onToggleColumn: ((field: string) => void) | undefined;
+}) {
+  return [
+    ...(filter
+      ? [
+          ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+            return <FilterExist row={rows[rowIndex]} Component={Component} />;
+          },
+        ]
+      : []),
+    ...(onToggleColumn
+      ? [
+          ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+            return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
+          },
+        ]
+      : []),
+    ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+      return <PinToggle row={rows[rowIndex]} Component={Component} />;
+    },
+  ];
+}
+
+export function getFieldValueCellActions({
+  rows,
+  filter,
+}: {
+  rows: TableRow[];
+  filter?: DocViewFilterFn;
+}) {
+  return filter
+    ? [
+        ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+          return <FilterIn row={rows[rowIndex]} Component={Component} />;
+        },
+        ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+          return <FilterOut row={rows[rowIndex]} Component={Component} />;
+        },
+      ]
+    : [];
+}
