@@ -42,10 +42,12 @@ import {
   useMappingsState,
 } from '../../../../components/mappings_editor/mappings_state_context';
 import {
-  NormalizedField,
-  NormalizedFields,
-  State,
-} from '../../../../components/mappings_editor/types';
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
+} from '../../../../components/mappings_editor/lib';
+import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
+import { MappingsFilter } from './details_page_filter_fields';
+
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { documentationService } from '../../../../services';
 import { updateIndexMappings } from '../../../../services/api';
@@ -53,16 +55,6 @@ import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
-
-const getFieldsFromState = (state: State) => {
-  const getField = (fieldId: string) => {
-    return state.fields.byId[fieldId];
-  };
-  const fields = () => {
-    return state.fields.rootLevelFields.map((id) => getField(id));
-  };
-  return fields();
-};
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -111,9 +103,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [state.fields.byId]);
 
   const [previousState, setPreviousState] = useState<State>(state);
-  const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
-    getFieldsFromState(state)
-  );
+
+  const previousStateSelectedDataTypes: string[] = useMemo(() => {
+    return previousState.filter.selectedOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+  }, [previousState.filter.selectedOptions]);
+
   const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
@@ -151,7 +147,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     setAddingFields(!isAddingFields);
 
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
-    setPreviousStateFields(getFieldsFromState(state));
     setPreviousState(state);
 
     // reset mappings and change status to create field.
@@ -160,6 +155,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       value: {
         ...state,
         fields: { ...state.fields, byId: {}, rootLevelFields: [] } as NormalizedFields,
+        filter: {
+          filteredFields: [],
+          selectedOptions: [],
+          selectedDataTypes: [],
+        },
         documentFields: {
           status: 'creatingField',
           editor: 'default',
@@ -235,15 +235,38 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           ...previousState,
           search: {
             term: value,
-            result: searchFields(value, previousState.fields.byId),
+            result: searchFields(
+              value,
+              previousStateSelectedDataTypes.length > 0
+                ? getFieldsMatchingFilterFromState(previousState, previousStateSelectedDataTypes)
+                : previousState.fields.byId
+            ),
           },
         });
       } else {
         dispatch({ type: 'search:update', value });
       }
     },
-    [dispatch, previousState, isAddingFields]
+    [dispatch, previousState, isAddingFields, previousStateSelectedDataTypes]
   );
+
+  const onClearSearch = useCallback(() => {
+    setPreviousState({
+      ...previousState,
+      search: {
+        term: '',
+        result: searchFields(
+          '',
+          previousState.filter.selectedDataTypes.length > 0
+            ? getFieldsMatchingFilterFromState(
+                previousState,
+                previousState.filter.selectedDataTypes
+              )
+            : previousState.fields.byId
+        ),
+      },
+    });
+  }, [previousState]);
 
   const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
@@ -263,6 +286,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <SearchResult
       result={previousState.search.result}
       documentFieldsState={previousState.documentFields}
+      onClearSearch={onClearSearch}
     />
   ) : (
     <SearchResult result={state.search.result} documentFieldsState={state.documentFields} />
@@ -270,13 +294,25 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const fieldsListComponent = isAddingFields ? (
     <FieldsList
-      fields={previousStateFields}
+      fields={
+        previousStateSelectedDataTypes.length > 0
+          ? previousState.filter.filteredFields
+          : getFieldsFromState(previousState.fields)
+      }
       state={previousState}
       setPreviousState={setPreviousState}
       isAddingFields={isAddingFields}
     />
   ) : (
-    <FieldsList fields={getFieldsFromState(state)} state={state} isAddingFields={isAddingFields} />
+    <FieldsList
+      fields={
+        state.filter.selectedDataTypes.length > 0
+          ? state.filter.filteredFields
+          : getFieldsFromState(state.fields)
+      }
+      state={state}
+      isAddingFields={isAddingFields}
+    />
   );
   const fieldSearchComponent = isAddingFields ? (
     <DocumentFieldsSearch
@@ -391,6 +427,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         )}
         <EuiFlexGroup direction="column">
           <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <MappingsFilter
+                isAddingFields={isAddingFields}
+                isJSONVisible={isJSONVisible}
+                previousState={previousState}
+                setPreviousState={setPreviousState}
+                state={state}
+              />
+            </EuiFlexItem>
             <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
             {!index.hidden && (
               <EuiFlexItem grow={false}>

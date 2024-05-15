@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_DEGRADED_DOCS } from '../constants';
-import { DataStreamType } from '../types';
-import { indexNameToDataStreamParts } from '../utils';
+import { DataStreamType, QualityIndicators } from '../types';
+import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
 import { DegradedDocsStat } from './malformed_docs_stat';
 import { DataStreamStatType } from './types';
@@ -18,13 +18,16 @@ export class DataStreamStat {
   name: DataStreamStatType['name'];
   namespace: string;
   title: string;
-  size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['sizeBytes'];
+  size?: DataStreamStatType['size']; // total datastream size
+  sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
+  totalDocs?: DataStreamStatType['totalDocs']; // total datastream docs count
   integration?: Integration;
   degradedDocs: {
     percentage: number;
     count: number;
+    docsCount: number; // docs count in the filtered time range
+    quality: QualityIndicators;
   };
 
   private constructor(dataStreamStat: DataStreamStat) {
@@ -36,10 +39,13 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
+    this.totalDocs = dataStreamStat.totalDocs;
     this.integration = dataStreamStat.integration;
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
+      docsCount: dataStreamStat.degradedDocs.docsCount,
+      quality: dataStreamStat.degradedDocs.quality,
     };
   }
 
@@ -55,6 +61,7 @@ export class DataStreamStat {
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
+      totalDocs: dataStreamStat.totalDocs,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
@@ -63,10 +70,10 @@ export class DataStreamStat {
 
   public static fromDegradedDocStat({
     degradedDocStat,
-    integrationMap,
+    datasetIntegrationMap,
   }: {
     degradedDocStat: DegradedDocsStat;
-    integrationMap: Record<string, { integration: Integration; title: string }>;
+    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
 
@@ -74,15 +81,22 @@ export class DataStreamStat {
       rawName: degradedDocStat.dataset,
       type,
       name: dataset,
-      title: integrationMap[dataset]?.title || dataset,
+      title: datasetIntegrationMap[dataset]?.title || dataset,
       namespace,
-      integration: integrationMap[dataset]?.integration,
+      integration: datasetIntegrationMap[dataset]?.integration,
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
+        docsCount: degradedDocStat.docsCount,
+        quality: mapPercentageToQuality(degradedDocStat.percentage),
       },
     };
 
     return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static calculateFilteredSize({ sizeBytes, totalDocs, degradedDocs }: DataStreamStat) {
+    const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
+    return avgDocSize * degradedDocs.docsCount;
   }
 }

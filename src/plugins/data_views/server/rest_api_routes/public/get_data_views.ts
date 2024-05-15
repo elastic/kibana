@@ -33,17 +33,6 @@ export const getDataViews = async ({
   return dataViewsService.getIdsWithTitle();
 };
 
-const dataViewListSchema = schema.arrayOf(
-  schema.object({
-    id: schema.string(),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    title: schema.string(),
-    type: schema.maybe(schema.string()),
-    typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    name: schema.maybe(schema.string()),
-  })
-);
-
 const getDataViewsRouteFactory =
   (path: string, serviceKey: string) =>
   (
@@ -54,12 +43,26 @@ const getDataViewsRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
+    const responseValidation = () => {
+      const dataViewListSchema = schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          title: schema.string(),
+          type: schema.maybe(schema.string()),
+          typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          name: schema.maybe(schema.string()),
+        })
+      );
+      return schema.object({ [serviceKey]: dataViewListSchema });
+    };
+
     router.versioned.get({ path, access: 'public' }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
           request: {},
-          response: { 200: { body: schema.object({ [serviceKey]: dataViewListSchema }) } },
+          response: { 200: { body: responseValidation } },
         },
       },
       router.handleLegacyErrors(

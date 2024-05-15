@@ -18,6 +18,8 @@ import type {
   DocLinksStart,
   ThemeServiceStart,
   ExecutionContextSetup,
+  AnalyticsServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
@@ -34,6 +36,8 @@ import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
+export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');

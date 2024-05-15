@@ -114,18 +114,27 @@ export const usePresentationPanelHeaderActions = <
 
   const badgeElements = useMemo(() => {
     if (!showBadges) return [];
-    return badges?.map((badge) => (
-      <EuiBadge
-        key={badge.id}
-        className="embPanel__headerBadge"
-        iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
-        onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
-        onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-        data-test-subj={`embeddablePanelBadge-${badge.id}`}
-      >
-        {badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-      </EuiBadge>
-    ));
+    return badges?.map((badge) => {
+      return (
+        <EuiBadge
+          key={badge.id}
+          className="embPanel__headerBadge"
+          iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
+          onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
+          onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+          data-test-subj={`embeddablePanelBadge-${badge.id}`}
+        >
+          {badge.MenuItem
+            ? React.createElement(badge.MenuItem, {
+                context: {
+                  embeddable: api,
+                  trigger: panelBadgeTrigger,
+                },
+              })
+            : badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+        </EuiBadge>
+      );
+    });
   }, [api, badges, showBadges]);
 
   const notificationElements = useMemo(() => {

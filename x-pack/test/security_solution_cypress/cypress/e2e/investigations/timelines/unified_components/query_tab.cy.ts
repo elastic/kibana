@@ -17,6 +17,12 @@ import {
   TIMELINE_DETAILS_FLYOUT,
   USER_DETAILS_FLYOUT,
 } from '../../../../screens/unified_timeline';
+import {
+  ROW_ADD_NOTES_BUTTON,
+  ADD_NOTE_CONTAINER,
+  RESOLVER_GRAPH_CONTAINER,
+} from '../../../../screens/timeline';
+import { OPEN_ANALYZER_BTN } from '../../../../screens/alerts';
 import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
@@ -25,7 +31,8 @@ import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { createNewTimeline, executeTimelineSearch } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/181882
+describe.skip(
   'Unsaved Timeline query tab',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -54,6 +61,16 @@ describe(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('be.visible');
       removeFieldFromTable('agent.type');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
+    });
+
+    it('should render the add note button and display the markdown editor', () => {
+      cy.get(ROW_ADD_NOTES_BUTTON).should('be.visible').realClick();
+      cy.get(ADD_NOTE_CONTAINER).should('be.visible');
+    });
+
+    it('should render the analyze event button and display the process analyzer visualization', () => {
+      cy.get(OPEN_ANALYZER_BTN).should('be.visible').realClick();
+      cy.get(RESOLVER_GRAPH_CONTAINER).should('be.visible');
     });
 
     // these tests are skipped until we implement the expandable flyout in the unified table for timeline

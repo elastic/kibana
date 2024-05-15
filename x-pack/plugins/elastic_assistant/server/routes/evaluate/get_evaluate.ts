@@ -35,7 +35,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
         validate: {
           response: {
             200: {
-              body: buildRouteValidationWithZod(GetEvaluateResponse),
+              body: { custom: buildRouteValidationWithZod(GetEvaluateResponse) },
             },
           },
         },

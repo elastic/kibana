@@ -9,14 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import {
-  SQLLang,
-  monaco,
-  ESQL_LANG_ID,
-  ESQL_THEME_ID,
-  ESQLLang,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
+import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -143,18 +136,6 @@ const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
-
-const languageId = (language: string) => {
-  switch (language) {
-    case 'esql': {
-      return ESQL_LANG_ID;
-    }
-    case 'sql':
-    default: {
-      return SQLLang.ID;
-    }
-  }
-};
 
 let clickedOutside = false;
 let initialRender = true;
@@ -895,7 +876,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         />
                       )}
                     <CodeEditor
-                      languageId={languageId(language)}
+                      languageId={ESQL_LANG_ID}
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
@@ -998,6 +979,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         hideQueryHistory={hideHistoryComponent}
                         refetchHistoryItems={refetchHistoryItems}
                         isInCompactMode={true}
+                        queryHasChanged={code !== codeWhenSubmitted}
                       />
                     )}
                   </div>
@@ -1096,6 +1078,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           containerWidth={editorWidth}
           hideQueryHistory={hideHistoryComponent}
           refetchHistoryItems={refetchHistoryItems}
+          queryHasChanged={code !== codeWhenSubmitted}
         />
       )}
       {isCodeEditorExpanded && (

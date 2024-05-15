@@ -419,11 +419,7 @@ describe('ConfigPanel', () => {
       datasourceMap.testDatasource.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
-      const { instance } = await prepareAndMountComponent(
-        props,
-        {},
-        { sql: 'SELECT * from "foo"' }
-      );
+      const { instance } = await prepareAndMountComponent(props, {}, { esql: 'from "foo"' });
       expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });

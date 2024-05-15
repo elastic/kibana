@@ -14,7 +14,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(30)
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('verifies that all the default APM index templates exist', async () => {
         const { status, body } = await apmApiClient.adminUser({

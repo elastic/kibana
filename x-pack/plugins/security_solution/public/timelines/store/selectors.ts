@@ -117,6 +117,14 @@ const selectTimelineType = createSelector(selectTimelineById, (timeline) => time
 const selectTimelineKqlQuery = createSelector(selectTimelineById, (timeline) => timeline?.kqlQuery);
 
 /**
+ * Selector that returns the timeline esql saved search id.
+ */
+export const selectTimelineESQLSavedSearchId = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.savedSearchId
+);
+
+/**
  * Selector that returns the kqlQuery.filterQuery.kuery.expression of a timeline.
  */
 export const selectKqlFilterQueryExpression = createSelector(

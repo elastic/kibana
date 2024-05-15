@@ -13,7 +13,7 @@ import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
@@ -51,7 +51,7 @@ export interface StaticReturnType {
   headers: ResponseHeaders;
 }
 export type AgentExecutorResponse<T extends boolean> = T extends true
-  ? StreamFactoryReturnType['responseWithHeaders']
+  ? StreamResponseWithHeaders
   : StaticReturnType;
 
 export type AgentExecutor<T extends boolean> = (

@@ -15,9 +15,9 @@ import {
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 import { PublishesSettings } from './publishes_settings';
 
-export interface PanelPackage {
+export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
-  initialState?: object;
+  initialState?: SerializedState;
 }
 
 export interface PresentationContainer
@@ -25,7 +25,10 @@ export interface PresentationContainer
     CanAddNewPanel {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
-  replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
+  replacePanel: <SerializedState extends object = object>(
+    idToRemove: string,
+    newPanel: PanelPackage<SerializedState>
+  ) => Promise<string>;
 
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }

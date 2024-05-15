@@ -6,7 +6,7 @@
  */
 
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
 import type { ChromeStart } from '@kbn/core/public';
@@ -42,7 +42,7 @@ export interface BreadcrumbProps extends EuiBreadcrumb {
  * </Breadcrumb>
  * ```
  */
-export const Breadcrumb: FunctionComponent<BreadcrumbProps> = ({ children, ...breadcrumb }) => {
+export const Breadcrumb: FC<PropsWithChildren<BreadcrumbProps>> = ({ children, ...breadcrumb }) => {
   const context = useContext(BreadcrumbsContext);
   const component = <InnerBreadcrumb breadcrumb={breadcrumb}>{children}</InnerBreadcrumb>;
 
@@ -71,7 +71,7 @@ export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
  * </Breadcrumbs>
  * ```
  */
-export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = ({
+export const BreadcrumbsProvider: FC<PropsWithChildren<BreadcrumbsProviderProps>> = ({
   children,
   onChange,
 }) => {
@@ -120,7 +120,7 @@ export interface InnerBreadcrumbProps {
   breadcrumb: BreadcrumbProps;
 }
 
-export const InnerBreadcrumb: FunctionComponent<InnerBreadcrumbProps> = ({
+export const InnerBreadcrumb: FC<PropsWithChildren<InnerBreadcrumbProps>> = ({
   breadcrumb,
   children,
 }) => {

@@ -149,7 +149,56 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-common.getKibanaTranslationFiles",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaTranslationFiles",
+        "description": [],
+        "signature": [
+          "(locale: string, pluginPaths: string[]) => Promise<string[]>"
+        ],
+        "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.getKibanaTranslationFiles.$1",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.getKibanaTranslationFiles.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "pluginPaths",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-i18n-server-internal",
@@ -195,6 +244,23 @@
           "{ readonly locale: string; }"
         ],
         "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-common.supportedLocale",
+        "type": "Array",
+        "tags": [],
+        "label": "supportedLocale",
+        "description": [
+          "\nList of all locales that are officially supported."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/core/i18n/core-i18n-server-internal/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

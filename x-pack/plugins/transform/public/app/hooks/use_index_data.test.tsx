@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -48,7 +48,7 @@ const queryClient = new QueryClient();
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">
           <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>

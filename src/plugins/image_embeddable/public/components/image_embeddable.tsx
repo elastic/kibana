@@ -63,7 +63,9 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
       }}
     >
       <ImageViewer
-        data-rendering-count={1} // TODO: Remove this as part of https://github.com/elastic/kibana/issues/179376
+        // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
+        data-shared-item={''}
+        data-rendering-count={1}
         className="imageEmbeddableImage"
         imageConfig={imageConfig}
         isScreenshotMode={screenshotModeService?.isScreenshotMode()}

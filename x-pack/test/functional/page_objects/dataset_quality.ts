@@ -70,6 +70,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
+    datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
     datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
@@ -125,6 +127,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
+      await this.waitUntilSummaryPanelLoaded();
+
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
@@ -179,7 +183,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         'Dataset Name',
         'Namespace',
         'Size',
-        'Degraded Docs',
+        'Dataset Quality',
+        'Degraded Docs (%)',
         'Last Activity',
         'Actions',
       ]);
@@ -198,6 +203,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityNamespacesSelectableButton,
         testSubjectSelectors.datasetQualityNamespacesSelectable,
         namespaces
+      );
+    },
+
+    async filterForQualities(qualities: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityQualitiesSelectableButton,
+        testSubjectSelectors.datasetQualityQualitiesSelectable,
+        qualities
       );
     },
 

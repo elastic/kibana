@@ -14,7 +14,6 @@ import { useCapabilities, UseCapabilitiesParams } from './use_capabilities';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const statusResponse = {
-  assistantAlertsInsights: false,
   assistantModelEvaluation: true,
   assistantStreamingEnabled: false,
 };

@@ -89,6 +89,7 @@ export const IndexPatternTable = ({
     overlays,
     docLinks,
     noDataPage,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -128,6 +129,7 @@ export const IndexPatternTable = ({
         setSelectedItems([]);
         dataViewController.loadDataViews();
       },
+      startServices,
     });
     if (selectedItems.length === 0) {
       return;
@@ -183,6 +185,7 @@ export const IndexPatternTable = ({
     uiSettings,
     overlays,
     onDelete: () => dataViewController.loadDataViews(),
+    startServices,
   });
 
   const alertColumn = {
@@ -218,7 +221,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Name',
       }),
       width: spaces ? '70%' : '90%',
-      render: (name: string, dataView: IndexPatternTableItem) => (
+      render: (_name: string, dataView: IndexPatternTableItem) => (
         <div>
           <EuiLink
             {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
@@ -261,7 +264,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Spaces',
       }),
       width: '20%',
-      render: (name: string, dataView: IndexPatternTableItem) => {
+      render: (_name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
@@ -290,7 +293,7 @@ export const IndexPatternTable = ({
       fill={true}
       iconType="plusInCircle"
       onClick={() => setShowCreateDialog(true)}
-      data-test-subj="createIndexPatternButton"
+      data-test-subj="createDataViewButton"
     >
       <FormattedMessage
         id="indexPatternManagement.dataViewTable.createBtn"

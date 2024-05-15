@@ -11,7 +11,10 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import { useValues } from 'kea';
 
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
@@ -39,9 +42,27 @@ export const Playground: React.FC = () => {
           }),
         ]}
         pageHeader={{
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
-            defaultMessage: 'Playground',
-          }),
+          pageTitle: (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.playground.headerTitle"
+                  defaultMessage="Playground"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.content.playground.headerTitle.techPreview',
+                    {
+                      defaultMessage: 'TECH PREVIEW',
+                    }
+                  )}
+                  color="hollow"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
           rightSideItems: [<searchPlayground.PlaygroundToolbar />],
         }}
         pageViewTelemetry="Playground"

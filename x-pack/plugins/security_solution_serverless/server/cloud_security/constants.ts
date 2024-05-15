@@ -49,7 +49,7 @@ export const BILLABLE_ASSETS_CONFIG = {
   [CSPM]: {
     filter_attribute: 'resource.sub_type',
     values: [
-      'aws-ebs',
+      // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
       'aws-ec2',
       'aws-s3',
       'aws-rds',

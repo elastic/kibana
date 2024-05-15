@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Dispatch } from 'redux';
@@ -13,9 +13,11 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
@@ -54,6 +56,7 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -73,6 +76,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
@@ -85,8 +90,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const { augmentedColumnHeaders, getTimelineQueryFieldsFromColumns, leadingControlColumns } =
-    useTimelineColumns(columns);
+  const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
+
+  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
@@ -119,7 +125,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     dataViewId,
     endDate: end,
     eqlOptions: restEqlOption,
-    fields: getTimelineQueryFieldsFromColumns(),
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: eqlQuery ?? '',
     id: timelineId,
     indexNames: selectedPatterns,
@@ -195,6 +201,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 updatedAt={refreshedAt}
                 isTextBasedQuery={false}
                 pageInfo={pageInfo}
+                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+                pinnedEventIds={pinnedEventIds}
+                eventIdToNoteIds={eventIdToNoteIds}
               />
             </ScrollableFlexItem>
           </FullWidthFlexGroup>
@@ -213,62 +222,58 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           />
           <FullWidthFlexGroup>
             <ScrollableFlexItem grow={2}>
-              <EuiFlexGroup gutterSize="s" direction="column">
-                <EqlTabHeader
-                  activeTab={activeTab}
-                  setTimelineFullScreen={setTimelineFullScreen}
-                  timelineFullScreen={timelineFullScreen}
-                  timelineId={timelineId}
-                />
-                <EuiFlexItem grow={true}>
-                  <EventDetailsWidthProvider>
-                    <StyledEuiFlyoutBody
-                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
-                      className="timeline-flyout-body"
-                    >
-                      <StatefulBody
-                        activePage={pageInfo.activePage}
-                        browserFields={browserFields}
-                        data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
-                        id={timelineId}
-                        refetch={refetch}
-                        renderCellValue={renderCellValue}
-                        rowRenderers={rowRenderers}
-                        sort={TIMELINE_NO_SORTING}
-                        tabType={TimelineTabs.eql}
-                        totalPages={calculateTotalPages({
-                          itemsCount: totalCount,
-                          itemsPerPage,
-                        })}
-                        leadingControlColumns={leadingControlColumns}
-                        trailingControlColumns={timelineEmptyTrailingControlColumns}
-                      />
-                    </StyledEuiFlyoutBody>
+              <EqlTabHeader
+                activeTab={activeTab}
+                setTimelineFullScreen={setTimelineFullScreen}
+                timelineFullScreen={timelineFullScreen}
+                timelineId={timelineId}
+              />
+              <EventDetailsWidthProvider>
+                <StyledEuiFlyoutBody
+                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
+                  className="timeline-flyout-body"
+                >
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
+                    id={timelineId}
+                    refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={TIMELINE_NO_SORTING}
+                    tabType={TimelineTabs.eql}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCount,
+                      itemsPerPage,
+                    })}
+                    leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
+                    trailingControlColumns={timelineEmptyTrailingControlColumns}
+                  />
+                </StyledEuiFlyoutBody>
 
-                    <StyledEuiFlyoutFooter
-                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
-                      className="timeline-flyout-footer"
-                    >
-                      {!isBlankTimeline && (
-                        <Footer
-                          activePage={pageInfo?.activePage ?? 0}
-                          data-test-subj="timeline-footer"
-                          updatedAt={refreshedAt}
-                          height={footerHeight}
-                          id={timelineId}
-                          isLive={isLive}
-                          isLoading={isQueryLoading || loadingSourcerer}
-                          itemsCount={isBlankTimeline ? 0 : events.length}
-                          itemsPerPage={itemsPerPage}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          onChangePage={loadPage}
-                          totalCount={isBlankTimeline ? 0 : totalCount}
-                        />
-                      )}
-                    </StyledEuiFlyoutFooter>
-                  </EventDetailsWidthProvider>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <StyledEuiFlyoutFooter
+                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
+                  className="timeline-flyout-footer"
+                >
+                  {!isBlankTimeline && (
+                    <Footer
+                      activePage={pageInfo?.activePage ?? 0}
+                      data-test-subj="timeline-footer"
+                      updatedAt={refreshedAt}
+                      height={footerHeight}
+                      id={timelineId}
+                      isLive={isLive}
+                      isLoading={isQueryLoading || loadingSourcerer}
+                      itemsCount={isBlankTimeline ? 0 : events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={isBlankTimeline ? 0 : totalCount}
+                    />
+                  )}
+                </StyledEuiFlyoutFooter>
+              </EventDetailsWidthProvider>
             </ScrollableFlexItem>
             {showExpandedDetails && (
               <>
@@ -297,8 +302,16 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =
-      timeline;
+    const {
+      activeTab,
+      columns,
+      eqlOptions,
+      expandedDetail,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
+    } = timeline;
 
     return {
       activeTab,
@@ -310,6 +323,8 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
       showExpandedDetails:
         !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
 
@@ -342,6 +357,8 @@ const EqlTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )
 );

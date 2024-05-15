@@ -9,16 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { catchError, filter, of, OperatorFunction, shareReplay, throwError } from 'rxjs';
 import {
   ChatCompletionChunkEvent,
-  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../common';
-import { isFunctionNotFoundError } from '../../../common/conversation_complete';
+import { isFunctionNotFoundError, MessageOrChatEvent } from '../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 
 export function catchFunctionLimitExceededError(): OperatorFunction<
-  ChatCompletionChunkEvent | MessageAddEvent,
-  ChatCompletionChunkEvent | MessageAddEvent
+  MessageOrChatEvent,
+  MessageOrChatEvent
 > {
   return (source$) => {
     const shared$ = source$.pipe(shareReplay());

@@ -355,6 +355,31 @@ export abstract class Container<
     });
   }
 
+  public async untilReactEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
+    if (!this.input.panels[id]) {
+      throw new PanelNotFoundError();
+    }
+
+    if (this.children$.value[id]) {
+      return this.children$.value[id] as ApiType;
+    }
+
+    return new Promise((resolve, reject) => {
+      const subscription = merge(this.children$, this.getInput$()).subscribe(() => {
+        if (this.children$.value[id]) {
+          subscription.unsubscribe();
+          resolve(this.children$.value[id] as ApiType);
+        }
+
+        // If we hit this, the panel was removed before the embeddable finished loading.
+        if (this.input.panels[id] === undefined) {
+          subscription.unsubscribe();
+          resolve(undefined);
+        }
+      });
+    });
+  }
+
   public async getExplicitInputIsEqual(lastInput: TContainerInput) {
     const { panels: lastPanels, ...restOfLastInput } = lastInput;
     const { panels: currentPanels, ...restOfCurrentInput } = this.getExplicitInput();

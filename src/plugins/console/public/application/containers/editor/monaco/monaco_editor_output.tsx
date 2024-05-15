@@ -13,7 +13,7 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
@@ -22,7 +22,7 @@ import {
   safeExpandLiteralStrings,
   languageForContentType,
 } from '../utilities';
-import { useResizeCheckerUtils } from './use_resize_checker_utils';
+import { useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -99,9 +99,10 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
         options={{
+          readOnly: true,
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
-          theme: mode === CONSOLE_OUTPUT_LANG_ID ? CONSOLE_OUTPUT_THEME_ID : undefined,
+          theme: CONSOLE_THEME_ID,
           automaticLayout: true,
         }}
       />

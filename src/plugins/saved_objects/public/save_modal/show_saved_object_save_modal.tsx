@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -32,7 +32,7 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  Wrapper?: React.FC
+  Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
   const container = document.createElement('div');
   const closeModal = () => {

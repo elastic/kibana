@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
-export const FunctionHelpPopover: FC = memo(() => {
+export const FunctionHelpPopover = memo(() => {
   const {
     services: { docLinks },
   } = useMlKibana();

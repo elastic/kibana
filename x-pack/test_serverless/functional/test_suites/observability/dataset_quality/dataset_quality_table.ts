@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.eql([defaultNamespace, defaultNamespace, defaultNamespace]);
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('ascending');
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -88,7 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    it('shows the updated size of the index', async () => {
+    // https://github.com/elastic/kibana/issues/178954
+    it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
@@ -126,8 +127,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(7);
-
       const datasetNameCol = cols['Dataset Name'];
 
       // Sort ascending
