@@ -19,19 +19,17 @@ import { CustomizePanelEditor } from './customize_panel_editor';
 
 describe('customize panel editor', () => {
   let api: CustomizePanelActionApi;
-  let setTitle: (title: string | undefined) => void;
+  let setTitle: (title?: string) => void;
   let setViewMode: (viewMode: ViewMode) => void;
-  let setDescription: (description: string | undefined) => void;
+  let setDescription: (description?: string) => void;
 
   beforeEach(() => {
     const titleSubject = new BehaviorSubject<string | undefined>(undefined);
-    setTitle = jest.fn().mockImplementation((title) => titleSubject.next(title));
+    setTitle = jest.fn((title) => titleSubject.next(title));
     const descriptionSubject = new BehaviorSubject<string | undefined>(undefined);
-    setDescription = jest
-      .fn()
-      .mockImplementation((description) => descriptionSubject.next(description));
+    setDescription = jest.fn((description) => descriptionSubject.next(description));
     const viewMode = new BehaviorSubject<ViewMode>('edit');
-    setViewMode = jest.fn().mockImplementation((nextViewMode) => viewMode.next(nextViewMode));
+    setViewMode = jest.fn((nextViewMode) => viewMode.next(nextViewMode));
 
     api = {
       viewMode,
@@ -75,27 +73,44 @@ describe('customize panel editor', () => {
       );
     });
 
-    it('Sets panel title on apply', () => {
+    it('should set panel title on apply', () => {
       renderPanelEditor();
       userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
       userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
       expect(setTitle).toBeCalledWith('New title');
     });
 
+    it('should use default title when title is undefined', () => {
+      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      setTitle(undefined);
+      renderPanelEditor();
+      const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
+      expect(titleInput).toHaveValue('Default title');
+    });
+
+    it('should use title even when empty string', () => {
+      api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      setTitle('');
+      renderPanelEditor();
+      const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
+      expect(titleInput).toHaveValue('');
+    });
+
     it('Resets panel title to default when reset button is pressed', () => {
       api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
+      setTitle('Initial title');
       renderPanelEditor();
       userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
       userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelTitleButton'));
       expect(screen.getByTestId('customEmbeddablePanelTitleInput')).toHaveValue('Default title');
     });
 
-    it('Reset panel title to undefined on apply', () => {
-      setTitle('very cool title');
+    it('should hide title reset when no default exists', () => {
+      api.defaultPanelTitle = new BehaviorSubject<string | undefined>(undefined);
+      setTitle('Initial title');
       renderPanelEditor();
-      userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelTitleButton'));
-      userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
-      expect(setTitle).toBeCalledWith(undefined);
+      userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
+      expect(screen.queryByTestId('resetCustomEmbeddablePanelTitleButton')).not.toBeInTheDocument();
     });
 
     test('title input receives focus when `focusOnTitle` is `true`', async () => {
@@ -128,7 +143,7 @@ describe('customize panel editor', () => {
       );
     });
 
-    it('Sets panel description on apply', () => {
+    it('should set panel description on apply', () => {
       renderPanelEditor();
       userEvent.type(
         screen.getByTestId('customEmbeddablePanelDescriptionInput'),
@@ -138,22 +153,47 @@ describe('customize panel editor', () => {
       expect(setDescription).toBeCalledWith('New description');
     });
 
-    it('Resets panel desription to default when reset button is pressed', () => {
+    it('should use default description when description is undefined', () => {
       api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      setDescription(undefined);
       renderPanelEditor();
-      userEvent.type(screen.getByTestId('customEmbeddablePanelDescriptionInput'), 'New desription');
+      const descriptionInput = screen.getByTestId('customEmbeddablePanelDescriptionInput');
+      expect(descriptionInput).toHaveValue('Default description');
+    });
+
+    it('should use description even when empty string', () => {
+      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      setDescription('');
+      renderPanelEditor();
+      const descriptionInput = screen.getByTestId('customEmbeddablePanelDescriptionInput');
+      expect(descriptionInput).toHaveValue('');
+    });
+
+    it('Resets panel description to default when reset button is pressed', () => {
+      api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
+      setDescription('Initial description');
+      renderPanelEditor();
+      userEvent.type(
+        screen.getByTestId('customEmbeddablePanelDescriptionInput'),
+        'New description'
+      );
       userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelDescriptionButton'));
       expect(screen.getByTestId('customEmbeddablePanelDescriptionInput')).toHaveValue(
         'Default description'
       );
     });
 
-    it('Reset panel description to undefined on apply', () => {
-      setDescription('very cool description');
+    it('should hide description reset when no default exists', () => {
+      api.defaultPanelDescription = new BehaviorSubject<string | undefined>(undefined);
+      setDescription('Initial description');
       renderPanelEditor();
-      userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelDescriptionButton'));
-      userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
-      expect(setDescription).toBeCalledWith(undefined);
+      userEvent.type(
+        screen.getByTestId('customEmbeddablePanelDescriptionInput'),
+        'New description'
+      );
+      expect(
+        screen.queryByTestId('resetCustomEmbeddablePanelDescriptionButton')
+      ).not.toBeInTheDocument();
     });
   });
 
