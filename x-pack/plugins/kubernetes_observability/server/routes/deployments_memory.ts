@@ -100,14 +100,14 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           //Create overall message for deployment
           for (var pod_reason of pod_reasons) {
             //Check for memory pod_reason.reason[0]
-            if (pod_reason.reason[0].value == "Medium") {
+            if (pod_reason.reason.memory == "Medium") {
               pods_memory_medium.push(pod_reason.pod);
-            } else if (pod_reason.reason[0].value == "High") {
+            } else if (pod_reason.reason.memory == "High") {
               pods_memory_high.push(pod_reason.pod);
             }
 
             //Check for memory_usage_median_absolute_deviation pod_reason.reason[1]
-            if (pod_reason.reason[1].value == "High") {
+            if (pod_reason.reason.memory_usage_median_absolute_deviation == "High") {
               pods_deviation_high.push(pod_reason.pod);
             }
           }

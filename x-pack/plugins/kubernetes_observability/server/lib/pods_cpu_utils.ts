@@ -100,10 +100,10 @@ export function calulcatePodsCpuUtilisation(podName: string, namespace: string, 
             alarm = "High";
         }
         reason = {
-            'pod': podName, reason: [
-                { 'cpu utilisation': alarm, },
-                { 'cpu_utilisation_median_absolute_deviation': deviation_alarm, }
-            ]
+            'pod': podName, reason: {
+                'cpu utilisation': alarm,
+                'cpu_utilisation_median_absolute_deviation': deviation_alarm
+            }
         };
     }
 

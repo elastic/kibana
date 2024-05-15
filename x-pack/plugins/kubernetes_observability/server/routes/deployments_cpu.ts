@@ -12,7 +12,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_CPU_ROUTE,
 } from '../../common/constants';
-const resource = "deployment"
+const resource = "Deployment"
 const type = "cpu"
 
 export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => {
@@ -100,14 +100,14 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               //Check for cpu utlisation in pod_reason.reason[0]
-              if (pod_reason.reason[0].value == "Medium") {
+              if (pod_reason.reason.reason == "Medium") {
                 pods_cpu_medium.push(pod_reason.pod);
-              } else if (pod_reason.reason[0].value == "High") {
+              } else if (pod_reason.reason.reason == "High") {
                 pods_cpu_high.push(pod_reason.pod);
               }
 
               //Check for cpu_utilization_median_absolute_deviation pod_reason.reason[1]
-              if (pod_reason.reason[1].value == "High") {
+              if (pod_reason.reason.cpu_utilisation_median_absolute_deviation == "High") {
                 pods_deviation_high.push(pod_reason.pod);
               }
             }

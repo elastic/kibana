@@ -109,9 +109,9 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
 
         if (memory_available_count == 0) {
             reasons = {
-                'pod': podName, reason: [
-                    { 'value': undefined, 'desc': ' Metric memory_available value is not defined ' },
-                    { 'value': deviation_alarm, 'desc': ' Memory usage median absolute deviation ' }],
+                'pod': podName, reason: {
+                    'memory': 'Metric memory_available value is not defined',
+                    'memory_usage_median_absolute_deviation': deviation_alarm }
             };
             message = { 'pod': podName, 'memory_usage': pod.memory_usage, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'desc': ' Pod Memory usage in  Bytes' };
         } else {
@@ -125,9 +125,9 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 alarm = "High";
             }
             reasons = {
-                'pod': podName, reason: [
-                    { 'memory': alarm,  },
-                    { 'memory_usage_median_absolute_deviation': deviation_alarm }]
+                'pod': podName, reason: {
+                    'memory': alarm,
+                    'memory_usage_median_absolute_deviation': deviation_alarm }
             };
 
         }
