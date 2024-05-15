@@ -18,11 +18,12 @@ import {
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
+import { useWhichFlyoutIsOpen } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../shared/hooks/use_which_flyout');
 
 const mockedUseKibana = mockUseKibana();
 
@@ -52,7 +53,7 @@ describe('<RightPanelTour />', () => {
         storage: storageMock,
       },
     });
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(false);
+    (useWhichFlyoutIsOpen as jest.Mock).mockReturnValue(Flyouts.securitySolution);
 
     storageMock.clear();
   });
@@ -93,7 +94,7 @@ describe('<RightPanelTour />', () => {
   });
 
   it('should not render tour for flyout in timeline', () => {
-    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(true);
+    (useWhichFlyoutIsOpen as jest.Mock).mockReturnValue(Flyouts.timeline);
     const { queryByText, queryByTestId } = renderRightPanelTour({
       ...mockContextValue,
       getFieldsData: () => '',

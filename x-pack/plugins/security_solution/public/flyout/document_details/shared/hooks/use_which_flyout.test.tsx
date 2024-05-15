@@ -7,8 +7,8 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useWhichFlyout } from './use_which_flyout';
-import { Flyouts } from '../../shared/constants/flyouts';
+import { useWhichFlyoutIsOpen } from './use_which_flyout';
+import { Flyouts } from '../constants/flyouts';
 
 describe('useWhichFlyout', () => {
   let hookResult: RenderHookResult<{}, string>;
@@ -22,11 +22,11 @@ describe('useWhichFlyout', () => {
     Object.defineProperty(window, 'location', {
       value: {
         search:
-          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:sopeId)))',
+          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:scopeId)))',
       },
     });
 
-    hookResult = renderHook(() => useWhichFlyout());
+    hookResult = renderHook(() => useWhichFlyoutIsOpen());
 
     expect(hookResult.result.current).toEqual(Flyouts.securitySolution);
   });
@@ -35,11 +35,11 @@ describe('useWhichFlyout', () => {
     Object.defineProperty(window, 'location', {
       value: {
         search:
-          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:sopeId)))&timelineFlyout=()',
+          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:scopeId)))&timelineFlyout=()',
       },
     });
 
-    hookResult = renderHook(() => useWhichFlyout());
+    hookResult = renderHook(() => useWhichFlyoutIsOpen());
 
     expect(hookResult.result.current).toEqual(Flyouts.securitySolution);
   });
@@ -48,11 +48,11 @@ describe('useWhichFlyout', () => {
     Object.defineProperty(window, 'location', {
       value: {
         search:
-          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:sopeId)))&timelineFlyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:scopeId)))',
+          '?flyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:scopeId)))&timelineFlyout=(right:(id:document-details-right,params:(id:id,indexName:indexName,scopeId:scopeId)))',
       },
     });
 
-    hookResult = renderHook(() => useWhichFlyout());
+    hookResult = renderHook(() => useWhichFlyoutIsOpen());
 
     expect(hookResult.result.current).toEqual(Flyouts.timeline);
   });

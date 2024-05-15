@@ -19,7 +19,8 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../shared/constants/panel_keys';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
+import { Flyouts } from '../../shared/constants/flyouts';
+import { useWhichFlyoutIsOpen } from '../../shared/hooks/use_which_flyout';
 
 /**
  * Guided tour for the right panel in details flyout
@@ -30,7 +31,7 @@ export const RightPanelTour = memo(() => {
 
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;
-  const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();
+  const isTimelineFlyoutOpen = useWhichFlyoutIsOpen() === Flyouts.timeline;
   const showTour = isAlert && !isPreview && !isTimelineFlyoutOpen;
 
   const goToLeftPanel = useCallback(() => {

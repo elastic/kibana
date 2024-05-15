@@ -15,7 +15,7 @@ import { HeaderActions } from './components/header_actions';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useRightPanelContext } from './context';
-import { useWhichFlyout } from './hooks/use_which_flyout';
+import { useWhichFlyoutIsOpen } from '../shared/hooks/use_which_flyout';
 
 interface PanelNavigationProps {
   /**
@@ -28,16 +28,16 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
   const { storage, telemetry } = useKibana().services;
   const { onClose$, openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();
-  const flyout = useWhichFlyout();
+  const openFlyout = useWhichFlyoutIsOpen();
 
   const localStorageLeftPanelExpanded = storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED);
   const clearLocalStorage = useCallback(
     () =>
       storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
         ...localStorageLeftPanelExpanded,
-        [flyout]: false,
+        [openFlyout]: false,
       }),
-    [storage, localStorageLeftPanelExpanded, flyout]
+    [storage, localStorageLeftPanelExpanded, openFlyout]
   );
 
   const expandDetails = useCallback(() => {
@@ -52,13 +52,15 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
 
     storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
       ...localStorageLeftPanelExpanded,
-      [flyout]: true,
+      [openFlyout]: true,
     });
 
     // we only want to keep track of the left side open while the user is still using the flyout.
     // that way when choosing another alert while the flyout is open, its state isn't going to reset.
     // we remove the value from local storage when flyout is closed.
-    onClose$.pipe(take(1)).subscribe(() => clearLocalStorage());
+    onClose$.pipe(take(1)).subscribe(() => {
+      clearLocalStorage();
+    });
 
     telemetry.reportDetailsFlyoutOpened({
       location: scopeId,
@@ -71,7 +73,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
     scopeId,
     storage,
     localStorageLeftPanelExpanded,
-    flyout,
+    openFlyout,
     onClose$,
     telemetry,
     clearLocalStorage,
@@ -80,7 +82,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
   // automatically open left panel if it was saved in local storage
   if (
     storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED) &&
-    storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED)[flyout]
+    storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED)[openFlyout]
   ) {
     expandDetails();
   }
