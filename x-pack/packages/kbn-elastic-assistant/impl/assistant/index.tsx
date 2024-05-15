@@ -944,6 +944,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
+                    isAssistantEnabled={isAssistantEnabled}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
