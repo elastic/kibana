@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
