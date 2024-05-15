@@ -42,7 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('compression', () => {
     before(async () => {
-      // TODO-TRE: Do we really need admin for checking referrers?
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
     after(async () => {
