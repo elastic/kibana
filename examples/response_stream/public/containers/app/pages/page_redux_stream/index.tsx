@@ -6,17 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, FC } from 'react';
-
-import {
-  Chart,
-  Settings,
-  Axis,
-  BarSeries,
-  Position,
-  ScaleType,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import React, { useEffect, useRef, FC } from 'react';
 
 import {
   EuiBadge,
@@ -32,11 +22,17 @@ import {
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
+import {
+  setSimulateErrors,
+  setCompressResponse,
+  setFlushFix,
+} from '../../../../../common/api/redux_stream/options_slice';
 import { reset } from '../../../../../common/api/redux_stream/data_slice';
 
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 
+import { BarChartRace } from '../../components/bar_chart_race';
 import { getStatusMessage } from '../../components/get_status_message';
 
 import { useAppDispatch, useAppSelector } from './hooks';
@@ -46,13 +42,10 @@ export const PageReduxStream: FC = () => {
     core: { http, notifications },
   } = useDeps();
 
-  const [simulateErrors, setSimulateErrors] = useState(false);
-  const [compressResponse, setCompressResponse] = useState(true);
-  const [flushFix, setFlushFix] = useState(false);
-
   const dispatch = useAppDispatch();
   const { isRunning, isCancelled, errors: streamErrors } = useAppSelector((s) => s.stream);
   const { progress, entities, errors } = useAppSelector((s) => s.data);
+  const { simulateErrors, compressResponse, flushFix } = useAppSelector((s) => s.options);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -123,54 +116,28 @@ export const PageReduxStream: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <div style={{ height: '300px' }}>
-        <Chart>
-          <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
-            rotation={90}
-          />
-          <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
-          <Axis id="left2" title="Developers" position={Position.Left} />
-
-          <BarSeries
-            id="commits"
-            xScaleType={ScaleType.Ordinal}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={Object.entries(entities)
-              .map(([x, y]) => {
-                return {
-                  x,
-                  y,
-                };
-              })
-              .sort((a, b) => b.y - a.y)}
-          />
-        </Chart>
-      </div>
+      <BarChartRace entities={entities} />
       <EuiText>
         <p>{getStatusMessage(isRunning, isCancelled, progress)}</p>
         <EuiCheckbox
           id="responseStreamSimulateErrorsCheckbox"
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
-          onChange={(e) => setSimulateErrors(!simulateErrors)}
+          onChange={(e) => dispatch(setSimulateErrors(!simulateErrors))}
           compressed
         />
         <EuiCheckbox
           id="responseStreamCompressionCheckbox"
           label="Toggle compression setting for response stream."
           checked={compressResponse}
-          onChange={(e) => setCompressResponse(!compressResponse)}
+          onChange={(e) => dispatch(setCompressResponse(!compressResponse))}
           compressed
         />
         <EuiCheckbox
           id="responseStreamFlushFixCheckbox"
           label="Toggle flushFix setting for response stream."
           checked={flushFix}
-          onChange={(e) => setFlushFix(!flushFix)}
+          onChange={(e) => dispatch(setFlushFix(!flushFix))}
           compressed
         />
       </EuiText>

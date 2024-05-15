@@ -9,16 +9,6 @@
 import React, { useEffect, useState, FC } from 'react';
 
 import {
-  Chart,
-  Settings,
-  Axis,
-  BarSeries,
-  Position,
-  ScaleType,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
-
-import {
   EuiBadge,
   EuiButton,
   EuiCheckbox,
@@ -42,6 +32,7 @@ import { Page } from '../../../../components/page';
 
 import { useDeps } from '../../../../hooks/use_deps';
 
+import { BarChartRace } from '../../components/bar_chart_race';
 import { getStatusMessage } from '../../components/get_status_message';
 
 export const PageReducerStream: FC = () => {
@@ -119,33 +110,7 @@ export const PageReducerStream: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <div style={{ height: '300px' }}>
-        <Chart>
-          <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
-            rotation={90}
-          />
-          <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
-          <Axis id="left2" title="Developers" position={Position.Left} />
-
-          <BarSeries
-            id="commits"
-            xScaleType={ScaleType.Ordinal}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={Object.entries(entities)
-              .map(([x, y]) => {
-                return {
-                  x,
-                  y,
-                };
-              })
-              .sort((a, b) => b.y - a.y)}
-          />
-        </Chart>
-      </div>
+      <BarChartRace entities={entities} />
       <EuiText>
         <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
         <EuiCheckbox

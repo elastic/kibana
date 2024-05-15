@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 
 import { streamSlice } from '@kbn/ml-response-stream/client';
 
+import { optionsSlice } from '../../../../../common/api/redux_stream/options_slice';
 import { dataSlice } from '../../../../../common/api/redux_stream/data_slice';
 
 const reduxStore = configureStore({
@@ -20,6 +21,8 @@ const reduxStore = configureStore({
     stream: streamSlice.reducer,
     // The actual data returned by the stream.
     data: dataSlice.reducer,
+    // Options for the stream: simulate errors, compress response, etc.
+    options: optionsSlice.reducer,
   },
 });
 
