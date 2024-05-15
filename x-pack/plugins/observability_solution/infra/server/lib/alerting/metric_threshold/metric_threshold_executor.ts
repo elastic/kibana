@@ -19,8 +19,7 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertUrl, LEGACY_OUTSIDE_RANGE } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
