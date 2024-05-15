@@ -47,7 +47,8 @@ deploy() {
   echo "Checking if project already exists..."
   PROJECT_DEPLOY_LOGS=$(mktemp --suffix ".json")
   PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
-  PROJECT_UPDATE_LOGS=$(mktemp --suffix ".json")
+  PROJECT_INFO_LOGS=$(mktemp --suffix ".json")
+
   curl -s \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
@@ -104,12 +105,18 @@ deploy() {
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_UPDATE_LOGS
+      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
-  PROJECT_KIBANA_URL=$(jq -r '.endpoints.kibana' $PROJECT_UPDATE_LOGS)
+  echo "Getting project info..."
+  curl -s \
+    -H "Authorization: ApiKey $PROJECT_API_KEY" \
+    "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
+    -XGET &> $PROJECT_INFO_LOGS
+
+  PROJECT_KIBANA_URL=$(jq -r '.endpoints.kibana' $PROJECT_INFO_LOGS)
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
-  PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_UPDATE_LOGS)
+  PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
   # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
   if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
