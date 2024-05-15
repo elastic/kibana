@@ -166,9 +166,6 @@ export class CspPlugin
 
             return packagePolicy;
           }
-
-          return packagePolicy;
-        }
       );
 
       plugins.fleet.registerExternalCallback(
