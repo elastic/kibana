@@ -13,7 +13,7 @@ import {
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { getDataViewsStart } from '../services';
+import { getDataViewsStart, getPalettesService } from '../services';
 import { ConvertGaugeVisToLensVisualization } from './types';
 import { getGaugeConfiguration } from './configurations/gauge';
 
@@ -22,6 +22,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     return null;
   }
 
+  const palettes = await getPalettesService().getPalettes();
   const dataViews = getDataViewsStart();
   const dataView = await getDataViewByIndexPatternId(vis.data.indexPattern?.id, dataViews);
 
@@ -29,8 +30,12 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     return null;
   }
 
-  const { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig } =
-    await convertToLensModule;
+  const {
+    getColumnsFromVis,
+    createStaticValueColumn,
+    getPredefinedPalette,
+    getPercentageModeConfig,
+  } = await convertToLensModule;
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
@@ -85,7 +90,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     configuration: getGaugeConfiguration(
       layerId,
       vis.params,
-      getPalette(vis.params.gauge, percentageModeConfig, true),
+      getPredefinedPalette(palettes, vis.params.gauge, percentageModeConfig, true),
       {
         metricAccessor,
         minAccessor: minColumn.columnId,

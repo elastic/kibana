@@ -10,15 +10,17 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { GaugePublicConfig } from '../config';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
-import { setDataViewsStart } from './services';
+import { setDataViewsStart, setPalettesService } from './services';
 
 /** @internal */
 export interface VisTypeGaugeSetupDependencies {
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -36,8 +38,10 @@ export class VisTypeGaugePlugin {
 
   public setup(
     core: CoreSetup<VisTypeGaugeSetupDependencies>,
-    { visualizations }: VisTypeGaugeSetupDependencies
+    { visualizations, charts }: VisTypeGaugeSetupDependencies
   ): VisTypeGaugePluginSetup {
+    setPalettesService(charts.palettes);
+
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
       const visTypeProps = { showElasticChartsOptions: true };
