@@ -25,7 +25,6 @@ import {
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
 } from '@kbn/core/server';
-
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
