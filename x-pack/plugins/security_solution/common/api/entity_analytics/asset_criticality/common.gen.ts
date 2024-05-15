@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Asset Criticality Common Schema
- *   version: 1.0.0
+ *   version: 1
  */
 
 export type IdField = z.infer<typeof IdField>;

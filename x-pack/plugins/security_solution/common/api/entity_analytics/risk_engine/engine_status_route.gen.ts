@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Risk Scoring API
- *   version: 1.0.0
+ *   version: 1
  */
 
 export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;

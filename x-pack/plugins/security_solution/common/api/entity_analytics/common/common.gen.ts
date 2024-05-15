@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Entity Analytics Common Schema
- *   version: 1.0.0
+ *   version: 1
  */
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
