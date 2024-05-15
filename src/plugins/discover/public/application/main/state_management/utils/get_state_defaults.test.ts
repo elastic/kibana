@@ -115,7 +115,7 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-    expect(actualForTextBasedWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
+    expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
