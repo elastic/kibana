@@ -515,7 +515,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 CLOUD_QA_API_KEY: API_KEY,
                 // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
                 TEST_CLOUD: 1,
-                CYPRESS_NO_COMMAND_LOG: 1,
               };
 
               if (process.env.DEBUG && !process.env.CI) {

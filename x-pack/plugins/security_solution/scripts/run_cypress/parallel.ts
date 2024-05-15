@@ -394,7 +394,6 @@ ${JSON.stringify(
                 KIBANA_PASSWORD: config.get('servers.kibana.password'),
 
                 IS_SERVERLESS: config.get('serverless'),
-                CYPRESS_NO_COMMAND_LOG: 1,
 
                 ...argv.env,
               };
