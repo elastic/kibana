@@ -93,6 +93,9 @@ jest.mock('../../../common/lib/kibana', () => {
         cases: {
           ...mockCasesContract(),
         },
+        maps: {
+          Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
