@@ -97,7 +97,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -105,6 +105,7 @@ export class UnifiedDocViewerPublicPlugin
             dataView={dataView}
             textBasedHits={textBasedHits}
             hasLineNumbers
+            decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
         );

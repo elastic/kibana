@@ -49,6 +49,10 @@ import {
   ToggleColumn,
   PinToggle,
 } from './table_cell_actions';
+import {
+  DEFAULT_MARGIN_BOTTOM,
+  getTabContentAvailableHeight,
+} from '../doc_viewer_source/get_height';
 
 export type FieldRecord = TableRow;
 
@@ -123,10 +127,11 @@ export const DocViewerTable = ({
   hit,
   dataView,
   filter,
-  availableHeight,
+  decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -402,18 +407,20 @@ export const DocViewerTable = ({
     [rows, searchText]
   );
 
-  const isHeightLimited = Boolean(availableHeight);
+  const containerHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+    : 0;
 
   return (
     <EuiFlexGroup
+      ref={setContainerRef}
       direction="column"
       gutterSize="none"
       responsive={false}
       css={
-        // TODO: clean up
-        availableHeight
+        containerHeight
           ? css`
-              height: ${availableHeight - 2 * 16 - 32}px; // vertical paddings and tabs height
+              height: ${containerHeight}px;
             `
           : css`
               display: block;
@@ -450,7 +457,7 @@ export const DocViewerTable = ({
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem
-            grow={isHeightLimited}
+            grow={Boolean(containerHeight)}
             css={css`
               min-block-size: 0;
               display: block;
