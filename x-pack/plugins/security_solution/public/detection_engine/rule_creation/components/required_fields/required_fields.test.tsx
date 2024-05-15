@@ -16,20 +16,6 @@ import type { RequiredFieldInput } from '../../../../../common/api/detection_eng
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
 const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      docLinks: {
-        links: {
-          securitySolution: {
-            createDetectionRules: 'http://link-to-docs',
-          },
-        },
-      },
-    },
-  }),
-}));
-
 describe('RequiredFields form part', () => {
   it('displays the required fields label', () => {
     render(<TestForm />);
@@ -228,7 +214,7 @@ describe('RequiredFields form part', () => {
 
       expect(
         screen.getByText(
-          'Field "field-that-does-not-exist" is not found within specified index patterns'
+          `Field "field-that-does-not-exist" is not found within the rule's specified index patterns`
         )
       ).toBeVisible();
 
@@ -255,7 +241,7 @@ describe('RequiredFields form part', () => {
 
       expect(
         screen.getByText(
-          'Field "field1" with type "type-that-does-not-exist" is not found within specified index patterns'
+          `Field "field1" with type "type-that-does-not-exist" is not found within the rule's specified index patterns`
         )
       ).toBeVisible();
 
@@ -284,7 +270,7 @@ describe('RequiredFields form part', () => {
 
       expect(
         screen.getByText(
-          'Field "field-that-does-not-exist" is not found within specified index patterns'
+          `Field "field-that-does-not-exist" is not found within the rule's specified index patterns`
         )
       ).toBeVisible();
 

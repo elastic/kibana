@@ -7,12 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
 import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import { RequiredFieldRow } from './required_fields_row';
+import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
@@ -157,7 +159,15 @@ const RequiredFieldsList = ({
           iconType="help"
           data-test-subj="requiredFieldsGeneralWarning"
         >
-          <p>{i18n.REQUIRED_FIELDS_GENERAL_WARNING_DESCRIPTION}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.generalWarningDescription"
+              defaultMessage="This doesn't break rule execution, but it might indicate that required fields were set incorrectly. Please check that indices specified in the rule's {source} exist and have expected fields and types in mappings."
+              values={{
+                source: <strong>{defineRuleI18n.SOURCE}</strong>,
+              }}
+            />
+          </p>
         </EuiCallOut>
       )}
       <EuiSpacer size="m" />

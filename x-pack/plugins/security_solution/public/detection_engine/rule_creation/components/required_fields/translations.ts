@@ -28,17 +28,17 @@ export const FIELD_TYPE = i18n.translate(
   }
 );
 
-export const REQUIRED_FIELDS_GENERAL_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.generalWarningTitle',
+export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.openHelpPopoverAriaLabel',
   {
-    defaultMessage: 'Some fields are not found within specified index patterns.',
+    defaultMessage: 'Open help popover',
   }
 );
 
-export const REQUIRED_FIELDS_GENERAL_WARNING_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.generalWarningDescription',
+export const REQUIRED_FIELDS_GENERAL_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.generalWarningTitle',
   {
-    defaultMessage: `This doesn't break rule execution, but it might indicate that required fields were set incorrectly. Please check that indices specified in index patterns exist and have expected fields and types in mappings.`,
+    defaultMessage: `Some fields aren't found within the rule's specified index patterns.`,
   }
 );
 
@@ -68,7 +68,7 @@ export const FIELD_NAME_NOT_FOUND_WARNING = (name: string) =>
     'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldNameNotFoundWarning',
     {
       values: { name },
-      defaultMessage: `Field "{name}" is not found within specified index patterns`,
+      defaultMessage: `Field "{name}" is not found within the rule's specified index patterns`,
     }
   );
 
@@ -77,7 +77,7 @@ export const FIELD_TYPE_NOT_FOUND_WARNING = (name: string, type: string) =>
     'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldTypeNotFoundWarning',
     {
       values: { name, type },
-      defaultMessage: `Field "{name}" with type "{type}" is not found within specified index patterns`,
+      defaultMessage: `Field "{name}" with type "{type}" is not found within the rule's specified index patterns`,
     }
   );
 

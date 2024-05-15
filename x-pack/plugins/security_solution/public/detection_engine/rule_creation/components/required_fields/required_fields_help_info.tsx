@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { useToggle } from 'react-use';
-import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
+import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
+import * as i18n from './translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -22,13 +23,12 @@ const POPOVER_WIDTH = 320;
 
 export function RequiredFieldsHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
-  const { docLinks } = useKibana().services;
 
   const button = (
     <EuiButtonIcon
       iconType="questionInCircle"
       onClick={togglePopover}
-      aria-label="Open help popover"
+      aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
     />
   );
 
@@ -37,16 +37,9 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText"
-          defaultMessage="Choose the fields that are needed for this rule to execute. You can read more about required fields in our {docLink}."
+          defaultMessage="Choose the fields and data types needed for this rule to function. You can select the fields available in the rule's {source} index patterns or data view."
           values={{
-            docLink: (
-              <EuiLink href={docLinks.links.securitySolution.createDetectionRules} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.docLink"
-                  defaultMessage="documentation"
-                />
-              </EuiLink>
-            ),
+            source: <strong>{defineRuleI18n.SOURCE}</strong>,
           }}
         />
       </EuiText>
