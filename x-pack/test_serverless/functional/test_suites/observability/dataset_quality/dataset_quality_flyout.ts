@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
   // Failing https://github.com/elastic/kibana/issues/183495
-  describes.skip('Dataset quality flyout', () => {
+  describe.skip('Dataset quality flyout', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
