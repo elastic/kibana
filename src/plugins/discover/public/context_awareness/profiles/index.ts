@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './root_context';
-export * from './data_source_context';
-export * from './document_context';
+export * from './root_profile';
+export * from './data_source_profile';
+export * from './document_profile';
