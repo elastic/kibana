@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -51,6 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const openNewEndpointExceptionFlyout = async () => {
+      await testSubjects.scrollIntoView('timeline-context-menu-button');
       await testSubjects.click('timeline-context-menu-button');
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
@@ -134,6 +135,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
@@ -165,6 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
@@ -209,6 +212,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
