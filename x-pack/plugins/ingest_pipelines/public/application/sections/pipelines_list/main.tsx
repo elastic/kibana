@@ -33,7 +33,6 @@ import { PipelineTable } from './table';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
-import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
@@ -54,7 +53,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
-  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   // Track component loaded
   useEffect(() => {
