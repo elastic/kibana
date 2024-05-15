@@ -16,6 +16,9 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
+import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
+
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
@@ -121,7 +124,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/content/search_indices`)
+                          prepend(`/app/enterprise_search/content${SEARCH_INDICES_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchContent:searchIndices',
@@ -157,7 +160,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/applications/search_applications`)
+                          prepend(`/app/enterprise_search/applications${SEARCH_APPLICATIONS_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',

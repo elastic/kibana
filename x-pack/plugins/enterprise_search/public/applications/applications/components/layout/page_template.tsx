@@ -44,16 +44,16 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   docLink = 'search_application',
   ...pageTemplateProps
 }) => {
-  const { renderHeaderActions, updateSideNavDefinition, getChromeStyle$ } = useValues(KibanaLogic);
-  const chromeStyle = useObservable(getChromeStyle$(), 'classic');
   const alwaysReturnNavItems = true;
-
   const navItems = useEnterpriseSearchApplicationNav(
     searchApplicationName,
     pageTemplateProps.isEmptyState,
     hasSchemaConflicts,
     alwaysReturnNavItems
   );
+
+  const { renderHeaderActions, updateSideNavDefinition, getChromeStyle$ } = useValues(KibanaLogic);
+  const chromeStyle = useObservable(getChromeStyle$(), 'classic');
 
   const getSelectedAppItems = useCallback(
     (
