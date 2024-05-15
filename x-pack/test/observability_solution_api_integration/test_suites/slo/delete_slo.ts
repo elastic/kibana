@@ -15,8 +15,6 @@ import { loadTestData } from './helper/load_test_data';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Delete SLOs', function () {
-    this.tags('skipCloud');
-
     const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
@@ -77,6 +75,24 @@ export default function ({ getService }: FtrProviderContext) {
 
       // SO should now be deleted
       expect(savedObjectAfterDelete.saved_objects.length).eql(0);
+
+      // roll up transform should be deleted
+      await supertestAPI
+        .get(`/internal/transform/transforms/slo-${id}-1`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .set('elastic-api-version', '1')
+        .send()
+        .expect(404);
+
+      // summary transform should be deleted
+      await supertestAPI
+        .get(`/internal/transform/transforms/slo-summary-${id}-1`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .set('elastic-api-version', '1')
+        .send()
+        .expect(404);
 
       // expect summary and rollup documents to be deleted
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {

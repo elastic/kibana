@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Slo - API Integration tests', function () {
     loadTestFile(require.resolve('./create_slo'));
     loadTestFile(require.resolve('./delete_slo'));
+    loadTestFile(require.resolve('./reset_slo'));
   });
 }
