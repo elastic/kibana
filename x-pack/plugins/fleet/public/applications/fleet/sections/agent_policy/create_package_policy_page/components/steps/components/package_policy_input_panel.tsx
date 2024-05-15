@@ -121,13 +121,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
     const packageInputStreamShouldBeVisible = useCallback(
       (packageInputStream: RegistryStreamWithDataStream) => {
-        return packageInputStream.vars &&
+        return (
+          !!packageInputStream.vars &&
           packageInputStream.vars.length > 0 &&
           !!packageInputStream.vars.find((registryVar: RegistryVarsEntry) =>
             showRegistryVars(registryVar)
           )
-          ? true
-          : false;
+        );
       },
       [showRegistryVars]
     );
@@ -165,11 +165,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiSwitch
+              data-test-subj="PackagePolicy.InputStreamConfig.Switch"
               label={
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3 id={titleElementId}>{packageInput.title || packageInput.type}</h3>
+                      <h3
+                        data-test-subj="PackagePolicy.InputStreamConfig.title"
+                        id={titleElementId}
+                      >
+                        {packageInput.title || packageInput.type}
+                      </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -231,6 +237,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
             <PackagePolicyInputConfig
+              data-test-subj="PackagePolicy.InputConfig"
               hasInputStreams={hasInputStreams}
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
@@ -245,7 +252,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
         {/* Per-stream policy */}
         {isShowingStreams ? (
-          <EuiFlexGroup direction="column">
+          <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
