@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -48,7 +49,7 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useMemo(
+  const baseGetTopNavMenu = useCallback(
     () =>
       getTopNavLinks({
         dataView,
@@ -69,6 +70,9 @@ export const useDiscoverTopNav = ({
       topNavCustomization,
     ]
   );
+
+  const getTopNavMenu = useProfileAccessor('getTopNavItems', baseGetTopNavMenu);
+  const topNavMenu = useMemo(() => getTopNavMenu(), [getTopNavMenu]);
 
   return {
     topNavMenu,
