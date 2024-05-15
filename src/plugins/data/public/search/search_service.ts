@@ -261,6 +261,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
+      dataViews: indexPatterns,
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,

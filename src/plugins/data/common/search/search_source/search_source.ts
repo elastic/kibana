@@ -1244,6 +1244,13 @@ export class SearchSource {
       dataView = await this.dependencies.dataViews.get(index.id);
     }
     this.setFields({ ...fields, index: dataView });
-    return {};
+
+    return {
+      getSearchRequestBody: async () => {
+        return this.getSearchRequestBody();
+      },
+      fetch$: this.fetch$,
+      toExpressionAst: this.toExpressionAst,
+    };
   }
 }
