@@ -64,8 +64,13 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
 });
 
 const defaultFilterOptions: EuiSelectableOption[] = [
-  { key: 'managed', label: managedFilterLabel },
-  { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
+  { key: 'managed', label: managedFilterLabel, 'data-test-subj': 'managedFilter' },
+  {
+    key: 'deprecated',
+    label: deprecatedFilterLabel,
+    checked: 'off',
+    'data-test-subj': 'deprecatedFilter',
+  },
 ];
 
 interface FilterQueryParams {
@@ -190,6 +195,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="success"
+      data-test-subj="filtersDropdown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
