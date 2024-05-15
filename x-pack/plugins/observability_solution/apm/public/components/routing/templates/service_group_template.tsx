@@ -12,6 +12,7 @@ import {
   EuiSkeletonTitle,
   EuiIcon,
 } from '@elastic/eui';
+import { apmEnableMultiSignal } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -20,6 +21,8 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -149,13 +152,26 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
+  const { core } = useApmPluginContext();
+  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
 
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      label: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-        defaultMessage: 'Inventory',
-      }),
+      label: (
+        <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+              defaultMessage: 'Inventory',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isMultiSignalEnabled && (
+              <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       href: router.link('/services', { query }),
     },
     {

@@ -13,8 +13,7 @@ import { MultiSignalServicesTable } from './multi_signal_service_list';
 
 export const ServiceInventory = () => {
   const { core } = useApmPluginContext();
-  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, true);
+  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
 
-  console.log(isMultiSignalEnabled);
   return isMultiSignalEnabled ? <MultiSignalServicesTable /> : <ApmServiceInventory />;
 };
