@@ -15,7 +15,7 @@ export const getSuggestionProvider = (
 ): monaco.languages.CompletionItemProvider => {
   return {
     // force suggestions when these characters are used
-    triggerCharacters: ['/', '.', '_', ',', '?', '=', '&'],
+    triggerCharacters: ['/', '.', '_', ',', '?', '=', '&', '"'],
     provideCompletionItems: (...args) => {
       if (actionsProvider.current) {
         return actionsProvider.current?.provideCompletionItems(...args);
