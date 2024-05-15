@@ -88,7 +88,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
   }
 
   const indexData = data.index;
-
+  console.log('indexData', indexData);
   return (
     <>
       {aliasesFlyoutOpen && (
@@ -208,7 +208,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
                         values={{
                           documentCount: <EuiI18nNumber value={indexData.count} />,
                           deletedCount: (
-                            <EuiI18nNumber value={indexData.stats?.total?.docs?.deleted ?? 0} />
+                            <EuiI18nNumber value={indexData?.indexStorage.deletedDocs} />
                           ),
                         }}
                       />
@@ -217,10 +217,10 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
                 </EuiFlexGroup>
               }
             >
-              <EuiFlexGroup alignItems="baseline" justifyContent="" gutterSize="s">
+              <EuiFlexGroup alignItems="baseline" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <IndexOverviewPanelStat>
-                    {numeral(indexData?.indexCat['dataset.size'] ?? 0).format('0 b')}
+                    {indexData?.indexStorage.totalStoreSize}
                   </IndexOverviewPanelStat>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

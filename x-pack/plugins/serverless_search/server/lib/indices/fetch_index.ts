@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import numeral from '@elastic/numeral';
 import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
-
-import { FetchIndexResult } from '../../../common/types';
+import { FetchIndexResult, IndexStorage } from '../../../common/types';
 
 export async function fetchIndex(
   client: ElasticsearchClient,
@@ -32,16 +31,20 @@ export async function fetchIndex(
   const index = indexData[indexName];
   const count = indexCountResult.status === 'fulfilled' ? indexCountResult.value.count : 0;
   const connector = connectorResult.status === 'fulfilled' ? connectorResult.value : undefined;
-  const cat = indexCatResult.status === 'fulfilled' ? indexCatResult.value : undefined;
+
+
   const indexCat: Record<string, CatIndicesResponse | undefined> =
     indexCatResult.status === 'fulfilled' ? Object.assign({}, ...indexCatResult.value) : {};
-
+  const indexStorage: IndexStorage ={deletedDocs: parseInt(indexCat["docs.deleted"]?.toString()??'0'),
+    totalStoreSize: indexCat['dataset.size']?.toString()??'0'}
+    console.log(numeral(indexCat['dataset.size']??'0'))
   return {
     index: {
       ...index,
       count,
       connector,
-      indexCat,
+      indexStorage,
+
     },
   };
 }

@@ -26,12 +26,15 @@ export interface IndexData {
 export interface FetchIndicesResult {
   indices: IndexData[];
 }
-
+export interface IndexStorage {
+  deletedDocs :number;
+  totalStoreSize:string;
+}
 export interface FetchIndexResult {
   index: IndicesIndexState & {
     connector?: Connector;
     count: number;
-    indexCat: Record<string, CatIndicesResponse | undefined>;
+    indexStorage: IndexStorage;
   };
 }
 
