@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 
 export function SloListEmpty() {
+  const { onStateChange } = useUrlSearchState();
+
   return (
     <EuiCallOut
       title={i18n.translate('xpack.slo.list.emptyTitle', {
@@ -21,6 +24,23 @@ export function SloListEmpty() {
       {i18n.translate('xpack.slo.list.emptyMessage', {
         defaultMessage: 'There are no results for your criteria.',
       })}
+
+      <EuiButtonEmpty
+        data-test-subj="sloSloListEmptyLinkButtonButton"
+        onClick={() => {
+          onStateChange({
+            kqlQuery: '',
+            filters: [],
+            tagsFilter: undefined,
+            statusFilter: undefined,
+          });
+        }}
+        color="primary"
+      >
+        {i18n.translate('xpack.slo.sloListEmpty.clearFiltersButtonLabel', {
+          defaultMessage: 'Clear filters',
+        })}
+      </EuiButtonEmpty>
     </EuiCallOut>
   );
 }
