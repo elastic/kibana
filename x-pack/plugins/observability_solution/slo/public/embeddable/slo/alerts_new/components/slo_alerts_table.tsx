@@ -99,7 +99,6 @@ export function SloAlertsTable({
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
-  console.log(timeRange, '!!updated timefange');
   return (
     <AlertsStateTable
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}

@@ -18,7 +18,7 @@ import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
-import type { SloItem, EmbeddableSloProps, SloEmbeddableDeps } from './types';
+import type { SloItem, SloEmbeddableDeps } from './types';
 import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 
 interface Props {

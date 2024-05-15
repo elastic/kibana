@@ -81,7 +81,6 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
-          console.log(next, '!!next');
           reload$.next(next);
         });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import {
   type CoreStart,
   IUiSettingsClient,
