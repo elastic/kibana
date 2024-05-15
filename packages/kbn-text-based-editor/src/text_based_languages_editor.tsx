@@ -73,7 +73,6 @@ import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
-import { add } from 'lodash';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -160,7 +159,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
-const isMacroMenuVisible = false;
+let isMacroMenuVisible = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -302,7 +301,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-      // isMacroMenuVisible = true;
+      isMacroMenuVisible = true;
       setIsPopoverVisible(true);
     }
   }, []);
@@ -1071,6 +1070,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                               openQuickActionsPopover();
                             } else {
                               setIsPopoverVisible(false);
+                              isMacroMenuVisible = true;
                             }
                           }
                         });
@@ -1081,22 +1081,35 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
                         editor.onKeyDown((e) => {
                           onEditorFocus();
+                          const currentPosition = editor.getPosition();
+                          const editorValue = editor.getValue();
+                          if (currentPosition && editorValue) {
+                            const currentWord = model?.getWordAtPosition(currentPosition);
+                            const pattern = getIndexPatternFromESQLQuery(editorValue);
+
+                            if (
+                              currentWord?.word === pattern.trim() &&
+                              e.keyCode === monaco.KeyCode.DownArrow &&
+                              !isMacroMenuVisible
+                            ) {
+                              openQuickActionsPopover();
+                            }
+                          }
 
                           if (
-                            isPopoverVisible &&
+                            isMacroMenuVisible &&
                             (e.keyCode === monaco.KeyCode.UpArrow ||
                               e.keyCode === monaco.KeyCode.DownArrow)
                           ) {
                             e.stopPropagation();
                             e.preventDefault();
-
                             popoverRef.current?.focus();
                           }
                         });
 
                         editor.onKeyUp((e) => {
                           if (
-                            isPopoverVisible &&
+                            isMacroMenuVisible &&
                             (e.keyCode === monaco.KeyCode.UpArrow ||
                               e.keyCode === monaco.KeyCode.DownArrow)
                           ) {
@@ -1125,16 +1138,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             0,
                             cursorPosition.column - 1
                           );
-                          const currentWord = model?.getWordAtPosition(cursorPosition);
-                          const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
+
                           if (
-                            // currentWord?.word === pattern.trim() ||
                             cursorPosition.column === 2 &&
                             preCursorColumnContent?.includes('/')
                           ) {
                             openQuickActionsPopover();
                           } else {
-                            // isMacroMenuVisible = false;
+                            isMacroMenuVisible = false;
                             setIsPopoverVisible(false);
                           }
                         });
@@ -1320,6 +1331,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       {createPortal(
         isPopoverVisible && (
           <div
+            tabIndex={0}
             style={{
               ...popoverPosition,
               backgroundColor: 'white',
@@ -1337,12 +1349,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           >
             <EuiListGroup>
               {integrations.map((dataStream) => {
+                const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
+                const isActive = dataStream.name === pattern.trim();
                 return (
                   <EuiListGroupItem
                     label={dataStream.name}
                     color="primary"
                     size="m"
                     key={dataStream.name}
+                    isActive={isActive}
                     onClick={() => {
                       const newCode = `from ${dataStream.name}`;
                       if (code !== newCode) {
