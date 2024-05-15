@@ -44,7 +44,7 @@ import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { getRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -280,7 +280,7 @@ export const createAndAssociateDefaultExceptionList = async ({
   rulesClient: RulesClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
-  const rulesManagementClient = getRulesManagementClient();
+  const rulesManagementClient = new RulesManagementClient(rulesClient);
 
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
@@ -297,7 +297,6 @@ export const createAndAssociateDefaultExceptionList = async ({
     : existingRuleExceptionLists;
 
   await rulesManagementClient.patchRule({
-    rulesClient,
     existingRule: rule,
     nextParams: {
       ...rule.params,

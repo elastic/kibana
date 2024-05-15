@@ -41,7 +41,7 @@ import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
-import { getRulesManagementClient } from '../../../logic/crud/rules_management_client';
+import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ROUTE_CONCURRENCY = 5;
@@ -121,7 +121,7 @@ export const performBulkActionRoute = (
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
-          const rulesManagementClient = getRulesManagementClient();
+          const rulesManagementClient = RulesManagementClient(rulesClient);
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -206,7 +206,6 @@ export const performBulkActionRoute = (
 
                   await rulesManagementClient.deleteRule({
                     ruleId: rule.id,
-                    rulesClient,
                   });
 
                   return null;
