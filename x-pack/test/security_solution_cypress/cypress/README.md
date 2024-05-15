@@ -243,11 +243,12 @@ cy.task('esArchiverUnload', { archiveName: 'overview'});
 
 ```
 
-You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+You can also use archives located in `x-pack/test/functional/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
 
 ```typescript
-cy.task('esArchiverLoad', { archiveName: 'security_solution/alias', type: 'ftr'});
-cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+// loads then unloads from x-pack/test/functional/es_archives/security_solution/alias
+cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr'});
+cy.task('esArchiverUnload', { archiveName: 'alias', type:'ftr'});
 ```
 
 ## Serverless
