@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { AgentStatus } from '../../../../../../common/components/agents/agent_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useAgentStatusHook } from '../../../../../hooks/agents/use_get_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
@@ -21,11 +20,8 @@ interface AgentInfoProps {
 }
 
 export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, agentType }) => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const getAgentStatus = useAgentStatusHook();
-  const { data } = getAgentStatus([agentId], agentType, {
-    enabled: agentStatusClientEnabled,
-  });
+  const { data } = getAgentStatus([agentId], agentType);
   const agentStatus = data?.[agentId];
   const lastCheckin = agentStatus ? agentStatus.lastSeen : '';
 
