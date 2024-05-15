@@ -472,21 +472,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
       validate: {
-        body: schema.object({
-          advanced_snippet: schema.string(),
-          filtering_rules: schema.arrayOf(
-            schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
-              order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
-            })
-          ),
-        }),
+        body: schema.maybe(
+          schema.object({
+            advanced_snippet: schema.string(),
+            filtering_rules: schema.arrayOf(
+              schema.object({
+                created_at: schema.string(),
+                field: schema.string(),
+                id: schema.string(),
+                order: schema.number(),
+                policy: schema.string(),
+                rule: schema.string(),
+                updated_at: schema.string(),
+                value: schema.string(),
+              })
+            ),
+          })
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
