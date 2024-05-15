@@ -22,7 +22,7 @@ import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
-import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
+import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
@@ -44,6 +44,7 @@ import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useInvestigationFields } from '../../hooks/use_investigation_fields';
 import { MaxSignals } from '../max_signals';
+import { ConcurrentSearchesAndItemsPerSearch } from '../concurrent_searches';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -256,6 +257,29 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleInvestigationFields',
               }}
             />
+            <EuiSpacer size="l" />
+            {isThreatMatchRuleValue && (
+              <>
+                <UseMultiFields
+                  fields={{
+                    concurrentSearches: {
+                      path: 'concurrentSearches',
+                    },
+                    itemsPerSearch: {
+                      path: 'itemsPerSearch',
+                    },
+                  }}
+                >
+                  {({ concurrentSearches, itemsPerSearch }) => (
+                    <ConcurrentSearchesAndItemsPerSearch
+                      concurrentSearches={concurrentSearches}
+                      itemsPerSearch={itemsPerSearch}
+                      isDisabled={isLoading}
+                    />
+                  )}
+                </UseMultiFields>
+              </>
+            )}
             <EuiSpacer size="l" />
             <UseField
               path="setup"

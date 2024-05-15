@@ -345,6 +345,12 @@ export const getDescriptionItem = (
   } else if (field === 'maxSignals') {
     const value: number | undefined = get(field, data);
     return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'concurrentSearches') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'itemsPerSearch') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
   }
 
   const description: string = get(field, data);

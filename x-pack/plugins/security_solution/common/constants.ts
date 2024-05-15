@@ -507,3 +507,13 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+
+/**
+ * Default value for concurrent_searches used in indicator match rules
+ */
+export const DEFAULT_CONCURRENT_SEARCHES = 1 as const;
+
+/**
+ * Default value for items_per_search used in indicator match rules
+ */
+export const DEFAULT_ITEMS_PER_SEARCH = 9000 as const;

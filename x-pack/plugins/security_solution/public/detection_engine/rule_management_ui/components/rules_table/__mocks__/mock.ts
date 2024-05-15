@@ -200,6 +200,8 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
   maxSignals: 100,
+  concurrentSearches: 1,
+  itemsPerSearch: 9000,
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({

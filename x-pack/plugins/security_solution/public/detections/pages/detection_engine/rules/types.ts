@@ -104,6 +104,8 @@ export interface AboutStepRule {
   note: string;
   maxSignals?: number;
   setup: SetupGuide;
+  concurrentSearches?: number;
+  itemsPerSearch?: number;
 }
 
 export interface AboutStepRuleDetails {

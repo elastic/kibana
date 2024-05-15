@@ -551,8 +551,10 @@ export const formatAboutStepData = (
 ): AboutStepRuleJson => {
   const {
     author,
+    concurrentSearches,
     falsePositives,
     investigationFields,
+    itemsPerSearch,
     references,
     riskScore,
     severity,
@@ -615,6 +617,8 @@ export const formatAboutStepData = (
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
     max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
+    concurrent_searches: Number.isSafeInteger(concurrentSearches) ? concurrentSearches : undefined,
+    items_per_search: Number.isSafeInteger(itemsPerSearch) ? itemsPerSearch : undefined,
     ...rest,
   };
   return resp;

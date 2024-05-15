@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(14);
+      expect(result.length).toEqual(16);
     });
   });
 
@@ -788,6 +788,60 @@ describe('description_step', () => {
             'maxSignals',
             'Max alerts per run',
             { ...mockAboutStep, maxSignals: undefined },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result.length).toEqual(0);
+        });
+      });
+
+      describe('concurrentSearches', () => {
+        test('returns default "concurrent searches" description', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'concurrentSearches',
+            'Concurrent searches',
+            mockAboutStep,
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].title).toEqual('Concurrent searches');
+          expect(result[0].description).toEqual(1);
+        });
+
+        test('returns empty array when "value" is a undefined', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'concurrentSearches',
+            'Concurrent searches',
+            { ...mockAboutStep, concurrentSearches: undefined },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result.length).toEqual(0);
+        });
+      });
+
+      describe('itemsPerSearch', () => {
+        test('returns default "items per search" description', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'itemsPerSearch',
+            'Items per search',
+            mockAboutStep,
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].title).toEqual('Items per search');
+          expect(result[0].description).toEqual(9000);
+        });
+
+        test('returns empty array when "value" is a undefined', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'itemsPerSearch',
+            'Items per search',
+            { ...mockAboutStep, itemsPerSearch: undefined },
             mockFilterManager,
             mockLicenseService
           );

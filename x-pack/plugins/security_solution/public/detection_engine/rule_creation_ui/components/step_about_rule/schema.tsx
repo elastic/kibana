@@ -48,6 +48,24 @@ export const schema: FormSchema<AboutStepRule> = {
       },
     ],
   },
+  concurrentSearches: {
+    type: FIELD_TYPES.NUMBER,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldConcurrentSearches',
+      {
+        defaultMessage: 'Concurrent searches',
+      }
+    ),
+  },
+  itemsPerSearch: {
+    type: FIELD_TYPES.NUMBER,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldItemsPerSearch',
+      {
+        defaultMessage: 'Items per search',
+      }
+    ),
+  },
   name: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(

@@ -14,7 +14,9 @@ import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import {
+  DEFAULT_CONCURRENT_SEARCHES,
   DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_ITEMS_PER_SEARCH,
   DEFAULT_MAX_SIGNALS,
   SERVER_APP_ID,
 } from '../../../../../common/constants';
@@ -138,8 +140,8 @@ export const typeSpecificSnakeToCamel = (
         threatLanguage: params.threat_language,
         threatIndex: params.threat_index,
         threatIndicatorPath: params.threat_indicator_path ?? DEFAULT_INDICATOR_SOURCE_PATH,
-        concurrentSearches: params.concurrent_searches,
-        itemsPerSearch: params.items_per_search,
+        concurrentSearches: params.concurrent_searches ?? DEFAULT_CONCURRENT_SEARCHES,
+        itemsPerSearch: params.items_per_search ?? DEFAULT_ITEMS_PER_SEARCH,
         alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import {
+  DEFAULT_CONCURRENT_SEARCHES,
+  DEFAULT_ITEMS_PER_SEARCH,
+  DEFAULT_MAX_SIGNALS,
+} from '../../../../../common/constants';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
 
@@ -36,4 +40,6 @@ export const stepAboutDefaultValue: AboutStepRule = {
   note: '',
   maxSignals: DEFAULT_MAX_SIGNALS,
   setup: '',
+  concurrentSearches: DEFAULT_CONCURRENT_SEARCHES,
+  itemsPerSearch: DEFAULT_ITEMS_PER_SEARCH,
 };
