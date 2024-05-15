@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
+import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import type { NormalizedActionRequest } from './utils';
 import {
   categorizeActionResults,
@@ -31,11 +31,11 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
-} from '../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 import { v4 as uuidv4 } from 'uuid';
-import type { Results } from '../../routes/actions/mocks';
-import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
-import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
+import type { Results } from '../../../routes/actions/mocks';
+import { mockAuditLogSearchResult } from '../../../routes/actions/mocks';
+import { ActivityLogItemTypes } from '../../../../../common/endpoint/types';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
