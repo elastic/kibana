@@ -89,6 +89,7 @@ export function discover({
         manifest,
         opaqueId: initializerContext.opaqueId,
         initializerContext,
+        categoryInfo: pkg.getPluginCategories(),
       });
     })
   );

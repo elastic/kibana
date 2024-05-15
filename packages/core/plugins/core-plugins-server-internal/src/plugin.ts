@@ -11,6 +11,7 @@ import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
+import type { PluginCategoryInfo } from '@kbn/repo-packages';
 import type { Logger } from '@kbn/logging';
 import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type {
@@ -24,8 +25,8 @@ import type {
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 
-const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
-const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
+const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]/; // Matches src/ directory on POSIX and Windows
+const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]/; // Matches x-pack/ directory on POSIX and Windows
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -51,6 +52,7 @@ export class PluginWrapper<
   public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
+  public readonly categoryInfo?: PluginCategoryInfo;
 
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
@@ -69,6 +71,7 @@ export class PluginWrapper<
       readonly manifest: PluginManifest;
       readonly opaqueId: PluginOpaqueId;
       readonly initializerContext: PluginInitializerContext;
+      readonly categoryInfo?: PluginCategoryInfo;
     }
   ) {
     this.path = params.path;
@@ -85,6 +88,7 @@ export class PluginWrapper<
     this.runtimePluginDependencies = params.manifest.runtimePluginDependencies;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
+    this.categoryInfo = params.categoryInfo;
   }
 
   public async init() {

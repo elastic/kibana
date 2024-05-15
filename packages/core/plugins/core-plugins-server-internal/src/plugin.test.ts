@@ -43,10 +43,10 @@ jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugi
   virtual: true,
 });
 
-const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
-const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
-const XPACK_PLUGIN_PATH_POSIX = '/kibana/x-pack/plugins/xPackPlugin';
-const XPACK_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\x-pack\\plugins\\xPackPlugin';
+const OSS_PLUGIN_PATH_POSIX = '/kibana/src/foo/ossPlugin';
+const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\foo\\ossPlugin';
+const XPACK_PLUGIN_PATH_POSIX = '/kibana/x-pack/foo/xPackPlugin';
+const XPACK_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\x-pack\\foo\\xPackPlugin';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {

@@ -368,7 +368,14 @@ export class PluginsService
     plugin: PluginWrapper,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
   ) {
-    const { name, manifest, requiredBundles, requiredPlugins } = plugin;
+    const {
+      name,
+      manifest,
+      optionalPlugins,
+      requiredBundles,
+      requiredPlugins,
+      runtimePluginDependencies,
+    } = plugin;
 
     // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
     for (const requiredBundleId of requiredBundles) {
@@ -403,6 +410,44 @@ export class PluginsService
         }
       }
     }
+
+    // validate that non-platform plugins do not have dependencies on each other
+    for (const id of [
+      ...requiredPlugins,
+      ...requiredBundles,
+      ...optionalPlugins,
+      ...runtimePluginDependencies,
+    ]) {
+      const dependency = pluginEnableStatuses.get(id);
+      const pluginTier = this.getPluginTier(plugin);
+      const dependencyPluginTier = this.getPluginTier(dependency?.plugin);
+      if (
+        dependency &&
+        !this.isPublicPlatformPlugin(dependency.plugin) &&
+        pluginTier !== dependencyPluginTier
+      ) {
+        throw new Error(
+          `Plugin or bundle with id "${id}" is required by plugin "${name}", which is prohibited. Plugin "${name}" may only have dependencies on public platform plugins, or other ${pluginTier} plugins.`
+        );
+      }
+    }
+  }
+
+  private getPluginTier(plugin?: PluginWrapper) {
+    if (plugin?.categoryInfo?.platform) return 'platform';
+    if (plugin?.categoryInfo?.observability) return 'observability';
+    if (plugin?.categoryInfo?.search) return 'search';
+    if (plugin?.categoryInfo?.security) return 'security';
+    return 'unknown';
+  }
+
+  private isPublicPlatformPlugin(plugin: PluginWrapper) {
+    const isPlatformPlugin = this.getPluginTier(plugin) === 'platform';
+    // TODO: find a nicer way to do this
+    const isInternalPlatformPlugin =
+      plugin.path.includes('src/platform/internal') ||
+      plugin.path.includes('x-pack/platform/internal');
+    return isPlatformPlugin && !isInternalPlatformPlugin;
   }
 
   private shouldEnablePlugin(

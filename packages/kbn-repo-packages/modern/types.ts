@@ -194,4 +194,12 @@ export interface PluginCategoryInfo {
   example: boolean;
   /** is this a test plugin? */
   testPlugin: boolean;
+  /** is this a platform plugin? */
+  platform: boolean;
+  /** is this a observability plugin? */
+  observability: boolean;
+  /** is this a search plugin? */
+  search: boolean;
+  /** is this a security plugin? */
+  security: boolean;
 }

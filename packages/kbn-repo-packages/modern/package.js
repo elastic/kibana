@@ -157,10 +157,19 @@ class Package {
     const oss = !dir.startsWith('x-pack/');
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
     const testPlugin = dir.startsWith('test/') || dir.startsWith('x-pack/test/');
+    const platform = dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/');
+    const observability =
+      dir.startsWith('src/observability/') || dir.startsWith('x-pack/observability/');
+    const search = dir.startsWith('src/search/') || dir.startsWith('x-pack/search/');
+    const security = dir.startsWith('src/security/') || dir.startsWith('x-pack/security/');
     return {
       oss,
       example,
       testPlugin,
+      platform,
+      observability,
+      search,
+      security,
     };
   }
 
