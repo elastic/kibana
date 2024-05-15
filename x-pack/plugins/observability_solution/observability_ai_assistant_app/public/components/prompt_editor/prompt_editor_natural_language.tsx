@@ -84,7 +84,6 @@ export function PromptEditorNaturalLanguage({
       content: selectedOption.label,
     });
     setSelectablePopoverOpen(false);
-    onFocus();
   };
 
   const handleClosePopover = () => {

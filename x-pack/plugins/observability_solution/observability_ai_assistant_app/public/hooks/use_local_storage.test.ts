@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useLocalStorage } from './use_local_storage'; // adjust the import path accordingly
+import { useLocalStorage } from './use_local_storage';
 
 describe('useLocalStorage', () => {
   const key = 'testKey';
