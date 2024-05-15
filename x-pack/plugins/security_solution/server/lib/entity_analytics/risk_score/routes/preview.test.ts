@@ -173,8 +173,7 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.category_1,
+              type: RiskWeightTypes.global,
               host: 0.1,
               user: 0.2,
             },
@@ -188,8 +187,7 @@ describe('POST risk_engine/preview route', () => {
           expect.objectContaining({
             weights: [
               {
-                type: RiskWeightTypes.riskCategory,
-                value: RiskCategories.category_1,
+                type: RiskWeightTypes.global,
                 host: 0.1,
                 user: 0.2,
               },
@@ -202,8 +200,7 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.category_1,
+              type: RiskWeightTypes.global,
               host: 1.1,
             },
           ],
@@ -227,7 +224,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "{"type":"something new","host":1.1}" supplied to "weights"'
+          'Invalid value "something new" supplied to "weights,type",Invalid value "1.1" supplied to "weights,host",Invalid value "undefined" supplied to "weights,user"'
         );
       });
     });
