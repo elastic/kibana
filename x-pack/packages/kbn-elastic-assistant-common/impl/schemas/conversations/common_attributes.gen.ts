@@ -152,7 +152,7 @@ export const ConversationSummary = z.object({
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
   .object({
-    id: UUID.optional(),
+    id: z.union([UUID, NonEmptyString]).optional(),
     error: z.object({
       status_code: z.number().int().min(400),
       message: z.string(),

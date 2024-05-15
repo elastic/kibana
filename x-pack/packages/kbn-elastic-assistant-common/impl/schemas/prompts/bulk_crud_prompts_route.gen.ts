@@ -44,7 +44,7 @@ export const NormalizedPromptError = z.object({
 
 export type PromptResponse = z.infer<typeof PromptResponse>;
 export const PromptResponse = z.object({
-  id: UUID,
+  id: z.union([UUID, NonEmptyString]),
   timestamp: NonEmptyString.optional(),
   name: z.string(),
   promptType: z.string(),

@@ -130,7 +130,9 @@ components:
       additionalProperties: false
       properties:
         id:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
+          oneOf:
+            - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
+            - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         error:
           type: object
           required:

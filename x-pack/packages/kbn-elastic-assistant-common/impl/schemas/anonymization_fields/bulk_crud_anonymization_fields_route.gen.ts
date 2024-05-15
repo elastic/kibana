@@ -44,7 +44,7 @@ export const NormalizedAnonymizationFieldError = z.object({
 
 export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
 export const AnonymizationFieldResponse = z.object({
-  id: UUID,
+  id: z.union([UUID, NonEmptyString]),
   timestamp: NonEmptyString.optional(),
   field: z.string(),
   allowed: z.boolean().optional(),
