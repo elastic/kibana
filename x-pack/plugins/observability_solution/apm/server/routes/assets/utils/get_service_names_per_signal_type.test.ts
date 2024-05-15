@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AssetService } from '../services/types';
 import { getServiceNamesPerSignalType } from './get_service_names_per_signal_type';
 
 describe('getServiceNamesPerSignalType', () => {

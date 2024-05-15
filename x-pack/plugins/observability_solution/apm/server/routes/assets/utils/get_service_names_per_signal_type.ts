@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AssetService, SignalType } from '../services/types';
+import { AssetServiceListItem, SignalType } from '../../../../common/assets/types';
 
-export function getServiceNamesPerSignalType(serviceAssets: AssetService[]) {
+export function getServiceNamesPerSignalType(serviceAssets: AssetServiceListItem[]) {
   const tracesServiceNames = serviceAssets
     .filter(({ asset }) => asset.signalTypes[SignalType.ASSET_TRACES])
     .map(({ service }) => service.name);

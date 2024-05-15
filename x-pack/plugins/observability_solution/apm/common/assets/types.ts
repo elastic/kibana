@@ -33,11 +33,12 @@ export interface ServiceAssetDocument {
   service: ServiceItem;
 }
 
-export interface AssetService {
+export interface AssetServiceListItem {
   asset: AssetItem;
   service: ServiceItem;
+  metrics: TraceMetrics & LogsRatesMetrics;
 }
 
 export interface AssetServicesResponse {
-  services: Array<AssetService & { metrics: TraceMetrics & LogsRatesMetrics }>;
+  services: Array<AssetServiceListItem>;
 }
