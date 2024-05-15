@@ -438,7 +438,8 @@ export class MonacoEditorActionsProvider {
       prefix = '';
     }
     // check the text after the inserted request
-    const textAfter = position.lineNumber <= model.getLineCount() ? model.getLineContent(position.lineNumber) : '';
+    const textAfter =
+      position.lineNumber <= model.getLineCount() ? model.getLineContent(position.lineNumber) : '';
     if (!textAfter) {
       // if there is no text after, don't insert a new line after the request
       suffix = '';
@@ -455,7 +456,7 @@ export class MonacoEditorActionsProvider {
     };
     this.editor.executeEdits('restoreFromHistory', [edit]);
   }
-  
+
   /*
   This function returns the text in the provided range.
   If no range is provided, it returns all text in the editor.
