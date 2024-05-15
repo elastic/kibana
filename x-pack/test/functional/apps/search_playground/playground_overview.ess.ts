@@ -15,27 +15,21 @@ const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
   const pageObjects = getPageObjects(['common', 'searchPlayground']);
-  const configService = getService('config');
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+  let closeOpenAIConnector: () => Promise<void>;
   const createConnector = async () => {
-    await openAIConnectorGen.next();
+    closeOpenAIConnector = await createOpenAIConnector({
+      supertest,
+      requestHeader: commonAPI.getCommonRequestHeader(),
+    });
   };
-  const openAIConnectorGen = createOpenAIConnector({
-    configService,
-    supertest,
-    requestHeader: commonAPI.getCommonRequestHeader(),
-  });
 
   describe('Playground Overview', () => {
-    let closeOpenAIConnector: () => Promise<void> | undefined;
-
     before(async () => {
       await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
-
-      closeOpenAIConnector = (await openAIConnectorGen.next()).value;
     });
 
     after(async () => {

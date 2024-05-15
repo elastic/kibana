@@ -5,54 +5,28 @@
  * 2.0.
  */
 
-import { Config } from '@kbn/test';
 import type SuperTest from 'supertest';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
 
 const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
-async function* createOpenAIConnector({
-  configService,
+async function createOpenAIConnector({
   supertest,
   requestHeader = {},
   apiKeyHeader = {},
 }: {
-  configService: Config;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
-}): AsyncGenerator<() => Promise<void>> {
-  const simulator = new OpenAISimulator({
-    returnError: false,
-    proxy: {
-      config: configService.get('kbnTestServer.serverArgs'),
-    },
-  });
-
+}): Promise<() => Promise<void>> {
   const config = {
     apiProvider: 'OpenAI',
     defaultModel: 'gpt-4',
-    apiUrl: await simulator.start(),
-  };
-  // eslint-disable-next-line prefer-const
-  let connector: { id: string } | undefined;
-
-  yield async () => {
-    if (connector) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set(requestHeader)
-        .set(apiKeyHeader)
-        .expect(204);
-    }
-
-    await simulator.close();
+    apiUrl: 'http://localhost:3002',
   };
 
-  connector = (
+  const connector: { id: string } | undefined = (
     await supertest
       .post('/api/actions/connector')
       .set(requestHeader)
@@ -67,24 +41,30 @@ async function* createOpenAIConnector({
       })
       .expect(200)
   ).body;
+
+  return async () => {
+    if (connector) {
+      await supertest
+        .delete(`/api/actions/connector/${connector.id}`)
+        .set(requestHeader)
+        .set(apiKeyHeader)
+        .expect(204);
+    }
+  };
 }
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const configService = getService('config');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
-  const createConnector = async () => {
-    await openAIConnectorGen.next();
-  };
-  let openAIConnectorGen: AsyncGenerator<() => Promise<void>>;
   let roleAuthc: RoleCredentials;
 
   describe('Serverless Playground Overview', () => {
-    let closeOpenAIConnector: () => Promise<void> | undefined;
+    let removeOpenAIConnector: () => Promise<void>;
+    let createConnector: () => Promise<void>;
 
     before(async () => {
       await pageObjects.svlCommonPage.login();
@@ -94,18 +74,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      openAIConnectorGen = createOpenAIConnector({
-        configService,
-        supertest: supertestWithoutAuth,
-        requestHeader,
-        apiKeyHeader: roleAuthc.apiKeyHeader,
-      });
-
-      closeOpenAIConnector = (await openAIConnectorGen.next()).value;
+      createConnector = async () => {
+        removeOpenAIConnector = await createOpenAIConnector({
+          supertest: supertestWithoutAuth,
+          requestHeader,
+          apiKeyHeader: roleAuthc.apiKeyHeader,
+        });
+      };
     });
 
     after(async () => {
-      await closeOpenAIConnector?.();
+      await removeOpenAIConnector();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
       await pageObjects.svlCommonPage.forceLogout();
     });

@@ -5,49 +5,24 @@
  * 2.0.
  */
 
-import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
-import { Config } from '@kbn/test';
 import type SuperTest from 'supertest';
 
-export async function* createOpenAIConnector({
-  configService,
+export async function createOpenAIConnector({
   supertest,
   requestHeader = {},
   apiKeyHeader = {},
 }: {
-  configService: Config;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
-}): AsyncGenerator<() => Promise<void>> {
-  const simulator = new OpenAISimulator({
-    returnError: false,
-    proxy: {
-      config: configService.get('kbnTestServer.serverArgs'),
-    },
-  });
-
+}): Promise<() => Promise<void>> {
   const config = {
     apiProvider: 'OpenAI',
     defaultModel: 'gpt-4',
-    apiUrl: await simulator.start(),
-  };
-  // eslint-disable-next-line prefer-const
-  let connector: { id: string } | undefined;
-
-  yield async () => {
-    if (connector) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set(requestHeader)
-        .set(apiKeyHeader)
-        .expect(204);
-    }
-
-    await simulator.close();
+    apiUrl: 'http://localhost:3002',
   };
 
-  connector = (
+  const connector: { id: string } | undefined = (
     await supertest
       .post('/api/actions/connector')
       .set(requestHeader)
@@ -62,4 +37,14 @@ export async function* createOpenAIConnector({
       })
       .expect(200)
   ).body;
+
+  return async () => {
+    if (connector) {
+      await supertest
+        .delete(`/api/actions/connector/${connector.id}`)
+        .set(requestHeader)
+        .set(apiKeyHeader)
+        .expect(204);
+    }
+  };
 }

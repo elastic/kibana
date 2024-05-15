@@ -14,13 +14,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
-    kbnTestServer: {
-      ...kbnTestServer,
-      serverArgs: [
-        ...kbnTestServer.serverArgs,
-        // used for connector simulators
-        `--xpack.actions.proxyUrl=http://localhost:6200`,
-      ],
-    },
   };
 }

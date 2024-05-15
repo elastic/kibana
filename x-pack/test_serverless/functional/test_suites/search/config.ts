@@ -8,10 +8,6 @@
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
-  kbnServerArgs: [
-    // used for connector simulators
-    `--xpack.actions.proxyUrl=http://localhost:6200`,
-  ],
   serverlessProject: 'es',
   testFiles: [require.resolve('.')],
   junit: {
