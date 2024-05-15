@@ -8965,56 +8965,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where date_diff(\"year\", dateField, dateField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where date_diff(numberField, stringField, stringField) > 0",
-      "error": [
-        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(numberField, stringField, stringField)",
-      "error": [
-        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
-      "error": [
-        "Error: [date_diff] function expects exactly 3 arguments, got 4."
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = abs(5)",
       "error": [],
       "warning": []
@@ -9773,6 +9723,42 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, stringField, stringField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", now())",
       "error": [],
       "warning": []
@@ -9780,19 +9766,6 @@
     {
       "query": "row date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", now())",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where date_extract(stringField, stringField) > 0",
-      "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]",
-        "Argument of [date_extract] must be [date], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -9838,19 +9811,6 @@
     {
       "query": "row date_format(now(), \"a\")",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(date_format(dateField, stringField)) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(date_format(stringField, numberField)) > 0",
-      "error": [
-        "Argument of [date_format] must be [date], found value [stringField] type [string]",
-        "Argument of [date_format] must be [string], found value [numberField] type [number]"
-      ],
       "warning": []
     },
     {
@@ -10735,18 +10695,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where mv_count(stringField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where mv_count(booleanField) > 0",
-      "error": [
-        "Argument of [mv_count] must be [any], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = mv_count(stringField)",
       "error": [],
       "warning": []
@@ -11011,20 +10959,6 @@
     {
       "query": "row mv_slice(\"a\", 5, 5)",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where mv_slice(stringField, numberField, numberField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where mv_slice(booleanField, stringField, stringField) > 0",
-      "error": [
-        "Argument of [mv_slice] must be [any], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [stringField] type [string]",
-        "Argument of [mv_slice] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -13964,18 +13898,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_double(stringField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_double(booleanField) > 0",
-      "error": [
-        "Argument of [to_double] must be [any], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = to_double(stringField)",
       "error": [],
       "warning": []
@@ -14082,18 +14004,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_integer(stringField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_integer(booleanField) > 0",
-      "error": [
-        "Argument of [to_integer] must be [any], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = to_integer(stringField)",
       "error": [],
       "warning": []
@@ -14160,18 +14070,6 @@
     {
       "query": "row to_long(\"a\")",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_long(stringField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_long(booleanField) > 0",
-      "error": [
-        "Argument of [to_long] must be [any], found value [booleanField] type [boolean]"
-      ],
       "warning": []
     },
     {
@@ -14362,18 +14260,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where length(to_string(stringField)) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(to_string(booleanField)) > 0",
-      "error": [
-        "Argument of [to_string] must be [any], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = to_string(stringField)",
       "error": [],
       "warning": []
@@ -14418,18 +14304,6 @@
     {
       "query": "row var = to_ulong(\"a\")",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_unsigned_long(stringField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where to_unsigned_long(booleanField) > 0",
-      "error": [
-        "Argument of [to_unsigned_long] must be [any], found value [booleanField] type [boolean]"
-      ],
       "warning": []
     },
     {

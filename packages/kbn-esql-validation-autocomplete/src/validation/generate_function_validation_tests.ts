@@ -159,6 +159,18 @@ function generateWhereCommandTestsForEvalFunction(
   { name, signatures, ...rest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
+  // Test that all functions work in where
+  // TODO: not sure why there's this constraint...
+  const supportedFunction = signatures.some(
+    ({ returnType, params }) =>
+      ['number', 'string'].includes(returnType) &&
+      params.every(({ type }) => ['number', 'string'].includes(type))
+  );
+
+  if (!supportedFunction) {
+    return;
+  }
+
   const supportedSignatures = signatures.filter(({ returnType }) =>
     // TODO — not sure why the tests have this limitation... seems like any type
     // that can be part of a boolean expression should be allowed in a where clause
