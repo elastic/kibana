@@ -26,7 +26,7 @@ import {
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import { getEditPath, getClonePath, getListPath } from '../../services/navigation';
+import { getEditPath, getClonePath } from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
