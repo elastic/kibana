@@ -4342,7 +4342,7 @@
           },
           "<\"map\"> & { getLayerList: () => ",
           "ILayer",
-          "[]; } & ",
+          "[]; reload: () => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

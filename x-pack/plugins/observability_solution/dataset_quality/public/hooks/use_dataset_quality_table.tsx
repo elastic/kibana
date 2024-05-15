@@ -33,6 +33,7 @@ export const useDatasetQualityTable = () => {
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+  const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
 
   const {
     inactive: showInactiveDatasets,
@@ -113,6 +114,7 @@ export const useDatasetQualityTable = () => {
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
+        isSizeStatsAvailable,
         isActiveDataset: isActive,
       }),
     [
@@ -122,6 +124,7 @@ export const useDatasetQualityTable = () => {
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
+      isSizeStatsAvailable,
       isActive,
     ]
   );
@@ -216,5 +219,6 @@ export const useDatasetQualityTable = () => {
     showFullDatasetNames,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
+    isSizeStatsAvailable,
   };
 };
