@@ -1991,9 +1991,8 @@ describe('validation logic', () => {
       });
     });
 
-    describe('functions', () => {
-      // This section will expand in time, especially with https://github.com/elastic/kibana/issues/182390
-      describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
+    describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
+      describe('date_diff', () => {
         testErrorsAndWarnings(
           `row var = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
           []
@@ -2034,6 +2033,32 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval date_diff("month", dateField, stringField)`, [
           'Argument of [date_diff] must be [date], found value [stringField] type [string]',
         ]);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff("year", dateField, dateField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_diff("year", dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff("year", to_datetime(stringField), to_datetime(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff(numberField, stringField, stringField)',
+          [
+            'Argument of [date_diff] must be [string], found value [numberField] type [number]',
+            'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+            'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", dateField, dateField, extraArg)',
+          ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort date_diff("year", dateField, dateField)', []);
       });
 
       describe('abs', () => {
@@ -2384,35 +2409,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort cosh(numberField)', []);
-      });
-
-      describe('date_diff', () => {
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_diff("year", dateField, dateField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_diff("year", dateField, dateField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_diff("year", to_datetime(stringField), to_datetime(stringField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_diff(numberField, stringField, stringField)',
-          [
-            'Argument of [date_diff] must be [string], found value [numberField] type [number]',
-            'Argument of [date_diff] must be [date], found value [stringField] type [string]',
-            'Argument of [date_diff] must be [date], found value [stringField] type [string]',
-          ]
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_diff("year", dateField, dateField, extraArg)',
-          ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
-        );
-
-        testErrorsAndWarnings('from a_index | sort date_diff("year", dateField, dateField)', []);
       });
 
       describe('date_extract', () => {

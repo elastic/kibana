@@ -1116,14 +1116,16 @@ function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>
   function findFunctionsDescribeBlock(ast: any): recast.types.namedTypes.BlockStatement {
     let foundBlock: recast.types.namedTypes.CallExpression | null = null;
 
+    const describeBlockIdentifierName = Object.keys({ FUNCTION_DESCRIBE_BLOCK_NAME })[0];
+
     recast.visit(ast, {
       visitCallExpression(path) {
         const node = path.node;
         if (
           n.Identifier.check(node.callee) &&
           node.callee.name === 'describe' &&
-          n.StringLiteral.check(node.arguments[0]) &&
-          node.arguments[0].value === FUNCTION_DESCRIBE_BLOCK_NAME
+          n.Identifier.check(node.arguments[0]) &&
+          node.arguments[0].name === describeBlockIdentifierName
         ) {
           foundBlock = node;
           this.abort();
