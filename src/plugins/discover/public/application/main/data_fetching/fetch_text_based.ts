@@ -16,6 +16,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getEcsCategoriesArrByFieldName } from '@kbn/discover-utils/src';
 import type { RecordsFetchResponse } from '../../types';
 
 interface TextBasedErrorResponse {
@@ -70,10 +71,15 @@ export function fetchTextBased(
             textBasedQueryColumns = table?.columns ?? undefined;
             textBasedHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row: Record<string, string>, idx: number) => {
+              const ecs = getEcsCategoriesArrByFieldName(Object.keys(row));
+              if (ecs.length > 0) {
+                row._ecs = ecs.join(',');
+              }
               return {
                 id: String(idx),
                 raw: row,
                 flattened: row,
+                ecs,
               } as unknown as DataTableRecord;
             });
           }

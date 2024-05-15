@@ -12,6 +12,7 @@ export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
 export interface EsHitRecord extends Omit<SearchHit, '_source'> {
   _source?: Record<string, unknown>;
+  _ecs?: string[];
 }
 
 /**

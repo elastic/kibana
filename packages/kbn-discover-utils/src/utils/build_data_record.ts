@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { flattenHit } from '@kbn/data-service';
-import type { DataTableRecord, EsHitRecord } from '../types';
-import { getDocId } from './get_doc_id';
+import type {DataView} from '@kbn/data-views-plugin/common';
+import {flattenHit} from '@kbn/data-service';
+import type {DataTableRecord, EsHitRecord} from '../types';
+import {getDocId} from './get_doc_id';
+import {applyEcsCategoryInformation} from "@kbn/discover-utils/src/utils/ecs";
 
 /**
  * Build a record for data table, explorer + classic one
@@ -22,6 +23,7 @@ export function buildDataTableRecord(
   dataView?: DataView,
   isAnchor?: boolean
 ): DataTableRecord {
+  applyEcsCategoryInformation(doc);
   return {
     id: getDocId(doc),
     raw: doc,
