@@ -15,7 +15,6 @@ import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_a
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
 import { createAddSwimlanePanelAction } from './create_swim_lane';
-import { createEditSingleMetricViewerPanelAction } from './edit_single_metric_viewer_panel_action';
 import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import {
   createCategorizationADJobAction,
@@ -48,9 +47,6 @@ export function registerMlUiActions(
     core.getStartServices
   );
   const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
-  const editSingleMetricViewerPanelAction = createEditSingleMetricViewerPanelAction(
-    core.getStartServices
-  );
   const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
   const openInSingleMetricViewerAction = createOpenInSingleMetricViewerAction(
     core.getStartServices
@@ -75,7 +71,6 @@ export function registerMlUiActions(
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSwimlanePanelAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAnomalyChartsPanelAction);
 
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);
 
