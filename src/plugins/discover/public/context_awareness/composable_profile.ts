@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+
 export interface Profile {
-  getTopNavItems: (count: number) => TopNavItem[];
+  getTopNavItems: () => TopNavMenuData[];
   getDefaultColumns: () => Column[];
   getFlyout: () => FlyoutComponent;
 }
@@ -16,23 +18,19 @@ export type PartialProfile = Partial<Profile>;
 
 export type ComposableAccessor<T> = (getPrevious: T) => T;
 
-export type ComposableProfile<TProfile extends PartialProfile> = {
+export type ComposableProfile<TProfile extends PartialProfile = Profile> = {
   [TKey in keyof TProfile]?: ComposableAccessor<TProfile[TKey]>;
 };
 
-export const getMergedAccessor = <
-  TProfile extends PartialProfile,
-  TKey extends keyof ComposableProfile<TProfile>
->(
+export const getMergedAccessor = <TKey extends keyof Profile>(
+  profiles: ComposableProfile[],
   key: TKey,
-  baseProfile: TProfile
+  defaultImplementation: Profile[TKey]
 ) => {
-  return (profiles: Array<ComposableProfile<TProfile>>) => {
-    return profiles.reduce((nextAccessor, profile) => {
-      const currentAccessor = profile[key];
-      return currentAccessor ? currentAccessor(nextAccessor) : nextAccessor;
-    }, baseProfile[key]);
-  };
+  return profiles.reduce((nextAccessor, profile) => {
+    const currentAccessor = profile[key];
+    return currentAccessor ? currentAccessor(nextAccessor) : nextAccessor;
+  }, defaultImplementation);
 };
 
 // placeholders

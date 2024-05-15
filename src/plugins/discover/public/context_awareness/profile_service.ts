@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ComposableProfile, PartialProfile } from './composable_profile';
+import { ComposableProfile, PartialProfile, Profile } from './composable_profile';
 
 export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext> {
   order: number;
@@ -14,8 +14,9 @@ export interface ProfileProvider<TProfile extends PartialProfile, TParams, TCont
   resolve: (params: TParams) => { isMatch: true; context: TContext } | { isMatch: false };
 }
 
+const EMPTY_PROFILE = {};
+
 export class ProfileService<TProfile extends PartialProfile, TParams, TContext> {
-  private static readonly EMPTY_PROFILE = {};
   private readonly providers: Array<ProfileProvider<TProfile, TParams, TContext>> = [];
 
   public registerProvider(provider: ProfileProvider<TProfile, TParams, TContext>) {
@@ -23,15 +24,15 @@ export class ProfileService<TProfile extends PartialProfile, TParams, TContext> 
     this.providers.sort((a, b) => a.order - b.order);
   }
 
-  public resolve(params: TParams): ComposableProfile<TProfile> {
+  public resolve(params: TParams): ComposableProfile<Profile> {
     for (const provider of this.providers) {
       const result = provider.resolve(params);
 
       if (result.isMatch) {
-        return provider.profile;
+        return provider.profile as ComposableProfile<Profile>;
       }
     }
 
-    return ProfileService.EMPTY_PROFILE;
+    return EMPTY_PROFILE;
   }
 }

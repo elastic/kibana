@@ -67,7 +67,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useContextAwareness } from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -318,8 +317,6 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
-  const { rootContext, dataSourceContext, documentContexts } = useContextAwareness();
-
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -374,84 +371,63 @@ function DiscoverDocumentsComponent({
           </>
         )}
         {!isLegacy && (
-          <>
-            <div css={{ padding: '8px' }}>
-              <span>
-                <strong>Solution:</strong> {rootContext.solutionType}
-              </span>{' '}
-              <span>
-                <strong>Data source:</strong> {dataSourceContext.category}
-              </span>
-            </div>
-            <div className="unifiedDataTable">
-              <CellActionsProvider
-                getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-              >
-                <DiscoverGridMemoized
-                  ariaLabelledBy="documentsAriaLabel"
-                  columns={currentColumns}
-                  columnsMeta={columnsMeta}
-                  expandedDoc={expandedDoc}
-                  dataView={dataView}
-                  loadingState={
-                    isDataLoading
-                      ? DataLoadingState.loading
-                      : isMoreDataLoading
-                      ? DataLoadingState.loadingMore
-                      : DataLoadingState.loaded
-                  }
-                  rows={rows}
-                  sort={(sort as SortOrder[]) || []}
-                  searchDescription={savedSearch.description}
-                  searchTitle={savedSearch.title}
-                  setExpandedDoc={setExpandedDoc}
-                  showTimeCol={showTimeCol}
-                  settings={grid}
-                  onFilter={onAddFilter as DocViewFilterFn}
-                  onSetColumns={onSetColumns}
-                  onSort={onSort}
-                  onResize={onResizeDataGrid}
-                  useNewFieldsApi={useNewFieldsApi}
-                  configHeaderRowHeight={3}
-                  headerRowHeightState={headerRowHeight}
-                  onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
-                  rowHeightState={rowHeight}
-                  onUpdateRowHeight={onUpdateRowHeight}
-                  isSortEnabled={true}
-                  isPlainRecord={isEsqlMode}
-                  rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
-                  onUpdateRowsPerPage={onUpdateRowsPerPage}
-                  maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-                  sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
-                  onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
-                  onFieldEdited={onFieldEdited}
-                  configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
-                  showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-                  maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-                  renderDocumentView={renderDocumentView}
-                  renderCustomToolbar={renderCustomToolbarWithElements}
-                  services={services}
-                  totalHits={totalHits}
-                  onFetchMoreRecords={onFetchMoreRecords}
-                  componentsTourSteps={TOUR_STEPS}
-                  // externalCustomRenderers={externalCustomRenderers}
-                  externalCustomRenderers={{
-                    _source: (props) => {
-                      return (
-                        <>
-                          <strong>{documentContexts.get(props.row.id)?.type ?? 'unknown'}</strong>
-                          <br />
-                          <div>{JSON.stringify(props.row.flattened)}</div>
-                        </>
-                      );
-                    },
-                  }}
-                  customGridColumnsConfiguration={customGridColumnsConfiguration}
-                  customControlColumnsConfiguration={customControlColumnsConfiguration}
-                />
-              </CellActionsProvider>
-            </div>
-          </>
+          <div className="unifiedDataTable">
+            <CellActionsProvider
+              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+            >
+              <DiscoverGridMemoized
+                ariaLabelledBy="documentsAriaLabel"
+                columns={currentColumns}
+                columnsMeta={columnsMeta}
+                expandedDoc={expandedDoc}
+                dataView={dataView}
+                loadingState={
+                  isDataLoading
+                    ? DataLoadingState.loading
+                    : isMoreDataLoading
+                    ? DataLoadingState.loadingMore
+                    : DataLoadingState.loaded
+                }
+                rows={rows}
+                sort={(sort as SortOrder[]) || []}
+                searchDescription={savedSearch.description}
+                searchTitle={savedSearch.title}
+                setExpandedDoc={setExpandedDoc}
+                showTimeCol={showTimeCol}
+                settings={grid}
+                onFilter={onAddFilter as DocViewFilterFn}
+                onSetColumns={onSetColumns}
+                onSort={onSort}
+                onResize={onResizeDataGrid}
+                useNewFieldsApi={useNewFieldsApi}
+                configHeaderRowHeight={3}
+                headerRowHeightState={headerRowHeight}
+                onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
+                rowHeightState={rowHeight}
+                onUpdateRowHeight={onUpdateRowHeight}
+                isSortEnabled={true}
+                isPlainRecord={isEsqlMode}
+                rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+                onUpdateRowsPerPage={onUpdateRowsPerPage}
+                maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+                onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
+                onFieldEdited={onFieldEdited}
+                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+                renderDocumentView={renderDocumentView}
+                renderCustomToolbar={renderCustomToolbarWithElements}
+                services={services}
+                totalHits={totalHits}
+                onFetchMoreRecords={onFetchMoreRecords}
+                componentsTourSteps={TOUR_STEPS}
+                externalCustomRenderers={externalCustomRenderers}
+                customGridColumnsConfiguration={customGridColumnsConfiguration}
+                customControlColumnsConfiguration={customControlColumnsConfiguration}
+              />
+            </CellActionsProvider>
+          </div>
         )}
       </EuiFlexItem>
     </>

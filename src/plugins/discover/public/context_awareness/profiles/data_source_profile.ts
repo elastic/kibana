@@ -7,8 +7,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { DiscoverDataSource } from '../../../common/data_sources';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataSourceType, DiscoverDataSource, isDataSourceType } from '../../../common/data_sources';
 import { Profile } from '../composable_profile';
 import { ProfileService } from '../profile_service';
 
@@ -32,3 +33,42 @@ export const dataSourceProfileService = new ProfileService<
   DataSourceProfileProviderParams,
   DataSourceContext
 >();
+
+dataSourceProfileService.registerProvider({
+  order: 0,
+  profile: {
+    getTopNavItems: (prev) => () =>
+      [
+        {
+          id: 'logs-data-source-entry',
+          label: 'Logs data source entry',
+          run: () => {
+            alert('HELLO WORLD');
+          },
+        },
+        ...prev(),
+      ],
+  },
+  resolve: (params) => {
+    let indices: string[] = [];
+
+    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
+      if (!isOfAggregateQueryType(params.query)) {
+        return { isMatch: false };
+      }
+
+      indices = getIndexPatternFromESQLQuery(params.query.esql).split(',');
+    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
+      indices = params.dataView.getIndexPattern().split(',');
+    }
+
+    if (indices.every((index) => index.includes('logs'))) {
+      return {
+        isMatch: true,
+        context: { category: DataSourceCategory.Logs },
+      };
+    }
+
+    return { isMatch: false };
+  },
+});
