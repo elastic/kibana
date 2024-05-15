@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.12.2",
+    "node": "20.13.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1097,7 +1097,7 @@
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
-    "puppeteer": "22.3.0",
+    "puppeteer": "22.8.1",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
@@ -1214,7 +1214,6 @@
     "@babel/types": "7.21.2",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
-    "@cypress/code-coverage": "^3.12.18",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.1",
     "@elastic/eslint-plugin-eui": "0.0.2",
@@ -1582,7 +1581,7 @@
     "cssnano": "^5.1.12",
     "cssnano-preset-default": "^5.2.12",
     "csstype": "^3.0.2",
-    "cypress": "^13.6.3",
+    "cypress": "13.6.2",
     "cypress-axe": "^1.5.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.4",
