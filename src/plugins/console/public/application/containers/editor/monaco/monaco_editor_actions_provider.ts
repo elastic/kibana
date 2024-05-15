@@ -400,7 +400,14 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position, context);
   }
 
+  /*
+   * This function inserts a request from the history into the editor
+   */
   public async restoreRequestFromHistory(request: string) {
+    const model = this.editor.getModel();
+    if (!model) {
+      return;
+    }
     let position = this.editor.getPosition() as monaco.IPosition;
     const requests = await this.getSelectedParsedRequests();
     // if there are requests at the cursor/selection, insert either before or after
@@ -418,14 +425,19 @@ export class MonacoEditorActionsProvider {
         position = { lineNumber: 1, column: 1 };
       }
     }
+    // add new lines around the request inserted from history
     let prefix = '\n';
     let suffix = '\n';
-    if (position.lineNumber === 1) {
-      // if inserting at the beginning, remove the prefix new line
+    // check the text before the inserted request: content on the line above or empty
+    const textBefore = position.lineNumber > 1 ? model.getLineContent(position.lineNumber - 1) : '';
+    if (!textBefore) {
+      // if there is no text before, don't insert a new line before the request
       prefix = '';
     }
-    if (position.lineNumber === this.editor.getModel()?.getLineCount()) {
-      // if inserting at the end, remove the suffix new line
+    // check the text after the inserted request
+    const textAfter = position.lineNumber <= model.getLineCount() ? model.getLineContent(position.lineNumber) : '';
+    if (!textAfter) {
+      // if there is no text after, don't insert a new line after the request
       suffix = '';
     }
     const edit: monaco.editor.IIdentifiedSingleEditOperation = {
