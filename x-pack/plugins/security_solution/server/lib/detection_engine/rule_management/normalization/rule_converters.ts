@@ -105,6 +105,7 @@ const DEFAULT_INTERVAL = '5m' as const;
 export const typeSpecificSnakeToCamel = (
   params: TypeSpecificCreateProps
 ): TypeSpecificRuleParams => {
+  console.log('Converting params to internal format', params);
   switch (params.type) {
     case 'eql': {
       return {
@@ -554,9 +555,9 @@ interface RuleCreateOptions {
 
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps,
-  options: RuleCreateOptions
+  options?: RuleCreateOptions
 ): InternalRuleCreate => {
-  const { immutable = false, defaultEnabled = true } = options;
+  const { immutable = false, defaultEnabled = true } = options ?? {};
 
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
