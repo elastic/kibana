@@ -14,7 +14,7 @@ describe('initDynamicActionsState', () => {
   });
 
   test('should return empty state when enhancements is empty object', () => {
-    expect(initDynamicActionsState()).toEqual({ dynamicActions: { events: [] } });
+    expect(initDynamicActionsState({})).toEqual({ dynamicActions: { events: [] } });
   });
 
   test('should return empty state when enhancements.dynamicActions is undefined', () => {
