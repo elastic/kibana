@@ -19,7 +19,7 @@ import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { FunctionDefinition } from '../definitions/types';
 import { nonNullable } from '../shared/helpers';
-import { FUNCTION_DESCRIBE_BLOCK_NAME } from './validation.test';
+import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
@@ -37,180 +37,6 @@ function main() {
   }
 
   writeTestsToFile(testCasesByFunction);
-}
-
-function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>>) {
-  const testFilePath = join(__dirname, 'validation.test.ts');
-
-  const ast = recast.parse(readFileSync(testFilePath).toString(), {
-    parser: require('recast/parsers/typescript'),
-  });
-
-  const functionsDescribeBlock = findFunctionsDescribeBlock(ast);
-
-  // check for existing describe blocks for functions and add any new
-  // test cases to them
-  for (const node of functionsDescribeBlock.body) {
-    if (!n.ExpressionStatement.check(node)) {
-      continue;
-    }
-
-    if (!n.CallExpression.check(node.expression)) {
-      continue;
-    }
-
-    if (!n.StringLiteral.check(node.expression.arguments[0])) {
-      continue;
-    }
-
-    const functionName = node.expression.arguments[0].value;
-
-    if (!testCasesByFunction.has(functionName)) {
-      // this will be a new describe block for a function that doesn't have any tests yet
-      continue;
-    }
-
-    const generatedTestCasesForFunction = testCasesByFunction.get(functionName) as Map<
-      string,
-      string[]
-    >;
-
-    if (!n.ArrowFunctionExpression.check(node.expression.arguments[1])) {
-      continue;
-    }
-
-    if (!n.BlockStatement.check(node.expression.arguments[1].body)) {
-      continue;
-    }
-
-    for (const existingTestCaseAST of node.expression.arguments[1].body.body) {
-      if (!n.ExpressionStatement.check(existingTestCaseAST)) {
-        continue;
-      }
-
-      if (!n.CallExpression.check(existingTestCaseAST.expression)) {
-        continue;
-      }
-
-      if (!n.Identifier.check(existingTestCaseAST.expression.callee)) {
-        continue;
-      }
-
-      if (existingTestCaseAST.expression.callee.name !== 'testErrorsAndWarnings') {
-        continue;
-      }
-
-      const testQuery = getValueFromStringOrTemplateLiteral(
-        existingTestCaseAST.expression.arguments[0]
-      );
-
-      if (!testQuery) {
-        continue;
-      }
-
-      if (generatedTestCasesForFunction.has(testQuery)) {
-        // Remove the test case from the generated test cases to respect
-        // what is already there in the test file... we don't want to overwrite
-        // what already exists
-        generatedTestCasesForFunction.delete(testQuery);
-      }
-    }
-
-    // add new testCases
-    for (const [testQuery, expectedErrors] of generatedTestCasesForFunction.entries()) {
-      node.expression.arguments[1].body.body.push(buildTestCase(testQuery, expectedErrors));
-    }
-
-    // remove the function from the map so we don't add a duplicate describe block
-    testCasesByFunction.delete(functionName);
-  }
-
-  // Add new describe blocks for functions that don't have any tests yet
-  for (const [functionName, testCases] of testCasesByFunction) {
-    functionsDescribeBlock.body.push(buildDescribeBlockForFunction(functionName, testCases));
-  }
-
-  writeFileSync(testFilePath, recast.print(ast).code, 'utf-8');
-}
-
-const buildTestCase = (testQuery: string, expectedErrors: string[]) => {
-  return b.expressionStatement(
-    b.callExpression(b.identifier('testErrorsAndWarnings'), [
-      b.stringLiteral(testQuery),
-      b.arrayExpression(expectedErrors.map((error) => b.stringLiteral(error))),
-    ])
-  );
-};
-
-const buildDescribeBlockForFunction = (_functionName: string, testCases: Map<string, string[]>) => {
-  const testCasesInCode = Array.from(testCases.entries()).map(([testQuery, expectedErrors]) => {
-    return buildTestCase(testQuery, expectedErrors);
-  });
-
-  return b.expressionStatement(
-    b.callExpression(b.identifier('describe'), [
-      b.stringLiteral(_functionName),
-      b.arrowFunctionExpression([], b.blockStatement(testCasesInCode)),
-    ])
-  );
-};
-
-/**
- * Returns the string contents of a node whether or not it's a StringLiteral or a TemplateLiteral
- * @param node
- * @returns
- */
-function getValueFromStringOrTemplateLiteral(node: any): string {
-  if (n.StringLiteral.check(node)) {
-    return node.value;
-  }
-
-  if (n.TemplateLiteral.check(node)) {
-    return node.quasis[0].value.raw;
-  }
-
-  return '';
-}
-
-/**
- * This function searches the AST for the describe block containing per-function tests
- * @param ast
- * @returns
- */
-function findFunctionsDescribeBlock(ast: any): recast.types.namedTypes.BlockStatement {
-  let foundBlock: recast.types.namedTypes.CallExpression | null = null;
-
-  recast.visit(ast, {
-    visitCallExpression(path) {
-      const node = path.node;
-      if (
-        n.Identifier.check(node.callee) &&
-        node.callee.name === 'describe' &&
-        n.StringLiteral.check(node.arguments[0]) &&
-        node.arguments[0].value === FUNCTION_DESCRIBE_BLOCK_NAME
-      ) {
-        foundBlock = node;
-        this.abort();
-      }
-      this.traverse(path);
-    },
-  });
-
-  if (!foundBlock) {
-    throw Error('couldn\'t find the "functions" describe block in the test file');
-  }
-
-  const functionsDescribeCallExpression = foundBlock as recast.types.namedTypes.CallExpression;
-
-  if (!n.ArrowFunctionExpression.check(functionsDescribeCallExpression.arguments[1])) {
-    throw Error('Expected an arrow function expression');
-  }
-
-  if (!n.BlockStatement.check(functionsDescribeCallExpression.arguments[1].body)) {
-    throw Error('Expected a block statement');
-  }
-
-  return functionsDescribeCallExpression.arguments[1].body;
 }
 
 function generateTestsForEvalFunction(definition: FunctionDefinition) {
@@ -1218,6 +1044,190 @@ function generateIncorrectlyTypedParameters(
     .filter(nonNullable);
 
   return { wrongFieldMapping, expectedErrors };
+}
+
+/**
+ * This writes the test cases to the validation.test.ts file
+ *
+ * It will never overwrite existing test cases, only add new ones
+ *
+ * @param testCasesByFunction
+ */
+function writeTestsToFile(testCasesByFunction: Map<string, Map<string, string[]>>) {
+  const buildTestCase = (testQuery: string, expectedErrors: string[]) => {
+    return b.expressionStatement(
+      b.callExpression(b.identifier('testErrorsAndWarnings'), [
+        b.stringLiteral(testQuery),
+        b.arrayExpression(expectedErrors.map((error) => b.stringLiteral(error))),
+      ])
+    );
+  };
+
+  const buildDescribeBlockForFunction = (
+    _functionName: string,
+    testCases: Map<string, string[]>
+  ) => {
+    const testCasesInCode = Array.from(testCases.entries()).map(([testQuery, expectedErrors]) => {
+      return buildTestCase(testQuery, expectedErrors);
+    });
+
+    return b.expressionStatement(
+      b.callExpression(b.identifier('describe'), [
+        b.stringLiteral(_functionName),
+        b.arrowFunctionExpression([], b.blockStatement(testCasesInCode)),
+      ])
+    );
+  };
+
+  /**
+   * Returns the string contents of a node whether or not it's a StringLiteral or a TemplateLiteral
+   * @param node
+   * @returns
+   */
+  function getValueFromStringOrTemplateLiteral(node: any): string {
+    if (n.StringLiteral.check(node)) {
+      return node.value;
+    }
+
+    if (n.TemplateLiteral.check(node)) {
+      return node.quasis[0].value.raw;
+    }
+
+    return '';
+  }
+
+  /**
+   * This function searches the AST for the describe block containing per-function tests
+   * @param ast
+   * @returns
+   */
+  function findFunctionsDescribeBlock(ast: any): recast.types.namedTypes.BlockStatement {
+    let foundBlock: recast.types.namedTypes.CallExpression | null = null;
+
+    recast.visit(ast, {
+      visitCallExpression(path) {
+        const node = path.node;
+        if (
+          n.Identifier.check(node.callee) &&
+          node.callee.name === 'describe' &&
+          n.StringLiteral.check(node.arguments[0]) &&
+          node.arguments[0].value === FUNCTION_DESCRIBE_BLOCK_NAME
+        ) {
+          foundBlock = node;
+          this.abort();
+        }
+        this.traverse(path);
+      },
+    });
+
+    if (!foundBlock) {
+      throw Error('couldn\'t find the "functions" describe block in the test file');
+    }
+
+    const functionsDescribeCallExpression = foundBlock as recast.types.namedTypes.CallExpression;
+
+    if (!n.ArrowFunctionExpression.check(functionsDescribeCallExpression.arguments[1])) {
+      throw Error('Expected an arrow function expression');
+    }
+
+    if (!n.BlockStatement.check(functionsDescribeCallExpression.arguments[1].body)) {
+      throw Error('Expected a block statement');
+    }
+
+    return functionsDescribeCallExpression.arguments[1].body;
+  }
+
+  const testFilePath = join(__dirname, 'validation.test.ts');
+
+  const ast = recast.parse(readFileSync(testFilePath).toString(), {
+    parser: require('recast/parsers/typescript'),
+  });
+
+  const functionsDescribeBlock = findFunctionsDescribeBlock(ast);
+
+  // check for existing describe blocks for functions and add any new
+  // test cases to them
+  for (const node of functionsDescribeBlock.body) {
+    if (!n.ExpressionStatement.check(node)) {
+      continue;
+    }
+
+    if (!n.CallExpression.check(node.expression)) {
+      continue;
+    }
+
+    if (!n.StringLiteral.check(node.expression.arguments[0])) {
+      continue;
+    }
+
+    const functionName = node.expression.arguments[0].value;
+
+    if (!testCasesByFunction.has(functionName)) {
+      // this will be a new describe block for a function that doesn't have any tests yet
+      continue;
+    }
+
+    const generatedTestCasesForFunction = testCasesByFunction.get(functionName) as Map<
+      string,
+      string[]
+    >;
+
+    if (!n.ArrowFunctionExpression.check(node.expression.arguments[1])) {
+      continue;
+    }
+
+    if (!n.BlockStatement.check(node.expression.arguments[1].body)) {
+      continue;
+    }
+
+    for (const existingTestCaseAST of node.expression.arguments[1].body.body) {
+      if (!n.ExpressionStatement.check(existingTestCaseAST)) {
+        continue;
+      }
+
+      if (!n.CallExpression.check(existingTestCaseAST.expression)) {
+        continue;
+      }
+
+      if (!n.Identifier.check(existingTestCaseAST.expression.callee)) {
+        continue;
+      }
+
+      if (existingTestCaseAST.expression.callee.name !== 'testErrorsAndWarnings') {
+        continue;
+      }
+
+      const testQuery = getValueFromStringOrTemplateLiteral(
+        existingTestCaseAST.expression.arguments[0]
+      );
+
+      if (!testQuery) {
+        continue;
+      }
+
+      if (generatedTestCasesForFunction.has(testQuery)) {
+        // Remove the test case from the generated test cases to respect
+        // what is already there in the test file... we don't want to overwrite
+        // what already exists
+        generatedTestCasesForFunction.delete(testQuery);
+      }
+    }
+
+    // add new testCases
+    for (const [testQuery, expectedErrors] of generatedTestCasesForFunction.entries()) {
+      node.expression.arguments[1].body.body.push(buildTestCase(testQuery, expectedErrors));
+    }
+
+    // remove the function from the map so we don't add a duplicate describe block
+    testCasesByFunction.delete(functionName);
+  }
+
+  // Add new describe blocks for functions that don't have any tests yet
+  for (const [functionName, testCases] of testCasesByFunction) {
+    functionsDescribeBlock.body.push(buildDescribeBlockForFunction(functionName, testCases));
+  }
+
+  writeFileSync(testFilePath, recast.print(ast).code, 'utf-8');
 }
 
 main();

@@ -18,8 +18,7 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
-
-export const FUNCTION_DESCRIBE_BLOCK_NAME = 'functions';
+import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 
 const fieldTypes = [
   'number',
