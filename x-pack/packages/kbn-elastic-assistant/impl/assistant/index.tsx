@@ -983,16 +983,19 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  {/* <BlockBotCallToAction
-                    connectorPrompt={connectorPrompt}
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                    isWelcomeSetup={isWelcomeSetup}
-                  /> */}
+                  {!isAssistantEnabled ? (
+                    <BlockBotCallToAction
+                      connectorPrompt={connectorPrompt}
+                      http={http}
+                      isAssistantEnabled={isAssistantEnabled}
+                      isWelcomeSetup={isWelcomeSetup}
+                    />
+                  ) : (
+                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
