@@ -41,6 +41,13 @@ export const RuleExecutionResult = z.object({
   gap_duration_s: z.number().int(),
   security_status: z.string(),
   security_message: z.string(),
+  backfill: z
+    .object({
+      start: z.string().datetime().optional(),
+      end: z.string().datetime().optional(),
+      interval: z.string().optional(),
+    })
+    .optional(),
 });
 
 /**

@@ -52,6 +52,17 @@ components:
           type: string
         security_message:
           type: string
+        backfill:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+            interval:
+              type: string              
       required:
         - execution_uuid
         - timestamp
