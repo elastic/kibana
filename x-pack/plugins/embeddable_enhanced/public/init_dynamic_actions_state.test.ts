@@ -18,14 +18,20 @@ describe('initDynamicActionsState', () => {
   });
 
   test('should return empty state when enhancements.dynamicActions is undefined', () => {
-    expect(initDynamicActionsState({ dynamicActions: undefined })).toEqual({ dynamicActions: { events: [] } });
+    expect(initDynamicActionsState({ dynamicActions: undefined })).toEqual({
+      dynamicActions: { events: [] },
+    });
   });
 
   test('should return empty state when enhancements.dynamicActions is empty object', () => {
-    expect(initDynamicActionsState({ dynamicActions: {} })).toEqual({ dynamicActions: { events: [] } });
+    expect(initDynamicActionsState({ dynamicActions: {} })).toEqual({
+      dynamicActions: { events: [] },
+    });
   });
 
   test('should return state when enhancements.dynamicActions is provided', () => {
-    expect(initDynamicActionsState({ dynamicActions: { events: [{} as unknown as SerializedEvent] } })).toEqual({ dynamicActions: { events: [{}] } });
+    expect(
+      initDynamicActionsState({ dynamicActions: { events: [{} as unknown as SerializedEvent] } })
+    ).toEqual({ dynamicActions: { events: [{}] } });
   });
 });

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { DynamicActionsState } from "@kbn/ui-actions-enhanced-plugin/public";
+import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 
-export function initDynamicActionsState(enhancements?: { dynamicActions?: Partial<DynamicActionsState> }) {
+export function initDynamicActionsState(enhancements?: {
+  dynamicActions?: Partial<DynamicActionsState>;
+}) {
   return {
     dynamicActions: {
       events: [],
-      ...(enhancements?.dynamicActions ?? {})
-    }
+      ...(enhancements?.dynamicActions ?? {}),
+    },
   };
 }
 
-//{ dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
+// { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
