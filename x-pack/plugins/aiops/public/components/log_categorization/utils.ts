@@ -29,7 +29,7 @@ export function createAdditionalConfigHash(additionalStrings: string[] = []) {
 
 /**
  * Retrieves the message field from a DataView object.
- * If the message field is not found, it falls back to error.message or event.original or the first field in the DataView.
+ * If the message field is not found, it falls back to error.message or event.original or the first text field in the DataView.
  *
  * @param dataView - The DataView object containing the fields.
  * @returns An object containing the message field and all the fields in the DataView.
