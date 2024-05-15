@@ -73,6 +73,8 @@ export enum AlertProvidedActionVariables {
   alertId = 'alert.id',
   alertActionGroup = 'alert.actionGroup',
   alertActionGroupName = 'alert.actionGroupName',
+  alertPreviousActionGroup = 'alert.previousActionGroup',
+  alertPreviousActionGroupName = 'alert.previousActionGroupName',
   alertActionSubgroup = 'alert.actionSubgroup',
   alertFlapping = 'alert.flapping',
   kibanaBaseUrl = 'kibanaBaseUrl',
@@ -213,6 +215,28 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       {
         defaultMessage:
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
+      }
+    ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertPreviousActionGroup,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertPreviousActionGroupLabel',
+      {
+        defaultMessage:
+          'The previous action group of the alert that scheduled actions for the rule.',
+      }
+    ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertPreviousActionGroupName,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertPreviousActionGroupNameLabel',
+      {
+        defaultMessage:
+          'The human readable name of the previous action group of the alert that scheduled actions for the rule.',
       }
     ),
   });
