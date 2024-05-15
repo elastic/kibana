@@ -5,42 +5,113 @@
  * 2.0.
  */
 
+import { Config } from '@kbn/test';
+import type SuperTest from 'supertest';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { createOpenAIConnector } from './utils/create_openai_connector';
-import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
+import { RoleCredentials } from '../../../shared/services';
 
 const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+async function* createOpenAIConnector({
+  configService,
+  supertest,
+  requestHeader = {},
+  apiKeyHeader = {},
+}: {
+  configService: Config;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  requestHeader?: Record<string, string>;
+  apiKeyHeader?: Record<string, string>;
+}): AsyncGenerator<() => Promise<void>> {
+  const simulator = new OpenAISimulator({
+    returnError: false,
+    proxy: {
+      config: configService.get('kbnTestServer.serverArgs'),
+    },
+  });
 
-export default function (ftrContext: FtrProviderContext) {
-  const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects(['common', 'searchPlayground']);
+  const config = {
+    apiProvider: 'OpenAI',
+    defaultModel: 'gpt-4',
+    apiUrl: await simulator.start(),
+  };
+  // eslint-disable-next-line prefer-const
+  let connector: { id: string } | undefined;
+
+  yield async () => {
+    if (connector) {
+      await supertest
+        .delete(`/api/actions/connector/${connector.id}`)
+        .set(requestHeader)
+        .set(apiKeyHeader)
+        .expect(204);
+    }
+
+    await simulator.close();
+  };
+
+  connector = (
+    await supertest
+      .post('/api/actions/connector')
+      .set(requestHeader)
+      .set(apiKeyHeader)
+      .send({
+        name: 'test Open AI',
+        connector_type_id: '.gen-ai',
+        config,
+        secrets: {
+          apiKey: 'genAiApiKey',
+        },
+      })
+      .expect(200)
+  ).body;
+}
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const configService = getService('config');
-  const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   const createConnector = async () => {
     await openAIConnectorGen.next();
   };
-  const openAIConnectorGen = createOpenAIConnector({
-    configService,
-    supertest,
-    requestHeader: commonAPI.getCommonRequestHeader(),
-  });
+  let openAIConnectorGen: AsyncGenerator<() => Promise<void>>;
+  let roleAuthc: RoleCredentials;
 
-  describe('Playground Overview', () => {
+  describe('Serverless Playground Overview', () => {
     let closeOpenAIConnector: () => Promise<void> | undefined;
 
     before(async () => {
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonNavigation.sidenav.clickLink({
+        deepLinkId: 'searchPlayground',
+      });
+
+      const requestHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      openAIConnectorGen = createOpenAIConnector({
+        configService,
+        supertest: supertestWithoutAuth,
+        requestHeader,
+        apiKeyHeader: roleAuthc.apiKeyHeader,
+      });
 
       closeOpenAIConnector = (await openAIConnectorGen.next()).value;
     });
 
     after(async () => {
-      await esArchiver.unload(esArchiveIndex);
       await closeOpenAIConnector?.();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
+    after(async () => {
+      await esArchiver.unload(esArchiveIndex);
     });
 
     describe('start chat page', () => {
@@ -51,7 +122,7 @@ export default function (ftrContext: FtrProviderContext) {
 
       it('show no index callout', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToMissed();
       });
 
       it('hide no index callout when index added', async () => {

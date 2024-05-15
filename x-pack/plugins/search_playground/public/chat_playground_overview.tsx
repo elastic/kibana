@@ -34,7 +34,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiTitle
-                  style={{ whiteSpace: 'nowrap' }}
+                  css={{ whiteSpace: 'nowrap' }}
                   data-test-subj="chat-playground-home-page-title"
                 >
                   <h2>

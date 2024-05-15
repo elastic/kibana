@@ -26,6 +26,15 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('playground-documentation-link');
       },
 
+      async expectCreateIndexButtonToMissed() {
+        await testSubjects.missingOrFail('createIndexButton');
+        await testSubjects.existOrFail('createIndexButton23');
+      },
+
+      async expectCreateIndexButtonToExists() {
+        await testSubjects.existOrFail('createIndexButton');
+      },
+
       async expectNoIndexCalloutExists() {
         await testSubjects.existOrFail('createIndexCallout');
       },

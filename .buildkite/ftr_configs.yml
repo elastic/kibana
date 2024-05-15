@@ -322,7 +322,6 @@ enabled:
   - x-pack/test/functional/apps/security/config.ts
   - x-pack/test/functional/apps/slo/embeddables/config.ts
   - x-pack/test/functional/apps/search_playground/config.ts
-  - x-pack/test/functional/apps/search_playground/serverless.config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/spaces/in_solution_navigation/config.ts

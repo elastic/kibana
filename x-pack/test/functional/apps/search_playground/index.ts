@@ -6,15 +6,8 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const config = getService('config');
-  const isServerless = config.get('serverless');
-
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('playground', async () => {
-    if (isServerless) {
-      loadTestFile(require.resolve('./playground_overview.serverless'));
-    } else {
-      loadTestFile(require.resolve('./playground_overview.ess.ts'));
-    }
+    loadTestFile(require.resolve('./playground_overview.ess.ts'));
   });
 }
