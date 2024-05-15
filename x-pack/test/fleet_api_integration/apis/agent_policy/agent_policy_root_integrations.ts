@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
             item: { id: agentPolicyId },
           },
         } = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `Test policy ${uuidv4()}`,
@@ -110,10 +110,14 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx');
 
         // Check that the root integrations are correct
-        expect(Object.values(agentPolicy.root_integrations)).to.eql([
+        expect(
+          Object.values(agentPolicy.package_policies.map((policy: any) => policy.package))
+        ).to.eql([
           {
             name: 'auditd_manager',
             title: 'Auditd Manager',
+            requires_root: true,
+            version: '1.16.3',
           },
         ]);
 

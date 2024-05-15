@@ -328,6 +328,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           logger,
         });
       }
+
+      if (enrichedPackagePolicy.package) {
+        enrichedPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -457,6 +461,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             : inputs;
 
           elasticsearch = pkgInfo?.elasticsearch;
+
+          packagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
         }
 
         policiesToCreate.push({
@@ -862,6 +868,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+      if (enrichedPackagePolicy.package) {
+        enrichedPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+      }
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1042,6 +1052,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               assetsMap
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+            if (restOfPackagePolicy.package) {
+              restOfPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+            }
           }
         }
 

@@ -105,6 +105,7 @@ const PackagePolicyBaseSchema = {
       title: schema.string(),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     })
   ),
   // Deprecated TODO create remove issue

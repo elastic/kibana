@@ -4746,6 +4746,8 @@ components:
               type: string
             title:
               type: string
+            requires_root:
+              type: boolean
           required:
             - name
             - version
@@ -4866,18 +4868,6 @@ components:
           type: number
         unprivileged_agents:
           type: number
-        root_integrations:
-          description: >-
-            List of integrations used in package policy that require root
-            privileges
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-              title:
-                type: string
         agent_features:
           type: array
           items:

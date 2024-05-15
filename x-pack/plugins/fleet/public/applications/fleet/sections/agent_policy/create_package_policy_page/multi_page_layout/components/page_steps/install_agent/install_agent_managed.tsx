@@ -21,6 +21,8 @@ import { ManualInstructions } from '../../../../../../../../../components/enroll
 
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
+import { getRootIntegrations } from '../../../../../../../../../../common/services';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
@@ -94,6 +96,11 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     );
   }
 
+  const unprivilegedAgentsCount = Math.max(
+    unprivilegedAgentIds.length,
+    agentPolicy?.unprivileged_agents ?? 0
+  );
+
   steps.push(
     AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,
@@ -101,8 +108,8 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
-      rootIntegrations: agentPolicy?.root_integrations ?? [],
-      unprivilegedAgentsCount: unprivilegedAgentIds.length,
+      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      unprivilegedAgentsCount,
     })
   );
 

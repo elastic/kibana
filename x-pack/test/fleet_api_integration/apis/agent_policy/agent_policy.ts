@@ -497,7 +497,6 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           is_protected: false,
-          root_integrations: [],
         });
       });
 
@@ -901,7 +900,6 @@ export default function (providerContext: FtrProviderContext) {
           inactivity_timeout: 1209600,
           package_policies: [],
           is_protected: false,
-          root_integrations: [],
         });
       });
 
@@ -1066,7 +1064,6 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
-          root_integrations: [],
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
@@ -1132,7 +1129,6 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           },
-          root_integrations: [],
         });
       });
 

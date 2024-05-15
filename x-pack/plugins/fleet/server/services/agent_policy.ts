@@ -96,7 +96,7 @@ import {
   elasticAgentStandaloneManifest,
 } from './elastic_agent_manifest';
 
-import { bulkInstallPackages, getPackageInfo } from './epm/packages';
+import { bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
@@ -391,8 +391,6 @@ class AgentPolicyService {
     if (withPackagePolicies) {
       agentPolicy.package_policies =
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
-
-      await this.populateRootIntegrations?.(soClient, agentPolicy as AgentPolicy);
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -402,35 +400,6 @@ class AgentPolicyService {
     });
 
     return agentPolicy;
-  }
-
-  private async populateRootIntegrations(
-    soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
-  ) {
-    if (!agentPolicy.package_policies) {
-      return;
-    }
-    const packageInfos = await pMap(
-      agentPolicy.package_policies,
-      async (packagePolicy) => {
-        if (!packagePolicy.package) return null;
-        return await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
-          prerelease: true,
-        });
-      },
-      { concurrency: 5 }
-    );
-
-    agentPolicy.root_integrations = packageInfos
-      .filter((packageInfo: any) => {
-        if (!packageInfo) return false;
-        return packageInfo.agent?.privileges?.root || false;
-      })
-      .map((packageInfo) => ({ name: packageInfo?.name || '', title: packageInfo?.title || '' }));
   }
 
   public async getByIDs(

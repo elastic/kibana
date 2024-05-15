@@ -432,6 +432,7 @@ export const getSavedObjectTypes = (
               name: { type: 'keyword' },
               title: { type: 'keyword' },
               version: { type: 'keyword' },
+              requires_root: { type: 'boolean' },
             },
           },
           elasticsearch: {
@@ -536,6 +537,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 overrides: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package: { properties: { requires_root: { type: 'boolean' } } },
               },
             },
           ],

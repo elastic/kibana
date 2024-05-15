@@ -130,7 +130,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [isUnprivilegedModalOpen, setIsUnprivilegedModalOpen] = useState<boolean>(false);
 
   const integrationInfo = useMemo(
     () =>
@@ -445,7 +445,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isRootPrivilegesRequired(packageInfo) &&
       (agentPolicy?.unprivileged_agents ?? 0) > 0
     ) {
-      setIsConfirmModalOpen(true);
+      setIsUnprivilegedModalOpen(true);
     } else {
       onSubmit();
     }
@@ -462,6 +462,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => setFormState('VALID')}
           />
         )}
+        {isUnprivilegedModalOpen && !(formState === 'CONFIRM' && agentPolicy) ? (
+          <UnprivilegedConfirmModal
+            onCancel={() => setIsUnprivilegedModalOpen(false)}
+            onConfirm={() => {
+              setIsUnprivilegedModalOpen(false);
+              onSubmit();
+            }}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            agentPolicyName={agentPolicy?.name ?? ''}
+          />
+        ) : null}
         {formState === 'SUBMITTED_NO_AGENTS' &&
           agentPolicy &&
           packageInfo &&
@@ -561,14 +572,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {isConfirmModalOpen ? (
-          <UnprivilegedConfirmModal
-            onCancel={() => setIsConfirmModalOpen(false)}
-            onConfirm={onSubmit}
-            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
-            agentPolicyName={agentPolicy?.name ?? ''}
-          />
-        ) : null}
         <StepsWithLessPadding steps={steps} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

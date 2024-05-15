@@ -14,6 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../common/constants';
+import { getRootIntegrations } from '../../../../common/services';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
@@ -314,6 +315,10 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     }
 
     if (selectedApiKeyId && apiKeyData) {
+      const unprivilegedAgentsCount = Math.max(
+        unprivilegedAgentIds.length,
+        agentPolicy?.unprivileged_agents ?? 0
+      );
       steps.push(
         AgentEnrollmentConfirmationStep({
           selectedPolicyId: selectedPolicy?.id,
@@ -321,8 +326,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
-          rootIntegrations: selectedPolicy?.root_integrations ?? [],
-          unprivilegedAgentsCount: unprivilegedAgentIds.length,
+          rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+          unprivilegedAgentsCount,
         })
       );
     }
