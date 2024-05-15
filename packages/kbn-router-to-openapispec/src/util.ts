@@ -73,7 +73,9 @@ export const prepareRoutes = <
     ) {
       return false;
     }
-    if (filters.pathStartsWith && !route.path.startsWith(filters.pathStartsWith)) return false;
+    if (filters.pathStartsWith && !filters.pathStartsWith.some((p) => route.path.startsWith(p))) {
+      return false;
+    }
     if (filters.access && route.options.access !== filters.access) return false;
     return true;
   });

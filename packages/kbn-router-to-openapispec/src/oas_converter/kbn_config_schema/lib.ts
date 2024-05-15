@@ -11,7 +11,7 @@ import { isConfigSchema, Type, metaFields } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
-import { isReferenceObject } from '../common';
+import { isReferenceObject, trimTrailingStar } from '../common';
 import { parse } from './parse';
 
 import { createCtx, IContext } from './post_process_mutations';
@@ -104,6 +104,14 @@ export const convert = (kbnConfigSchema: unknown) => {
   return { schema: result, shared: Object.fromEntries(shared.entries()) };
 };
 
+const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
+  return (
+    knownParameters[schemaKey] ??
+    knownParameters[schemaKey + '*'] ??
+    knownParameters[schemaKey + '?*']
+  );
+};
+
 const convertObjectMembersToParameterObjects = (
   ctx: IContext,
   schema: joi.Schema,
@@ -127,7 +135,8 @@ const convertObjectMembersToParameterObjects = (
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {
-    if (!knownParameters[schemaKey] && isPathParameter) {
+    const paramSchema = getParamSchema(knownParameters, schemaKey);
+    if (!paramSchema && isPathParameter) {
       throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
     }
     const isSubSchemaRequired = required.has(schemaKey);
@@ -143,7 +152,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !knownParameters[schemaKey].optional : isSubSchemaRequired,
+      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
       schema: finalSchema,
       description,
     };

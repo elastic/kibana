@@ -16,7 +16,7 @@ import { processVersionedRouter } from './process_versioned_router';
 export const openApiVersion = '3.0.0';
 
 export interface GenerateOpenApiDocumentOptionsFilters {
-  pathStartsWith?: string;
+  pathStartsWith?: string[];
   excludePathsMatching?: string[];
   access?: 'public' | 'internal';
   version?: string;
