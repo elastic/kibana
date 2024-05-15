@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ConnectorSetup } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
