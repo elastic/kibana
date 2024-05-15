@@ -223,6 +223,7 @@ const findTestUtils = (
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+              console.log('----------', JSON.stringify(response.body), '----------');
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.equal(perPage);
