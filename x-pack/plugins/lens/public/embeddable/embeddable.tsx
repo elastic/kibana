@@ -186,6 +186,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  handleUserMessages?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -612,6 +613,10 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
+    const externalUserMessagesHandler = this.input.handleUserMessages
+      ? this.input.handleUserMessages
+      : (d: UserMessage[]) => d;
+
     const userMessages: UserMessage[] = [];
     userMessages.push(
       ...getApplicationUserMessages({
@@ -638,7 +643,7 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return externalUserMessagesHandler(userMessages);
     }
     const mergedSearchContext = this.getMergedSearchContext();
 
@@ -680,10 +685,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return externalUserMessagesHandler(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 

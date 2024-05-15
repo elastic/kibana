@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiToolTip, type EuiPanelProps } from '@elastic/eui';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
@@ -70,6 +71,41 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         searchSessionId={searchSessionId}
         onFilter={onFilter}
+        handleUserMessages={(messages) => {
+          return messages.map((m) => {
+            if (
+              m.displayLocations.find((d) => d.id === 'embeddableBadge') !== undefined &&
+              m.severity === 'error'
+              // we need something else to better identify those errors
+            ) {
+              return {
+                ...m,
+                severity: 'warning' as const,
+                longMessage: (
+                  <p>
+                    <b>
+                      {i18n.translate('xpack.infra.lens.b.noResultsFoundLabel', {
+                        defaultMessage: 'No Results found',
+                      })}
+                    </b>
+                    <br />
+                    {i18n.translate('xpack.infra.lens.p.youCanShowTheLabel', {
+                      defaultMessage:
+                        'You can show the cpu by declaring metrics in your system integration',
+                    })}
+                    <br />
+                    <a>
+                      {i18n.translate('xpack.infra.lens.a.learnHowLabel', {
+                        defaultMessage: 'Learn how',
+                      })}
+                    </a>
+                  </p>
+                ),
+              };
+            }
+            return m;
+          });
+        }}
       />
     );
     const content = !toolTip ? (
