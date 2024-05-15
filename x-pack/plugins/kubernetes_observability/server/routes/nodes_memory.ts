@@ -13,6 +13,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import {
   NODE_MEMORY_ROUTE
 } from '../../common/constants';
+import { MaybePromise } from '@kbn/utility-types';
 
 
 // Define the global CPU limits to categorise cpu utilisation
@@ -38,7 +39,7 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
           },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response:MaybePromise<any>) => {
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         var musts = new Array();
         musts.push(
@@ -105,23 +106,27 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
         };
         // console.log(dsl);
         const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        const buckets = esResponse.aggregations.group_by_category['buckets'];
-        if (buckets.length > 0) {
-          if (esResponse.hits.hits.length > 0) {
+        // console.log(esResponse);
+        
+        var time = '';
+        if (esResponse.hits.hits.length > 0) {
             const firsttHit = esResponse.hits.hits[0];
             const { fields = {} } = firsttHit;
-            const time = extractFieldValue(fields['@timestamp']);
+            time = extractFieldValue(fields['@timestamp']);
+        }
+        const { after_key: _, buckets = [] } = (esResponse.aggregations?.group_by_category || {}) as any;
+        if (buckets.length > 0) {
             var nodes = new Array();
-            for (const bucket of buckets) {
-              console.log(bucket);
+            const getNodes =  buckets.map(async (bucket: any) => {
+              const name = bucket.key;
+              const [memoryAlloc, _] = await getNodeAllocMemCpu(client, name);
+              console.log("Each bucket");
               var nodeMem = {} as NodeMem;
               var alarm = '';
-              const name = bucket.key;
+              
               const memory_available = bucket.stats_available.avg;
               const memory_usage = bucket.stats_memory.avg;
               const memory_usage_median_deviation = bucket.review_variability_memory_usage.value;
-              const [memoryAlloc, _] = await getNodeAllocMemCpu(client, name);
               var memory_utilization = undefined;
               if (memoryAlloc !== undefined){
                 memory_utilization = round(memory_usage / memoryAlloc, 3);
@@ -146,15 +151,16 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
                   'reason': reason
               };
               nodes.push(nodeMem);
-            }
-
-            return response.ok({
-                  body: {
-                    time: time,
-                    nodes: nodes,
-                  },
             });
-          }
+            return Promise.all(getNodes).then(() => {
+                return response.ok({
+                    body: {
+                        time: time,
+                        nodes: nodes,
+                    },
+                });
+            });
+            
         } else {
             var notFoundMessage = '';
             if (request.query.name !== undefined) {
