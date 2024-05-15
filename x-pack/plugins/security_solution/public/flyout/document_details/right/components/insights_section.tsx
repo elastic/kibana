@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -23,8 +23,6 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { OPEN, updateStorage } from '../hooks/use_accordion_state';
-import { useKibana } from '../../../../common/lib/kibana';
 
 const KEY = 'insights';
 
@@ -32,8 +30,6 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const { storage } = useKibana().services;
-
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
@@ -41,15 +37,9 @@ export const InsightsSection = memo(() => {
   const isGuidedOnboardingTourShown =
     isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
 
-  useEffect(() => {
-    // Preserve the section expansion state activated by the guided tour
-    if (isGuidedOnboardingTourShown) {
-      updateStorage(storage, KEY, OPEN);
-    }
-  }, [isGuidedOnboardingTourShown, storage]);
-
   const expanded =
     useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;
+
   return (
     <ExpandableSection
       expanded={expanded}

@@ -23,6 +23,10 @@ interface UseHiddenByFlyoutProps {
   step: AlertsCasesTourSteps;
 }
 
+/*
+ ** To check if given Guided tour step should be hidden when the LEFT expandable flyout
+ ** or any case modal is opened
+ */
 export const useHiddenByFlyout = ({ tourId, step }: UseHiddenByFlyoutProps) => {
   const { useIsAddToCaseOpen } = useKibana().services.cases.hooks;
   const isAddToCaseOpen = useIsAddToCaseOpen();

@@ -10,8 +10,8 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
-export const CLOSED = 'closed' as const;
-export const OPEN = 'open' as const;
+const CLOSED = 'closed' as const;
+const OPEN = 'open' as const;
 type ToggleReducerState = typeof CLOSED | typeof OPEN;
 
 export interface ToggleReducerAction {
@@ -25,20 +25,6 @@ export interface ToggleReducerAction {
   title: string | undefined;
 }
 
-export const updateStorage = (
-  storage: Storage | undefined,
-  title: string | undefined,
-  state: 'open' | 'closed'
-) => {
-  if (storage && title) {
-    const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
-    storage.set(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
-      ...localStorage,
-      [title]: state !== OPEN,
-    });
-  }
-};
-
 /**
  * Reducer for toggling between expanded and collapsed states.
  * Every time the user takes an action, we store the new state in local storage. This allows to preserve the state when opening new flyouts or when refreshing the page.
@@ -46,8 +32,13 @@ export const updateStorage = (
  */
 export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAction) => {
   const { storage, title } = action;
-
-  updateStorage(storage, title, state);
+  if (storage && title) {
+    const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
+    storage.set(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
+      ...localStorage,
+      [title]: state !== OPEN,
+    });
+  }
 
   return state === CLOSED ? OPEN : CLOSED;
 };

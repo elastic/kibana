@@ -236,97 +236,99 @@ const EventDetailsComponent: React.FC<Props> = ({
                 step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
                 tourId={SecurityStepId.alertsCases}
               >
-                <EuiSpacer size="m" />
-                <Overview
-                  browserFields={browserFields}
-                  contextId={scopeId}
-                  data={data}
-                  eventId={id}
-                  scopeId={scopeId}
-                  handleOnEventClosed={handleOnEventClosed}
-                  isReadOnly={isReadOnly}
-                />
-                <EuiSpacer size="l" />
-                {threatDetails && threatDetails[0] && (
-                  <ThreatTacticContainer
-                    alignItems="flexStart"
-                    direction="column"
-                    wrap={false}
-                    gutterSize="none"
-                  >
-                    <>
-                      <EuiTitle size="xxs">
-                        <h5>{threatDetails[0].title}</h5>
-                      </EuiTitle>
-                      <ThreatTacticDescription>
-                        {threatDetails[0].description}
-                      </ThreatTacticDescription>
-                    </>
-                  </ThreatTacticContainer>
-                )}
-                <EuiSpacer size="l" />
-                {renderer != null && detailsEcsData != null && (
-                  <div>
-                    <EuiTitle size="xs">
-                      <h5>{i18n.ALERT_REASON}</h5>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <RendererContainer data-test-subj="renderer">
-                      {renderer.renderRow({
-                        contextId: EVENT_DETAILS_CONTEXT_ID,
-                        data: detailsEcsData,
-                        isDraggable: isDraggable ?? false,
-                        scopeId,
-                      })}
-                    </RendererContainer>
-                  </div>
-                )}
-                <EuiHorizontalRule />
-                <AlertSummaryView
-                  {...{
-                    data,
-                    eventId: id,
-                    browserFields,
-                    isDraggable,
-                    scopeId,
-                    title: i18n.HIGHLIGHTED_FIELDS,
-                    isReadOnly,
-                  }}
-                  goToTable={goToTableTab}
-                  investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
-                />
-                <EuiSpacer size="xl" />
-                <Insights
-                  browserFields={browserFields}
-                  eventId={id}
-                  data={data}
-                  scopeId={scopeId}
-                  isReadOnly={isReadOnly}
-                />
-
-                {showThreatSummary && (
-                  <ThreatSummaryView
-                    isDraggable={isDraggable}
-                    hostRisk={hostRisk}
-                    userRisk={userRisk}
+                <>
+                  <EuiSpacer size="m" />
+                  <Overview
                     browserFields={browserFields}
+                    contextId={scopeId}
                     data={data}
                     eventId={id}
                     scopeId={scopeId}
-                    enrichments={allEnrichments}
+                    handleOnEventClosed={handleOnEventClosed}
                     isReadOnly={isReadOnly}
                   />
-                )}
+                  <EuiSpacer size="l" />
+                  {threatDetails && threatDetails[0] && (
+                    <ThreatTacticContainer
+                      alignItems="flexStart"
+                      direction="column"
+                      wrap={false}
+                      gutterSize="none"
+                    >
+                      <>
+                        <EuiTitle size="xxs">
+                          <h5>{threatDetails[0].title}</h5>
+                        </EuiTitle>
+                        <ThreatTacticDescription>
+                          {threatDetails[0].description}
+                        </ThreatTacticDescription>
+                      </>
+                    </ThreatTacticContainer>
+                  )}
+                  <EuiSpacer size="l" />
+                  {renderer != null && detailsEcsData != null && (
+                    <div>
+                      <EuiTitle size="xs">
+                        <h5>{i18n.ALERT_REASON}</h5>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <RendererContainer data-test-subj="renderer">
+                        {renderer.renderRow({
+                          contextId: EVENT_DETAILS_CONTEXT_ID,
+                          data: detailsEcsData,
+                          isDraggable: isDraggable ?? false,
+                          scopeId,
+                        })}
+                      </RendererContainer>
+                    </div>
+                  )}
+                  <EuiHorizontalRule />
+                  <AlertSummaryView
+                    {...{
+                      data,
+                      eventId: id,
+                      browserFields,
+                      isDraggable,
+                      scopeId,
+                      title: i18n.HIGHLIGHTED_FIELDS,
+                      isReadOnly,
+                    }}
+                    goToTable={goToTableTab}
+                    investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
+                  />
+                  <EuiSpacer size="xl" />
+                  <Insights
+                    browserFields={browserFields}
+                    eventId={id}
+                    data={data}
+                    scopeId={scopeId}
+                    isReadOnly={isReadOnly}
+                  />
 
-                {isEnrichmentsLoading && (
-                  <>
-                    <EuiSkeletonText lines={2} />
-                  </>
-                )}
+                  {showThreatSummary && (
+                    <ThreatSummaryView
+                      isDraggable={isDraggable}
+                      hostRisk={hostRisk}
+                      userRisk={userRisk}
+                      browserFields={browserFields}
+                      data={data}
+                      eventId={id}
+                      scopeId={scopeId}
+                      enrichments={allEnrichments}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
 
-                {basicAlertData.ruleId && maybeRule?.note && (
-                  <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
-                )}
+                  {isEnrichmentsLoading && (
+                    <>
+                      <EuiSkeletonText lines={2} />
+                    </>
+                  )}
+
+                  {basicAlertData.ruleId && maybeRule?.note && (
+                    <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
+                  )}
+                </>
               </GuidedOnboardingTourStep>
             ),
           }
