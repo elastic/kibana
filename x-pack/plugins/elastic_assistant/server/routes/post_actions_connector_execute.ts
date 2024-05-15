@@ -8,7 +8,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
@@ -303,7 +303,6 @@ export const postActionsConnectorExecuteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-
           const assistantTools = (await context.elasticAssistant)
             .getRegisteredTools(pluginName)
             .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
@@ -346,40 +345,39 @@ export const postActionsConnectorExecuteRoute = (
             kbDataClient
           );
 
-          const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
-            await callAgentExecutor({
-              abortSignal,
-              alertsIndexPattern: request.body.alertsIndexPattern,
-              anonymizationFields: anonymizationFieldsRes
-                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
-                : undefined,
-              actions,
-              isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
-              assistantTools,
-              connectorId,
-              esClient,
-              esStore,
-              isStream:
-                // TODO implement llmClass for bedrock streaming
-                // tracked here: https://github.com/elastic/security-team/issues/7363
-                request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
-              llmType: getLlmType(actionTypeId),
-              langChainMessages,
-              logger,
-              onNewReplacements,
-              onLlmResponse,
-              request,
-              replacements: request.body.replacements,
-              size: request.body.size,
-              traceOptions: {
+          const result: StreamResponseWithHeaders | StaticReturnType = await callAgentExecutor({
+            abortSignal,
+            alertsIndexPattern: request.body.alertsIndexPattern,
+            anonymizationFields: anonymizationFieldsRes
+              ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+              : undefined,
+            actions,
+            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
+            assistantTools,
+            connectorId,
+            esClient,
+            esStore,
+            isStream:
+              // TODO implement llmClass for bedrock streaming
+              // tracked here: https://github.com/elastic/security-team/issues/7363
+              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+            llmType: getLlmType(actionTypeId),
+            langChainMessages,
+            logger,
+            onNewReplacements,
+            onLlmResponse,
+            request,
+            replacements: request.body.replacements,
+            size: request.body.size,
+            traceOptions: {
+              projectName: langSmithProject,
+              tracers: getLangSmithTracer({
+                apiKey: langSmithApiKey,
                 projectName: langSmithProject,
-                tracers: getLangSmithTracer({
-                  apiKey: langSmithApiKey,
-                  projectName: langSmithProject,
-                  logger,
-                }),
-              },
-            });
+                logger,
+              }),
+            },
+          });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             actionTypeId,
@@ -392,9 +390,7 @@ export const postActionsConnectorExecuteRoute = (
               request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
           });
 
-          return response.ok<
-            StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
-          >(result);
+          return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);
