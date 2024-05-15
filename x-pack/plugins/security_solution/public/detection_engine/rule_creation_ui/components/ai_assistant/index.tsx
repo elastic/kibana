@@ -12,15 +12,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { NewChat, AssistantAvatar } from '@kbn/elastic-assistant';
 
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
-
-import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
 
+import * as i18n from './translations';
+
 interface AiAssistantProps {
-  form: FormHook<DefineStepRule>;
+  getFields: FormHook<DefineStepRule>['getFields'];
 }
 
 const retrieveErrorMessages = (errors: ValidationError[]): string =>
@@ -28,11 +28,11 @@ const retrieveErrorMessages = (errors: ValidationError[]): string =>
     .flatMap(({ message, messages }) => [message, ...(Array.isArray(messages) ? messages : [])])
     .join(', ');
 
-const AiAssistantComponent: React.FC<AiAssistantProps> = ({ form }) => {
+const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields }) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
 
   const getPromptContext = async () => {
-    const queryField = form.getFields().queryBar;
+    const queryField = getFields().queryBar;
     const { query, language } = (queryField.value as DefineStepRule['queryBar']).query;
 
     if (!query) {
