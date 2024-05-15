@@ -181,22 +181,27 @@ export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
 
 export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) => {
   const {
-    action: { onToggleColumn },
+    action: { onToggleColumn, isAddedAsColumn },
     field: { field },
   } = row;
 
+  const isAdded = isAddedAsColumn(field);
+
   // Toggle columns
-  const toggleColumnsLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.toggleColumnInTableButtonTooltip',
-    { defaultMessage: 'Toggle column in table' }
-  );
+  const toggleColumnsLabel = isAdded
+    ? i18n.translate('unifiedDocViewer.docViews.table.removeColumnFromTableButtonTooltip', {
+        defaultMessage: 'Remove column from table',
+      })
+    : i18n.translate('unifiedDocViewer.docViews.table.addColumnToTableButtonTooltip', {
+        defaultMessage: 'Add column to table',
+      });
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${field}`}
-      iconType="listAdd"
+      iconType={isAdded ? 'list' : 'listAdd'}
       title={toggleColumnsLabel}
-      onClick={() => onToggleColumn(field)}
+      onClick={() => onToggleColumn?.(field)}
     >
       {toggleColumnsLabel}
     </Component>

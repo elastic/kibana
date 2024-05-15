@@ -84,8 +84,9 @@ export interface FieldRecordLegacy {
   action: {
     isActive: boolean;
     onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
+    onToggleColumn: ((field: string) => void) | undefined;
     flattenedField: unknown;
+    isAddedAsColumn: (field: string) => boolean;
   };
   field: {
     displayName: string;
