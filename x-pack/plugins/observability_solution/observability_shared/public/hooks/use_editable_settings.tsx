@@ -56,7 +56,6 @@ export function useEditableSettings(settingsKeys: string[]) {
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
   );
-
   const fields = useMemo(
     () => {
       return getSettingsFields({ settingsKeys, uiSettings: settings?.client });

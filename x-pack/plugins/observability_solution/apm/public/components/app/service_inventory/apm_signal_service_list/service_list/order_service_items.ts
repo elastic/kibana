@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { orderBy } from 'lodash';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import {
   ServiceListItem,
   ServiceInventoryFieldName,
-} from '../../../../../common/service_inventory';
+} from '../../../../../../common/service_inventory';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;
 
