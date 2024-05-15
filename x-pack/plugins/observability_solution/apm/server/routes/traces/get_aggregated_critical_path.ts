@@ -128,9 +128,10 @@ export async function getAggregatedCriticalPath({
                   "agent.name": $('agent.name', '')
                 ];
 
+                def spanName = $('span.name', null);
                 id = $('span.id', null);
-                if (id != null) {
-                  operationMetadata.put('span.name', $('span.name', ''));
+                if (id != null && spanName != null) {
+                  operationMetadata.put('span.name', spanName);
                   def spanType = $('span.type', '');
                   if (spanType != '') {
                     operationMetadata.put('span.type', spanType);
