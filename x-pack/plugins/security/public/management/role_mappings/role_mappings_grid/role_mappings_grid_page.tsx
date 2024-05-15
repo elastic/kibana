@@ -39,6 +39,7 @@ import {
 } from '../../management_urls';
 import { RoleTableDisplay } from '../../role_table_display';
 import type { RolesAPIClient } from '../../roles';
+import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
   DeleteProvider,
   NoCompatibleRealms,
@@ -47,7 +48,6 @@ import {
 } from '../components';
 import type { DeleteRoleMappings } from '../components/delete_provider/delete_provider';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import type { SecurityFeaturesAPIClient } from '../../security_features'
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
