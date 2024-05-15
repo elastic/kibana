@@ -38,7 +38,7 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
           },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response: any) => {
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         var musts = new Array();
         musts.push(
@@ -97,23 +97,25 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
         };
         // console.log(dsl);
         const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        const buckets = esResponse.aggregations.group_by_category['buckets'];
-        if (buckets.length > 0) {
-          if (esResponse.hits.hits.length > 0) {
+        // console.log(esResponse);
+        var time = '';
+        if (esResponse.hits.hits.length > 0) {
             const firsttHit = esResponse.hits.hits[0];
             const { fields = {} } = firsttHit;
-            const time = extractFieldValue(fields['@timestamp']);
+            time = extractFieldValue(fields['@timestamp']);
+        }
+        const { after_key: _, buckets = [] } = (esResponse.aggregations?.group_by_category || {}) as any;
+        if (buckets.length > 0) {
+          if (esResponse.hits.hits.length > 0) {
             var nodes = new Array();
-            for (const bucket of buckets) {
-              console.log(bucket);
+            buckets.map((bucket: any) => {
               var nodeCpu = {} as NodeCpu;
               var alarm = '';
               const name = bucket.key;
-              var cpu_utilization = bucket.stats_cpu.avg;
-              var cpu_utilization_median_deviation = bucket.review_variability_cpu_utilization.value;
-              cpu_utilization_median_deviation = round(cpu_utilization_median_deviation, 3);
-              cpu_utilization = round(cpu_utilization, 3);
+              const cpu_utilization = bucket.stats_cpu.avg;
+              const cpu_utilization_median_deviation = bucket.review_variability_cpu_utilization.value;
+              const rounded_cpu_utilization_median_deviation = round(cpu_utilization_median_deviation, 3);
+              const rounded_cpu_utilization = round(cpu_utilization, 3);
               if (cpu_utilization < limits["medium"]) {
                 alarm = "Low";
               } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
@@ -122,17 +124,17 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
                     alarm = "High";
               }
               const reason = `Node ${name} has ${alarm} cpu utilization`
-              const message = `Node ${name} has ${toPct(cpu_utilization)}% cpu utilisation and ${toPct(cpu_utilization_median_deviation)}% deviation from median value.`
+              const message = `Node ${name} has ${(toPct(rounded_cpu_utilization))?.toFixed(1) }% cpu utilisation and ${(toPct(rounded_cpu_utilization_median_deviation))?.toFixed(1) }% deviation from median value.`
               nodeCpu = {
                   'name': name,
-                  'cpu_utilization': cpu_utilization,
-                  'cpu_utilization_median_deviation': cpu_utilization_median_deviation,
+                  'cpu_utilization': rounded_cpu_utilization,
+                  'cpu_utilization_median_deviation': rounded_cpu_utilization_median_deviation,
                   'alarm': alarm,
                   'message': message,
                   'reason': reason
               };
               nodes.push(nodeCpu);
-            }
+            });
 
             return response.ok({
                   body: {
