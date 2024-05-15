@@ -33,11 +33,14 @@ import {
   SELECTED_REQUESTS_CLASSNAME,
   stringifyRequest,
   trackSentRequests,
+  getAutoIndentedRequests,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
+
+const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -451,5 +454,58 @@ export class MonacoEditorActionsProvider {
       forceMoveMarkers: true,
     };
     this.editor.executeEdits('restoreFromHistory', [edit]);
+  }
+  
+  /*
+  This function returns the text in the provided range.
+  If no range is provided, it returns all text in the editor.
+  */
+  private getTextInRange(selectionRange?: monaco.IRange): string {
+    const model = this.editor.getModel();
+    if (!model) {
+      return '';
+    }
+    if (selectionRange) {
+      const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
+      return model.getValueInRange({
+        startLineNumber,
+        startColumn,
+        endLineNumber,
+        endColumn,
+      });
+    }
+    // If no range is provided, return all text in the editor
+    return model.getValue();
+  }
+
+  /**
+   * This function applies indentations to the request in the selected text.
+   */
+  public async autoIndent() {
+    const parsedRequests = await this.getSelectedParsedRequests();
+    const selectionStartLineNumber = parsedRequests[0].startLineNumber;
+    const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
+    const selectedRange = new monaco.Range(
+      selectionStartLineNumber,
+      1,
+      selectionEndLineNumber,
+      this.editor.getModel()?.getLineMaxColumn(selectionEndLineNumber) ?? 1
+    );
+
+    if (parsedRequests.length < 1) {
+      return;
+    }
+
+    const selectedText = this.getTextInRange(selectedRange);
+    const allText = this.getTextInRange();
+
+    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+
+    this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
+      {
+        range: selectedRange,
+        text: autoIndentedText,
+      },
+    ]);
   }
 }
