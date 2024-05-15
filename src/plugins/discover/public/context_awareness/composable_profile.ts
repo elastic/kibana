@@ -7,11 +7,13 @@
  */
 
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { CustomCellRenderer } from '@kbn/unified-data-table';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 export interface Profile {
   getTopNavItems: () => TopNavMenuData[];
-  getDefaultColumns: () => Column[];
-  getFlyout: () => FlyoutComponent;
+  getCellRenderers: () => CustomCellRenderer;
+  getDocViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
 }
 
 export type PartialProfile = Partial<Profile>;
@@ -25,27 +27,10 @@ export type ComposableProfile<TProfile extends PartialProfile = Profile> = {
 export const getMergedAccessor = <TKey extends keyof Profile>(
   profiles: ComposableProfile[],
   key: TKey,
-  defaultImplementation: Profile[TKey]
+  baseImpl: Profile[TKey]
 ) => {
   return profiles.reduce((nextAccessor, profile) => {
     const currentAccessor = profile[key];
     return currentAccessor ? currentAccessor(nextAccessor) : nextAccessor;
-  }, defaultImplementation);
+  }, baseImpl);
 };
-
-// placeholders
-
-interface TopNavItem {
-  __brand: 'TopNavItem';
-  name: string;
-}
-
-interface Column {
-  __brand: 'Columns';
-  name: string;
-}
-
-interface FlyoutComponent {
-  __brand: 'FlyoutComponent';
-  name: string;
-}

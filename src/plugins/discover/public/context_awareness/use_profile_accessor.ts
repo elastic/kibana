@@ -18,7 +18,7 @@ import { dataSourceProfileService, documentProfileService, rootProfileService } 
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,
-  defaultImplementation: Profile[TKey],
+  baseImpl: Profile[TKey],
   { record }: { record?: DataTableRecord } = {}
 ) => {
   const { chrome } = useDiscoverServices();
@@ -54,6 +54,6 @@ export const useProfileAccessor = <TKey extends keyof Profile>(
       }
     }
 
-    return getMergedAccessor(profiles, key, defaultImplementation);
-  }, [rootProfile, dataSourceProfile, record, key, defaultImplementation, documentContexts]);
+    return getMergedAccessor(profiles, key, baseImpl);
+  }, [rootProfile, dataSourceProfile, record, key, baseImpl, documentContexts]);
 };

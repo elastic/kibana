@@ -67,6 +67,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useProfileAccessor } from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -261,6 +262,14 @@ function DiscoverDocumentsComponent({
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
 
+  const baseGetCellRenderers = useCallback(
+    () => externalCustomRenderers ?? {},
+    [externalCustomRenderers]
+  );
+
+  const getCellRenderers = useProfileAccessor('getCellRenderers', baseGetCellRenderers);
+  const cellRenderers = useMemo(() => getCellRenderers(), [getCellRenderers]);
+
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
@@ -422,7 +431,7 @@ function DiscoverDocumentsComponent({
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
                 componentsTourSteps={TOUR_STEPS}
-                externalCustomRenderers={externalCustomRenderers}
+                externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 customControlColumnsConfiguration={customControlColumnsConfiguration}
               />

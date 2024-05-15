@@ -23,10 +23,32 @@ export interface DocumentContext {
   type: DocumentType;
 }
 
-export type DocumentProfile = Pick<Profile, 'getFlyout'>;
+export type DocumentProfile = Pick<Profile, 'getDocViewsRegistry'>;
 
 export const documentProfileService = new ProfileService<
   DocumentProfile,
   DocumentProfileProviderParams,
   DocumentContext
 >();
+
+documentProfileService.registerProvider({
+  order: 0,
+  profile: {
+    getDocViewsRegistry: (prev) => (registry) => {
+      registry.enableById('doc_view_logs_overview');
+      return prev(registry);
+    },
+  },
+  resolve: (params) => {
+    if ('message' in params.record.flattened) {
+      return {
+        isMatch: true,
+        context: {
+          type: DocumentType.Log,
+        },
+      };
+    }
+
+    return { isMatch: false };
+  },
+});
