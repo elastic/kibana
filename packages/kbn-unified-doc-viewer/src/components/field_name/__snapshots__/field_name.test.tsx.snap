@@ -21,6 +21,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -79,6 +80,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test.test.test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -113,6 +115,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test.test.test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -147,6 +150,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -181,6 +185,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test.test.test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -215,6 +220,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -249,6 +255,7 @@ Array [
   >
     <div
       class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      data-test-subj="tableDocViewRow-test.test.test-name"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
