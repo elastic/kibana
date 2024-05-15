@@ -36,11 +36,11 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   migrationVersionCompatibility?: 'compatible' | 'raw';
   /**
    * By default, update will merge the provided attributes with the ones present on the document
-   * (performing a standard partial update). Setting this option to `true` will change the behavior, performing
-   * a "full" update instead, where the provided attributes will fully override the existing ones.
-   * Defaults to `false`.
+   * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
+   * a "full" update instead, where the provided attributes will fully replace the existing ones.
+   * Defaults to `true`.
    */
-  overrideAttributes?: boolean;
+  mergeAttributes?: boolean;
 }
 
 /**

@@ -58,7 +58,7 @@ type ExpectedBulkGetResult = Either<
     objectNamespace?: string;
     esRequestIndex: number;
     migrationVersionCompatibility?: 'raw' | 'compatible';
-    overrideAttributes: boolean;
+    mergeAttributes: boolean;
   }
 >;
 
@@ -97,7 +97,7 @@ export const performBulkUpdate = async <T>(
       references,
       version,
       namespace: objectNamespace,
-      overrideAttributes = false,
+      mergeAttributes = true,
     } = object;
     let error: DecoratedError | undefined;
 
@@ -131,7 +131,7 @@ export const performBulkUpdate = async <T>(
       objectNamespace,
       esRequestIndex: bulkGetRequestIndexCounter++,
       migrationVersionCompatibility,
-      overrideAttributes,
+      mergeAttributes,
     });
   });
 
@@ -222,7 +222,7 @@ export const performBulkUpdate = async <T>(
         version,
         documentToSave,
         objectNamespace,
-        overrideAttributes,
+        mergeAttributes,
       } = expectedBulkGetResult.value;
 
       let namespaces: string[] | undefined;
@@ -286,15 +286,15 @@ export const performBulkUpdate = async <T>(
         documentToSave[type]
       );
 
-      const updatedAttributes = overrideAttributes
-        ? encryptedUpdatedAttributes
-        : mergeForUpdate({
+      const updatedAttributes = mergeAttributes
+        ? mergeForUpdate({
             targetAttributes: {
               ...(migrated!.attributes as Record<string, unknown>),
             },
             updatedAttributes: encryptedUpdatedAttributes,
             typeMappings: typeDefinition.mappings,
-          });
+          })
+        : encryptedUpdatedAttributes;
 
       const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
         ...migrated!,

@@ -179,7 +179,7 @@ describe('SOR - update API', () => {
       {
         hello: 'dolly',
       },
-      { overrideAttributes: false }
+      { mergeAttributes: true }
     );
 
     document = await repository.get('update-test-type', 'my-id');
@@ -195,7 +195,7 @@ describe('SOR - update API', () => {
       {
         over: '9000',
       },
-      { overrideAttributes: true }
+      { mergeAttributes: false }
     );
 
     document = await repository.get('update-test-type', 'my-id');

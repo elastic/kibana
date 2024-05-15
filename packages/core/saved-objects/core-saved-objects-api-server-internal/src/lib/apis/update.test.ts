@@ -178,7 +178,7 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use the ES index action with the merged attributes when overrideAttributes is not true`, async () => {
+      it(`should use the ES index action with the merged attributes when mergeAttributes is not false`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
 
         await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, {
@@ -199,7 +199,7 @@ describe('#update', () => {
         );
       });
 
-      it(`should use the ES index action only with the provided attributes when overrideAttributes is true`, async () => {
+      it(`should use the ES index action only with the provided attributes when mergeAttributes is false`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
 
         await updateSuccess(
@@ -211,7 +211,7 @@ describe('#update', () => {
           {
             foo: 'bar',
           },
-          { overrideAttributes: true }
+          { mergeAttributes: false }
         );
 
         expect(client.index).toHaveBeenCalledTimes(1);

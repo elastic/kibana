@@ -274,7 +274,7 @@ describe('SOR - bulk_update API', () => {
         attributes: {
           over: '9000',
         },
-        overrideAttributes: true,
+        mergeAttributes: false,
       },
     ]);
 

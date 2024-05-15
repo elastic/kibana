@@ -230,9 +230,9 @@ describe('#bulkUpdate', () => {
         expectClientCallArgsAction([obj1, _obj2], { method: 'index' });
       });
 
-      it('should use the ES bulk action with the merged attributes when overrideAttributes is not true', async () => {
+      it('should use the ES bulk action with the merged attributes when mergeAttributes is not false', async () => {
         const _obj1 = { ...obj1, attributes: { foo: 'bar' } };
-        const _obj2 = { ...obj2, attributes: { hello: 'dolly' }, overrideAttributes: false };
+        const _obj2 = { ...obj2, attributes: { hello: 'dolly' }, mergeAttributes: true };
         await bulkUpdateSuccess(client, repository, registry, [_obj1, _obj2]);
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -259,8 +259,8 @@ describe('#bulkUpdate', () => {
         );
       });
 
-      it('should use the ES bulk action only with the provided attributes when overrideAttributes is true', async () => {
-        const _obj1 = { ...obj1, attributes: { hello: 'dolly' }, overrideAttributes: true };
+      it('should use the ES bulk action only with the provided attributes when mergeAttributes is false', async () => {
+        const _obj1 = { ...obj1, attributes: { hello: 'dolly' }, mergeAttributes: false };
         await bulkUpdateSuccess(client, repository, registry, [_obj1]);
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
