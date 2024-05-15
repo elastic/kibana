@@ -12,7 +12,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: "Kibana / Serverless / Security Solution Quality Gate / Rule Management"
+      name: "Kibana / Serverless / Security Solution Periodic Pipeline / Rule Management"
       description: "[MKI] Executes Cypress tests for the Rule Management team"
     spec:
       repository: elastic/kibana
