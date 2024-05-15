@@ -31,6 +31,7 @@ import { getProductProductFeatures } from '../../common/pli/pli_features';
 import {
   EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingLazy,
+  EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
@@ -73,7 +74,7 @@ export const registerUpsellings = (
   const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
     (sectionUpsellings, { id, pli, component }) => {
       if (!enabledPLIsSet.has(pli)) {
-        sectionUpsellings[id] = component;
+        sectionUpsellings[id] = withServicesProvider(component, services);
       }
       return sectionUpsellings;
     },
@@ -154,6 +155,15 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'entity_analytics_panel',
+    pli: ProductFeatureKey.advancedInsights,
+    component: () => (
+      <EntityAnalyticsUpsellingSectionLazy
+        requiredProduct={getProductTypeByPLI(ProductFeatureKey.advancedInsights) ?? undefined}
+      />
+    ),
   },
 ];
 
