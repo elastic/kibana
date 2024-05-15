@@ -17,7 +17,7 @@ export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
 export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantDesc',
   {
-    defaultMessage: 'Query validation and generation',
+    defaultMessage: 'Rule query error',
   }
 );
 

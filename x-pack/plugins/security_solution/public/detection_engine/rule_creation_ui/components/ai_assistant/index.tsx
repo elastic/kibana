@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NewChat, AssistantAvatar } from '@kbn/elastic-assistant';
 
@@ -59,20 +60,28 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   return (
     <>
       <EuiSpacer size="s" />
-      <NewChat
-        asLink={true}
-        category="detection-rules"
-        conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-        description={i18n.ASK_ASSISTANT_DESCRIPTION}
-        getPromptContext={getPromptContext}
-        suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-        tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-        iconType={null}
-        onShowOverlay={onShowOverlay}
-      >
-        <AssistantAvatar size="xxs" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-      </NewChat>
-      <span> {'to help resolve this error.'}</span>
+
+      <FormattedMessage
+        id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
+        defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
+        values={{
+          AiAssistantNewChatLink: (
+            <NewChat
+              asLink={true}
+              category="detection-rules"
+              conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+              description={i18n.ASK_ASSISTANT_DESCRIPTION}
+              getPromptContext={getPromptContext}
+              suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+              tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+              iconType={null}
+              onShowOverlay={onShowOverlay}
+            >
+              <AssistantAvatar size="xxs" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+            </NewChat>
+          ),
+        }}
+      />
     </>
   );
 };
