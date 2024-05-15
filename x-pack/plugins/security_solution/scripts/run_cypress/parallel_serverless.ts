@@ -554,6 +554,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
+                    runnerUi: !process.env.CI,
                   });
                   if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     failedSpecFilePaths.push(filePath);
