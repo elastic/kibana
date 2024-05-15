@@ -166,7 +166,6 @@ export default function AlertDetailsAppSection({
               <EuiLink
                 data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
                 href={viewInAppUrl}
-                target="_blank"
               >
                 {i18n.translate(
                   'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
