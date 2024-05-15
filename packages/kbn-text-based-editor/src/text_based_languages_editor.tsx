@@ -10,6 +10,7 @@ import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from '
 import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
@@ -33,14 +34,14 @@ import {
   EuiResizeObserver,
   EuiOutsideClickDetector,
   EuiToolTip,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButton,
-  EuiSpacer,
-  EuiDescriptionList,
+  // EuiModal,
+  // EuiModalHeader,
+  // EuiModalHeaderTitle,
+  // EuiModalBody,
+  // EuiModalFooter,
+  // EuiButton,
+  // EuiSpacer,
+  // EuiDescriptionList,
   EuiListGroup,
   EuiListGroupItem,
 } from '@elastic/eui';
@@ -72,6 +73,7 @@ import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
+import { add } from 'lodash';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -139,7 +141,7 @@ interface TextBasedEditorDeps {
 interface FleetResponse {
   items: Array<{
     name: string;
-    description: string;
+    title?: string;
   }>;
 }
 
@@ -158,6 +160,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
+const isMacroMenuVisible = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -202,15 +205,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [integrations, setIntegrations] = useState<
-    Array<{
-      name: string;
-      description: string;
-    }>
-  >([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPopoverlVisible, setIsPopoverVisible] = useState(false);
-  const [isEditorActionsPopover, setIsEditorActionsPopover] = useState(false);
+  const [integrations, setIntegrations] = useState<FleetResponse['items']>([]);
+  // const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isPopoverVisible, setIsPopoverVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -243,6 +240,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
+  const addSourceDecoration = useCallback(
+    (newCode?: string) => {
+      const pattern = getIndexPatternFromESQLQuery(newCode ?? code);
+      const range = new monaco.Range(1, 6, 1, pattern.length + 6);
+      editor1?.current?.createDecorationsCollection([
+        {
+          range,
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: 'mySourcePill',
+          },
+        },
+      ]);
+    },
+    [code]
+  );
+
   const onQuerySubmit = useCallback(() => {
     if (isQueryLoading && allowQueryCancellation) {
       abortController?.abort();
@@ -260,7 +275,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
 
-  const onSlashType = useCallback(() => {
+  const onUpdateAndSubmit = useCallback(
+    (qs: string) => {
+      // update the query first
+      onQueryUpdate(qs);
+      // submit the query with some latency
+      // if I do it immediately there is some race condition until
+      // the state is updated and it won't be sumbitted correctly
+      setTimeout(() => {
+        onQuerySubmit();
+      }, 300);
+    },
+    [onQuerySubmit, onQueryUpdate]
+  );
+
+  const openQuickActionsPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
     if (currentCursorPosition && editorCoords) {
@@ -271,9 +300,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       // Calculate the absolute position of the popover
       const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
       const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      // isMacroMenuVisible = true;
       setIsPopoverVisible(true);
-      setIsEditorActionsPopover(true);
     }
   }, []);
 
@@ -497,6 +527,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
+  // useEffect(() => {
+  //   if (decorationIds.length > 0) {
+  //     setTimeout(() => {
+  //       const elements = document.getElementsByClassName('mySourcePill');
+  //       elements[0].addEventListener('click', function () {
+  //         console.log('Button clicked!');
+  //       });
+  //     }, 500);
+  //   }
+  // }, [decorationIds.length]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
@@ -666,36 +707,63 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         .catch((error) => {
           throw new Error(`Failed to fetch integrations": ${error}`);
         })) as FleetResponse;
-      setIntegrations(response.items);
+      const integrationsArray = response.items.map((item) => {
+        return { name: item.name };
+      });
+      const [remoteIndices, localIndices] = await Promise.all([
+        getRemoteIndicesList(dataViews),
+        getIndicesList(dataViews),
+      ]);
+      const visibleSources = [...localIndices, ...remoteIndices]
+        .filter((source) => !source.hidden)
+        .map((item) => {
+          return { name: item.name };
+        });
+      setIntegrations([...integrationsArray, ...visibleSources]);
     }
     fetchIntegrations();
-  }, [core.http]);
+  }, [core.http, dataViews]);
 
   monaco.editor.registerCommand('esql.sources.select', (...args) => {
-    setIsModalVisible(true);
+    openQuickActionsPopover();
   });
 
-  monaco.editor.registerCommand('esql.popover', (...args) => {
-    const currentCursorPosition = editor1.current?.getPosition();
-    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
-    if (currentCursorPosition && editorCoords) {
-      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
-      const editorTop = editorCoords.top;
-      const editorLeft = editorCoords.left;
+  // const addSourceWidget = (position: monaco.Position, sourceName: string) => {
+  //   console.log(position);
+  //   editor1?.current?.addContentWidget({
+  //     allowEditorOverflow: true,
+  //     getDomNode: () => {
+  //       const div = document.createElement('div');
+  //       div.innerText = sourceName;
+  //       div.id = 'source-widget';
+  //       div.style.cssText = `
+  //         display: inline-block;
+  //         margin-left: 10px;
+  //         overflow: hidden;
+  //         background: yellow;
+  //         padding: 5px;
+  //         box-shadow: 0 0 #0000, inset 0 0 0 1px #bcc3ce;
+  //         background-color: #fbfcfd;
+  //         color: #343741;
+  //       `;
+  //       return div;
+  //     },
+  //     getId: () => {
+  //       return 'editor.author.avatar.widget';
+  //     },
+  //     getPosition: () => {
+  //       return {
+  //         position: position || { column: 1, lineNumber: 1 },
+  //         preference: [1, 2],
+  //       };
+  //     },
+  //     afterRender: () => {
+  //       isMacroMenuVisible = false;
+  //     },
+  //   });
+  // };
 
-      // Calculate the absolute position of the popover
-      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
-      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
-      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-      setIsPopoverVisible(true);
-
-      setTimeout(() => {
-        popoverRef?.current?.focus();
-      }, 500);
-    }
-  });
-
-  const closeModal = () => setIsModalVisible(false);
+  // const closeModal = () => setIsModalVisible(false);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -956,6 +1024,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           lines = model?.getLineCount() || 1;
                         }
 
+                        addSourceDecoration();
+
                         editor.onDidChangeModelContent((e) => {
                           if (updateLinesFromModel) {
                             lines = model?.getLineCount() || 1;
@@ -967,6 +1037,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             endLineNumber: currentPosition?.lineNumber ?? 1,
                             endColumn: currentPosition?.column ?? 1,
                           });
+                          if (currentPosition && content) {
+                            const currentWord = model?.getWordAtPosition(currentPosition);
+                            const pattern = getIndexPatternFromESQLQuery(content);
+                            if (currentWord?.word === pattern.trim()) {
+                              addSourceDecoration(content);
+                            }
+                          }
+
+                          // const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
                           if (content) {
                             codeRef.current = content || editor.getValue();
                           }
@@ -977,10 +1056,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                         // and the user needs to click again the editor.
                         // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                        editor.onMouseDown(() => {
+                        editor.onMouseDown((e) => {
                           setTimeout(() => {
                             editor.focus();
                           }, 100);
+                          const mousePosition = e.target.position;
+
+                          if (mousePosition) {
+                            const currentWord = model?.getWordAtPosition(mousePosition);
+                            const pattern = getIndexPatternFromESQLQuery(
+                              editor1.current?.getValue()
+                            );
+                            if (currentWord?.word === pattern.trim()) {
+                              openQuickActionsPopover();
+                            } else {
+                              setIsPopoverVisible(false);
+                            }
+                          }
                         });
 
                         editor.onDidFocusEditorText(() => {
@@ -989,6 +1081,62 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
                         editor.onKeyDown((e) => {
                           onEditorFocus();
+
+                          if (
+                            isPopoverVisible &&
+                            (e.keyCode === monaco.KeyCode.UpArrow ||
+                              e.keyCode === monaco.KeyCode.DownArrow)
+                          ) {
+                            e.stopPropagation();
+                            e.preventDefault();
+
+                            popoverRef.current?.focus();
+                          }
+                        });
+
+                        editor.onKeyUp((e) => {
+                          if (
+                            isPopoverVisible &&
+                            (e.keyCode === monaco.KeyCode.UpArrow ||
+                              e.keyCode === monaco.KeyCode.DownArrow)
+                          ) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            popoverRef.current?.focus();
+                          }
+                        });
+
+                        // // can be used in commands
+                        // const myCondition1 = editor.createContextKey(
+                        //   'myCondition1',
+                        //   false
+                        // ) as monaco.editor.IContextKey<boolean>;
+
+                        // // on CMD/CTRL + Enter submit the query
+                        // editor.addCommand(monaco.KeyCode.Slash, openQuickActionsPopover, 'myCondition1');
+
+                        editor.onDidChangeCursorPosition((e) => {
+                          const cursorPosition = e.position;
+                          const cursorLine = editor
+                            .getModel()
+                            ?.getLineContent(cursorPosition.lineNumber);
+
+                          const preCursorColumnContent = cursorLine?.substring(
+                            0,
+                            cursorPosition.column - 1
+                          );
+                          const currentWord = model?.getWordAtPosition(cursorPosition);
+                          const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
+                          if (
+                            // currentWord?.word === pattern.trim() ||
+                            cursorPosition.column === 2 &&
+                            preCursorColumnContent?.includes('/')
+                          ) {
+                            openQuickActionsPopover();
+                          } else {
+                            // isMacroMenuVisible = false;
+                            setIsPopoverVisible(false);
+                          }
                         });
 
                         // on CMD/CTRL + Enter submit the query
@@ -996,12 +1144,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           // eslint-disable-next-line no-bitwise
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                           onQuerySubmit
-                        );
-
-                        editor.addCommand(
-                          // eslint-disable-next-line no-bitwise
-                          monaco.KeyMod.Shift | monaco.KeyCode.Slash,
-                          onSlashType
                         );
 
                         if (!isCodeEditorExpanded) {
@@ -1149,7 +1291,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           editorIsInline={editorIsInline}
         />
       )}
-      {isModalVisible && (
+      {/* {isModalVisible && (
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle id="modal">Integrations</EuiModalHeaderTitle>
@@ -1159,7 +1301,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             <EuiDescriptionList
               listItems={integrations.map((i) => {
                 return {
-                  title: i.name,
+                  title: i.title,
                   description: i.description,
                 };
               })}
@@ -1173,10 +1315,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
-      )}
+      )} */}
 
       {createPortal(
-        isPopoverlVisible && (
+        isPopoverVisible && (
           <div
             style={{
               ...popoverPosition,
@@ -1186,32 +1328,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               padding: '10px',
               boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
               zIndex: 1000,
-              maxWidth: 300,
+              width: 300,
               overflow: 'auto',
+              // opacity: isMacroMenuVisible ? 1 : 0,
             }}
             ref={popoverRef}
+            data-test-subj="TextBasedLangEditor-macro-menu"
           >
-            {isEditorActionsPopover ? (
-              <EuiListGroup>
-                <EuiListGroupItem
-                  label="Here is a list of actions items"
-                  color="primary"
-                  size="m"
-                />
-
-                <EuiListGroupItem href="#" label="Action 1" color="text" size="s" />
-                <EuiListGroupItem href="#" label="Action 2" color="text" size="s" />
-              </EuiListGroup>
-            ) : (
-              <EuiDescriptionList
-                listItems={integrations.map((i) => {
-                  return {
-                    title: i.name,
-                    description: i.description,
-                  };
-                })}
-              />
-            )}
+            <EuiListGroup>
+              {integrations.map((dataStream) => {
+                return (
+                  <EuiListGroupItem
+                    label={dataStream.name}
+                    color="primary"
+                    size="m"
+                    key={dataStream.name}
+                    onClick={() => {
+                      const newCode = `from ${dataStream.name}`;
+                      if (code !== newCode) {
+                        onUpdateAndSubmit(newCode);
+                      }
+                      setIsPopoverVisible(false);
+                    }}
+                  />
+                );
+              })}
+            </EuiListGroup>
           </div>
         ),
         document.body

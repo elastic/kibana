@@ -292,7 +292,7 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
 export const buildSelectDataDefinition = (): SuggestionRawDefinition[] => [
   {
     label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.selectDataLabel', {
-      defaultMessage: 'Open a modal to select data',
+      defaultMessage: 'Open a popover to select data',
     }),
     text: '',
     kind: 'Issue',
@@ -305,17 +305,6 @@ export const buildSelectDataDefinition = (): SuggestionRawDefinition[] => [
       title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.selectMoreData', {
         defaultMessage: 'Click to select more',
       }),
-    },
-  },
-  {
-    label: 'Open a popover to select data',
-    text: '',
-    kind: 'Issue',
-    detail: 'open the popover',
-    sortText: 'D',
-    command: {
-      id: 'esql.sources.popover',
-      title: 'open the popover',
     },
   },
 ];

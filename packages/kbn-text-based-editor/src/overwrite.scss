@@ -43,3 +43,12 @@
 .TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
 }
+
+.mySourcePill {
+	background: lightblue;
+  padding: 5px;
+  box-shadow: 0 0 #0000, inset 0 0 0 1px #bcc3ce;
+  // background-color: #fbfcfd;
+  color: #343741;
+  cursor: pointer;
+}
