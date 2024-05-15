@@ -22,7 +22,7 @@ import type {
 } from '..';
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
-import { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
 export const getBaseRuleParams = (): BaseRuleParams => {
   return {

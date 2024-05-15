@@ -105,7 +105,6 @@ const DEFAULT_INTERVAL = '5m' as const;
 export const typeSpecificSnakeToCamel = (
   params: TypeSpecificCreateProps
 ): TypeSpecificRuleParams => {
-  console.log('Converting params to internal format', params);
   switch (params.type) {
     case 'eql': {
       return {
