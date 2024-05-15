@@ -101,7 +101,9 @@
     "@kbn/alerting-comparators",
     "@kbn/react-hooks",
     "@kbn/search-types",
-    "@kbn/router-utils"
+    "@kbn/router-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"

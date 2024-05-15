@@ -86,7 +86,6 @@
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/core-application-common",
-    "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/lens-embeddable-utils",
@@ -100,6 +99,8 @@
     "@kbn/cases-components",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/alerting-comparators",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*"
