@@ -30,11 +30,9 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless init_and_status_apis', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
-      await clearLegacyTransforms({ es, log });
-      await clearLegacyDashboards({ supertest, log });
     });
 
-    after(async () => {
+    afterEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await clearLegacyTransforms({ es, log });
       await clearLegacyDashboards({ supertest, log });
