@@ -7,25 +7,30 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('GET /api/console/es_config', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
     it('returns es host', async () => {
-      const roleAuthc: RoleCredentials = await svlUserManager.createApiKeyForRole('admin');
       const { body } = await supertestWithoutAuth
         .get('/api/console/es_config')
-        .set('kbn-xsrf', 'true')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(body.host).to.be.ok();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
   });
 }
