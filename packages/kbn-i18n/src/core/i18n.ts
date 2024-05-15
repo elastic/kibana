@@ -8,12 +8,12 @@
 
 import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
 import type { MessageDescriptor } from '@formatjs/intl';
-import type { PrimitiveType, FormatXMLElementFn } from 'intl-messageformat';
 import { handleIntlError } from './error_handler';
 
 import { Translation, TranslationInput } from '../translation';
 import { polyfillLocale } from './polyfills';
 import { defaultEnFormats } from './formats';
+import { FormatXMLElementFn, PrimitiveType } from './types';
 
 const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;

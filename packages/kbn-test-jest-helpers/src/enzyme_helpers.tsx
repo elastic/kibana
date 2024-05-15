@@ -103,7 +103,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ReactElement,
+  WrapperComponent?: React.ComponentType,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
@@ -130,7 +130,6 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
   const TestComponent: React.FunctionComponent<Args> = (args) =>
     WrapperComponent ? (
-      // @ts-ignore
       <WrapperComponent>
         <HookComponent {...args} />
       </WrapperComponent>
@@ -139,7 +138,6 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     );
 
   reactAct(() => {
-    // @ts-ignore
     component = mount(<TestComponent {...initialArgs} />);
   });
 

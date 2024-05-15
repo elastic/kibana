@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Serializer } from '.';
 
-export const serializeToJson: Serializer = (messages, formats = i18n.formats) => {
+export const serializeToJson: Serializer = (messages, formats = i18n.getTranslation().formats) => {
   const resultJsonObject = {
     formats,
     messages: {} as Record<string, string | { text: string; comment: string }>,

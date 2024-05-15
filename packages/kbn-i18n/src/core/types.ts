@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Formats } from '@kbn/i18n';
-
-export { serializeToJson } from './json';
-export { serializeToJson5 } from './json5';
-
-export type Serializer = (
-  messages: Array<[string, { message: string; description?: string }]>,
-  formats?: Formats
-) => string;
+export type FormatXMLElementFn<T, R = string | T | Array<string | T>> = (
+  parts: Array<string | T>
+) => R;
+export type PrimitiveType = string | number | boolean | null | undefined | Date;

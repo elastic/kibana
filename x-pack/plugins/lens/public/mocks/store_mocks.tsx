@@ -6,8 +6,7 @@
  */
 
 import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';

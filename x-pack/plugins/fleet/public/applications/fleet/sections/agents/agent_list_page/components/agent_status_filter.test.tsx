@@ -29,7 +29,7 @@ jest.mock('../../../../../../hooks', () => {
 
 const renderComponent = (props: React.ComponentProps<typeof AgentStatusFilter>) => {
   return render(
-    <IntlProvider timeZone="UTC" locale="en">
+    <IntlProvider locale="en">
       <AgentStatusFilter {...props} />
     </IntlProvider>
   );

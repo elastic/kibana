@@ -26,7 +26,7 @@ export {
   FormattedRelativeTime,
 };
 
-export { FormattedRelative } from './src/compatiblity_layer';
-export type { FormattedRelativeProps } from './src/compatiblity_layer';
+export { FormattedRelative, __IntlProvider } from './src/compatiblity_layer';
+export type { FormattedRelativeProps, InjectedIntl } from './src/compatiblity_layer';
 export { I18nProvider } from './src/provider';
 export { injectI18n, useI18n } from './src/inject';
