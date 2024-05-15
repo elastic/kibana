@@ -201,7 +201,7 @@ export enum RegistryPolicyTemplateKeys {
   description = 'description',
   icons = 'icons',
   screenshots = 'screenshots',
-  deployments_modes = 'deployment_modes',
+  deployment_modes = 'deployment_modes',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -210,7 +210,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
-  [RegistryPolicyTemplateKeys.deployments_modes]?: DeploymentsModes;
+  [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;

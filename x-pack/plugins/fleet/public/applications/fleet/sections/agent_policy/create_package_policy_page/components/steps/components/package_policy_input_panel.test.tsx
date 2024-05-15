@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
 import type { TestRenderer } from '../../../../../../../../mock';
+import { useAgentlessPolicy } from '../../../single_page_layout/hooks/setup_technology';
 
 import type {
   PackageInfo,
@@ -22,11 +23,10 @@ import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_p
 
 jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
-    useAgentlessPolicy: jest.fn().mockReturnValue({
-      isAgentlessEnabled: true,
-    }),
+    useAgentlessPolicy: jest.fn(),
   };
 });
+const useAgentlessPolicyMock = useAgentlessPolicy as jest.MockedFunction<typeof useAgentlessPolicy>;
 
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
@@ -364,7 +364,17 @@ describe('PackagePolicyInputPanel', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
   });
-  it('should render inputs specific to the env', async () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('when agentless, should render inputs specific to env', async () => {
+    useAgentlessPolicyMock.mockReturnValue({
+      isAgentlessEnabled: true,
+      isAgentlessPackagePolicy: jest.fn(),
+      isAgentlessAgentPolicy: jest.fn(),
+      isAgentlessIntegration: jest.fn(),
+    });
     render();
     await waitFor(async () => {
       expect(
@@ -383,6 +393,32 @@ describe('PackagePolicyInputPanel', () => {
       expect(
         await renderResult.queryByText('Sample logs hidden in agentless')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it('when stateful, should render inputs specific to the env', async () => {
+    useAgentlessPolicyMock.mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessPackagePolicy: jest.fn(),
+      isAgentlessAgentPolicy: jest.fn(),
+      isAgentlessIntegration: jest.fn(),
+    });
+    render();
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+    });
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect sample logs from instances')
+      ).toBeInTheDocument();
+    });
+    await waitFor(async () => {
+      expect(await renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
+    });
+    await waitFor(async () => {
+      expect(await renderResult.queryByText('Sample logs hidden in agentless')).toBeInTheDocument();
     });
   });
 });

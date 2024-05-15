@@ -36,11 +36,14 @@ export const useAgentlessPolicy = () => {
     return false;
   };
 
+  // When an integration has at least a policy template enabled for agentless
   const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
     if (
       packageInfo?.policy_templates &&
       packageInfo?.policy_templates.length > 0 &&
-      packageInfo?.policy_templates[0]?.deployment_modes?.agentless
+      packageInfo?.policy_templates.find(
+        (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
+      )
     ) {
       return true;
     }
