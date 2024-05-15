@@ -58,10 +58,12 @@
  *    `appSearchSource`.
  */
 
+import { setWith } from '@kbn/safer-lodash-set';
 import {
   difference,
   isEqual,
   isFunction,
+  isObject,
   keyBy,
   pick,
   uniqueId,
@@ -795,12 +797,12 @@ export class SearchSource {
     const fieldListProvided = !!body.fields;
 
     // set defaults
-    const initialUnderscoreSource =
+    const _source =
       index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = index
-      ? this.getFieldFilter({ bodySourceExcludes: initialUnderscoreSource.excludes, metaFields })
+      ? this.getFieldFilter({ bodySourceExcludes: _source.excludes, metaFields })
       : (fields: any) => fields;
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
@@ -836,7 +838,7 @@ export class SearchSource {
       uniqFieldNames,
       scriptFields: scriptedFields,
       runtimeFields,
-      _source: initialUnderscoreSource,
+      _source,
     });
 
     // For testing shard failure messages in the UI, follow these steps:
@@ -858,6 +860,15 @@ export class SearchSource {
     // });
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
+    body._source = _source;
+
+    // only include unique values
+    if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
+      setWith(body, '_source.includes', remainingFields, (nsValue) => {
+        return isObject(nsValue) ? {} : nsValue;
+      });
+    }
+
     const builtQuery = this.getBuiltEsQuery({
       index,
       query: searchRequest.query,
@@ -875,14 +886,7 @@ export class SearchSource {
           ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
-      _source: (() => {
-        if (fieldListProvided && !sourceFieldsProvided) return false;
-        // only include unique values
-        if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
-          return { includes: remainingFields };
-        }
-        return initialUnderscoreSource;
-      })(),
+      _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
       stored_fields:
         fieldListProvided || sourceFieldsProvided ? [...new Set(remainingFields)] : ['*'],
       runtime_mappings: runtimeFields,
