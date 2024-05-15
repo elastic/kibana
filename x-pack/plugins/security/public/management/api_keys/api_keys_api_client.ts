@@ -10,6 +10,7 @@ import type { QueryContainer } from '@elastic/eui/src/components/search_bar/quer
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
+import type { QueryFilters } from './api_keys_grid/api_keys_table';
 import type { ApiKeyToInvalidate, QueryApiKeyResult } from '../../../common/model';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../../server/routes/api_keys';
 
@@ -43,6 +44,7 @@ export interface QueryApiKeyParams {
   from: number;
   size: number;
   sort: QueryApiKeySortOptions;
+  filters: QueryFilters;
 }
 
 const apiKeysUrl = '/internal/security/api_key';
