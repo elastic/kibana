@@ -25,14 +25,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async assertSingleMetricViewerEmbeddableInitializerExists() {
-      await retry.tryForTime(10 * 1000, async () => {
-        await testSubjects.existOrFail('mlSingleMetricViewerEmbeddableInitializer', {
-          timeout: 1000,
-        });
-      });
-    },
-
     async assertSingleMetricViewerEmbeddableInitializerNotExists() {
       await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.missingOrFail('mlSingleMetricViewerEmbeddableInitializer', {
@@ -133,11 +125,11 @@ export function MachineLearningDashboardEmbeddablesProvider(
 
         if (mlEmbeddableType === 'ml_single_metric_viewer') {
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Single metric viewer');
+          await testSubjects.existOrFail('mlAnomalyJobSelectionControls', { timeout: 2000 });
         } else {
           await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
+          await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
         }
-
-        await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
       });
     },
   };
