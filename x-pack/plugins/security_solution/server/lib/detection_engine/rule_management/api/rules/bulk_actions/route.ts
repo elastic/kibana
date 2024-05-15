@@ -121,7 +121,7 @@ export const performBulkActionRoute = (
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
-          const rulesManagementClient = RulesManagementClient(rulesClient);
+          const rulesManagementClient = new RulesManagementClient(rulesClient);
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
