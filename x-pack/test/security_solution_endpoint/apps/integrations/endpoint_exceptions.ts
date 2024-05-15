@@ -29,11 +29,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
+  const MINUTES = 60_000;
+
   // Failing: See https://github.com/elastic/kibana/issues/176009
   describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    this.timeout(10 * 60_000);
+    this.timeout(10 * MINUTES);
 
     const clearPrefilledEntries = async () => {
       const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
@@ -102,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(120_000, async () => {
+      return retry.tryForTime(2 * MINUTES, async () => {
         const artifacts = await endpointArtifactTestResources.getArtifacts();
 
         const manifestArtifact = artifacts.find((artifact) =>
@@ -133,7 +135,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await retry.waitForWithTimeout('alerts to appear', 10 * 60_000, async () => {
+        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
         });
