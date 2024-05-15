@@ -329,8 +329,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
 
-      if (enrichedPackagePolicy.package) {
-        enrichedPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+      if (enrichedPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+        enrichedPackagePolicy.package = {
+          ...enrichedPackagePolicy.package,
+          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+        };
       }
     }
 
@@ -462,7 +465,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           elasticsearch = pkgInfo?.elasticsearch;
 
-          packagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+          if (packagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+            packagePolicy.package = {
+              ...packagePolicy.package,
+              requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+            };
+          }
         }
 
         policiesToCreate.push({
@@ -869,8 +877,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-      if (enrichedPackagePolicy.package) {
-        enrichedPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+      if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+        restOfPackagePolicy.package = {
+          ...restOfPackagePolicy.package,
+          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+        };
       }
     }
 
@@ -1052,8 +1063,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               assetsMap
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
-            if (restOfPackagePolicy.package) {
-              restOfPackagePolicy.package.requires_root = pkgInfo?.agent?.privileges?.root ?? false;
+
+            if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+              restOfPackagePolicy.package = {
+                ...restOfPackagePolicy.package,
+                requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+              };
             }
           }
         }

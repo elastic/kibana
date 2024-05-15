@@ -321,6 +321,9 @@ describe('when on the package policy create page', () => {
         expect(
           renderResult.getByText('Unprivileged agents enrolled to the selected policy')
         ).toBeInTheDocument();
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'This integration requires Elastic Agents to have root privileges. There is 1 agent running in an unprivileged mode using Agent policy 1. To ensure that all data required by the integration can be collected, re-enroll the agent using an account with root privileges.'
+        );
       });
 
       await waitFor(() => {

@@ -54,6 +54,7 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
           title={i18n.translate('xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsTitle', {
             defaultMessage: 'Unprivileged agents enrolled to the selected policy',
           })}
+          data-test-subj="unprivilegedAgentsCallout"
         >
           <FormattedMessage
             id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"

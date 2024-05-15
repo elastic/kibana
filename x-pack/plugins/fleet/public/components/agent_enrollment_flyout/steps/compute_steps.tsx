@@ -317,7 +317,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     if (selectedApiKeyId && apiKeyData) {
       const unprivilegedAgentsCount = Math.max(
         unprivilegedAgentIds.length,
-        agentPolicy?.unprivileged_agents ?? 0
+        selectedPolicy?.unprivileged_agents ?? 0
       );
       steps.push(
         AgentEnrollmentConfirmationStep({
