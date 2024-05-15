@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-
 import { EuiSelectableOption } from '@elastic/eui';
 import { serializeFilterOptions, deserializeFilterOptions } from './table';
 
 describe('Query param serialization', () => {
   it('knows how to serialize a set of options', () => {
-    expect(serializeFilterOptions([
-      { key: 'deprecated', checked: 'on' },
-      { key: 'managed', checked: 'off' },
-      { key: 'test' },
-    ] as EuiSelectableOption[])).toStrictEqual({
+    expect(
+      serializeFilterOptions([
+        { key: 'deprecated', checked: 'on' },
+        { key: 'managed', checked: 'off' },
+        { key: 'test' },
+      ] as EuiSelectableOption[])
+    ).toStrictEqual({
       deprecated: 'on',
       managed: 'off',
       test: 'unset',
@@ -23,12 +24,19 @@ describe('Query param serialization', () => {
   });
 
   it('knows how to deserialize a set of filter query params', () => {
-    expect(deserializeFilterOptions({
-      managed: 'on',
-      deprecated: 'off',
-    })).toStrictEqual([
+    expect(
+      deserializeFilterOptions({
+        managed: 'on',
+        deprecated: 'off',
+      })
+    ).toStrictEqual([
       { key: 'managed', checked: 'on', label: 'Managed', 'data-test-subj': 'managedFilter' },
-      { key: 'deprecated', checked: 'off', label: 'Deprecated', 'data-test-subj': 'deprecatedFilter' },
+      {
+        key: 'deprecated',
+        checked: 'off',
+        label: 'Deprecated',
+        'data-test-subj': 'deprecatedFilter',
+      },
     ]);
   });
 });
