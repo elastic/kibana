@@ -25,7 +25,7 @@ import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observer } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
@@ -53,6 +53,8 @@ export const getVisualizeEmbeddableFactory: (
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const vis = await createVisAsync(state.savedVis.type, state.savedVis);
 
+    const hasRendered$ = new BehaviorSubject<boolean>(false);
+
     const id$ = new BehaviorSubject<string>(state.id);
     const vis$ = new BehaviorSubject<Vis>(vis);
     const savedVis$ = new BehaviorSubject(state.savedVis);
@@ -78,7 +80,6 @@ export const getVisualizeEmbeddableFactory: (
       {
         ...titlesApi,
         serializeState: () => {
-          console.log('SERIALIZING STATE');
           return serializeState({
             savedVis: vis$.getValue().serialize(),
             id: id$.getValue(),
@@ -111,6 +112,10 @@ export const getVisualizeEmbeddableFactory: (
           });
         },
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
+        setVis: async (newVis) => {
+          vis$.next(await createVisAsync(newVis.type, newVis));
+        },
+        subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
       },
       {
         ...titleComparators,
@@ -143,7 +148,6 @@ export const getVisualizeEmbeddableFactory: (
             syncTooltips: parentApi.settings.syncTooltips$.getValue(),
           }
         : {};
-
       const { params, abortController } = await getExpressionRendererProps({
         unifiedSearch,
         vis: vis$.getValue(),
@@ -152,6 +156,11 @@ export const getVisualizeEmbeddableFactory: (
         searchSessionId,
         parentExecutionContext: executionContext,
         abortController: expressionAbortController$.getValue(),
+        onRender: () => {
+          if (hasRendered$.getValue() === true) return;
+          hasRendered$.next(true);
+          hasRendered$.complete();
+        },
       });
       if (params) expressionParams$.next(params);
       expressionAbortController$.next(abortController);

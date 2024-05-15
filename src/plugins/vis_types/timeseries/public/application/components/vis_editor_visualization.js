@@ -19,7 +19,7 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { BehaviorSubject, pluck } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-plugin/public';
 import './_vis_editor_visualization.scss';
@@ -46,11 +46,15 @@ class VisEditorVisualizationUI extends Component {
   }
 
   updateParentApi = (timeRange, query, filters) => {
-    console.log('UPDATE PARENT API');
     this._parentApi.timeRange$.next(timeRange);
     this._parentApi.query$.next(query);
     this._parentApi.filters$.next(filters);
   };
+
+  getSavedVis = () => ({
+    ...omit(this.props.vis, 'uiState'),
+    type: this.props.vis.type.name,
+  });
 
   handleMouseDown = () => {
     window.addEventListener('mouseup', this.handleMouseUp);
@@ -69,24 +73,6 @@ class VisEditorVisualizationUI extends Component {
       }));
     }
   };
-
-  async _loadVisualization() {
-    if (!this._visEl.current) {
-      // In case the visualize loader isn't done before the component is unmounted.
-      return;
-    }
-
-    const { onDataChange, embeddableHandler, timeRange, filters, query } = this.props;
-
-    this._handler = embeddableHandler;
-    this._handler.updateInput({ timeRange, filters, query });
-    await this._handler.render(this._visEl.current);
-    this.props.eventEmitter.emit('embeddableRendered');
-
-    this._subscription = this._handler.handler.data$
-      .pipe(pluck('result'))
-      .subscribe((data) => onDataChange(data.value));
-  }
 
   /**
    * Resize the chart height when pressing up/down while the drag handle
@@ -120,7 +106,6 @@ class VisEditorVisualizationUI extends Component {
 
   componentDidMount() {
     window.addEventListener('mousemove', this.handleMouseMove);
-    this._loadVisualization();
   }
 
   componentDidUpdate() {
@@ -141,12 +126,11 @@ class VisEditorVisualizationUI extends Component {
       timeRange,
       filters,
       query,
-      vis,
     } = this.props;
     const style = { height: this.state.height };
 
     this.updateParentApi(timeRange, query, filters);
-    console.log('VIS', vis);
+    this.updateVis?.();
 
     if (this.state.dragging) {
       style.userSelect = 'none';
@@ -229,17 +213,19 @@ class VisEditorVisualizationUI extends Component {
             type={VISUALIZE_EMBEDDABLE_TYPE}
             state={{
               rawState: {
-                savedVis: {
-                  ...omit(vis, 'uiState'),
-                  type: vis.type.name,
-                },
+                savedVis: this.getSavedVis(),
                 title: title,
                 description: description,
               },
               references: [],
             }}
             parentApi={this._parentApi}
-            onAnyStateChange={(...args) => console.log(args)}
+            onApiAvailable={(api) => {
+              this.updateVis = () => api.setVis(this.getSavedVis());
+              api.subscribeToInitialRender(() =>
+                this.props.eventEmitter.emit('embeddableRendered')
+              );
+            }}
           />
         </div>
         <div className="tvbEditor--hideForReporting">

@@ -29,6 +29,7 @@ interface GetExpressionRendererPropsParams {
   searchSessionId?: string;
   abortController?: AbortController;
   vis: Vis<VisParams>;
+  onRender: () => void;
 }
 
 export const getExpressionRendererProps: (params: GetExpressionRendererPropsParams) => Promise<{
@@ -42,6 +43,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   searchSessionId,
   vis,
   abortController,
+  onRender,
 }) => {
   const parentContext = parentExecutionContext ?? getExecutionContext().get();
   const childContext: KibanaExecutionContext = {
@@ -81,6 +83,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     interactive: !disableTriggers,
     inspectorAdapters,
     executionContext,
+    onRender$: onRender,
   };
 
   if (abortController) {
