@@ -17,5 +17,3 @@ export function initDynamicActionsState(enhancements?: {
     },
   };
 }
-
-// { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
