@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Has queryable API Keys', () => {
     beforeEach(cleanup);
-    // afterEach(cleanup);
+    afterEach(cleanup);
 
     it('should return all the keys', async () => {
       await createMultipleKeys();
