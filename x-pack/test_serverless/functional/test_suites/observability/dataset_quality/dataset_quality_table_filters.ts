@@ -87,7 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('filters for integration', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('filters for integration', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationName = 'Apache HTTP Server';
@@ -118,7 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
     });
 
-    it('filters for namespace', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('filters for namespace', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const datasetNamespace = 'prod';
 
@@ -155,7 +157,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
     });
 
-    it('filters for quality', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('filters for quality', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const expectedQuality = 'Poor';
 

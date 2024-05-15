@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    it('shows the right number of rows in correct order', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('descending');
@@ -138,7 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(cellTexts).to.eql(datasetNamesAsc);
     });
 
-    it('shows dataset from integration', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('shows dataset from integration', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -184,7 +186,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetSelectorText).to.eql(datasetName);
     });
 
-    it('shows the last activity when in time range', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('shows the last activity when in time range', async () => {
       await PageObjects.datasetQuality.navigateTo();
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];

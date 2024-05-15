@@ -43,7 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    it('opens the flyout for the right dataset', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('opens the flyout for the right dataset', async () => {
       const testDatasetName = datasetNames[1];
 
       await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
@@ -109,7 +110,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('shows the integration details', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('shows the integration details', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationId = 'apache';
@@ -150,7 +152,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetSelectorText).to.eql(testDatasetName);
     });
 
-    it('shows summary KPIs', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('shows summary KPIs', async () => {
       await PageObjects.datasetQuality.navigateTo();
 
       const apacheAccessDatasetHumanName = 'Apache access logs';
@@ -294,7 +297,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchTab(0);
     });
 
-    it('Integration actions menu is present with correct actions', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('Integration actions menu is present with correct actions', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -322,7 +326,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(actions.length).to.eql(3);
     });
 
-    it('Integration dashboard action hidden for integrations without dashboards', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('Integration dashboard action hidden for integrations without dashboards', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
       const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
@@ -349,7 +354,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('Integration overview action should navigate to the integration overview page', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('Integration overview action should navigate to the integration overview page', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
       const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
@@ -383,7 +389,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Integration template action should navigate to the index template page', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('Integration template action should navigate to the index template page', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -417,7 +424,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Integration dashboard action should navigate to the selected dashboard', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('Integration dashboard action should navigate to the selected dashboard', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
