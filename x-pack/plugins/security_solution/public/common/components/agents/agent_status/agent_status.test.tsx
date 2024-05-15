@@ -49,7 +49,6 @@ describe('AgentStatus component', () => {
 
     getAgentStatusMock.mockReturnValue({ data: {} });
     useAgentStatusHookMock.mockImplementation(() => useGetAgentStatus);
-    render();
   });
 
   afterEach(() => {
@@ -60,7 +59,7 @@ describe('AgentStatus component', () => {
     it('should show agent health status info', () => {
       getAgentStatusMock.mockReturnValue({
         data: {
-          [agentId]: { ...baseData, status: HostStatus.OFFLINE },
+          [agentId]: { ...baseData, agentType, status: HostStatus.OFFLINE },
         },
         isLoading: false,
         isFetched: true,
