@@ -79,8 +79,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       registerKeyboardCommands({
         editor,
         sendRequest: sendRequestsCallback,
-        // TODO: Fix this once https://github.com/elastic/kibana/pull/181613 is merged
-        autoIndent: () => {},
+        autoIndent: async () => await actionsProvider.current?.autoIndent(),
         getDocumentationLink: getDocumenationLink,
         moveToPreviousRequestEdge: async () =>
           await actionsProvider.current?.moveToPreviousRequestEdge(),

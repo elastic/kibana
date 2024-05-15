@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 
 interface RegisterKeyboardCommandsParams {
@@ -22,6 +23,13 @@ interface RegisterKeyboardCommandsParams {
   /** Function for moving the cursor to the next request edge. */
   moveToNextRequestEdge: () => void;
 }
+
+const SEND_REQUEST_ACTION_ID = 'sendRequest';
+const AUTO_INDENT_ACTION_ID = 'autoIndent';
+const OPEN_DOCS_ACTION_ID = 'openDocs';
+const MOVE_UP_ACTION_ID = 'moveUp';
+const MOVE_DOWN_ACTION_ID = 'moveDown';
+const MOVE_TO_LINE_ACTION_ID = 'moveToLine';
 
 /**
  * Hook that returns a function for registering keyboard commands in the editor.
@@ -47,27 +55,71 @@ export const useRegisterKeyboardCommands = () => {
       window.open(documentation, '_blank');
     };
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, sendRequest);
+    editor.addAction({
+      id: SEND_REQUEST_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.sendRequest', {
+        defaultMessage: 'Send request',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: sendRequest,
+    });
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, autoIndent);
+    editor.addAction({
+      id: AUTO_INDENT_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.autoIndent', {
+        defaultMessage: 'Apply indentations',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
+      run: autoIndent,
+    });
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, openDocs);
+    editor.addAction({
+      id: OPEN_DOCS_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.openDocs', {
+        defaultMessage: 'Open documentations',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
+      run: openDocs,
+    });
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, moveToPreviousRequestEdge);
+    editor.addAction({
+      id: MOVE_UP_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.moveToPreviousRequestEdge', {
+        defaultMessage: 'Move to next request end/start',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow],
+      run: moveToPreviousRequestEdge,
+    });
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow, moveToNextRequestEdge);
+    editor.addAction({
+      id: MOVE_DOWN_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.moveToNextRequestEdge', {
+        defaultMessage: 'Move to next request end/start',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow],
+      run: moveToNextRequestEdge,
+    });
 
-    // eslint-disable-next-line no-bitwise
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL, () => {
-      const line = parseInt(prompt('Enter line number') ?? '', 10);
-      if (!isNaN(line)) {
-        editor.setPosition({ lineNumber: line, column: 1 });
-      }
+    editor.addAction({
+      id: MOVE_TO_LINE_ACTION_ID,
+      label: i18n.translate('console.keyboardCommandActionLabel.moveToLine', {
+        defaultMessage: 'Move cursor to a line',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyM],
+      run: () => {
+        const line = parseInt(prompt('Enter line number') ?? '', 10);
+        if (!isNaN(line)) {
+          editor.setPosition({ lineNumber: line, column: 1 });
+        }
+      },
     });
   };
+
+  // TODO: Add unregisterCommand function
 };
