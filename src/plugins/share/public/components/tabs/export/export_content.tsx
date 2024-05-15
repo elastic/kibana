@@ -157,7 +157,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
     return (
       <EuiButton
         fill
-        color="primary"
+        color={isDirty ? 'warning' : 'primary'}
         onClick={getReport}
         data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
@@ -165,7 +165,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
         {generateExportButton}
       </EuiButton>
     );
-  }, [generateExportButton, getReport, isCreatingExport]);
+  }, [generateExportButton, getReport, isCreatingExport, isDirty]);
 
   const renderRadioOptions = () => {
     if (radioOptions.length > 1) {
