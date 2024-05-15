@@ -17,6 +17,7 @@ import {
 } from '../../../../common/components/agents/agent_status';
 import { useRightPanelContext } from '../context';
 import {
+  AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -136,7 +137,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
             >
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell value={value} />
-              ) : isSentinelOneAgentIdField ? (
+              ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <FieldsAgentStatus
                   value={value}
                   isSentinelOneAgentIdField={isSentinelOneAgentIdField}
