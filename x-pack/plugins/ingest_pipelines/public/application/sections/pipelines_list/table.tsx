@@ -172,7 +172,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               ...(!isQueryEmpty ? { queryText } : {}),
               ...(!isDefaultFilters ? serializedFilterOptions : {}),
             },
-            { strict: false, encode: false, arrayFormat: 'index' }
+            { strict: false, arrayFormat: 'index' }
           ),
       });
     }
@@ -221,7 +221,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
     },
     search: {
       query: queryText,
-      onChange: ({ queryText: searchText }) => setQueryText(searchText),
+      onChange: ({ queryText: searchText, error }) => {
+        if (!error) {
+          setQueryText(searchText);
+        }
+      },
       toolsLeft:
         selection.length > 0 ? (
           <EuiButton
@@ -297,17 +301,22 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
-          <EuiLink
-            data-test-subj="pipelineDetailsLink"
-            {...reactRouterNavigate(history, {
-              pathname: '/',
-              search: `pipeline=${encodeURIComponent(name)}`,
-            })}
-          >
-            {name}
-          </EuiLink>
-        ),
+        render: (name: string) => {
+          const currentSearch = history.location.search;
+          const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
+
+          return (
+            <EuiLink
+              data-test-subj="pipelineDetailsLink"
+              {...reactRouterNavigate(history, {
+                pathname: '',
+                search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
+              })}
+            >
+              {name}
+            </EuiLink>
+          );
+        },
       },
       {
         width: '100px',

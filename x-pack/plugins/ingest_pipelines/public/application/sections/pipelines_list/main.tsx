@@ -82,7 +82,17 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const goHome = () => {
     setShowFlyout(false);
-    redirectToPathOrRedirectPath(getListPath());
+
+    // When redirecting the user to the list of pipelines, we want to only clean
+    // up the pipeline query param as there might be other query params (for example:
+    // search or filters) that we want to keep.
+    const params = new URLSearchParams(history.location.search);
+    params.delete('pipeline');
+
+    history.push({
+      pathname: '',
+      search: params.toString(),
+    });
   };
 
   if (error) {
