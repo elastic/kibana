@@ -47,14 +47,14 @@ import { DiscoverTabs } from './discover_tabs';
 
 export interface LogCategorizationEmbeddableProps {
   input: Readonly<EmbeddablePatternAnalysisInput>;
-  viewModeToggle: (patternCount?: number) => React.ReactElement;
+  renderViewModeToggle: (patternCount?: number) => React.ReactElement;
 }
 
 const BAR_TARGET = 20;
 
 export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({
   input,
-  viewModeToggle,
+  renderViewModeToggle,
 }) => {
   const {
     notifications: { toasts },
@@ -403,7 +403,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         selectedField={selectedField}
         setMinimumTimeRangeOption={setMinimumTimeRangeOption}
         setSelectedField={setSelectedField}
-        viewModeToggle={viewModeToggle}
+        renderViewModeToggle={renderViewModeToggle}
         dataview={dataView}
         earliest={earliest}
         latest={latest}

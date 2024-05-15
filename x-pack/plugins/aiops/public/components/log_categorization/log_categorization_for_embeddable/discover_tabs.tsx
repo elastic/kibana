@@ -22,7 +22,7 @@ import { SelectedPatterns } from './selected_patterns';
 import { CreateCategorizationJobButton } from '../create_categorization_job';
 
 interface Props {
-  viewModeToggle: (patternCount?: number) => React.ReactElement;
+  renderViewModeToggle: (patternCount?: number) => React.ReactElement;
   randomSampler: RandomSampler;
   openInDiscover: OpenInDiscover;
   selectedCategories: Category[];
@@ -44,7 +44,7 @@ interface Props {
 }
 
 export const DiscoverTabs: FC<Props> = ({
-  viewModeToggle,
+  renderViewModeToggle,
   randomSampler,
   openInDiscover,
   selectedCategories,
@@ -63,7 +63,7 @@ export const DiscoverTabs: FC<Props> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>{viewModeToggle(data?.categories.length)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderViewModeToggle(data?.categories.length)}</EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <>

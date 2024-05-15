@@ -29,7 +29,7 @@ export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'f
         savedSearch={savedSearch}
         stateContainer={props.stateContainer}
         trackUiMetric={props.trackUiMetric}
-        viewModeToggle={props.viewModeToggle}
+        renderViewModeToggle={props.renderViewModeToggle}
       />
     );
   }

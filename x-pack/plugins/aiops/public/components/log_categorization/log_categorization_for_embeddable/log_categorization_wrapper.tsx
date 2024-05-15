@@ -73,7 +73,7 @@ export const LogCategorizationWrapper: FC<LogCategorizationEmbeddableWrapperProp
             <Suspense fallback={null}>
               <LogCategorizationEmbeddable
                 input={props.input}
-                viewModeToggle={props.viewModeToggle}
+                renderViewModeToggle={props.renderViewModeToggle}
               />
             </Suspense>
           </StorageContextProvider>

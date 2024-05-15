@@ -23,7 +23,7 @@ import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stat
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
-import { PATTERN_ANALYSIS_LOADED } from '../pattern_analysis/constants';
+import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 
 const DROP_PROPS = {
   value: {
@@ -73,7 +73,7 @@ export const DiscoverMainContent = ({
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
         } else if (mode === VIEW_MODE.PATTERN_LEVEL) {
-          trackUiMetric(METRIC_TYPE.CLICK, PATTERN_ANALYSIS_LOADED);
+          trackUiMetric(METRIC_TYPE.CLICK, PATTERN_ANALYSIS_VIEW_CLICK);
         } else {
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
         }
@@ -84,7 +84,7 @@ export const DiscoverMainContent = ({
 
   const isDropAllowed = Boolean(onDropFieldToTable);
 
-  const viewModeToggle = useCallback(
+  const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
       return (
         <DocumentViewModeToggle
@@ -133,7 +133,7 @@ export const DiscoverMainContent = ({
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              viewModeToggle={viewModeToggle()}
+              viewModeToggle={renderViewModeToggle()}
               dataView={dataView}
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
@@ -142,7 +142,7 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderViewModeToggle()}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
@@ -158,7 +158,7 @@ export const DiscoverMainContent = ({
               stateContainer={stateContainer}
               onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
               trackUiMetric={trackUiMetric}
-              viewModeToggle={viewModeToggle}
+              renderViewModeToggle={renderViewModeToggle}
             />
           ) : null}
         </EuiFlexGroup>
