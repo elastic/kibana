@@ -413,6 +413,7 @@ export const getAgentVersionMatchingCurrentStack = async (
 
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
+    .catch(catchAxiosErrorFormatAndThrow)
     .then((response) =>
       map(
         response.data.versions.filter(isValidArtifactVersion),
