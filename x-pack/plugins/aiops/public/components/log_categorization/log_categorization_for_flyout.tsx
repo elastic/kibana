@@ -32,6 +32,7 @@ import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -119,6 +120,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
   const [showTabs, setShowTabs] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
+  const tableState = useTableState<Category>([], 'key');
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -412,6 +414,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
               displayExamples={data.displayExamples}
               setSelectedCategories={setSelectedCategories}
               openInDiscover={openInDiscover}
+              tableState={tableState}
             />
           </>
         ) : null}

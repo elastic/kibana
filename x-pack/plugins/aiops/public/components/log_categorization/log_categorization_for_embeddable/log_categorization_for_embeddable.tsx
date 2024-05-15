@@ -22,6 +22,7 @@ import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-anal
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -110,6 +111,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const tableState = useTableState<Category>([], 'key');
 
   useEffect(
     function initFields() {
@@ -442,6 +444,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
                   displayExamples={data.displayExamples}
                   setSelectedCategories={setSelectedCategories}
                   openInDiscover={openInDiscover}
+                  tableState={tableState}
                 />
               ) : null}
             </>

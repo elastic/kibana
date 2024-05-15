@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useTableState } from '@kbn/ml-in-memory-table';
+import type { UseTableState } from '@kbn/ml-in-memory-table';
 
 import { css } from '@emotion/react';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
@@ -43,6 +43,7 @@ interface Props {
   setHighlightedCategory: (category: Category | null) => void;
   setSelectedCategories: (category: Category[]) => void;
   openInDiscover: OpenInDiscover;
+  tableState: UseTableState<Category>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
 }
@@ -56,12 +57,14 @@ export const CategoryTable: FC<Props> = ({
   setHighlightedCategory,
   setSelectedCategories,
   openInDiscover,
+  tableState,
   enableRowActions = true,
   displayExamples = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
-  const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  const { onTableChange, pagination, sorting } = tableState;
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );

@@ -31,6 +31,7 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -97,6 +98,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const tableState = useTableState<Category>([], 'key');
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -422,6 +424,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
             displayExamples={data.displayExamples}
             setSelectedCategories={setSelectedCategories}
             openInDiscover={openInDiscover}
+            tableState={tableState}
           />
         </>
       ) : null}
