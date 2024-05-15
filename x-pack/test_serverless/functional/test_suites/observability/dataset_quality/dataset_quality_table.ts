@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality table', () => {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+    
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -35,8 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('shows the right number of rows in correct order', async () => {
+    it('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('descending');
@@ -89,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    // https://github.com/elastic/kibana/issues/178954
-    it.skip('shows the updated size of the index', async () => {
+    it('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
@@ -139,8 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(cellTexts).to.eql(datasetNamesAsc);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('shows dataset from integration', async () => {
+    it('shows dataset from integration', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
@@ -186,8 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(datasetSelectorText).to.eql(datasetName);
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('shows the last activity when in time range', async () => {
+    it('shows the last activity when in time range', async () => {
       await PageObjects.datasetQuality.navigateTo();
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];
@@ -226,8 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Failing https://github.com/elastic/kibana/issues/183495
-    it.skip('hides inactive datasets', async () => {
+    it('hides inactive datasets', async () => {
       await PageObjects.datasetQuality.waitUntilTableLoaded();
 
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
