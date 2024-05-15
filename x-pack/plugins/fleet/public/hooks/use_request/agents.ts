@@ -244,6 +244,15 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
   });
 }
 
+export function sendDeleteAgentUpload(fileId: string, options?: RequestOptions) {
+  return sendRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getAgentFileDeletePath(fileId),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    ...options,
+  });
+}
+
 export const useGetAgentUploads = (agentId: string, options?: RequestOptions) => {
   return useRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
