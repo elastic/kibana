@@ -38,7 +38,7 @@ export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, ag
       <AgentStatus
         agentId={agentId}
         agentType={agentType}
-        data-test-subj={`responderHeader-${agentType}-AgentIsolationStatus`}
+        data-test-subj={`responderHeader-${agentType}-agentIsolationStatus`}
       />
     </HeaderAgentInfo>
   );

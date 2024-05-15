@@ -87,7 +87,7 @@ export const AgentResponseActionsStatus = memo<AgentResponseActionsStatusProps>(
         ISOLATED_LABEL
       ) : (
         <FormattedMessage
-          id="xpack.securitySolution.agentStatus.agentAndActionsStatus.multiplePendingActions"
+          id="xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions"
           defaultMessage="{count} {count, plural, one {action} other {actions}} pending"
           values={{
             count: totalPending,
@@ -131,7 +131,7 @@ export const AgentResponseActionsStatus = memo<AgentResponseActionsStatusProps>(
               <div style={TOOLTIP_CONTENT_STYLES} data-test-subj={`${dataTestSubj}-tooltipContent`}>
                 <div>
                   <FormattedMessage
-                    id="xpack.securitySolution.agentStatus.agentAndActionsStatus.tooltipPendingActions"
+                    id="xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions"
                     defaultMessage="Pending actions:"
                   />
                 </div>
