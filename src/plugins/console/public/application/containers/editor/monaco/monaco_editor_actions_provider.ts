@@ -344,6 +344,11 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position, context);
   }
 
+  /**
+   * This function moves the cursor to the previous request edge (start/end line).
+   * If the cursor is inside a request, it is moved to the start line of this request.
+   * If there are no requests before the cursor, it is moved at the first line in the editor.
+   */
   public async moveToPreviousRequestEdge() {
     const currentPosition = this.editor.getPosition();
     const model = this.editor.getModel();
@@ -368,6 +373,11 @@ export class MonacoEditorActionsProvider {
     }
   }
 
+  /**
+   * This function moves the cursor to the next request edge.
+   * If the cursor is inside a request, it is moved to the end line of this request.
+   * If there are no requests after the cursor, it is moved at the last line in the editor.
+   */
   public async moveToNextRequestEdge() {
     const currentPosition = this.editor.getPosition();
     const model = this.editor.getModel();
