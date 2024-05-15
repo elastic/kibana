@@ -182,7 +182,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       overflow-x: hidden;
       flex: 1;
     `;
-
+    console.log('RENDER VIS EDITOR');
     return (
       <KibanaContextProvider
         services={{

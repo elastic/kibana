@@ -28,6 +28,7 @@ class DefaultEditorController implements IEditorController {
   ) {}
 
   render(props: EditorRenderProps) {
+    console.log('RENDER DEFAULT EDITOR');
     render(
       <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
         <EuiErrorBoundary>

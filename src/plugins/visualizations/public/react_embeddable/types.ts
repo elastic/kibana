@@ -25,6 +25,7 @@ export interface VisualizeSavedObjectState {
 
 export const isVisualizeSavedObjectState = (state: unknown): state is VisualizeSavedObjectState => {
   return (
+    typeof state !== 'undefined' &&
     (state as VisualizeSavedObjectState).savedObjectId !== undefined &&
     !('savedVis' in (state as VisualizeSavedObjectState))
   );

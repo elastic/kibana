@@ -77,12 +77,14 @@ export const getVisualizeEmbeddableFactory: (
     const api = buildApi(
       {
         ...titlesApi,
-        serializeState: () =>
-          serializeState({
+        serializeState: () => {
+          console.log('SERIALIZING STATE');
+          return serializeState({
             savedVis: vis$.getValue().serialize(),
             id: id$.getValue(),
             titles: serializeTitles(),
-          }),
+          });
+        },
         getVis: () => vis$.getValue(),
         getTypeDisplayName: () =>
           i18n.translate('visualizations.displayName', {

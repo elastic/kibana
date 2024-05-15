@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSwitch,
+  EuiText,
+  keys,
+} from '@elastic/eui';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import {
-  keys,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiFlexItem,
-  EuiButton,
-  EuiText,
-  EuiSwitch,
-} from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { pluck } from 'rxjs';
+import { BehaviorSubject, pluck } from 'rxjs';
 
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-plugin/public';
 import './_vis_editor_visualization.scss';
+import { omit } from 'lodash';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -34,7 +37,20 @@ class VisEditorVisualizationUI extends Component {
 
     this._visEl = React.createRef();
     this._subscription = null;
+
+    this._parentApi = {
+      timeRange$: new BehaviorSubject(props.timeRange),
+      query$: new BehaviorSubject(props.query),
+      filters$: new BehaviorSubject(props.filters),
+    };
   }
+
+  updateParentApi = (timeRange, query, filters) => {
+    console.log('UPDATE PARENT API');
+    this._parentApi.timeRange$.next(timeRange);
+    this._parentApi.query$.next(query);
+    this._parentApi.filters$.next(filters);
+  };
 
   handleMouseDown = () => {
     window.addEventListener('mouseup', this.handleMouseUp);
@@ -115,8 +131,22 @@ class VisEditorVisualizationUI extends Component {
   }
 
   render() {
-    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
+    const {
+      dirty,
+      autoApply,
+      title,
+      description,
+      onToggleAutoApply,
+      onCommit,
+      timeRange,
+      filters,
+      query,
+      vis,
+    } = this.props;
     const style = { height: this.state.height };
+
+    this.updateParentApi(timeRange, query, filters);
+    console.log('VIS', vis);
 
     if (this.state.dragging) {
       style.userSelect = 'none';
@@ -194,8 +224,24 @@ class VisEditorVisualizationUI extends Component {
           data-shared-items-container
           data-title={title}
           data-description={description}
-          ref={this._visEl}
-        />
+        >
+          <ReactEmbeddableRenderer
+            type={VISUALIZE_EMBEDDABLE_TYPE}
+            state={{
+              rawState: {
+                savedVis: {
+                  ...omit(vis, 'uiState'),
+                  type: vis.type.name,
+                },
+                title: title,
+                description: description,
+              },
+              references: [],
+            }}
+            parentApi={this._parentApi}
+            onAnyStateChange={(...args) => console.log(args)}
+          />
+        </div>
         <div className="tvbEditor--hideForReporting">
           {applyButton}
           <button

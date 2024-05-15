@@ -35,8 +35,11 @@ import {
 } from './types';
 
 export const deserializeState = (
-  state: SerializedPanelState<VisualizeSerializedState | VisualizeSavedObjectState>
+  state:
+    | SerializedPanelState<VisualizeSerializedState | VisualizeSavedObjectState>
+    | { rawState: undefined }
 ) => {
+  if (!state.rawState) return undefined;
   const serializedState = cloneDeep(state.rawState);
   if (isVisualizeSavedObjectState(serializedState)) {
     // Defer deserialization to the embeddable factory, as it requires an async call
@@ -133,7 +136,6 @@ export const serializeState = ({
   titles: SerializedTitles;
 }) => {
   const { references, serializedSearchSource } = serializeReferences(savedVis);
-
   return {
     rawState: {
       ...titles,
