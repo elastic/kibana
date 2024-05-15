@@ -146,7 +146,7 @@ interface ExpressionAstOptions {
   asDatatable?: boolean;
 }
 
-const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
+const omitByIsNil = <T>(object: Record<string, unknown>) => omitBy(object, isNil) as T;
 
 /** @public **/
 export class SearchSource {
@@ -863,12 +863,10 @@ export class SearchSource {
     body._source = _source;
 
     // only include unique values
-    if (sourceFieldsProvided) {
-      if (!isEqual(remainingFields, fieldsFromSource)) {
-        setWith(body, '_source.includes', remainingFields, (nsValue) => {
-          return isObject(nsValue) ? {} : nsValue;
-        });
-      }
+    if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
+      setWith(body, '_source.includes', remainingFields, (nsValue) => {
+        return isObject(nsValue) ? {} : nsValue;
+      });
     }
 
     const builtQuery = this.getBuiltEsQuery({
