@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isInternalURL } from './is_internal_url';
+import { CUSTOM_BASE_URL, isInternalURL } from './is_internal_url';
 
 describe('isInternalURL', () => {
   describe('with basePath defined', () => {
@@ -61,6 +61,22 @@ describe('isInternalURL', () => {
       const href = `${basePath}/app/kibana/../../../management`;
       expect(isInternalURL(href, basePath)).toBe(false);
     });
+
+    it('should return `false` if absolute URL contains tabs or new lines', () => {
+      for (const char of ['\t', '\n', '\r', '\t\n\r']) {
+        for (const url of [
+          `/${char}/${basePath}app/kibana`,
+          `/${char}//${basePath}app/kibana`,
+          `//${char}/${basePath}app/kibana`,
+          `htt${char}ps://example.com${basePath}`,
+          CUSTOM_BASE_URL,
+          `${CUSTOM_BASE_URL}${basePath}`,
+          `${CUSTOM_BASE_URL}example.com${basePath}`,
+        ]) {
+          expect(isInternalURL(url, basePath)).toBe(false);
+        }
+      }
+    });
   });
 
   describe('without basePath defined', () => {
@@ -85,6 +101,23 @@ describe('isInternalURL', () => {
 
       const hrefWithThreeSlashes = `///app/kibana`;
       expect(isInternalURL(hrefWithThreeSlashes)).toBe(false);
+    });
+
+    it('should return `false` if absolute URL contains tabs or new lines', () => {
+      for (const char of ['\t', '\n', '\r', '\t\n\r']) {
+        for (const url of [
+          `/${char}/app/kibana`,
+          `/${char}//app/kibana`,
+          `//${char}/app/kibana`,
+          `htt${char}ps://example.com`,
+          `java${char}script:alert(1)`,
+          CUSTOM_BASE_URL,
+          `${CUSTOM_BASE_URL}app/kibana`,
+          `${CUSTOM_BASE_URL}example.com/path`,
+        ]) {
+          expect(isInternalURL(url)).toBe(false);
+        }
+      }
     });
   });
 });
