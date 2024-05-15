@@ -618,7 +618,7 @@ export class DashboardPageObject extends FtrService {
    * @param dashboardTitle {String}
    */
   public async enterDashboardTitleAndPressEnter(dashboardTitle: string) {
-    await this.testSubjects.click('dashboardSaveAsMenuItem');
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
@@ -803,7 +803,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectMissingSaveOption() {
-    await this.testSubjects.missingOrFail('dashboardSaveAsMenuItem');
+    await this.testSubjects.missingOrFail('dashboardInteractiveSaveMenuItem');
   }
 
   public async expectMissingQuickSaveOption() {

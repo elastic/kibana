@@ -38,7 +38,7 @@ export const journey = new Journey({
   })
   .step('Add dashboard', async ({ page, inputDelays }) => {
     await page.click(subj('newItemButton'));
-    await page.click(subj('dashboardSaveAsMenuItem'));
+    await page.click(subj('dashboardInteractiveSaveMenuItem'));
     await page.type(subj('savedObjectTitle'), `foobar dashboard ${uuidv4()}`, {
       delay: inputDelays.TYPING,
     });

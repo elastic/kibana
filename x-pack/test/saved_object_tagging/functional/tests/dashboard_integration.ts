@@ -103,7 +103,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.clickNewDashboard();
 
-        await testSubjects.click('dashboardSaveAsMenuItem');
+        await testSubjects.click('dashboardInteractiveSaveMenuItem');
         await testSubjects.setValue('savedObjectTitle', 'dashboard-with-new-tag');
 
         await testSubjects.click('savedObjectTagSelector');
