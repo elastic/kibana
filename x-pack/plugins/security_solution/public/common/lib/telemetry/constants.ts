@@ -34,6 +34,13 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
+
+  // value list
+  OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
+  CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
+  DELETE_VALUE_LIST_ITEM = 'delete_value_list_item',
+  EDIT_VALUE_LIST_ITEM = 'edit_value_list_item',
+  ADDITIONAL_UPLOAD_VALUE_LIST_ITEM = 'additinonal_upload_value_list_item',
 }
 
 export enum TelemetryEventTypes {
