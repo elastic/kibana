@@ -184,7 +184,7 @@ const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
   for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    const subtechnique = subtechniques[i * 20]; // Double our interval to broaden the subtechnique types we're pulling data from a bit
+    const subtechnique = subtechniques[i * 50]; // Increase our interval to broaden the subtechnique types we're pulling data from a bit
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 
