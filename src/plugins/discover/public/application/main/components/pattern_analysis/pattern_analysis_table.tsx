@@ -63,7 +63,7 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
   const input: EmbeddablePatternAnalysisInput = Object.assign(
     {},
     pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']),
-    lastReloadRequestTime
+    { lastReloadRequestTime }
   );
 
   return (

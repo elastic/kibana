@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // temporarily disabled, to be replaced
   describe('log pattern analysis', async function () {
     let tabsCount = 1;
 
