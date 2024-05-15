@@ -10,7 +10,7 @@
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import * as ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -75,56 +75,43 @@ export class FlyoutService {
   public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
 
-    const render = (
-      renderNode: () => React.ReactNode,
-      options: OverlayFlyoutOpenOptions
-    ): OverlayRef => {
-      // If there is an active flyout session close it before opening a new one.
-      if (this.activeFlyout) {
-        this.activeFlyout.close();
-        this.cleanupDom();
-      }
-
-      const flyout = new FlyoutRef();
-
-      // If a flyout gets closed through it's FlyoutRef, remove it from the dom
-      flyout.onClose.then(() => {
-        if (this.activeFlyout === flyout) {
+    return {
+      open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
+        // If there is an active flyout session close it before opening a new one.
+        if (this.activeFlyout) {
+          this.activeFlyout.close();
           this.cleanupDom();
         }
-      });
 
-      this.activeFlyout = flyout;
+        const flyout = new FlyoutRef();
 
-      const onCloseFlyout = () => {
-        if (options.onClose) {
-          options.onClose(flyout);
-        } else {
-          flyout.close();
-        }
-      };
+        // If a flyout gets closed through it's FlyoutRef, remove it from the dom
+        flyout.onClose.then(() => {
+          if (this.activeFlyout === flyout) {
+            this.cleanupDom();
+          }
+        });
 
-      ReactDOM.render(
-        <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
-          <EuiFlyout {...options} onClose={onCloseFlyout}>
-            {renderNode()}
-          </EuiFlyout>
-        </KibanaRenderContextProvider>,
-        this.targetDomElement
-      );
+        this.activeFlyout = flyout;
 
-      return flyout;
-    };
+        const onCloseFlyout = () => {
+          if (options.onClose) {
+            options.onClose(flyout);
+          } else {
+            flyout.close();
+          }
+        };
 
-    return {
-      render,
-
-      /** @deprecated */
-      open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
-        return render(
-          () => <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />,
-          options
+        render(
+          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+            <EuiFlyout {...options} onClose={onCloseFlyout}>
+              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+            </EuiFlyout>
+          </KibanaRenderContextProvider>,
+          this.targetDomElement
         );
+
+        return flyout;
       },
     };
   }
@@ -138,7 +125,7 @@ export class FlyoutService {
    */
   private cleanupDom(): void {
     if (this.targetDomElement != null) {
-      ReactDOM.unmountComponentAtNode(this.targetDomElement);
+      unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.innerHTML = '';
     }
     this.activeFlyout = null;

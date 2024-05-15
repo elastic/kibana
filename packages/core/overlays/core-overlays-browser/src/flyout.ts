@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import * as React from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -23,26 +21,8 @@ export interface OverlayFlyoutStart {
    * @param mount {@link MountPoint} - Mounts the children inside a flyout panel
    * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout
    * @return {@link OverlayRef} A reference to the opened flyout panel.
-   *
-   * @deprecated Use `.render()` method instead.
    */
   open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
-
-  /**
-   * Opens a flyout panel with the given mount point inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
-   *
-   * Example:
-   *
-   * ```ts
-   * overlays.flyout.render(() => <MyComponent />);
-   * ```
-   *
-   * @param renderNode - React render function that will be rendered inside the flyout
-   * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout
-   * @return {@link OverlayRef} A reference to the opened flyout panel.
-   */
-  render(renderNode: () => React.ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
 }
 
 /**
