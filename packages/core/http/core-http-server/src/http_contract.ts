@@ -402,3 +402,8 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
 }
+
+/**
+ * @public
+ */
+export type HttpProtocol = 'http1' | 'http2';

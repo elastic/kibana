@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { hostname, EOL } from 'node:os';
+import url, { URL } from 'node:url';
+import type { Duration } from 'moment';
 import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
-import type { ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
-
-import { hostname, EOL } from 'node:os';
-import url, { URL } from 'node:url';
-
-import type { Duration } from 'moment';
+import type { ICspConfig, IExternalUrlConfig, HttpProtocol } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
@@ -120,6 +118,9 @@ const configSchema = schema.object(
           )}`;
         }
       },
+    }),
+    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+      defaultValue: 'http1',
     }),
     host: schema.string({
       defaultValue: 'localhost',
@@ -283,6 +284,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
 export class HttpConfig implements IHttpConfig {
   public name: string;
   public autoListen: boolean;
+  public protocol: HttpProtocol;
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
@@ -350,6 +352,7 @@ export class HttpConfig implements IHttpConfig {
     );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
+    this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
