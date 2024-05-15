@@ -49,6 +49,8 @@ const defaultUseTourContextValue = {
   isTourShown: () => false,
 };
 
+jest.mock('../../guided_onboarding_tour/tour_step');
+
 const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a';
 const scrollToMock = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = scrollToMock;
