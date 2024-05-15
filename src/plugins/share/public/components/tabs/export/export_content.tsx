@@ -203,7 +203,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
             >
               <FormattedMessage
                 id="share.postURLWatcherMessage.unsavedChanges"
-                defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
+                defaultMessage="URL may change if you upgrade Kibana."
               />
             </EuiCallOut>
           </>

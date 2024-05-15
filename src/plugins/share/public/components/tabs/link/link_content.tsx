@@ -15,7 +15,9 @@ import {
   EuiForm,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
 import { IShareContext } from '../../context';
@@ -49,7 +51,7 @@ export const LinkContent = ({
 }: LinkProps) => {
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
-  const [, setTextCopied] = useState(false);
+  const [isTextCopied, setTextCopied] = useState(false);
   const [, setShortUrlCache] = useState<string | undefined>(undefined);
 
   const getUrlWithUpdatedParams = useCallback(
@@ -142,16 +144,24 @@ export const LinkContent = ({
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            data-test-subj="copyShareUrlButton"
-            data-share-url={url}
-            onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
-            onClick={copyUrlHelper}
-            color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
+          <EuiToolTip
+            content={
+              isTextCopied
+                ? i18n.translate('share.link.copied', { defaultMessage: 'Text copied' })
+                : null
+            }
           >
-            <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
-          </EuiButton>
+            <EuiButton
+              fill
+              data-test-subj="copyShareUrlButton"
+              data-share-url={url}
+              onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
+              onClick={copyUrlHelper}
+              color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
+            >
+              <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
