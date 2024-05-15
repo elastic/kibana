@@ -16,7 +16,7 @@ import {
   DAEMONSET_MEMORY_ROUTE,
 } from '../../common/constants';
 
-const resource = "daemonset"
+const resource = "Daemonset"
 const type = "memory"
 export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -39,52 +39,53 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-          const mustsPods = [
-            {
-              term: {
-                'resource.attributes.k8s.daemonset.name': request.query.name,
-              },
+        const mustsPods = [
+          {
+            term: {
+              'resource.attributes.k8s.daemonset.name': request.query.name,
             },
-            {
-              term: {
-                'resource.attributes.k8s.namespace.name': namespace,
-              },
+          },
+          {
+            term: {
+              'resource.attributes.k8s.namespace.name': namespace,
             },
-            { exists: { field: 'metrics.k8s.pod.phase' } }
-          ];
-          const dslPods: estypes.SearchRequest = {
-            index: ["metrics-otel.*"],
-            sort: [{ '@timestamp': 'desc' }],
-            _source: false,
-            fields: [
-              '@timestamp',
-              'metrics.k8s.pod.phase',
-              'resource.attributes.k8s.*',
-            ],
-            query: {
-              bool: {
-                must: mustsPods,
-              },
+          },
+          { exists: { field: 'metrics.k8s.pod.phase' } }
+        ];
+        const dslPods: estypes.SearchRequest = {
+          index: ["metrics-otel.*"],
+          sort: [{ '@timestamp': 'desc' }],
+          _source: false,
+          fields: [
+            '@timestamp',
+            'metrics.k8s.pod.phase',
+            'resource.attributes.k8s.*',
+          ],
+          query: {
+            bool: {
+              must: mustsPods,
             },
-            aggs: {
-              unique_values: {
-                terms: { field: 'resource.attributes.k8s.pod.name' },
-              },
+          },
+          aggs: {
+            unique_values: {
+              terms: { field: 'resource.attributes.k8s.pod.name' },
             },
-          };
+          },
+        };
         // console.log(mustsPods);
         // console.log(dslPods);
         const esResponsePods = await client.search(dslPods);
         //console.log(esResponsePods);
         if (esResponsePods.hits.hits.length > 0) {
           var pod_reasons = new Array();
-          var pod_messages = new Array();
+          var pod_metrics = new Array();
           var pods_memory_medium = new Array();
           var pods_memory_high = new Array();
           var pods_deviation_high = new Array();
           var messages = '';
-          var reasons = '';
           var memory = '';
+          var deviation_alarm = '';
+
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
           const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
@@ -95,13 +96,13 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             console.log(podName);
             const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
+            const [reason, pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);
-            pod_messages.push(message);
+            pod_metrics.push(pod);
           }
-            //Create overall message for deployment
-            for (var pod_reason of pod_reasons) {
-              //Check for memory pod_reason.reason[0]
+          //Create overall message for deployment
+          for (var pod_reason of pod_reasons) {
+            //Check for memory pod_reason.reason[0]
             if (pod_reason.reason[0].value == "Medium") {
               pods_memory_medium.push(pod_reason.pod);
             } else if (pod_reason.reason[0].value == "High") {
@@ -117,21 +118,19 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           if (pods_memory_high.length > 0) {
             messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_memory_high.join(" , ");
             memory = "High";
-            reasons = "High " + type + " utilisation";
           } else if (pods_memory_medium.length > 0) {
             messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_memory_medium.join(" , ");
             memory = "Medium";
-            reasons = "Medium " + type + " utilisation";
           } else {
             messages = `${resource} has Low ${type} utilisation in all Pods`;
             memory = "Low";
-            reasons = "Low " + type + " utilisation";
           }
 
           if (pods_deviation_high.length > 0) {
-            messages = messages + ` , ` +`${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
-            memory = memory + ` , ` + "High memory_usage_median_absolute_deviation";
-            reasons = reasons + ` , ` +"High memory_usage_median_absolute_deviation";
+            messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+            deviation_alarm = "High";
+          } else { 
+            deviation_alarm = "Low" 
           }
 
           //End of Create overall message for deployment
@@ -141,11 +140,12 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
               time: time,
               name: request.query.name,
               namespace: namespace,
-              pods: pod_reasons , 
-              metrics: pod_messages,
-              memory: memory,
-              message: messages,
-              reason: reasons,
+              pods: pod_metrics,
+              memory: {
+                usage: memory,
+                deviation: deviation_alarm
+              },
+              message: messages
             },
           });
         } else {

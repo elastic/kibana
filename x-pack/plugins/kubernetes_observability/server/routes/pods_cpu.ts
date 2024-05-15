@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-// import { transformError } from '@kbn/securitysolution-es-utils';
-// import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
 import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 
@@ -38,28 +36,24 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
 
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const dsl = defineQueryForAllPodsCpuUtilisation(request.query.name, namespace, client);
-        console.log(dsl);
+        //console.log(dsl);
         const esResponse = await client.search(dsl);
         var message = undefined;
-        var reason = undefined;
-        var cpu_utilization = undefined;
-        var cpu_utilization_median_absolute_deviation = undefined;
-        console.log(esResponse);
+        //console.log(esResponse);
+
         if (esResponse.hits.hits.length > 0) {
           const hit = esResponse.hits.hits[0];
           const { fields = {} } = hit;
           const time = extractFieldValue(fields['@timestamp']);
 
-          [reason, message, cpu_utilization, cpu_utilization_median_absolute_deviation] = calulcatePodsCpuUtilisation(request.query.name, namespace, esResponse)
+          const [reason, pod] = calulcatePodsCpuUtilisation(request.query.name, namespace, esResponse)
+
           return response.ok({
             body: {
               time: time,
-              name: request.query.name,
-              namespace: namespace,
-              cpu_utilization: cpu_utilization,
-              cpu_utilization_median_absolute_deviation: cpu_utilization_median_absolute_deviation,
+              pod,
               message: message,
-              reason: reason
+              reason: reason.reason
             },
           });
         } else {

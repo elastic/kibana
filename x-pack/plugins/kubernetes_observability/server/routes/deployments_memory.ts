@@ -74,27 +74,28 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         //console.log(esResponsePods);
         if (esResponsePods.hits.hits.length > 0) {
           var pod_reasons = new Array();
-          var pod_messages = new Array();
+          var pod_metrics = new Array();
           var pods_memory_medium = new Array();
           var pods_memory_high = new Array();
           var pods_deviation_high = new Array();
           var messages = '';
-          var reasons = '';
+          var deviation_alarm = '';
           var memory = '';
+
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods
           const hitsPodsAggs = esResponsePods.aggregations.unique_values["buckets"];
           //console.log("hitspods:"+hitsPodsAggs);
-          const time = extractFieldValue(fields['@timestamp']);
+          var time = extractFieldValue(fields['@timestamp']);
           for (var entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log("name" + podName);
             const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
             //console.log(dslPodsMemory);
             const esResponsePods = await client.search(dslPodsMemory);
-            const [reason, message] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePods)
+            const [reason, pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePods)
             pod_reasons.push(reason);
-            pod_messages.push(message);
+            pod_metrics.push(pod);
           }
           //Create overall message for deployment
           for (var pod_reason of pod_reasons) {
@@ -114,21 +115,19 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           if (pods_memory_high.length > 0) {
             messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_memory_high.join(" , ");
             memory = "High";
-            reasons = "High " + type + " utilisation";
           } else if (pods_memory_medium.length > 0) {
             messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_memory_medium.join(" , ");
             memory = "Medium";
-            reasons = "Medium " + type + " utilisation";
           } else {
             messages = `${resource} has Low ${type} utilisation in all Pods`;
             memory = "Low";
-            reasons = "Low " + type + " utilisation";
           }
 
           if (pods_deviation_high.length > 0) {
-            messages = messages + ` , ` +`${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
-            memory = memory + ` , ` + "High memory_usage_median_absolute_deviation";
-            reasons = reasons + ` , ` +"High memory_usage_median_absolute_deviation";
+            messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+            deviation_alarm = "High";
+          } else { 
+            deviation_alarm = "Low" 
           }
 
           //End of Create overall message for deployment
@@ -138,11 +137,12 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               time: time,
               name: request.query.name,
               namespace: namespace,
-              pods: pod_reasons , 
-              metrics: pod_messages,
-              memory: memory,
+              pods: pod_metrics,
+              memory: {
+                usage: memory,
+                deviation: deviation_alarm
+              },
               message: messages,
-              reason: reasons,
             },
           });
         } else {

@@ -16,7 +16,7 @@ export type Event = {
     object: string;
 };
 
-export type Pod = {
+export type PodMem = {
     name: string;
     namespace: string;
     memory_available: {
@@ -28,6 +28,11 @@ export type Pod = {
         avg: number | undefined
         median_absolute_deviation: number | undefined;
     } 
+}
+
+export type PodCpu = {
+    name: string;
+    namespace: string;
     cpu_utilization: {
         min: number | undefined;
         max: number | undefined

@@ -46,28 +46,18 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
         // console.log(esResponseAll.hits.hits);
         // console.log(esResponseAll.hits.hits.length);
         //console.log(esResponse);
-        var message = undefined;
-        var reason = undefined;
-        var memory_available = undefined;
-        var memory_usage = undefined;
-        var memory_utilization = undefined;
-        var memory_usage_median_absolute_deviation = undefined;
+
         if (esResponseAll.hits.hits.length > 0) {
           const hits = esResponseAll.hits.hits[0];
           const { fields = {} } = hits;
           const time = extractFieldValue(fields['@timestamp']);
           
-          [reason, message, memory_usage, memory_usage_median_absolute_deviation, memory_available, memory_utilization ] = calulcatePodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
+          const [reason, pod ] = calulcatePodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
           return response.ok({
             body: {
               time: time,
-              name: request.query.name,
-              namespace: namespace,
-              memory_utilization: memory_utilization,
-              memory_usage_median_absolute_deviation: memory_usage_median_absolute_deviation,
-              memory_available: memory_available,
-              memory_usage: memory_usage,
-              reasons: reason,
+              pod,
+              reasons: reason.reason,
             },
           });
         } else {
