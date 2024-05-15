@@ -39,10 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('field statistics in Discover', function () {
+  describe('field statistics in Discover (trial license)', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
@@ -57,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
       await ml.testResources.deleteSavedSearches();
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
-      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
     });
 
     describe('when disabled', function () {
