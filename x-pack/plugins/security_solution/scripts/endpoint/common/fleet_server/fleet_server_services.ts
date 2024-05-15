@@ -42,6 +42,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import pRetry from 'p-retry';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import {
   createToolingLogger,
@@ -677,24 +678,32 @@ export const isFleetServerRunning = async (
   const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
-  return axios
-    .request({
-      method: 'GET',
-      url: url.toString(),
-      responseType: 'json',
-      // Custom agent to ensure we don't get cert errors
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    })
-    .then((response) => {
-      log.debug(`Fleet server is up and running at [${fleetServerUrl}]. Status: `, response.data);
-      return true;
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .catch((e) => {
-      log.debug(`Fleet server not up at [${fleetServerUrl}]`);
-      log.verbose(`Call to [${url.toString()}] failed with:`, e);
-      return false;
-    });
+  return pRetry<boolean>(
+    async () => {
+      return axios
+        .request({
+          method: 'GET',
+          url: url.toString(),
+          responseType: 'json',
+          // Custom agent to ensure we don't get cert errors
+          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        })
+        .then((response) => {
+          log.debug(
+            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
+            response.data
+          );
+          return true;
+        })
+        .catch(catchAxiosErrorFormatAndThrow)
+        .catch((e) => {
+          log.debug(`Fleet server not up at [${fleetServerUrl}]`);
+          log.verbose(`Call to [${url.toString()}] failed with:`, e);
+          return false;
+        });
+    },
+    { maxTimeout: 10000 }
+  );
 };
 
 /**
