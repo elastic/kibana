@@ -1030,16 +1030,12 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
  * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
  */
 export const getHasWrongOperator = (items: ExceptionsBuilderReturnExceptionItem[]): boolean => {
-  let hasWrongOperator = false;
-  items[0]?.entries.forEach((e) => {
-    if (
+  return items[0]?.entries.some((e) => {
+    return (
       validateHasWildcardWithWrongOperator({
         operator: (e as ExceptionsBuilderReturnExceptionItem[number]).type,
         value: (e as ExceptionsBuilderReturnExceptionItem[number]).value,
-      })
-    ) {
-      hasWrongOperator = true;
-    }
+      }) === true
+    );
   });
-  return hasWrongOperator;
 };
