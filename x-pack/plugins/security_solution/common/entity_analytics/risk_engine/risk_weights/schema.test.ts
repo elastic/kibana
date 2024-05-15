@@ -10,7 +10,7 @@ import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { riskWeightSchema } from './schema';
-import { RiskCategories, RiskWeightTypes } from './types';
+import { RiskWeightTypes } from './types';
 
 describe('risk weight schema', () => {
   let type: string;
@@ -119,115 +119,6 @@ describe('risk weight schema', () => {
 
         expect(getPaths(left(message.errors))).toEqual([]);
         expect(message.schema).toEqual({ type, host: 0.1 });
-      });
-    });
-
-    describe('risk category weights', () => {
-      beforeEach(() => {
-        type = RiskWeightTypes.riskCategory;
-      });
-
-      it('requires a value', () => {
-        const payload = { type, user: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "value"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      it('rejects if neither host nor user weight are specified', () => {
-        const payload = { type, value: RiskCategories.category_1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "host"',
-          'Invalid value "undefined" supplied to "user"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      it('allows a single host weight', () => {
-        const payload = { type, value: RiskCategories.category_1, host: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      it('allows a single user weight', () => {
-        const payload = { type, value: RiskCategories.category_1, user: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      it('allows both a host and user weight', () => {
-        const payload = { type, value: RiskCategories.category_1, user: 0.1, host: 0.5 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      it('rejects a weight outside of 0-1', () => {
-        const payload = { type, value: RiskCategories.category_1, host: -5 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toContain('Invalid value "-5" supplied to "host"');
-        expect(message.schema).toEqual({});
-      });
-
-      it('removes extra keys if specified', () => {
-        const payload = {
-          type,
-          value: RiskCategories.category_1,
-          host: 0.1,
-          extra: 'even more',
-        };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({ type, value: RiskCategories.category_1, host: 0.1 });
-      });
-
-      describe('allowed category values', () => {
-        it('allows the alerts type for a category', () => {
-          const payload = {
-            type,
-            value: RiskCategories.category_1,
-            host: 0.1,
-          };
-          const decoded = riskWeightSchema.decode(payload);
-          const message = pipe(decoded, foldLeftRight);
-
-          expect(getPaths(left(message.errors))).toEqual([]);
-          expect(message.schema).toEqual(payload);
-        });
-
-        it('rejects an unknown category value', () => {
-          const payload = {
-            type,
-            value: 'unknown',
-            host: 0.1,
-          };
-          const decoded = riskWeightSchema.decode(payload);
-          const message = pipe(decoded, foldLeftRight);
-
-          expect(getPaths(left(message.errors))).toContain(
-            'Invalid value "unknown" supplied to "value"'
-          );
-          expect(message.schema).toEqual({});
-        });
       });
     });
   });
