@@ -302,7 +302,7 @@ describe('#installArchive()', () => {
   });
 
   test('passes through all options+log to installArchive()', async () => {
-    installArchiveMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
+    installArchiveMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: true });
     const options: InstallArchiveOptions = {
       license: 'trial',
       password: 'changeme',
@@ -310,6 +310,7 @@ describe('#installArchive()', () => {
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],
       log,
+      disableEsTmpDir: true,
     };
     const cluster = new Cluster({ log });
     await cluster.installArchive('bar', options);
