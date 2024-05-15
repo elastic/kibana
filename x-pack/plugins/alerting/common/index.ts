@@ -13,6 +13,7 @@ import { AlertsHealth } from './rule';
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
+export * from './lib';
 export type {
   ThrottledActions,
   LastScheduledActions,
