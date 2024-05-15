@@ -92,6 +92,16 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: KIBANA_DOCKER_CONTEXT=chainguard .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: KIBANA_DOCKER_CONTEXT=ironbank .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
