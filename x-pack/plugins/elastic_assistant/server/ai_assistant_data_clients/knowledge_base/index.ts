@@ -43,20 +43,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @param soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
    */
   private installModel = async ({ soClient }: { soClient: SavedObjectsClientContract }) => {
+    const elserId = await this.options.getElserId();
+    this.options.logger.debug(`Installing ELSER model '${elserId}'...`);
+
     try {
-      this.setupInProgress = true;
-      const elserId = await this.options.getElserId();
-      const elserResponse = await this.options.ml
-        // TODO: See about calling `installElasticModel()` as systemUser as to not require soClient
+      await this.options.ml
+        // TODO: Potentially plumb soClient through DataClient from pluginStart
         .trainedModelsProvider({} as KibanaRequest, soClient)
         .installElasticModel(elserId);
-
-      this.options.logger.debug(
-        `installElasticModel response:\n: ${JSON.stringify(elserResponse, null, 2)}`
-      );
-    } catch (e) {
-      this.options.logger.error(`Error setting up ELSER model: ${e.message}`);
-      this.setupInProgress = false;
+    } catch (error) {
+      this.options.logger.error(`Error installing ELSER model '${elserId}':\n${error}`);
     }
   };
 
@@ -65,24 +61,23 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    *
    * @returns Promise<boolean> indicating whether the model is installed
    */
-  private isModelInstalled = async (): Promise<boolean> => {
+  public isModelInstalled = async (): Promise<boolean> => {
     const elserId = await this.options.getElserId();
+    this.options.logger.debug(`Checking if ELSER model '${elserId}' is installed...`);
+
     try {
       const esClient = await this.options.elasticsearchClientPromise;
       const getResponse = await esClient.ml.getTrainedModels({
         model_id: elserId,
         include: 'definition_status',
       });
-      this.options.logger.debug(
-        `Model definition status:\n${JSON.stringify(getResponse.trained_model_configs[0])}`
-      );
       return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
     } catch (error) {
       if (!isModelAlreadyExistsError(error)) {
-        this.options.logger.error(`Error deploying ELSER model '${elserId}'\n${error}`);
+        this.options.logger.error(
+          `Error checking if ELSER model '${elserId}' is installed:\n${error}`
+        );
       }
-      this.options.logger.debug(`Error deploying ELSER model '${elserId}', model already deployed`);
-      this.setupInProgress = false;
       return false;
     }
   };
@@ -92,8 +87,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   private deployModel = async () => {
     const elserId = await this.options.getElserId();
+    this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     try {
-      this.setupInProgress = true;
       const esClient = await this.options.elasticsearchClientPromise;
       await esClient.ml.startTrainedModelDeployment({
         model_id: elserId,
@@ -101,10 +96,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       });
     } catch (error) {
       if (!isModelAlreadyExistsError(error)) {
-        this.options.logger.error(`Error deploying ELSER model '${elserId}'\n${error}`);
+        this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
       }
       this.options.logger.debug(`Error deploying ELSER model '${elserId}', model already deployed`);
-      this.setupInProgress = false;
     }
   };
 
@@ -113,16 +107,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    *
    * @returns Promise<boolean> indicating whether the model is deployed
    */
-  private isModelDeployed = async (): Promise<boolean> => {
+  public isModelDeployed = async (): Promise<boolean> => {
     const elserId = await this.options.getElserId();
-    const esClient = await this.options.elasticsearchClientPromise;
+    this.options.logger.debug(`Checking if ELSER model '${elserId}' is deployed...`);
 
     try {
+      const esClient = await this.options.elasticsearchClientPromise;
       const getResponse = await esClient.ml.getTrainedModelsStats({
         model_id: elserId,
       });
-
-      this.options.logger.debug(`modelId: ${elserId}`);
 
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>
@@ -144,7 +137,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Downloads and deploys ELSER (if not already), then loads ES|QL docs
+   * Downloads and deploys recommended ELSER (if not already), then loads ES|QL docs
    *
    * NOTE: Before automatically installing ELSER in the background, we should perform deployment resource checks
    * Only necessary for ESS, as Serverless can always auto-install if `productTier === complete`
@@ -158,18 +151,18 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public setupKnowledgeBase = async ({
     esStore,
-    request,
     soClient,
   }: {
     esStore: ElasticsearchStore;
-    request: KibanaRequest;
     soClient: SavedObjectsClientContract;
   }): Promise<void> => {
     if (this.setupInProgress) {
-      this.options.logger.debug('Setup already in progress');
+      this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
 
+    this.options.logger.debug('Starting Knowledge Base setup...');
+    this.setupInProgress = true;
     const elserId = await this.options.getElserId();
 
     try {
@@ -181,8 +174,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             (await this.isModelInstalled())
               ? Promise.resolve()
               : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 10000, retries: 10 }
+          { minTimeout: 10000, maxTimeout: 10000, retries: 10 }
         );
+        this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
       } else {
         this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
       }
@@ -197,21 +191,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
               : Promise.reject(new Error('Model not deployed')),
           { minTimeout: 2000, retries: 10 }
         );
+        this.options.logger.debug(`ELSER model '${elserId}' successfully deployed!`);
       } else {
         this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
       }
 
+      this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
       const kbDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
       if (!kbDocsLoaded) {
-        this.options.logger.debug(`Loading KB docs!`);
+        this.options.logger.debug(`Loading KB docs...`);
         const loadedKnowledgeBase = await loadESQL(esStore, this.options.logger);
         this.options.logger.debug(`${loadedKnowledgeBase}`);
       } else {
-        this.options.logger.debug(`KB docs already loaded!`);
+        this.options.logger.debug(`Knowledge Base docs already loaded!`);
       }
     } catch (e) {
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
     }
+    this.setupInProgress = false;
   };
 
   /**

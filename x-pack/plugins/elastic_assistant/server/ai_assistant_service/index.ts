@@ -316,7 +316,7 @@ export class AIAssistantService {
     }
 
     return new AIAssistantKnowledgeBaseDataClient({
-      logger: this.options.logger,
+      logger: this.options.logger.get('knowledgeBase'),
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,

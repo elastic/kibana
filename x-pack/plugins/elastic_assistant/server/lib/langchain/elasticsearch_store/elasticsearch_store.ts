@@ -96,9 +96,7 @@ export class ElasticsearchStore extends VectorStore {
   ) {
     super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
-    this.index = kbDataClient
-      ? kbDataClient.indexTemplateAndPattern.alias
-      : index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
+    this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
     this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
@@ -432,6 +430,11 @@ export class ElasticsearchStore extends VectorStore {
    */
   async isModelInstalled(modelId?: string): Promise<boolean> {
     try {
+      // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+      if (this.kbDataClient != null) {
+        return this.kbDataClient.isModelInstalled();
+      }
+
       const getResponse = await this.esClient.ml.getTrainedModelsStats({
         model_id: modelId ?? this.model,
       });

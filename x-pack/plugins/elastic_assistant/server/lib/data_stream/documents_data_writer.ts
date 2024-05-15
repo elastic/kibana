@@ -241,6 +241,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     const documentCreateBody = params.documentsToCreate
       ? params.documentsToCreate.flatMap((document) => [
           // Do not pre-gen _id for bulk create operations to avoid `version_conflict_engine_exception`
+          // TODO: Breaks Attack Discovery anonymization-field creation :(
           { create: { _index: this.options.index } },
           document,
         ])

@@ -31,7 +31,7 @@ import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import {
   DEFAULT_PLUGIN_NAME,
@@ -41,6 +41,7 @@ import {
 import { getLangSmithTracer } from './evaluate/utils';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
+import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -302,6 +303,7 @@ export const postActionsConnectorExecuteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
+
           const assistantTools = (await context.elasticAssistant)
             .getRegisteredTools(pluginName)
             .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
@@ -323,6 +325,27 @@ export const postActionsConnectorExecuteRoute = (
               page: 1,
             });
 
+          // Create an ElasticsearchStore for KB interactions
+          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient = enableKnowledgeBaseByDefault
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            : undefined;
+          const kbIndex =
+            enableKnowledgeBaseByDefault && kbDataClient != null
+              ? kbDataClient.indexTemplateAndPattern.alias
+              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          const esStore = new ElasticsearchStore(
+            esClient,
+            kbIndex,
+            logger,
+            telemetry,
+            elserId,
+            ESQL_RESOURCE,
+            kbDataClient
+          );
+
           const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
             await callAgentExecutor({
               abortSignal,
@@ -334,14 +357,13 @@ export const postActionsConnectorExecuteRoute = (
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
               assistantTools,
               connectorId,
-              elserId,
               esClient,
+              esStore,
               isStream:
                 // TODO implement llmClass for bedrock streaming
                 // tracked here: https://github.com/elastic/security-team/issues/7363
                 request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
               llmType: getLlmType(actionTypeId),
-              kbResource: ESQL_RESOURCE,
               langChainMessages,
               logger,
               onNewReplacements,
@@ -349,7 +371,6 @@ export const postActionsConnectorExecuteRoute = (
               request,
               replacements: request.body.replacements,
               size: request.body.size,
-              telemetry,
               traceOptions: {
                 projectName: langSmithProject,
                 tracers: getLangSmithTracer({

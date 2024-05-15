@@ -78,32 +78,32 @@ export const postKnowledgeBaseRoute = (
         const enableKnowledgeBaseByDefault =
           assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
-        // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
-        if (enableKnowledgeBaseByDefault) {
-          const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
-          if (!knowledgeBaseDataClient) {
-            return response.custom({ body: { success: false }, statusCode: 500 });
+        try {
+          // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+          if (enableKnowledgeBaseByDefault) {
+            const knowledgeBaseDataClient =
+              await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
+            if (!knowledgeBaseDataClient) {
+              return response.custom({ body: { success: false }, statusCode: 500 });
+            }
+
+            // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
+            const esStore = new ElasticsearchStore(
+              esClient,
+              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
+              logger,
+              telemetry,
+              elserId,
+              getKbResource(request),
+              knowledgeBaseDataClient,
+              authenticatedUser
+            );
+
+            await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, request, soClient });
+
+            return response.ok({ body: { success: true } });
           }
 
-          // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
-          const esStore = new ElasticsearchStore(
-            esClient,
-            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
-            logger,
-            telemetry,
-            elserId,
-            getKbResource(request),
-            knowledgeBaseDataClient,
-            authenticatedUser
-          );
-
-          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, request, soClient });
-
-          return response.ok({ body: { success: true } });
-        }
-
-        try {
           const kbResource = getKbResource(request);
           const esStore = new ElasticsearchStore(
             esClient,
