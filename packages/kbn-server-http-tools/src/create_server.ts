@@ -6,23 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Server, ServerOptions } from '@hapi/hapi';
-import { ListenerOptions } from './get_listener_options';
+import { Server, type ServerOptions } from '@hapi/hapi';
+import type { ServerListener } from './types';
 
-export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
-  const server = new Server(serverOptions);
-
-  server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
-  server.listener.setTimeout(listenerOptions.socketTimeout);
-  server.listener.on('timeout', (socket) => {
-    socket.destroy();
-  });
-  server.listener.on('clientError', (err, socket) => {
-    if (socket.writable) {
-      socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
-    } else {
-      socket.destroy(err);
-    }
+export function createServer(serverOptions: ServerOptions, listener: ServerListener): Server {
+  const server = new Server({
+    ...serverOptions,
+    // HAPI type signatures are outdated and only define http1 listener
+    listener: listener as ServerOptions['listener'],
   });
 
   return server;

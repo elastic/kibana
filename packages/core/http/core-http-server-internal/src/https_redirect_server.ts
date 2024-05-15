@@ -8,7 +8,7 @@
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import { createServer, getServerListener, getServerOptions } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 
 import { HttpConfig } from './http_config';
@@ -36,7 +36,7 @@ export class HttpsRedirectServer {
         ...getServerOptions(config, { configureTLS: false }),
         port: config.ssl.redirectHttpFromPort,
       },
-      getListenerOptions(config)
+      getServerListener(config, { configureTLS: false })
     );
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {

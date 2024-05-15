@@ -70,6 +70,7 @@ export const config: ServiceConfigDescriptor<ServerConfigType> = {
 };
 
 export class ServerConfig implements IHttpConfig {
+  readonly protocol = 'http1';
   host: string;
   port: number;
   maxPayload: ByteSizeValue;

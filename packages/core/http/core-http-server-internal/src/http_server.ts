@@ -12,7 +12,7 @@ import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createServer,
-  getListenerOptions,
+  getServerListener,
   getServerOptions,
   setTlsConfig,
   getRequestId,
@@ -235,9 +235,9 @@ export class HttpServer {
     this.config = config;
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
+    const serverListener = getServerListener(config);
 
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions, serverListener);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({

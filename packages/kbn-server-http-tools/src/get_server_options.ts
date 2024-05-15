@@ -9,14 +9,16 @@
 import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
 import { IHttpConfig } from './types';
-import { getServerTLSOptions } from './get_tls_options';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
-export function getServerOptions(config: IHttpConfig, { configureTLS = true } = {}) {
+export function getServerOptions(
+  config: IHttpConfig,
+  { configureTLS = true }: { configureTLS?: boolean } = {}
+) {
   const cors: RouteOptionsCors | false = config.cors.enabled
     ? {
         credentials: config.cors.allowCredentials,
@@ -24,6 +26,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         headers: corsAllowedHeaders,
       }
     : false;
+
   const options: ServerOptions = {
     host: config.host,
     port: config.port,
@@ -49,11 +52,9 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
       isHttpOnly: true,
       isSameSite: false, // necessary to allow using Kibana inside an iframe
     },
+    // must set to true when manually passing a listener
+    tls: configureTLS && config.ssl.enabled,
   };
-
-  if (configureTLS) {
-    options.tls = getServerTLSOptions(config.ssl);
-  }
 
   return options;
 }

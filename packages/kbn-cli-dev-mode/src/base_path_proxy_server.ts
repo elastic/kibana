@@ -15,7 +15,7 @@ import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import { createServer, getServerListener, getServerOptions } from '@kbn/server-http-tools';
 
 import { DevConfig, HttpConfig } from './config';
 import { Log } from './log';
@@ -67,8 +67,8 @@ export class BasePathProxyServer {
 
   public async start(options: BasePathProxyServerOptions) {
     const serverOptions = getServerOptions(this.httpConfig);
-    const listenerOptions = getListenerOptions(this.httpConfig);
-    this.server = createServer(serverOptions, listenerOptions);
+    const serverListener = getServerListener(this.httpConfig);
+    this.server = createServer(serverOptions, serverListener);
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).

@@ -12,7 +12,7 @@ import moment from 'moment';
 import supertest from 'supertest';
 import {
   getServerOptions,
-  getListenerOptions,
+  getServerListener,
   createServer,
   IHttpConfig,
 } from '@kbn/server-http-tools';
@@ -34,6 +34,7 @@ describe('BasePathProxyServer', () => {
     logger = new TestLog();
 
     config = {
+      protocol: 'http1',
       host: '127.0.0.1',
       port: 10012,
       shutdownTimeout: moment.duration(30, 'seconds'),
@@ -51,8 +52,8 @@ describe('BasePathProxyServer', () => {
     };
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
-    server = createServer(serverOptions, listenerOptions);
+    const serverListener = getServerListener(config);
+    server = createServer(serverOptions, serverListener);
 
     // setup and start the proxy server
     const proxyConfig: IHttpConfig = { ...config, port: 10013 };
@@ -276,8 +277,8 @@ describe('BasePathProxyServer', () => {
       } as IHttpConfig;
 
       const serverOptions = getServerOptions(configWithBasePath);
-      const listenerOptions = getListenerOptions(configWithBasePath);
-      server = createServer(serverOptions, listenerOptions);
+      const serverListener = getServerListener(configWithBasePath);
+      server = createServer(serverOptions, serverListener);
 
       server.route({
         method: 'GET',
