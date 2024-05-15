@@ -12,19 +12,6 @@ steps:
     retry:
       automatic: false
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
-    label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
-    agents:
-      queue: n2-4-virt
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    soft_fail: true
-    parallelism: 1
-    retry:
-      automatic: false
-
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     agents:
