@@ -76,18 +76,16 @@ const RequiredFieldsList = ({
     This is a temporary solution and ideally, `useFormData` should be updated to handle this scenario.
   */
 
-  /* `form.getFields` returns an object with "flattened" keys like "requiredFields[0]", "requiredFields[1]"... */
-  const flattenedFieldNames = Object.keys(form.getFields());
-  const flattenedRequiredFieldsFieldNames = flattenedFieldNames.filter((key) =>
-    key.startsWith(path)
-  );
+  const internalField = form.getFields()[`${path}__array__`] ?? {};
+  const internalFieldValue = (internalField?.value ?? []) as ArrayItem[];
+  const flattenedFieldNames = internalFieldValue.map((item) => item.path);
 
   /*
     Not using "watch" for the initial render, to let row components render and initialize form fields.
     Then we can use the "watch" feature to track their changes.
   */
-  const hasRenderedInitially = flattenedRequiredFieldsFieldNames.length > 0;
-  const fieldsToWatch = hasRenderedInitially ? ['index', ...flattenedRequiredFieldsFieldNames] : [];
+  const hasRenderedInitially = flattenedFieldNames.length > 0;
+  const fieldsToWatch = hasRenderedInitially ? ['index', ...flattenedFieldNames] : [];
 
   const [formData] = useFormData({ watch: fieldsToWatch });
 
