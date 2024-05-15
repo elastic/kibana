@@ -25,7 +25,7 @@ import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
-import { BehaviorSubject, Observer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';

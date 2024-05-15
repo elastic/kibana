@@ -213,6 +213,7 @@ class VisEditorVisualizationUI extends Component {
             type={VISUALIZE_EMBEDDABLE_TYPE}
             state={{
               rawState: {
+                id: '',
                 savedVis: this.getSavedVis(),
                 title: title,
                 description: description,

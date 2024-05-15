@@ -39,7 +39,13 @@ export const deserializeState = (
     | SerializedPanelState<VisualizeSerializedState | VisualizeSavedObjectState>
     | { rawState: undefined }
 ) => {
-  if (!state.rawState) return undefined;
+  if (!state.rawState)
+    return {
+      id: '',
+      savedVis: {
+        data: {},
+      },
+    } as VisualizeSerializedState;
   const serializedState = cloneDeep(state.rawState);
   if (isVisualizeSavedObjectState(serializedState)) {
     // Defer deserialization to the embeddable factory, as it requires an async call
