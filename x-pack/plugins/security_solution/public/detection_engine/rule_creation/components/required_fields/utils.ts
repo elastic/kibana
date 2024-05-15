@@ -24,5 +24,5 @@ export function pickTypeForName({ name, type, typesByFieldName = {} }: PickTypeF
     If current type is not available, pick the first available type.
     If no type is available, use the current type.
   */
-  return typesAvailableForName?.[0] ?? type;
+  return typesAvailableForName[0] ?? type;
 }
