@@ -1202,6 +1202,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.aggregate',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related events into fewer aggregate events. Default is true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.events.enable_caps',
     first_supported_version: '8.14',
     documentation: i18n.translate(
