@@ -30,8 +30,6 @@ const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
 
-const RULE_INTERVAL_SECONDS = 3;
-
 interface CreateRuleParams {
   name: string;
   includeTransforms: string[];
@@ -80,8 +78,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-transform.health.alerts-default-000001`
   );
 
-  // Failing: See https://github.com/elastic/kibana/issues/177215
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';
@@ -114,12 +111,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly', async () => {
+      await stopTransform(transformId);
+
       const ruleId = await createRule({
         name: 'Test all transforms',
         includeTransforms: ['*'],
       });
-
-      await stopTransform(transformId);
 
       log.debug('Checking created alerts...');
 
@@ -194,7 +191,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [action],
           notify_when: 'onActiveAlert',
           params: {

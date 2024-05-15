@@ -134,11 +134,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Attack discovery feature and API endpoint
-   */
-  attackDiscoveryEnabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -207,6 +202,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
