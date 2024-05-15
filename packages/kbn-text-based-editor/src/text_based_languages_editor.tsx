@@ -33,7 +33,7 @@ import { TooltipWrapper } from '@kbn/visualization-utils';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EditorFooter } from './editor_footer';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
@@ -581,7 +581,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     if (layoutInfoEvent.contentWidth !== measuredEditorWidth) {
       const nextMeasuredWidth = layoutInfoEvent.contentWidth;
       setMeasuredEditorWidth(nextMeasuredWidth);
-      if (isCodeEditorExpandedFocused || isCompactFocused) {
+      if (!isCodeEditorExpandedFocused && !isCompactFocused) {
         calculateVisibleCode(nextMeasuredWidth, true);
       }
     }
