@@ -198,7 +198,8 @@ export const saveDashboardState = async ({
           data: attributes,
           options: {
             references: allReferences,
-            mergeAttributes: true,
+            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+            mergeAttributes: false,
           },
         })
       : await contentManagement.client.create<
