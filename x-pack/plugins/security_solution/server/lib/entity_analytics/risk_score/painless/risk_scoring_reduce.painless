@@ -9,7 +9,9 @@ List inputs = [];
 for (state in states) {
   inputs.addAll(state.inputs)
 }
-Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+// Currently the alerts index only has one shard so there will only be one state and we do not need to sort them
+// If there are multiple shards we will need this line
+// Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
 
 for (int i = 0; i < inputs.length; i++) {
   double current_score = inputs[i].score / Math.pow(i + 1, params.p);

@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs';
+import { flow } from 'lodash';
 
 const PHASES = ['init', 'map', 'combine', 'reduce'] as const;
 
@@ -14,7 +15,9 @@ export type PainlessScripts = Record<Phase, string>;
 
 const removeNewlines = (content: string) => content.replace(/\n/g, '');
 const condenseMultipleSpaces = (content: string) => content.replace(/\s+/g, ' ');
-const minifyContent = (content: string) => condenseMultipleSpaces(removeNewlines(content));
+const removeComments = (content: string) => content.replace(/\/\/.*/g, '');
+const minifyContent = flow(removeComments, removeNewlines, condenseMultipleSpaces);
+
 const readScript = async (phase: Phase) => {
   const content = await fs.promises.readFile(`${__dirname}/risk_scoring_${phase}.painless`, 'utf8');
   return minifyContent(content);
