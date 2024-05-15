@@ -24,6 +24,7 @@ export const SecretsSchema = schema.object({
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),
+  signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
 });
 

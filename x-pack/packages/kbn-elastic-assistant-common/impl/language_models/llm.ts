@@ -110,7 +110,6 @@ export class ActionsClientLlm extends LLM {
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
     const actionResult = await actionsClient.execute(requestBody);
-    console.log('ACTION_RESULT', actionResult);
 
     if (actionResult.status === 'error') {
       throw new Error(
@@ -119,8 +118,6 @@ export class ActionsClientLlm extends LLM {
     }
 
     const content = get('data.message', actionResult);
-
-    console.log('CONTENT', content);
 
     if (typeof content !== 'string') {
       throw new Error(
