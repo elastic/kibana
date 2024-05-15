@@ -9,7 +9,6 @@ import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Document } from 'langchain/document';
@@ -29,6 +28,7 @@ import { isModelAlreadyExistsError } from './helpers';
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
+  ingestPipelineResourceName: string;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   private setupInProgress: boolean = false;
@@ -219,13 +219,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
-    authenticatedUser,
   }: {
     documents: Document[];
-    authenticatedUser: AuthenticatedUser;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
+    const authenticatedUser = this.options.currentUser;
+    if (authenticatedUser == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
     // @ts-ignore
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) =>

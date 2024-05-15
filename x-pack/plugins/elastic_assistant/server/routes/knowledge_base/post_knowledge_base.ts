@@ -62,13 +62,6 @@ export const postKnowledgeBaseRoute = (
         const core = await context.core;
         const esClient = core.elasticsearch.client.asInternalUser;
         const soClient = core.savedObjects.getClient();
-        const authenticatedUser = assistantContext.getCurrentUser();
-        if (authenticatedUser == null) {
-          return response.custom({
-            body: `Authenticated user not found`,
-            statusCode: 401,
-          });
-        }
 
         const pluginName = getPluginNameFromRequest({
           request,
@@ -95,11 +88,10 @@ export const postKnowledgeBaseRoute = (
               telemetry,
               elserId,
               getKbResource(request),
-              knowledgeBaseDataClient,
-              authenticatedUser
+              knowledgeBaseDataClient
             );
 
-            await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, request, soClient });
+            await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
 
             return response.ok({ body: { success: true } });
           }

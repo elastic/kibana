@@ -68,14 +68,6 @@ export const getKnowledgeBaseStatusRoute = (
             kbResource
           );
 
-          const authenticatedUser = assistantContext.getCurrentUser();
-          if (authenticatedUser == null) {
-            return response.custom({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
-
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -87,7 +79,7 @@ export const getKnowledgeBaseStatusRoute = (
           // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
           if (enableKnowledgeBaseByDefault) {
             const knowledgeBaseDataClient =
-              await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
+              await assistantContext.getAIAssistantKnowledgeBaseDataClient(false);
             if (!knowledgeBaseDataClient) {
               return response.custom({ body: { success: false }, statusCode: 500 });
             }
@@ -100,8 +92,7 @@ export const getKnowledgeBaseStatusRoute = (
               telemetry,
               elserId,
               kbResource,
-              knowledgeBaseDataClient,
-              authenticatedUser
+              knowledgeBaseDataClient
             );
           }
 

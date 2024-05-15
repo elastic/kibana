@@ -321,6 +321,7 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       indexPatternsResourceName: this.resourceNames.aliases.knowledgeBase,
+      ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
       currentUser: opts.currentUser,
       ml: this.options.ml,
       getElserId: this.getElserId,

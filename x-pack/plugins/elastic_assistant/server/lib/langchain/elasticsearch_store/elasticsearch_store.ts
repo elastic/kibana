@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  type AnalyticsServiceSetup,
-  AuthenticatedUser,
-  ElasticsearchClient,
-  Logger,
-} from '@kbn/core/server';
+import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   MappingTypeMapping,
   MlTrainedModelDeploymentNodesStats,
@@ -70,8 +65,6 @@ export const TERMS_QUERY_SIZE = 10000;
 export class ElasticsearchStore extends VectorStore {
   declare FilterType: QueryDslQueryContainer;
 
-  // AuthenticatedUser is required for adding/retrieving documents as it is not encapsulated in the kbDataClient
-  private readonly authenticatedUser: AuthenticatedUser | undefined;
   private readonly esClient: ElasticsearchClient;
   private readonly kbDataClient: AIAssistantKnowledgeBaseDataClient | undefined;
   private readonly index: string;
@@ -91,8 +84,7 @@ export class ElasticsearchStore extends VectorStore {
     telemetry: AnalyticsServiceSetup,
     model?: string,
     kbResource?: string | undefined,
-    kbDataClient?: AIAssistantKnowledgeBaseDataClient,
-    authenticatedUser?: AuthenticatedUser
+    kbDataClient?: AIAssistantKnowledgeBaseDataClient
   ) {
     super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
@@ -102,7 +94,6 @@ export class ElasticsearchStore extends VectorStore {
     this.model = model ?? '.elser_model_2';
     this.kbResource = kbResource ?? ESQL_RESOURCE;
     this.kbDataClient = kbDataClient;
-    this.authenticatedUser = authenticatedUser;
   }
 
   /**
@@ -157,15 +148,14 @@ export class ElasticsearchStore extends VectorStore {
     documents: Document[],
     options?: Record<string, never>
   ): Promise<string[]> => {
-    if (!this.kbDataClient || !this.authenticatedUser) {
-      this.logger.error('No kbDataClient or authenticatedUser provided');
+    if (!this.kbDataClient) {
+      this.logger.error('No kbDataClient provided');
       return [];
     }
 
     try {
       const response = await this.kbDataClient.addKnowledgeBaseDocuments({
         documents,
-        authenticatedUser: this.authenticatedUser,
       });
       return response.map((doc) => doc.id);
     } catch (e) {
@@ -352,6 +342,13 @@ export class ElasticsearchStore extends VectorStore {
    * @returns Promise<boolean> indicating whether the index was created
    */
   deleteIndex = async (index?: string): Promise<boolean> => {
+    // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+    // We won't be supporting delete operations for the KB data stream going forward, so this can be removed along with the FF
+    if (this.kbDataClient != null) {
+      const response = await this.esClient.indices.deleteDataStream({ name: index ?? this.index });
+      return response.acknowledged;
+    }
+
     const response = await this.esClient.indices.delete({
       index: index ?? this.index,
     });
@@ -367,8 +364,12 @@ export class ElasticsearchStore extends VectorStore {
    */
   pipelineExists = async (pipelineId?: string): Promise<boolean> => {
     try {
+      const id =
+        pipelineId ??
+        this.kbDataClient?.options.ingestPipelineResourceName ??
+        KNOWLEDGE_BASE_INGEST_PIPELINE;
       const response = await this.esClient.ingest.getPipeline({
-        id: KNOWLEDGE_BASE_INGEST_PIPELINE,
+        id,
       });
       return Object.keys(response).length > 0;
     } catch (e) {
@@ -384,7 +385,10 @@ export class ElasticsearchStore extends VectorStore {
    */
   createPipeline = async ({ id, description }: CreatePipelineParams = {}): Promise<boolean> => {
     const response = await this.esClient.ingest.putPipeline({
-      id: id ?? KNOWLEDGE_BASE_INGEST_PIPELINE,
+      id:
+        id ??
+        this.kbDataClient?.options.ingestPipelineResourceName ??
+        KNOWLEDGE_BASE_INGEST_PIPELINE,
       description:
         description ?? 'Embedding pipeline for Elastic AI Assistant ELSER Knowledge Base',
       processors: [
@@ -416,7 +420,10 @@ export class ElasticsearchStore extends VectorStore {
    */
   deletePipeline = async (pipelineId?: string): Promise<boolean> => {
     const response = await this.esClient.ingest.deletePipeline({
-      id: pipelineId ?? KNOWLEDGE_BASE_INGEST_PIPELINE,
+      id:
+        pipelineId ??
+        this.kbDataClient?.options.ingestPipelineResourceName ??
+        KNOWLEDGE_BASE_INGEST_PIPELINE,
     });
 
     return response.acknowledged;
@@ -432,7 +439,8 @@ export class ElasticsearchStore extends VectorStore {
     try {
       // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
       if (this.kbDataClient != null) {
-        return this.kbDataClient.isModelInstalled();
+        // esStore.isModelInstalled() is actually checking if the model is deployed, not installed, so do that instead
+        return this.kbDataClient.isModelDeployed();
       }
 
       const getResponse = await this.esClient.ml.getTrainedModelsStats({
