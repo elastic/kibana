@@ -95,3 +95,31 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
 }
+
+export interface RuleFormSchema {
+  id?: SanitizedRule<RuleTypeParams>['id'];
+  name: SanitizedRule<RuleTypeParams>['name'];
+  tags: SanitizedRule<RuleTypeParams>['tags'];
+  params: SanitizedRule<RuleTypeParams>['params'];
+  schedule: SanitizedRule<RuleTypeParams>['schedule'];
+  consumer: SanitizedRule<RuleTypeParams>['consumer'];
+  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
+  notifyWhen?: SanitizedRule<RuleTypeParams>['notifyWhen'];
+}
+
+export interface RuleFormPlugins {
+  charts: ChartsPluginSetup;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  docLinks: DocLinksStart;
+}
+
+export interface RuleFormState {
+  state: RuleFormSchema;
+  plugins?: RuleFormPlugins;
+  errors: RuleFormErrors;
+  metadata?: Record<string, unknown>;
+  minimumScheduleInterval?: MinimumScheduleInterval;
+  canShowConsumerSelection?: boolean;
+}

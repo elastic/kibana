@@ -8,25 +8,22 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
 import {
   ALERT_DELAY_TITLE_PREFIX,
   ALERT_DELAY_TITLE_SUFFIX,
   ALERT_DELAY_HELP_TEXT,
   ALERT_DELAY_TITLE,
 } from '../translations';
-import { RuleFormErrors } from '../types';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
-export interface RuleAlertDelayProps {
-  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
-  errors?: RuleFormErrors;
-  onChange: (property: string, value: unknown) => void;
-}
+export const RuleAlertDelay = () => {
+  const { state, errors } = useRuleFormState();
 
-export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
-  const { alertDelay, errors = {}, onChange } = props;
+  const dispatch = useRuleFormDispatch();
+
+  const { alertDelay } = state;
 
   const onAlertDelayChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,13 +32,19 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
       }
       const value = e.target.value;
       if (value === '') {
-        onChange('alertDelay', null);
+        dispatch({
+          type: 'setAlertDelay',
+          payload: null,
+        });
       } else if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);
-        onChange('alertDelay', { active: parsedValue });
+        dispatch({
+          type: 'setAlertDelay',
+          payload: { active: parsedValue },
+        });
       }
     },
-    [onChange]
+    [dispatch]
   );
 
   return (

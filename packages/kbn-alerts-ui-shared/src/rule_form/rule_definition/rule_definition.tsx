@@ -22,20 +22,13 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
   RuleCreationValidConsumer,
   ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
-import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import type { RuleTypeModel, RuleFormErrors, MinimumScheduleInterval } from '../types';
+import type { RuleTypeModel } from '../types';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -51,6 +44,8 @@ import {
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
+import { RuleTypeWithDescription } from '../../common/types';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 const MULTI_CONSUMER_RULE_TYPE_IDS = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -59,49 +54,29 @@ const MULTI_CONSUMER_RULE_TYPE_IDS = [
 ];
 
 interface RuleDefinitionProps {
-  requiredPlugins: {
-    charts: ChartsPluginSetup;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-    unifiedSearch: UnifiedSearchPublicPluginStart;
-    docLinks: DocLinksStart;
-  };
-  formValues: {
-    id?: SanitizedRule<RuleTypeParams>['id'];
-    params: SanitizedRule<RuleTypeParams>['params'];
-    schedule: SanitizedRule<RuleTypeParams>['schedule'];
-    alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
-    notifyWhen?: SanitizedRule<RuleTypeParams>['notifyWhen'];
-    consumer?: SanitizedRule<RuleTypeParams>['consumer'];
-  };
-  minimumScheduleInterval?: MinimumScheduleInterval;
-  errors?: RuleFormErrors;
   canShowConsumerSelection?: boolean;
   authorizedConsumers?: RuleCreationValidConsumer[];
   selectedRuleTypeModel: RuleTypeModel;
-  selectedRuleType: RuleType;
+  selectedRuleType: RuleTypeWithDescription;
   validConsumers?: RuleCreationValidConsumer[];
-  onChange: (property: string, value: unknown) => void;
 }
 
 export const RuleDefinition = (props: RuleDefinitionProps) => {
   const {
-    requiredPlugins,
-    formValues,
-    errors = {},
     canShowConsumerSelection = false,
     authorizedConsumers = [],
     selectedRuleTypeModel,
     selectedRuleType,
-    minimumScheduleInterval,
-    onChange,
   } = props;
 
-  const { charts, data, dataViews, unifiedSearch, docLinks } = requiredPlugins;
+  const { state, plugins, errors, metadata } = useRuleFormState();
 
-  const { id, params, schedule, alertDelay, notifyWhen, consumer = 'alerts' } = formValues;
+  const dispatch = useRuleFormDispatch();
 
-  const [metadata, setMetadata] = useState<Record<string, unknown>>();
+  const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
+
+  const { id, params, schedule, alertDelay, notifyWhen } = state;
+
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
 
   const shouldShowConsumerSelect = useMemo(() => {
@@ -130,23 +105,40 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     setIsAdvancedOptionsVisible(isOpen);
   }, []);
 
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback(
+    (newMetadata) => {
+      dispatch({
+        type: 'setMetadata',
+        payload: newMetadata,
+      });
+    },
+    [dispatch]
+  );
 
   const onSetRuleParams = useCallback(
     (property: string, value: unknown) => {
-      onChange('params', {
-        ...params,
-        [property]: value,
+      dispatch({
+        type: 'setParamsProperty',
+        payload: {
+          property,
+          value,
+        },
       });
     },
-    [onChange, params]
+    [dispatch]
   );
 
-  const onSetRule = useCallback(
+  const onSetRuleProperty = useCallback(
     (property: string, value: unknown) => {
-      onChange(property, value);
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property,
+          value,
+        },
+      });
     },
-    [onChange]
+    [dispatch]
   );
 
   return (
@@ -199,7 +191,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                     alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
                     errors={errors}
                     setRuleParams={onSetRuleParams}
-                    setRuleProperty={onSetRule}
+                    setRuleProperty={onSetRuleProperty}
                     defaultActionGroupId={selectedRuleType.defaultActionGroupId}
                     actionGroups={selectedRuleType.actionGroups}
                     metadata={metadata}
@@ -220,7 +212,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           fullWidth
           title={<h3>{SCHEDULE_TITLE}</h3>}
           description={
-            <EuiText>
+            <EuiText size="s">
               <p>
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
                 <EuiIconTip
@@ -232,29 +224,19 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
             </EuiText>
           }
         >
-          <RuleSchedule
-            interval={schedule.interval}
-            minimumScheduleInterval={minimumScheduleInterval}
-            errors={errors}
-            onChange={onChange}
-          />
+          <RuleSchedule />
         </EuiDescribedFormGroup>
         {shouldShowConsumerSelect && (
           <EuiDescribedFormGroup
             fullWidth
             title={<h3>{SCOPE_TITLE}</h3>}
             description={
-              <EuiText>
+              <EuiText size="s">
                 <p>{SCOPE_DESCRIPTION_TEXT}</p>
               </EuiText>
             }
           >
-            <RuleConsumerSelection
-              consumers={authorizedConsumers}
-              selectedConsumer={consumer as RuleCreationValidConsumer}
-              errors={errors}
-              onChange={onChange}
-            />
+            <RuleConsumerSelection consumers={authorizedConsumers} />
           </EuiDescribedFormGroup>
         )}
         <EuiFlexItem>
@@ -280,7 +262,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                   </EuiText>
                 }
               >
-                <RuleAlertDelay alertDelay={alertDelay} errors={errors} onChange={onChange} />
+                <RuleAlertDelay />
               </EuiDescribedFormGroup>
             </EuiPanel>
           </EuiAccordion>

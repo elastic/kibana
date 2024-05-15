@@ -14,7 +14,7 @@ import {
   FEATURE_NAME_MAP,
   CONSUMER_SELECT_COMBO_BOX_TITLE,
 } from '../translations';
-import { RuleFormErrors } from '../types';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
@@ -25,15 +25,12 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 
 export interface RuleConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
-  selectedConsumer?: RuleCreationValidConsumer | null;
   /* FUTURE ENGINEER
    * if this prop is set to null then we wont initialize the value and the user will have to set it
    * if this prop is set to a valid consumers then we will set it up to what was passed
    * if this prop is not valid or undefined but the valid consumers has stackAlerts then we will default it to stackAlerts
    */
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
-  errors?: RuleFormErrors;
-  onChange: (property: string, value: unknown) => void;
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -41,20 +38,20 @@ const SINGLE_SELECTION = { asPlainText: true };
 type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
-  const {
-    consumers,
-    selectedConsumer,
-    // initialSelectedConsumer,
-    errors = {},
-    onChange,
-  } = props;
+  const { consumers } = props;
+
+  const { state, errors } = useRuleFormState();
+
+  const { consumer: selectedConsumer } = state;
+
+  const dispatch = useRuleFormDispatch();
 
   const isInvalid = (errors.consumer?.length || 0) > 0;
 
   const validatedSelectedConsumer = useMemo(() => {
     if (
       selectedConsumer &&
-      consumers.includes(selectedConsumer) &&
+      consumers.includes(selectedConsumer as RuleCreationValidConsumer) &&
       FEATURE_NAME_MAP[selectedConsumer]
     ) {
       return selectedConsumer;
@@ -66,7 +63,7 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
     if (validatedSelectedConsumer) {
       return [
         {
-          value: validatedSelectedConsumer,
+          value: validatedSelectedConsumer as RuleCreationValidConsumer,
           label: FEATURE_NAME_MAP[validatedSelectedConsumer],
         },
       ];
@@ -93,12 +90,18 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
     (selected: ComboBoxOption[]) => {
       if (selected.length > 0) {
         const newSelectedConsumer = selected[0];
-        onChange('consumer', newSelectedConsumer.value);
+        dispatch({
+          type: 'setConsumer',
+          payload: newSelectedConsumer.value!,
+        });
       } else {
-        onChange('consumer', null);
+        dispatch({
+          type: 'setConsumer',
+          payload: 'alerts',
+        });
       }
     },
-    [onChange]
+    [dispatch]
   );
 
   if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {

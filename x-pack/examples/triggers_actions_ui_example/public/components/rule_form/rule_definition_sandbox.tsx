@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { EuiLoadingSpinner, EuiCodeBlock, EuiTitle, EuiButton } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -17,12 +17,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import {
-  RuleDefinition,
-  useLoadRuleTypesQuery,
-  getRuleErrors,
-  InitialRule,
-} from '@kbn/alerts-ui-shared';
+import { RuleForm, useLoadRuleTypesQuery, getRuleErrors, InitialRule } from '@kbn/alerts-ui-shared';
 
 interface RuleDefinitionSandboxProps {
   data: DataPublicPluginStart;
@@ -38,7 +33,7 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.STACK_ALERTS,
 ];
 
-const DEFAULT_FORM_VALUES = (ruleTypeId: string) => ({
+const DEFAULT_FORM_VALUES = {
   id: 'test-id',
   name: 'test',
   params: {},
@@ -53,46 +48,12 @@ const DEFAULT_FORM_VALUES = (ruleTypeId: string) => ({
   enabled: true,
   tags: [],
   actions: [],
-  ruleTypeId,
-});
+  ruleTypeId: '.es-query',
+};
 
 export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
   const { data, charts, dataViews, unifiedSearch, triggersActionsUi } = props;
-
-  const [ruleTypeId, setRuleTypeId] = useState<string>('.es-query');
-
-  const [formValue, setFormValue] = useState<InitialRule>(DEFAULT_FORM_VALUES(ruleTypeId));
-
-  const onChange = useCallback(
-    (property: string, value: unknown) => {
-      if (property === 'interval') {
-        setFormValue({
-          ...formValue,
-          schedule: {
-            interval: value as string,
-          },
-        });
-        return;
-      }
-      if (property === 'params') {
-        setFormValue({
-          ...formValue,
-          params: value as Record<string, unknown>,
-        });
-        return;
-      }
-      setFormValue({
-        ...formValue,
-        [property]: value,
-      });
-    },
-    [formValue]
-  );
-
-  const onRuleTypeChange = useCallback((newRuleTypeId: string) => {
-    setRuleTypeId(newRuleTypeId);
-    setFormValue(DEFAULT_FORM_VALUES(newRuleTypeId));
-  }, []);
+  const ruleTypeId = '.es-query';
 
   const { docLinks, http, toasts } = useKibana<{
     docLinks: DocLinksStart;
@@ -109,63 +70,43 @@ export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
 
   const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
   const selectedRuleType = ruleTypes.find((ruleType) => ruleType.id === ruleTypeId);
+
   const selectedRuleTypeModel = triggersActionsUi.ruleTypeRegistry.get(ruleTypeId);
 
   const errors = useMemo(() => {
     if (!selectedRuleType || !selectedRuleTypeModel) {
-      return {};
+      return null;
     }
 
     return getRuleErrors({
-      rule: formValue,
+      rule: DEFAULT_FORM_VALUES as InitialRule,
       minimumScheduleInterval: {
         value: '1m',
         enforce: true,
       },
       ruleTypeModel: selectedRuleTypeModel,
     }).ruleErrors;
-  }, [formValue, selectedRuleType, selectedRuleTypeModel]);
+  }, [selectedRuleType, selectedRuleTypeModel]);
 
-  if (isLoading || !selectedRuleType) {
+  if (isLoading || !selectedRuleType || !errors) {
     return <EuiLoadingSpinner />;
   }
 
   return (
-    <>
-      <div>
-        <EuiTitle>
-          <h1>Form State</h1>
-        </EuiTitle>
-        <EuiCodeBlock>{JSON.stringify(formValue, null, 2)}</EuiCodeBlock>
-      </div>
-      <div>
-        <EuiTitle>
-          <h1>Switch Rule Types:</h1>
-        </EuiTitle>
-        <EuiButton onClick={() => onRuleTypeChange('.es-query')}>Es Query</EuiButton>
-        <EuiButton onClick={() => onRuleTypeChange('metrics.alert.threshold')}>
-          Metric Threshold
-        </EuiButton>
-        <EuiButton onClick={() => onRuleTypeChange('observability.rules.custom_threshold')}>
-          Custom Threshold
-        </EuiButton>
-      </div>
-      <RuleDefinition
-        requiredPlugins={{
-          data,
-          charts,
-          dataViews,
-          unifiedSearch,
-          docLinks,
-        }}
-        formValues={formValue}
-        canShowConsumerSelection
-        authorizedConsumers={VALID_CONSUMERS}
-        errors={errors}
-        selectedRuleType={selectedRuleType}
-        selectedRuleTypeModel={selectedRuleTypeModel}
-        onChange={onChange}
-      />
-    </>
+    <RuleForm
+      plugins={{
+        data,
+        charts,
+        dataViews,
+        unifiedSearch,
+        docLinks,
+      }}
+      state={DEFAULT_FORM_VALUES}
+      canShowConsumerSelection
+      authorizedConsumers={VALID_CONSUMERS}
+      errors={errors}
+      selectedRuleType={selectedRuleType}
+      selectedRuleTypeModel={selectedRuleTypeModel}
+    />
   );
 };

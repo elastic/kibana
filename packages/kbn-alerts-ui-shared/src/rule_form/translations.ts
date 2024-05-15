@@ -223,3 +223,10 @@ export const RULE_TAG_INPUT_TITLE = i18n.translate(
     defaultMessage: 'Tags',
   }
 );
+
+export const RULE_NAME_ARIA_LABEL_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.rulePage.ruleNameAriaLabelText',
+  {
+    defaultMessage: 'Edit rule name',
+  }
+);

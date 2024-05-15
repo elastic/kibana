@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './rule_definition';
-export * from './rule_actions';
-export * from './rule_details';
-export * from './rule_page';
-export * from './rule_form';
-export * from './utils';
-export * from './types';
+import { useContext } from 'react';
+import { RuleFormReducerContext } from '../rule_form_state/rule_form_state_context';
+
+export const useRuleFormDispatch = () => {
+  return useContext(RuleFormReducerContext);
+};

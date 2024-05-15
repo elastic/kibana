@@ -15,12 +15,13 @@ import {
   getDurationNumberInItsUnit,
 } from '../utils/parse_duration';
 import { getTimeOptions } from '../utils/get_time_options';
-import { MinimumScheduleInterval, RuleFormErrors } from '../types';
+import { MinimumScheduleInterval } from '../types';
 import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
 } from '../translations';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
@@ -48,15 +49,14 @@ const getHelpTextForInterval = (
 
 const labelForRuleChecked = [SCHEDULE_TITLE_PREFIX];
 
-export interface RuleScheduleProps {
-  interval: string;
-  minimumScheduleInterval?: MinimumScheduleInterval;
-  errors?: RuleFormErrors;
-  onChange: (property: string, value: unknown) => void;
-}
+export const RuleSchedule = () => {
+  const { state, errors, minimumScheduleInterval } = useRuleFormState();
 
-export const RuleSchedule = (props: RuleScheduleProps) => {
-  const { interval, minimumScheduleInterval, errors = {}, onChange } = props;
+  const dispatch = useRuleFormDispatch();
+
+  const {
+    schedule: { interval },
+  } = state;
 
   const hasIntervalError = useMemo(() => {
     return errors.interval?.length > 0;
@@ -86,17 +86,27 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
       const value = e.target.value;
       if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);
-        onChange('interval', `${parsedValue}${intervalUnit}`);
+        dispatch({
+          type: 'setSchedule',
+          payload: {
+            interval: `${parsedValue}${intervalUnit}`,
+          },
+        });
       }
     },
-    [intervalUnit, onChange]
+    [intervalUnit, dispatch]
   );
 
   const onIntervalUnitChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange('interval', `${intervalNumber}${e.target.value}`);
+      dispatch({
+        type: 'setSchedule',
+        payload: {
+          interval: `${intervalNumber}${e.target.value}`,
+        },
+      });
     },
-    [intervalNumber, onChange]
+    [intervalNumber, dispatch]
   );
 
   return (
