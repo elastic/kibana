@@ -41,7 +41,7 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializedState, LinksApi> = {
     type: CONTENT_ID,
     deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState) as LinksSerializedState;
+      const serializedState = cloneDeep(state.rawState);
       if (serializedState === undefined) return {};
 
       // by-reference embeddable
@@ -50,7 +50,7 @@ export const getLinksEmbeddableFactory = () => {
       }
 
       const { attributes: attributesWithInjectedIds } = injectReferences({
-        attributes: serializedState.attributes as unknown as LinksAttributes,
+        attributes: serializedState.attributes,
         references: state.references ?? [],
       });
 

@@ -16,12 +16,7 @@ import {
   DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
 } from '@kbn/dashboard-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerReactEmbeddableFactory,
-  registerReactEmbeddableSavedObject,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
@@ -62,6 +57,24 @@ export class LinksPlugin
           latest: LATEST_VERSION,
         },
         name: APP_NAME,
+      });
+
+      plugins.embeddable.registerReactEmbeddableSavedObject({
+        onAdd: (container, savedObject) => {
+          container.addNewPanel({
+            panelType: CONTENT_ID,
+            initialState: { savedObjectId: savedObject.id },
+          });
+        },
+        embeddableType: CONTENT_ID,
+        savedObjectType: CONTENT_ID,
+        savedObjectName: APP_NAME,
+        getIconForSavedObject: () => APP_ICON,
+      });
+
+      plugins.embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
+        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
+        return getLinksEmbeddableFactory();
       });
 
       plugins.visualizations.registerAlias({
@@ -108,19 +121,6 @@ export class LinksPlugin
     untilPluginStartServicesReady().then(() => {
       registerCreateLinksPanelAction();
 
-      registerReactEmbeddableSavedObject({
-        onAdd: (container, savedObject) => {
-          container.addNewPanel({
-            panelType: CONTENT_ID,
-            initialState: { savedObjectId: savedObject.id },
-          });
-        },
-        embeddableType: CONTENT_ID,
-        savedObjectType: CONTENT_ID,
-        savedObjectName: APP_NAME,
-        getIconForSavedObject: () => APP_ICON,
-      });
-
       plugins.dashboard.registerDashboardPanelPlacementSetting(
         CONTENT_ID,
         (serializedState: LinksSerializedState | undefined) => {
@@ -133,11 +133,6 @@ export class LinksPlugin
           return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
         }
       );
-
-      registerReactEmbeddableFactory(CONTENT_ID, async () => {
-        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
-        return getLinksEmbeddableFactory();
-      });
     });
 
     return {};
