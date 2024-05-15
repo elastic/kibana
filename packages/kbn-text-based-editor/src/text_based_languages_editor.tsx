@@ -34,16 +34,8 @@ import {
   EuiResizeObserver,
   EuiOutsideClickDetector,
   EuiToolTip,
-  // EuiModal,
-  // EuiModalHeader,
-  // EuiModalHeaderTitle,
-  // EuiModalBody,
-  // EuiModalFooter,
-  // EuiButton,
-  // EuiSpacer,
-  // EuiDescriptionList,
-  EuiListGroup,
-  EuiListGroupItem,
+  EuiPanel,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
@@ -141,6 +133,10 @@ interface FleetResponse {
   items: Array<{
     name: string;
     title?: string;
+    dataStreams: Array<{
+      name: string;
+      title?: string;
+    }>;
   }>;
 }
 
@@ -205,6 +201,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [integrations, setIntegrations] = useState<FleetResponse['items']>([]);
+  const [indices, setIndices] = useState<Array<{ name: string }>>([]);
   // const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
@@ -241,6 +238,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const addSourceDecoration = useCallback(
     (newCode?: string) => {
+      // we need to remove the previous decorations
+      // const decorationIds = editor1?.current?.getLineDecorations(1) ?? [];
+      // editor1?.current?.removeDecorations(decorationIds);
       const pattern = getIndexPatternFromESQLQuery(newCode ?? code);
       const range = new monaco.Range(1, 6, 1, pattern.length + 6);
       editor1?.current?.createDecorationsCollection([
@@ -706,19 +706,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         .catch((error) => {
           throw new Error(`Failed to fetch integrations": ${error}`);
         })) as FleetResponse;
-      const integrationsArray = response.items.map((item) => {
-        return { name: item.name };
-      });
       const [remoteIndices, localIndices] = await Promise.all([
         getRemoteIndicesList(dataViews),
         getIndicesList(dataViews),
       ]);
+
       const visibleSources = [...localIndices, ...remoteIndices]
         .filter((source) => !source.hidden)
         .map((item) => {
           return { name: item.name };
         });
-      setIntegrations([...integrationsArray, ...visibleSources]);
+      setIndices(visibleSources);
+      setIntegrations(response.items);
     }
     fetchIntegrations();
   }, [core.http, dataViews]);
@@ -727,42 +726,55 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     openQuickActionsPopover();
   });
 
-  // const addSourceWidget = (position: monaco.Position, sourceName: string) => {
-  //   console.log(position);
-  //   editor1?.current?.addContentWidget({
-  //     allowEditorOverflow: true,
-  //     getDomNode: () => {
-  //       const div = document.createElement('div');
-  //       div.innerText = sourceName;
-  //       div.id = 'source-widget';
-  //       div.style.cssText = `
-  //         display: inline-block;
-  //         margin-left: 10px;
-  //         overflow: hidden;
-  //         background: yellow;
-  //         padding: 5px;
-  //         box-shadow: 0 0 #0000, inset 0 0 0 1px #bcc3ce;
-  //         background-color: #fbfcfd;
-  //         color: #343741;
-  //       `;
-  //       return div;
-  //     },
-  //     getId: () => {
-  //       return 'editor.author.avatar.widget';
-  //     },
-  //     getPosition: () => {
-  //       return {
-  //         position: position || { column: 1, lineNumber: 1 },
-  //         preference: [1, 2],
-  //       };
-  //     },
-  //     afterRender: () => {
-  //       isMacroMenuVisible = false;
-  //     },
-  //   });
-  // };
-
   // const closeModal = () => setIsModalVisible(false);
+
+  const indicesPanels = [
+    {
+      id: 10,
+      title: 'Indices',
+      items: indices.map((index) => ({
+        name: index.name,
+        icon: 'document',
+        onClick: () => {
+          const newCode = `from ${index.name}`;
+          if (code !== newCode) {
+            onUpdateAndSubmit(newCode);
+          }
+          setIsPopoverVisible(false);
+        },
+      })),
+    },
+  ];
+
+  const integrationsPanels = [
+    {
+      id: 0,
+      title: 'Integrations',
+      items: integrations.map((integration, i) => ({
+        name: integration.title,
+        icon: 'logoElastic',
+        panel: i + 1,
+      })),
+    },
+    ...integrations.map((integration, i) => {
+      return {
+        id: i + 1,
+        title: integration.title,
+        items: integration.dataStreams.map((ds) => ({
+          name: ds.title,
+          icon: 'document',
+          onClick: () => {
+            const newCode = `from ${ds.name}`;
+            if (code !== newCode) {
+              onUpdateAndSubmit(newCode);
+            }
+            setIsPopoverVisible(false);
+          },
+          className: 'integrationWrapper',
+        })),
+      };
+    }),
+  ];
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -1336,39 +1348,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               ...popoverPosition,
               backgroundColor: 'white',
               position: 'absolute',
-              border: '1px solid #ccc',
-              padding: '10px',
               boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-              zIndex: 1000,
-              width: 300,
+              width: 450,
               overflow: 'auto',
-              // opacity: isMacroMenuVisible ? 1 : 0,
             }}
             ref={popoverRef}
             data-test-subj="TextBasedLangEditor-macro-menu"
           >
-            <EuiListGroup>
-              {integrations.map((dataStream) => {
-                const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
-                const isActive = dataStream.name === pattern.trim();
-                return (
-                  <EuiListGroupItem
-                    label={dataStream.name}
-                    color="primary"
-                    size="m"
-                    key={dataStream.name}
-                    isActive={isActive}
-                    onClick={() => {
-                      const newCode = `from ${dataStream.name}`;
-                      if (code !== newCode) {
-                        onUpdateAndSubmit(newCode);
-                      }
-                      setIsPopoverVisible(false);
-                    }}
-                  />
-                );
-              })}
-            </EuiListGroup>
+            <EuiPanel>
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={integrationsPanels}
+                css={{ width: '100%' }}
+              />
+              <EuiContextMenu initialPanelId={10} panels={indicesPanels} css={{ width: '100%' }} />
+            </EuiPanel>
           </div>
         ),
         document.body

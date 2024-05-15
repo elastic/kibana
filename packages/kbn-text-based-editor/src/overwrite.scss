@@ -52,3 +52,18 @@
   color: #343741;
   cursor: pointer;
 }
+
+.popoverHeader {
+  line-height: 1.4286rem;
+  font-weight: 700;
+  color: rgb(26, 28, 33);
+  border-block-end: 1px solid rgb(211, 218, 230);
+  margin-block: -16px 16px;
+  margin-inline: -16px;
+  padding: 8px;
+}
+
+div:has(> .integrationWrapper) {
+  max-height: 200px;
+  overflow-y: auto;
+}
