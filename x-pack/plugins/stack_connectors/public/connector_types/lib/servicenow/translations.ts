@@ -431,7 +431,7 @@ export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltipText',
   {
     defaultMessage:
-      'The additional info field was pre-filled with relevant internal data. Its value can be extended with additional information.',
+      'The rule automatically generates information about each event. You can change or add more custom fields in JSON format.',
   }
 );
 
