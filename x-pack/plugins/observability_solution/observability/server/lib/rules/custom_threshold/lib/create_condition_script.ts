@@ -17,12 +17,7 @@ export const createConditionScript = (threshold: number[], comparator: COMPARATO
       },
     };
   }
-  // BC_OUTSIDE_RANGE is added only for Backward Compatibility purposes
-  // For the old rules are active and using "outside"
-  if (
-    (comparator === COMPARATORS.NOT_BETWEEN || COMPARATORS.BC_OUTSIDE_RANGE) &&
-    threshold.length === 2
-  ) {
+  if (comparator === COMPARATORS.NOT_BETWEEN && threshold.length === 2) {
     return {
       // NOT BETWEEN is the opposite of BETWEEN. Use the BETWEEN condition and switch the 1 and 0
       source: `params.value > params.threshold0 && params.value < params.threshold1 ? 0 : 1`,
