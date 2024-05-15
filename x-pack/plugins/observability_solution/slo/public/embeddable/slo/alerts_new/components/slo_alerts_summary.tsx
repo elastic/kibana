@@ -50,17 +50,13 @@ export function SloAlertsSummary({
       ),
     [timeRange.from, timeRange.to, timeBuckets]
   );
-  const alertSummaryTimeRange = useMemo(
-    () =>
-      getAlertSummaryTimeRange(
-        {
-          from: timeRange.from,
-          to: timeRange.to,
-        },
-        bucketSize?.intervalString ?? DEFAULT_INTERVAL,
-        bucketSize?.dateFormat ?? DEFAULT_DATE_FORMAT
-      ),
-    [timeRange.from, timeRange.to, bucketSize]
+  const alertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+    bucketSize?.intervalString ?? DEFAULT_INTERVAL,
+    bucketSize?.dateFormat ?? DEFAULT_DATE_FORMAT
   );
 
   return (

@@ -14,6 +14,7 @@ import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
@@ -26,7 +27,7 @@ interface Props {
   timeRange: TimeRange;
   embeddable: any;
   onRenderComplete?: () => void;
-  reloadSubject: Subject<EmbeddableSloProps>;
+  reloadSubject: Subject<FetchContext>;
   showAllGroupByInstances?: boolean;
 }
 
@@ -45,7 +46,7 @@ export function SloAlertsWrapper({
   } = deps;
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
-  // const [slos, setSlos] = useState<SloItem[]>(initialSlos);
+
   // const [showAllGroupByInstances, setShowAllGroupByInstances] = useState<boolean | undefined>(
   //   initialShowAllGroupByInstances
   // );
@@ -55,12 +56,9 @@ export function SloAlertsWrapper({
   useEffect(() => {
     const subs = reloadSubject?.subscribe((input) => {
       if (input) {
-        console.log(input, '!!input');
         const { timeRange: nTimeRange } = input;
-
-        if (input.from !== timeRange.from || input.to !== timeRange.to) {
-          console.log('!!input lala');
-          setTimeRange(input);
+        if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
+          setTimeRange(nTimeRange!);
         }
       }
       setLastRefreshTime(Date.now());
@@ -70,9 +68,9 @@ export function SloAlertsWrapper({
     };
   }, [reloadSubject, timeRange.from, timeRange.to]);
 
-  // useEffect(() => {
-  //   setTimeRange(initialTimeRange);
-  // }, [initialTimeRange]);
+  useEffect(() => {
+    setTimeRange(initialTimeRange);
+  }, [initialTimeRange]);
 
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);
@@ -96,7 +94,6 @@ export function SloAlertsWrapper({
       },rangeTo:${timeRange.to})`
     );
   };
-  console.log(timeRange, '!!??');
   return (
     <Wrapper>
       <EuiFlexGroup
@@ -170,4 +167,5 @@ export function SloAlertsWrapper({
 
 const Wrapper = styled.div`
   width: 100%;
+  overflow: scroll;
 `;

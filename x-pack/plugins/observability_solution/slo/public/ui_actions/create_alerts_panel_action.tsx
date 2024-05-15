@@ -17,7 +17,7 @@ import {
   SLO_ALERTS_EMBEDDABLE_ID,
 } from '../embeddable/slo/alerts_new/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/overview/slo_embeddable_factory';
+import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 
 export function createAddAlertsPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']

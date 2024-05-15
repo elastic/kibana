@@ -14,6 +14,7 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
   fetch$,
+  FetchContext,
 } from '@kbn/presentation-publishing';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -47,7 +48,7 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
       const slos$ = new BehaviorSubject(state.slos);
       const timeRange$ = new BehaviorSubject(state.timeRange ?? { from: 'now-15m/m', to: 'now' });
       const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
-      const reload$ = new Subject<EmbeddableSloProps>();
+      const reload$ = new Subject<FetchContext>();
       const api = buildApi(
         {
           ...titlesApi,
@@ -88,9 +89,7 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
         .pipe()
         .subscribe((next) => {
           console.log(next, '!!next');
-          reload$.next(next.slos);
-          reload$.next(next.isReload);
-          reload$.next(next.timeRange);
+          reload$.next(next);
         });
 
       return {
@@ -101,7 +100,6 @@ export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersio
             timeRange$,
             showAllGroupByInstances$
           );
-          console.log(timeRange, '!!timeRangessssss');
           const I18nContext = deps.i18n.Context;
 
           useEffect(() => {
