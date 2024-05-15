@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonIconProps,
@@ -49,10 +49,19 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onDeleteField,
   useEcsInfo,
 }) => {
-  if (!field) {
+  const [description, setDescription] = useState<undefined | string>(undefined);
+  useEffect(() => {
+    const getDescription = async () => {
+      const actualdescription = field
+        ? await getFieldDescription(field?.name, field?.customDescription, useEcsInfo)
+        : '';
+      setDescription(actualdescription);
+    };
+    getDescription();
+  }, [field, useEcsInfo]);
+  if (!field || description === undefined) {
     return null;
   }
-  const description = getFieldDescription(field.name, field.customDescription, useEcsInfo);
 
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',

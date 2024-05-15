@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,15 +39,23 @@ export function FieldName({
   highlight = '',
   useEcsInfo = false,
 }: Props) {
+  const [description, setDescription] = useState<undefined | string>(undefined);
   const typeName = getFieldTypeName(fieldType);
   const displayName =
     fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
   const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
-  const description = fieldMapping
-    ? getFieldDescription(fieldMapping?.name, fieldMapping?.customDescription, useEcsInfo)
-    : '';
+  useEffect(() => {
+    const getDescription = async () => {
+      const actualdescription = fieldMapping
+        ? await getFieldDescription(fieldMapping?.name, fieldMapping?.customDescription, useEcsInfo)
+        : '';
+      setDescription(actualdescription);
+    };
+    getDescription();
+  }, [fieldMapping, useEcsInfo]);
+  if (description === undefined) return null;
 
   return (
     <Fragment>

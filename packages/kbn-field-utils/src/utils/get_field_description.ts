@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EcsFlat } from '@elastic/ecs';
 
-export function getFieldEcsDescription(name: string) {
+export async function getFieldEcsDescription(name: string) {
+  const { EcsFlat } = await import('@elastic/ecs');
   const { description } = EcsFlat[name as keyof typeof EcsFlat] ?? {};
   return description || '';
 }
 
-export function getFieldDescription(
+export async function getFieldDescription(
   name: string,
   description: string | undefined,
   useEcs?: boolean
-): string {
+): Promise<string> {
   if (description) {
     return description;
   }
