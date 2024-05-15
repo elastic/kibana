@@ -10,7 +10,6 @@ fi
 
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
 .buildkite/scripts/bootstrap.sh
 
 export JOB=kibana-defend-workflows-serverless-cypress

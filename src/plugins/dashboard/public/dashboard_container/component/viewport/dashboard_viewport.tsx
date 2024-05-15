@@ -53,6 +53,7 @@ export const DashboardViewportComponent = () => {
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
   const description = dashboard.select((state) => state.explicitInput.description);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
@@ -65,7 +66,11 @@ export const DashboardViewportComponent = () => {
   });
 
   return (
-    <div className={'dshDashboardViewportWrapper'}>
+    <div
+      className={classNames('dshDashboardViewportWrapper', {
+        'dshDashboardViewportWrapper--defaultBg': !useMargins,
+      })}
+    >
       {controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
