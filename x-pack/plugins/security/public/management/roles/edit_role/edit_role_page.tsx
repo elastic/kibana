@@ -552,7 +552,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRole({
       ...role,
-      description: e.target.value.trim().length ? e.target.value.trim() : undefined,
+      description: e.target.value.trim().length ? e.target.value : undefined,
     });
 
   const getElasticsearchPrivileges = () => {
