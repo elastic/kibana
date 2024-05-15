@@ -47,6 +47,10 @@ export function validateMetricThreshold({
         threshold0: string[];
         threshold1: string[];
       };
+      low: {
+        threshold0: string[];
+        threshold1: string[];
+      };
       metric: string[];
       customMetricsError?: string;
       customMetrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
@@ -83,6 +87,10 @@ export function validateMetricThreshold({
         threshold0: [],
         threshold1: [],
       },
+      low: {
+        threshold0: [],
+        threshold1: [],
+      },
       metric: [],
       filterQuery: [],
       customMetrics: {},
@@ -111,16 +119,25 @@ export function validateMetricThreshold({
       );
     }
 
+    if (c.lowThreshold && !c.lowThreshold.length) {
+      errors[id].low.threshold0.push(
+        i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
+          defaultMessage: 'Threshold is required.',
+        })
+      );
+    }
+
     for (const props of [
       { comparator: c.comparator, threshold: c.threshold, type: 'critical' },
       { comparator: c.warningComparator, threshold: c.warningThreshold, type: 'warning' },
+      { comparator: c.lowComparator, threshold: c.lowThreshold, type: 'low' },
     ]) {
       // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
       // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
       const { comparator, threshold, type } = props as {
         comparator?: Comparator;
         threshold?: number[];
-        type: 'critical' | 'warning';
+        type: 'critical' | 'warning' | 'low';
       };
       if (threshold && threshold.length && ![...threshold].every(isNumber)) {
         [...threshold].forEach((v, i) => {

@@ -24,6 +24,12 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 // kibana.alert.action_group - framework action group ID for this alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 
+// kibana.alert.previous_action_group
+const ALERT_PREVIOUS_ACTION_GROUP = `${ALERT_NAMESPACE}.previous_action_group` as const;
+
+// kibana.alert.is_improving
+const ALERT_IS_IMPROVING = `${ALERT_NAMESPACE}.is_improving` as const;
+
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
 
@@ -128,7 +134,9 @@ const fields = {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
+  ALERT_IS_IMPROVING,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -170,7 +178,9 @@ export {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
+  ALERT_IS_IMPROVING,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,

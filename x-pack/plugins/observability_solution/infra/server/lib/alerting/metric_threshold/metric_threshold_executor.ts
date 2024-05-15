@@ -71,16 +71,18 @@ export type MetricThresholdAlertContext = AlertContext; // no specific instance 
 
 export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
 export const WARNING_ACTIONS_ID = 'metrics.threshold.warning';
+export const LOW_ACTIONS_ID = 'metrics.threshold.low';
 export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
 
 type MetricThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
   | typeof WARNING_ACTIONS_ID
+  | typeof LOW_ACTIONS_ID
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof LOW_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
 type MetricThresholdAlertReporter = (
@@ -262,6 +264,7 @@ export const createMetricThresholdExecutor =
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
+      const shouldAlertLow = alertResults.every((result) => result[group]?.shouldLow);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => result[group]?.isNoData);
@@ -276,10 +279,16 @@ export const createMetricThresholdExecutor =
         ? AlertStates.ALERT
         : shouldAlertWarn
         ? AlertStates.WARNING
+        : shouldAlertLow
+        ? AlertStates.LOW
         : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
+      if (
+        nextState === AlertStates.ALERT ||
+        nextState === AlertStates.WARNING ||
+        nextState === AlertStates.LOW
+      ) {
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
@@ -326,6 +335,8 @@ export const createMetricThresholdExecutor =
             ? NO_DATA_ACTIONS_ID
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS_ID
+            : nextState === AlertStates.LOW
+            ? LOW_ACTIONS_ID
             : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
@@ -459,6 +470,7 @@ export const FIRED_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
+  severity: { level: 2 },
 };
 
 export const WARNING_ACTIONS = {
@@ -466,6 +478,15 @@ export const WARNING_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
     defaultMessage: 'Warning',
   }),
+  severity: { level: 1 },
+};
+
+export const LOW_ACTIONS = {
+  id: 'metrics.threshold.low',
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.low', {
+    defaultMessage: 'Low',
+  }),
+  severity: { level: 0 },
 };
 
 export const NO_DATA_ACTIONS = {
@@ -483,6 +504,9 @@ const translateActionGroupToAlertState = (
   }
   if (actionGroupId === WARNING_ACTIONS.id) {
     return stateToAlertMessage[AlertStates.WARNING];
+  }
+  if (actionGroupId === LOW_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.LOW];
   }
   if (actionGroupId === NO_DATA_ACTIONS.id) {
     return stateToAlertMessage[AlertStates.NO_DATA];

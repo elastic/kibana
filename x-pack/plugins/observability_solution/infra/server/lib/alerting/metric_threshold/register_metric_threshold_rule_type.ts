@@ -43,13 +43,14 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   WARNING_ACTIONS,
+  LOW_ACTIONS,
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof LOW_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
@@ -71,6 +72,8 @@ export function registerMetricThresholdRuleType(
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
     warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
+    lowThreshold: schema.maybe(schema.arrayOf(schema.number())),
+    lowComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
   const nonCountCriterion = schema.object({
@@ -149,7 +152,7 @@ export function registerMetricThresholdRuleType(
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
+    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, LOW_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createMetricThresholdExecutor(libs),
@@ -187,6 +190,10 @@ export function registerMetricThresholdRuleType(
         },
         {
           name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasLOW',
           description: originalAlertStateWasActionVariableDescription,
         },
         {

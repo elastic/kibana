@@ -34,6 +34,9 @@ export const stateToAlertMessage = {
   [AlertStates.WARNING]: i18n.translate('xpack.infra.metrics.alerting.threshold.warningState', {
     defaultMessage: 'WARNING',
   }),
+  [AlertStates.LOW]: i18n.translate('xpack.infra.metrics.alerting.threshold.lowState', {
+    defaultMessage: 'LOW',
+  }),
   [AlertStates.NO_DATA]: i18n.translate('xpack.infra.metrics.alerting.threshold.noDataState', {
     defaultMessage: 'NO DATA',
   }),

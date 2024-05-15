@@ -28,6 +28,7 @@ export const createBucketSelector = (
 ) => {
   const hasGroupBy = !!groupBy;
   const hasWarn = condition.warningThreshold != null && condition.warningComparator != null;
+  const hasLow = condition.lowThreshold != null && condition.lowComparator != null;
   const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
   const isCount = condition.aggType === Aggregators.COUNT;
   const isRate = condition.aggType === Aggregators.RATE;
@@ -55,6 +56,20 @@ export const createBucketSelector = (
       }
     : EMPTY_SHOULD_WARN;
 
+  const shouldLow = hasLow
+    ? {
+        bucket_script: {
+          buckets_path: {
+            value: bucketPath,
+          },
+          script: createConditionScript(
+            condition.lowThreshold as number[],
+            condition.lowComparator as Comparator
+          ),
+        },
+      }
+    : EMPTY_SHOULD_WARN;
+
   const shouldTrigger = {
     bucket_script: {
       buckets_path: {
@@ -67,6 +82,7 @@ export const createBucketSelector = (
   const aggs: any = {
     shouldWarn,
     shouldTrigger,
+    shouldLow,
   };
 
   if (hasGroupBy && alertOnGroupDisappear && lastPeriodEnd) {
@@ -98,15 +114,16 @@ export const createBucketSelector = (
         ? {
             shouldWarn: 'shouldWarn',
             shouldTrigger: 'shouldTrigger',
+            shouldLow: 'shouldLow',
             missingGroup: 'missingGroup',
             newOrRecoveredGroup: 'newOrRecoveredGroup',
           }
-        : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger' };
+        : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger', shouldLow: 'shouldLow' };
 
     const evaluationScript =
       alertOnGroupDisappear && lastPeriodEnd
-        ? '(params.missingGroup != null && params.missingGroup > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
-        : '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
+        ? '(params.missingGroup != null && params.missingGroup > 0) || (params.shouldLow != null && params.shouldLow > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
+        : '(params.shouldLow != null && params.shouldLow > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
 
     aggs.evaluation = {
       bucket_selector: {

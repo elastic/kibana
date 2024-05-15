@@ -13,7 +13,9 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_IS_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
   ALERT_TIME_RANGE,
@@ -110,6 +112,14 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
+    ...(legacyAlert.getSeverity()?.isImproving
+      ? {
+          [ALERT_IS_IMPROVING]: true,
+          [ALERT_PREVIOUS_ACTION_GROUP]: legacyAlert.getLastScheduledActions()?.group,
+        }
+      : {
+          [ALERT_IS_IMPROVING]: false,
+        }),
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(

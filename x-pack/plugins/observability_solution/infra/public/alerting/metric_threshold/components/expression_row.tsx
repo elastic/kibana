@@ -90,11 +90,14 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     comparator = Comparator.GT,
     threshold = [],
     warningThreshold = [],
+    lowThreshold = [],
     warningComparator,
+    lowComparator,
   } = expression;
   const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
     Boolean(warningThreshold?.length)
   );
+  const [displayLowThreshold, setDisplayLowThreshold] = useState(Boolean(lowThreshold?.length));
 
   const isMetricPct = useMemo(() => Boolean(metric && metric.endsWith('.pct')), [metric]);
 
@@ -133,6 +136,13 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     [expressionId, expression, setRuleParams]
   );
 
+  const updateLowComparator = useCallback(
+    (c?: string) => {
+      setRuleParams(expressionId, { ...expression, lowComparator: c as Comparator });
+    },
+    [expressionId, expression, setRuleParams]
+  );
+
   const convertThreshold = useCallback(
     (enteredThreshold) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
@@ -159,6 +169,16 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     [expressionId, expression, convertThreshold, setRuleParams]
   );
 
+  const updateLowThreshold = useCallback(
+    (enteredThreshold) => {
+      const t = convertThreshold(enteredThreshold);
+      if (t.join() !== expression.lowThreshold?.join()) {
+        setRuleParams(expressionId, { ...expression, lowThreshold: t });
+      }
+    },
+    [expressionId, expression, convertThreshold, setRuleParams]
+  );
+
   const toggleWarningThreshold = useCallback(() => {
     if (!displayWarningThreshold) {
       setDisplayWarningThreshold(true);
@@ -174,6 +194,27 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   }, [
     displayWarningThreshold,
     setDisplayWarningThreshold,
+    setRuleParams,
+    comparator,
+    expression,
+    expressionId,
+  ]);
+
+  const toggleLowThreshold = useCallback(() => {
+    if (!displayLowThreshold) {
+      setDisplayLowThreshold(true);
+      setRuleParams(expressionId, {
+        ...expression,
+        lowComparator: comparator,
+        lowThreshold: [],
+      });
+    } else {
+      setDisplayLowThreshold(false);
+      setRuleParams(expressionId, omit(expression, 'lowComparator', 'lowThreshold'));
+    }
+  }, [
+    displayLowThreshold,
+    setDisplayLowThreshold,
     setRuleParams,
     comparator,
     expression,
@@ -205,6 +246,17 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
       updateComparator={updateWarningComparator}
       updateThreshold={updateWarningThreshold}
       errors={(errors.warning as IErrorObject) ?? {}}
+      isMetricPct={isMetricPct}
+    />
+  );
+
+  const lowThresholdExpression = displayLowThreshold && (
+    <ThresholdElement
+      comparator={lowComparator || comparator}
+      threshold={lowThreshold}
+      updateComparator={updateLowComparator}
+      updateThreshold={updateLowThreshold}
+      errors={(errors.low as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
     />
   );
@@ -274,7 +326,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                 />
               </StyledExpression>
             )}
-            {!displayWarningThreshold && criticalThresholdExpression}
+            {!displayWarningThreshold && !displayLowThreshold && criticalThresholdExpression}
             {!displayWarningThreshold && (
               <>
                 <EuiSpacer size={'xs'} />
@@ -295,8 +347,28 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                 </EuiFlexGroup>
               </>
             )}
+            {!displayLowThreshold && (
+              <>
+                <EuiSpacer size={'xs'} />
+                <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                  <EuiButtonEmpty
+                    data-test-subj="infraExpressionRowAddLowThresholdButton"
+                    color={'primary'}
+                    flush={'left'}
+                    size="xs"
+                    iconType={'plusInCircleFilled'}
+                    onClick={toggleLowThreshold}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.addLowThreshold"
+                      defaultMessage="Add low threshold"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexGroup>
+              </>
+            )}
           </EuiFlexGroup>
-          {displayWarningThreshold && (
+          {displayWarningThreshold && !displayLowThreshold && (
             <>
               <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {criticalThresholdExpression}
@@ -327,6 +399,92 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   color="text"
                   iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
+                />
+              </EuiFlexGroup>
+            </>
+          )}
+          {displayLowThreshold && !displayWarningThreshold && (
+            <>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                {criticalThresholdExpression}
+                <StyledHealth color="danger">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    defaultMessage="Alert"
+                  />
+                </StyledHealth>
+              </EuiFlexGroup>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                {lowThresholdExpression}
+                <StyledHealth color="warning">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.lowThreshold"
+                    defaultMessage="Low"
+                  />
+                </StyledHealth>
+                <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
+                  aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeLowThreshold', {
+                    defaultMessage: 'Remove lowThreshold',
+                  })}
+                  iconSize="s"
+                  color="text"
+                  iconType={'minusInCircleFilled'}
+                  onClick={toggleLowThreshold}
+                />
+              </EuiFlexGroup>
+            </>
+          )}
+          {displayLowThreshold && displayWarningThreshold && (
+            <>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                {criticalThresholdExpression}
+                <StyledHealth color="danger">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    defaultMessage="Alert"
+                  />
+                </StyledHealth>
+              </EuiFlexGroup>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                {warningThresholdExpression}
+                <StyledHealth color="warning">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.warningThreshold"
+                    defaultMessage="Warning"
+                  />
+                </StyledHealth>
+                <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
+                  aria-label={i18n.translate(
+                    'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                    {
+                      defaultMessage: 'Remove warningThreshold',
+                    }
+                  )}
+                  iconSize="s"
+                  color="text"
+                  iconType={'minusInCircleFilled'}
+                  onClick={toggleWarningThreshold}
+                />
+              </EuiFlexGroup>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                {lowThresholdExpression}
+                <StyledHealth color="warning">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.lowThreshold"
+                    defaultMessage="Low"
+                  />
+                </StyledHealth>
+                <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
+                  aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeLowThreshold', {
+                    defaultMessage: 'Remove lowThreshold',
+                  })}
+                  iconSize="s"
+                  color="text"
+                  iconType={'minusInCircleFilled'}
+                  onClick={toggleLowThreshold}
                 />
               </EuiFlexGroup>
             </>

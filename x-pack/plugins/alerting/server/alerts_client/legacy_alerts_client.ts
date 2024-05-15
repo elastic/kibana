@@ -29,7 +29,6 @@ import {
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   ProcessAlertsOpts,
   LogAlertsOpts,
   TrackedAlerts,
@@ -171,17 +170,18 @@ export class LegacyAlertsClient<
       this.maxAlerts
     );
 
-    const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+    const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>({
       flappingSettings,
       notifyOnActionGroupChange,
-      this.options.ruleType.defaultActionGroupId,
+      actionGroups: this.options.ruleType.actionGroups,
+      actionGroupId: this.options.ruleType.defaultActionGroupId,
       alertDelay,
-      processedAlertsNew,
-      processedAlertsActive,
-      trimmedAlertsRecovered,
-      processedAlertsRecoveredCurrent,
-      this.startedAtString
-    );
+      newAlerts: processedAlertsNew,
+      activeAlerts: processedAlertsActive,
+      recoveredAlerts: trimmedAlertsRecovered,
+      currentRecoveredAlerts: processedAlertsRecoveredCurrent,
+      startedAt: this.startedAtString,
+    });
     ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
@@ -203,30 +203,6 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-    });
-  }
-
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
-    notifyOnActionGroupChange,
-    maintenanceWindowIds,
-    alertDelay,
-  }: ProcessAndLogAlertsOpts) {
-    this.processAlerts({
-      notifyOnActionGroupChange,
-      flappingSettings,
-      maintenanceWindowIds,
-      alertDelay,
-      ruleRunMetricsStore,
-    });
-
-    this.logAlerts({
-      eventLogger,
-      ruleRunMetricsStore,
-      shouldLogAlerts,
     });
   }
 

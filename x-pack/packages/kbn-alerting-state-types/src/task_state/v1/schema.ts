@@ -23,8 +23,14 @@ export const lastScheduledActionsSchema = schema.object({
   actions: schema.maybe(throttledActionSchema),
 });
 
+export const severitySchema = schema.object({
+  isImproving: schema.boolean(),
+  startedImprovingAt: schema.maybe(schema.nullable(schema.string())),
+});
+
 export const metaSchema = schema.object({
   lastScheduledActions: schema.maybe(lastScheduledActionsSchema),
+  severity: schema.maybe(severitySchema),
   // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
   // true - alert has changed from active/recovered
   // false - the status has remained either active or recovered

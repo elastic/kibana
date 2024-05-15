@@ -74,7 +74,6 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
   processAlerts(opts: ProcessAlertsOpts): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
@@ -101,16 +100,6 @@ export interface IAlertsClient<
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   > | null;
-}
-
-export interface ProcessAndLogAlertsOpts {
-  eventLogger: AlertingEventLogger;
-  shouldLogAlerts: boolean;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-  flappingSettings: RulesSettingsFlappingProperties;
-  notifyOnActionGroupChange: boolean;
-  maintenanceWindowIds: string[];
-  alertDelay: number;
 }
 
 export interface ProcessAlertsOpts {
