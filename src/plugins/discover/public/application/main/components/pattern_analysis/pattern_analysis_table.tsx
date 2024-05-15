@@ -17,7 +17,7 @@ import { PATTERN_ANALYSIS_LOADED } from './constants';
 export type PatternAnalysisTableProps = EmbeddablePatternAnalysisInput & {
   stateContainer?: DiscoverStateContainer;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  viewModeToggle: (patternCount?: number) => React.ReactElement;
+  renderViewModeToggle: (patternCount?: number) => React.ReactElement;
 };
 
 export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
@@ -70,10 +70,10 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     <aiopsService.PatternAnalysisComponent
       props={{
         input,
-        viewModeToggle: props.viewModeToggle,
+        renderViewModeToggle: props.renderViewModeToggle,
       }}
       deps={deps}
-      embeddingOrigin="discover-embedded"
+      embeddingOrigin="discover"
     />
   );
 };
