@@ -75,6 +75,7 @@
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
-    "@kbn/cloud"
+    "@kbn/cloud",
+    "@kbn/try-in-console"
   ]
 }
