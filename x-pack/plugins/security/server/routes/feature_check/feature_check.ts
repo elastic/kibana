@@ -39,49 +39,49 @@ interface XPackUsageResponse {
 
 const INCOMPATIBLE_REALMS = ['file', 'native'];
 
-export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefinitionParams) {
+export function defineSecurityFeatureCheckRoute({ router, logger }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/_check_role_mapping_features',
+      path: '/internal/security/_check_security_features',
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client;
-      const { has_all_requested: canManageRoleMappings } =
+      const { has_all_requested: canReadSecurity } =
         await esClient.asCurrentUser.security.hasPrivileges({
           body: { cluster: ['read_security'] },
         });
 
-      if (!canManageRoleMappings) {
+      if (!canReadSecurity) {
         return response.ok({
           body: {
-            canManageRoleMappings,
+            canReadSecurity,
           },
         });
       }
 
-      const enabledFeatures = await getEnabledRoleMappingsFeatures(esClient.asInternalUser, logger);
+      const enabledFeatures = await getEnabledSecurityFeatures(esClient.asInternalUser, logger);
 
       return response.ok({
         body: {
           ...enabledFeatures,
-          canManageRoleMappings,
+          canReadSecurity,
         },
       });
     })
   );
 }
 
-async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, logger: Logger) {
-  logger.debug(`Retrieving role mappings features`);
+async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger: Logger) {
+  logger.debug(`Retrieving security features`);
 
   const nodeScriptSettingsPromise = esClient.nodes
     .info({ filter_path: 'nodes.*.settings.script' })
     .catch((error) => {
       // fall back to assuming that node settings are unset/at their default values.
-      // this will allow the role mappings UI to permit both role template script types,
+      // this will allow the UI to permit both role template script types,
       // even if ES will disallow it at mapping evaluation time.
-      logger.error(`Error retrieving node settings for role mappings: ${error}`);
+      logger.error(`Error retrieving node settings for security feature check: ${error}`);
       return {};
     });
 
@@ -94,7 +94,7 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
       // fall back to no external realms configured.
       // this will cause a warning in the UI about no compatible realms being enabled, but will otherwise allow
       // the mappings screen to function correctly.
-      logger.error(`Error retrieving XPack usage info for role mappings: ${error}`);
+      logger.error(`Error retrieving XPack usage info for security feature check: ${error}`);
       return {
         security: {
           realms: {},

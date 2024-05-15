@@ -17,6 +17,7 @@ import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers
 import { EmptyPrompt } from './empty_prompt';
 import { RoleMappingsGridPage } from './role_mappings_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
+import { securityFeaturesAPIClientMock } from '../../security_features/security_features_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 
@@ -58,9 +59,10 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a create prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
@@ -88,8 +90,9 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: false,
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: false,
       hasCompatibleRealms: true,
     });
 
@@ -107,6 +110,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a warning when there are no compatible realms enabled', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -115,8 +119,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: false,
     });
 
@@ -133,6 +137,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders links to mapped roles, even if the roles API call returns nothing', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -141,8 +146,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
@@ -157,6 +162,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('describes the number of mapped role templates', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -165,8 +171,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
@@ -181,6 +187,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('allows role mappings to be deleted, refreshing the grid after', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -189,8 +196,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -224,6 +231,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a warning when a mapping is assigned a deprecated role', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -232,8 +240,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -269,6 +277,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders role mapping actions as appropriate', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -277,8 +286,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -315,9 +324,10 @@ describe('RoleMappingsGridPage', () => {
   describe('read-only', () => {
     it('renders an empty prompt when no role mappings exist', async () => {
       const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
       roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
-      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-        canManageRoleMappings: true,
+      securityFeaturesAPI.checkFeatures.mockResolvedValue({
+        canReadSecurity: true,
         hasCompatibleRealms: true,
       });
 
@@ -342,6 +352,7 @@ describe('RoleMappingsGridPage', () => {
 
     it('hides controls when `readOnly` is enabled', async () => {
       const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
       roleMappingsAPI.getRoleMappings.mockResolvedValue([
         {
           name: 'some-realm',
@@ -350,8 +361,8 @@ describe('RoleMappingsGridPage', () => {
           rules: { field: { username: '*' } },
         },
       ]);
-      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-        canManageRoleMappings: true,
+      securityFeaturesAPI.checkFeatures.mockResolvedValue({
+        canReadSecurity: true,
         hasCompatibleRealms: true,
       });
       roleMappingsAPI.deleteRoleMappings.mockResolvedValue([

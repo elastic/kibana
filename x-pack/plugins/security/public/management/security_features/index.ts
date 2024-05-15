@@ -4,12 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const roleMappingsAPIClientMock = {
-  create: () => ({
-    getRoleMappings: jest.fn(),
-    getRoleMapping: jest.fn(),
-    saveRoleMapping: jest.fn(),
-    deleteRoleMappings: jest.fn(),
-  }),
-};
+export { SecurityFeaturesAPIClient } from './security_features_api_client';
+export type { CheckSecurityFeaturesResponse } from './security_features_api_client';

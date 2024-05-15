@@ -9,12 +9,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { defineRoleMappingFeatureCheckRoute } from './feature_check';
+import { defineSecurityFeatureCheckRoute } from './feature_check';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
-  canManageRoleMappings?: boolean;
+  canReadSecurity?: boolean;
   nodeSettingsResponse?: () => Record<string, any>;
   xpackUsageResponse?: () => Record<string, any>;
   asserts: { statusCode: number; result?: Record<string, any> };
@@ -43,7 +43,7 @@ describe('GET role mappings feature check', () => {
     description: string,
     {
       licenseCheckResult = { state: 'valid' },
-      canManageRoleMappings = true,
+      canReadSecurity = true,
       nodeSettingsResponse = () => ({}),
       xpackUsageResponse = () => defaultXpackUsageResponse,
       asserts,
@@ -68,16 +68,16 @@ describe('GET role mappings feature check', () => {
         (async () => xpackUsageResponse()) as any
       );
       mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: canManageRoleMappings,
+        has_all_requested: canReadSecurity,
       } as any);
 
-      defineRoleMappingFeatureCheckRoute(mockRouteDefinitionParams);
+      defineSecurityFeatureCheckRoute(mockRouteDefinitionParams);
       const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
 
       const headers = { authorization: 'foo' };
       const mockRequest = httpServerMock.createKibanaRequest({
         method: 'get',
-        path: `/internal/security/_check_role_mapping_features`,
+        path: `/internal/security/_check_security_features`,
         headers,
       });
 
@@ -93,7 +93,7 @@ describe('GET role mappings feature check', () => {
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: true,
+        canReadSecurity: true,
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
@@ -118,7 +118,7 @@ describe('GET role mappings feature check', () => {
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: true,
+        canReadSecurity: true,
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
@@ -138,7 +138,7 @@ describe('GET role mappings feature check', () => {
       asserts: {
         statusCode: 200,
         result: {
-          canManageRoleMappings: true,
+          canReadSecurity: true,
           canUseInlineScripts: true,
           canUseStoredScripts: true,
           hasCompatibleRealms: true,
@@ -164,7 +164,7 @@ describe('GET role mappings feature check', () => {
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: true,
+        canReadSecurity: true,
         canUseInlineScripts: true,
         canUseStoredScripts: false,
         hasCompatibleRealms: true,
@@ -189,7 +189,7 @@ describe('GET role mappings feature check', () => {
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: true,
+        canReadSecurity: true,
         canUseInlineScripts: false,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
@@ -218,7 +218,7 @@ describe('GET role mappings feature check', () => {
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: true,
+        canReadSecurity: true,
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: false,
@@ -228,12 +228,12 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('indicates canManageRoleMappings=false for users without `read_security`', {
-    canManageRoleMappings: false,
+  getFeatureCheckTest('indicates canReadSecurity=false for users without `read_security`', {
+    canReadSecurity: false,
     asserts: {
       statusCode: 200,
       result: {
-        canManageRoleMappings: false,
+        canReadSecurity: false,
       },
     },
   });
@@ -250,7 +250,7 @@ describe('GET role mappings feature check', () => {
       asserts: {
         statusCode: 200,
         result: {
-          canManageRoleMappings: true,
+          canReadSecurity: true,
           canUseInlineScripts: true,
           canUseStoredScripts: true,
           hasCompatibleRealms: false,

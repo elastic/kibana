@@ -47,9 +47,11 @@ import {
 } from '../components';
 import type { DeleteRoleMappings } from '../components/delete_provider/delete_provider';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import type { SecurityFeaturesAPIClient } from '../../security_features'
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  securityFeaturesAPIClient: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -447,10 +449,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const { canManageRoleMappings, hasCompatibleRealms } =
-        await this.props.roleMappingsAPI.checkRoleMappingFeatures();
+      const { canReadSecurity, hasCompatibleRealms } =
+        await this.props.securityFeaturesAPIClient.checkFeatures();
 
-      const canLoad = canManageRoleMappings || this.props.readOnly;
+      const canLoad = canReadSecurity || this.props.readOnly;
 
       this.setState({
         loadState: canLoad ? this.state.loadState : 'permissionDenied',
