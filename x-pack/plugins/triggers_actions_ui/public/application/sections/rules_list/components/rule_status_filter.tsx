@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectableListItem } from '@elastic/eui';
-import { RuleStatus } from '../../../../types';
-
-const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
-
-const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  type EuiSelectableOption,
+  type EuiSelectableProps,
+} from '@elastic/eui';
+import type { RuleStatus } from '../../../../types';
 
 export interface RuleStatusFilterProps {
   selectedStatuses: RuleStatus[];
@@ -21,6 +25,8 @@ export interface RuleStatusFilterProps {
   optionDataTestSubj?: (status: RuleStatus) => string;
   onChange: (selectedStatuses: RuleStatus[]) => void;
 }
+
+const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
 
 export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
   const {
@@ -34,45 +40,59 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onFilterItemClick = useCallback(
-    (newOption: RuleStatus) => () => {
-      if (selectedStatuses.includes(newOption)) {
-        onChange(selectedStatuses.filter((option) => option !== newOption));
-        return;
-      }
-      onChange([...selectedStatuses, newOption]);
+  const onFilterItemChange: EuiSelectableProps['onChange'] = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selected = newOptions
+        .filter(({ checked, key }) => checked && key)
+        .map(({ key }) => key as RuleStatus);
+
+      onChange(selected);
     },
-    [selectedStatuses, onChange]
+    [onChange]
   );
 
   const onClick = useCallback(() => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
-  const renderRuleStateOptions = (status: 'enabled' | 'disabled' | 'snoozed') => {
-    if (status === 'enabled') {
-      return (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText"
-          defaultMessage="Rule is enabled"
-        />
-      );
-    } else if (status === 'disabled') {
-      return (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText"
-          defaultMessage="Rule is disabled"
-        />
-      );
-    } else if (status === 'snoozed') {
-      return (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText"
-          defaultMessage="Rule has snoozed"
-        />
-      );
-    }
-  };
+  const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
+    const partialOptions: Array<{ key: RuleStatus; label: string }> = [
+      {
+        key: 'enabled',
+        label: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText',
+          {
+            defaultMessage: 'Rule is enabled',
+          }
+        ),
+      },
+      {
+        key: 'disabled',
+        label: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText',
+          {
+            defaultMessage: 'Rule is disabled',
+          }
+        ),
+      },
+      {
+        key: 'snoozed',
+        label: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText',
+          {
+            defaultMessage: 'Rule has snoozed',
+          }
+        ),
+      },
+    ];
+
+    return partialOptions.map(({ key, label }) => ({
+      key,
+      label,
+      'data-test-subj': optionDataTestSubj(key),
+      checked: selectedStatuses.includes(key) ? 'on' : undefined,
+    }));
+  }, [optionDataTestSubj, selectedStatuses]);
 
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
@@ -96,18 +116,14 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
         }
       >
         <div data-test-subj={selectDataTestSubj}>
-          {statuses.map((status) => {
-            return (
-              <EuiSelectableListItem
-                key={status}
-                data-test-subj={optionDataTestSubj(status)}
-                onClick={onFilterItemClick(status)}
-                checked={selectedStatuses.includes(status) ? 'on' : undefined}
-              >
-                {renderRuleStateOptions(status)}
-              </EuiSelectableListItem>
-            );
-          })}
+          <EuiSelectable
+            options={selectableOptions}
+            onChange={onFilterItemChange}
+            style={{ width: 400 }}
+            listProps={{ bordered: false }}
+          >
+            {(list) => list}
+          </EuiSelectable>
         </div>
       </EuiPopover>
     </EuiFilterGroup>
