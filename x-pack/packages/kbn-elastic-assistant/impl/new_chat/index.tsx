@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { PromptContext } from '../assistant/prompt_context/types';
@@ -23,6 +23,10 @@ export type Props = Omit<PromptContext, 'id'> & {
   promptContextId?: string;
   /** Optionally specify color of empty button */
   color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
+  /** Optionally render new chat as a link */
+  asLink?: boolean;
+  /** Optional callback when overlay shows */
+  onShowOverlay?: () => void;
 };
 
 const NewChatComponent: React.FC<Props> = ({
@@ -36,6 +40,8 @@ const NewChatComponent: React.FC<Props> = ({
   promptContextId,
   suggestedUserPrompt,
   tooltip,
+  asLink = false,
+  onShowOverlay,
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
@@ -49,7 +55,8 @@ const NewChatComponent: React.FC<Props> = ({
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
-  }, [showAssistantOverlay]);
+    onShowOverlay?.();
+  }, [showAssistantOverlay, onShowOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
@@ -60,12 +67,22 @@ const NewChatComponent: React.FC<Props> = ({
   }, [iconType]);
 
   return useMemo(
-    () => (
-      <EuiButtonEmpty color={color} data-test-subj="newChat" onClick={showOverlay} iconType={icon}>
-        {children}
-      </EuiButtonEmpty>
-    ),
-    [children, icon, showOverlay, color]
+    () =>
+      asLink ? (
+        <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
+          {children}
+        </EuiLink>
+      ) : (
+        <EuiButtonEmpty
+          color={color}
+          data-test-subj="newChat"
+          onClick={showOverlay}
+          iconType={icon}
+        >
+          {children}
+        </EuiButtonEmpty>
+      ),
+    [children, icon, showOverlay, color, asLink]
   );
 };
 

@@ -46,6 +46,9 @@ export enum TELEMETRY_EVENT {
   ADD_INVESTIGATION_FIELDS = 'add_investigation_fields',
   SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
   DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
+
+  // AI assistant on rule creation form
+  OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',
 }
 
 export enum TelemetryEventTypes {

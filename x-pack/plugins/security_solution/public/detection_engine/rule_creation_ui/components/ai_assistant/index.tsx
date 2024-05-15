@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import { NewChat, AssistantAvatar } from '@kbn/elastic-assistant';
-import { css } from '@emotion/css';
+
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -46,13 +48,19 @@ Fix ${language} language query and give an example of it in markdown format that
 Proposed solution should be valid and must not contain new line symbols (\\n)`;
   };
 
+  const onShowOverlay = useCallback(() => {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.OPEN_ASSISTANT_ON_RULE_QUERY_ERROR);
+  }, []);
+
   if (!hasAssistantPrivilege) {
     return null;
   }
 
   return (
     <>
+      <EuiSpacer size="s" />
       <NewChat
+        asLink={true}
         category="detection-rules"
         conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
         description={i18n.ASK_ASSISTANT_DESCRIPTION}
@@ -60,22 +68,11 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
         tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
         iconType={null}
+        onShowOverlay={onShowOverlay}
       >
-        <AssistantAvatar
-          size="xxs"
-          css={css`
-            margin-right: 10px;
-          `}
-        />
-        {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+        <AssistantAvatar size="xxs" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
       </NewChat>
-      <span
-        css={css`
-          vertical-align: middle;
-        `}
-      >
-        {'to help resolve this error.'}
-      </span>
+      <span> {'to help resolve this error.'}</span>
     </>
   );
 };

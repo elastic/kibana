@@ -79,4 +79,12 @@ describe('NewChat', () => {
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
   });
+
+  it('renders new chat as link', () => {
+    render(<NewChat {...defaultProps} asLink={true} />);
+
+    const newChatLink = screen.getByTestId('newChatLink');
+
+    expect(newChatLink).toBeInTheDocument();
+  });
 });

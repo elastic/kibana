@@ -916,8 +916,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-          {/* TODO: remove before merge*/}
-          {!isMlRule(ruleType) && <AiAssistant form={form} />}
           {!isMlRule(ruleType) && !isQueryBarValid && <AiAssistant form={form} />}
           {isQueryRule(ruleType) && (
             <>
