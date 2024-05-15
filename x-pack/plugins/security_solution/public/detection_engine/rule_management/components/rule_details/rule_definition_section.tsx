@@ -24,7 +24,6 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FieldIcon, getFieldIconType } from '@kbn/field-utils';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
@@ -52,6 +51,7 @@ import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useAlertSuppression } from '../../logic/use_alert_suppression';
+import { RequiredFieldIcon } from './required_field_icon';
 import {
   filtersStyles,
   queryStyles,
@@ -260,14 +260,7 @@ const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
         <EuiFlexItem grow={false} key={rF.name}>
           <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
             <EuiFlexItem grow={false}>
-              <FieldIcon
-                data-test-subj="field-type-icon"
-                label={rF.type}
-                type={getFieldIconType({
-                  name: rF.name,
-                  esTypes: [rF.type],
-                })}
-              />
+              <RequiredFieldIcon type={rF.type} data-test-subj="field-type-icon" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText
