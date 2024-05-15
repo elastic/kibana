@@ -138,7 +138,12 @@ export function InsightBase({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          color="subdued"
+          data-test-subj="obsAiAssistantInsightResponse"
+        >
           {children}
         </EuiPanel>
       </EuiAccordion>
