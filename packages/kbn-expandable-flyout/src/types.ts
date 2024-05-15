@@ -51,9 +51,10 @@ export interface ExpandableFlyoutApi {
    */
   closeFlyout: () => void;
   /**
-   * Observable that emits when the flyout is closed
+   * Observable that emits the id of the flyout when the flyout is closed
+   * The id is the urlKey if provided, otherwise default back to 'memory
    */
-  onClose$: Subject<boolean>;
+  onClose$: Subject<string>;
 }
 
 export interface PanelPath {

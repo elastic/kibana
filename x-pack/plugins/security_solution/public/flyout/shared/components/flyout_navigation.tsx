@@ -38,7 +38,7 @@ export interface FlyoutNavigationProps {
   /**
    * If flyoutIsExpandable is true, pass a callback to run when the left panel is closed
    */
-  collapseDetails?: () => void;
+  collapseDetails?: (flyoutId: string) => void;
   /**
    * Optional actions to be placed on the right hand side of navigation
    */

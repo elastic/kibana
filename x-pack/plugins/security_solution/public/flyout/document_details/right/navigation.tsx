@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useEffect, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { take } from 'rxjs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
@@ -24,6 +24,11 @@ interface PanelNavigationProps {
   flyoutIsExpandable: boolean;
 }
 
+/**
+ * This component leverages the reusable FlyoutNavigation component to render the expand/collapse button if the flyout is expandable,
+ * as well as the icons to be rendered next to the close button of the flyout.
+ * It also handles the logic to save in local storage the left section expanded, and to remove it when the user collapses it or closes flyout.
+ */
 export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
   const { storage, telemetry } = useKibana().services;
   const { onClose$, openLeftPanel } = useExpandableFlyoutApi();
@@ -32,12 +37,12 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
 
   const localStorageLeftPanelExpanded = storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED);
   const clearLocalStorage = useCallback(
-    () =>
+    (flyoutId: string) =>
       storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
         ...localStorageLeftPanelExpanded,
-        [openFlyout]: false,
+        [flyoutId]: false,
       }),
-    [storage, localStorageLeftPanelExpanded, openFlyout]
+    [storage, localStorageLeftPanelExpanded]
   );
 
   const expandDetails = useCallback(() => {
@@ -58,8 +63,8 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
     // we only want to keep track of the left side open while the user is still using the flyout.
     // that way when choosing another alert while the flyout is open, its state isn't going to reset.
     // we remove the value from local storage when flyout is closed.
-    onClose$.pipe(take(1)).subscribe(() => {
-      clearLocalStorage();
+    onClose$.pipe(take(1)).subscribe((flyoutId: string) => {
+      clearLocalStorage(flyoutId);
     });
 
     telemetry.reportDetailsFlyoutOpened({
@@ -86,16 +91,6 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
   ) {
     expandDetails();
   }
-
-  // we remove the value from local storage when the component is unmounted
-  // this takes care of the case when the user navigates away from the page while the flyout is open or for example closing the browser window
-  useEffect(
-    () => () => {
-      clearLocalStorage();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   return (
     <FlyoutNavigation
