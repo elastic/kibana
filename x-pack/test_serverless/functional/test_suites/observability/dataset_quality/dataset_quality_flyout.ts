@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
   const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
-  describe('Dataset quality flyout', () => {
+  describe('Dataset quality flyout', function () {
     this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
-    
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
