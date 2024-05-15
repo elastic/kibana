@@ -226,7 +226,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('hides inactive datasets', async () => {
+    // Failing https://github.com/elastic/kibana/issues/183495
+    it.skip('hides inactive datasets', async () => {
       await PageObjects.datasetQuality.waitUntilTableLoaded();
 
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
