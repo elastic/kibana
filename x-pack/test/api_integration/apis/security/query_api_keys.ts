@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -14,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const isBasicLicense = config.get('esTestCluster.license') === 'basic';
 
-  const createKey = async (name: string, type: string, managed: boolean) => {
+  const createKey = async (name: string, type: string, managed: boolean, expiry?: string) => {
     const access =
       type === 'cross_cluster'
         ? {
@@ -40,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         type,
         metadata,
         ...(access ? { access } : {}),
+        ...(expiry ? { expiration: expiry } : {}),
       })
       .expect(200);
     expect(apiKey.name).to.eql(name);
@@ -51,6 +53,16 @@ export default function ({ getService }: FtrProviderContext) {
     return Array.from({ length: 10 }, (_, i) => i).map(
       async (i) => await createKey(`cross_cluster_key_${i}`, 'cross_cluster', false)
     );
+  };
+
+  const createExpiredKeys = async () => {
+    const restKeys = Array.from({ length: 10 }, (_, i) => i).map(
+      async (i) => await createKey(`rest_key_${i}`, 'rest', false)
+    );
+    const expiredKeys = Array.from({ length: 5 }, (_, i) => i).map(
+      async (i) => await createKey(`rest_key_${i}`, 'rest', false, '1s')
+    );
+    await Promise.all([...restKeys, ...expiredKeys]);
   };
 
   const createMultipleKeys = async () => {
@@ -83,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Has queryable API Keys', () => {
     beforeEach(cleanup);
-    afterEach(cleanup);
+    // afterEach(cleanup);
 
     it('should return all the keys', async () => {
       await createMultipleKeys();
@@ -160,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should query API keys with filters', async () => {
+    it('should query API keys with custom queries', async () => {
       await createMultipleKeys();
 
       const { body: keys } = await supertest
@@ -185,6 +197,83 @@ export default function ({ getService }: FtrProviderContext) {
       keys.apiKeys.forEach((key: any) => {
         expect(key.type).to.be('rest');
       });
+    });
+
+    it('should query API keys with filters', async () => {
+      await createMultipleKeys();
+
+      const { body: restKeys } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          query: {
+            match_all: {},
+          },
+          filters: {
+            type: 'rest',
+          },
+        })
+        .expect(200);
+
+      expect(restKeys.apiKeys.length).to.be(5);
+      restKeys.apiKeys.forEach((key: any) => {
+        expect(key.type).to.be('rest');
+      });
+
+      const { body: managedKeys } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          query: {
+            match_all: {},
+          },
+          filters: {
+            type: 'managed',
+          },
+        })
+        .expect(200);
+
+      expect(managedKeys.apiKeys.length).to.be(10);
+      const alertingNameKeys = managedKeys.apiKeys.filter((key: any) =>
+        key.name.startsWith('Alerting:')
+      );
+
+      expect(alertingNameKeys.length).to.be(5);
+    });
+
+    it('should correctly filter active and expired keys', async () => {
+      await createExpiredKeys();
+
+      const { body: activeKeys } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          query: {
+            match_all: {},
+          },
+          filters: {
+            expired: false,
+          },
+        })
+        .expect(200);
+
+      expect(activeKeys.apiKeys.length).to.be(10);
+
+      await setTimeoutAsync(2500);
+
+      const { body: expiredKeys } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          query: {
+            match_all: {},
+          },
+          filters: {
+            expired: true,
+          },
+        })
+        .expect(200);
+      expect(expiredKeys.apiKeys.length).to.be(5);
     });
   });
 }
