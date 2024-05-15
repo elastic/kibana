@@ -7,7 +7,7 @@
 
 import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 
-export function initDynamicActionsState(enhancements?: {
+export function getDynamicActionsState(enhancements?: {
   dynamicActions?: Partial<DynamicActionsState>;
 }) {
   return {

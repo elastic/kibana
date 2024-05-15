@@ -39,7 +39,7 @@ import {
 } from './embeddables/dynamic_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 import { EnhancedEmbeddable } from './types';
-import { initDynamicActionsState } from './init_dynamic_actions_state';
+import { getDynamicActionsState } from './get_dynamic_actions_state';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -149,7 +149,7 @@ export class EmbeddableEnhancedPlugin
     startDynamicActions: () => { stopDynamicActions: () => void };
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-      initDynamicActionsState(state.enhancements)
+      getDynamicActionsState(state.enhancements)
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
@@ -174,7 +174,7 @@ export class EmbeddableEnhancedPlugin
           dynamicActionsState$,
           api.setDynamicActions,
           (a, b) => {
-            return deepEqual(initDynamicActionsState(a), initDynamicActionsState(b));
+            return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
           },
         ],
       },

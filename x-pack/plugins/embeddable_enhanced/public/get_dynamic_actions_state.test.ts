@@ -6,32 +6,32 @@
  */
 
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common/types';
-import { initDynamicActionsState } from './init_dynamic_actions_state';
+import { getDynamicActionsState } from './get_dynamic_actions_state';
 
-describe('initDynamicActionsState', () => {
+describe('getDynamicActionsState', () => {
   test('should return empty state when enhancements is undefined', () => {
-    expect(initDynamicActionsState()).toEqual({ dynamicActions: { events: [] } });
+    expect(getDynamicActionsState()).toEqual({ dynamicActions: { events: [] } });
   });
 
   test('should return empty state when enhancements is empty object', () => {
-    expect(initDynamicActionsState({})).toEqual({ dynamicActions: { events: [] } });
+    expect(getDynamicActionsState({})).toEqual({ dynamicActions: { events: [] } });
   });
 
   test('should return empty state when enhancements.dynamicActions is undefined', () => {
-    expect(initDynamicActionsState({ dynamicActions: undefined })).toEqual({
+    expect(getDynamicActionsState({ dynamicActions: undefined })).toEqual({
       dynamicActions: { events: [] },
     });
   });
 
   test('should return empty state when enhancements.dynamicActions is empty object', () => {
-    expect(initDynamicActionsState({ dynamicActions: {} })).toEqual({
+    expect(getDynamicActionsState({ dynamicActions: {} })).toEqual({
       dynamicActions: { events: [] },
     });
   });
 
   test('should return state when enhancements.dynamicActions is provided', () => {
     expect(
-      initDynamicActionsState({ dynamicActions: { events: [{} as unknown as SerializedEvent] } })
+      getDynamicActionsState({ dynamicActions: { events: [{} as unknown as SerializedEvent] } })
     ).toEqual({ dynamicActions: { events: [{}] } });
   });
 });
