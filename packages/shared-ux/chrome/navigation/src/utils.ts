@@ -19,6 +19,14 @@ function isSamePath(pathA: string | null, pathB: string | null) {
   return pathA === pathB;
 }
 
+/**
+ * Predicate to check if a nodePath is active
+ *
+ * @param nodePath The path of the node to check
+ * @param activeNodes The active nodes to check against
+ * @param onlyIfHighestMatch Flag to indicate if we should only return true if the nodePath is the highest match
+ * @returns Boolean indicating if the nodePath is active
+ */
 export function isActiveFromUrl(
   nodePath: string,
   activeNodes: ChromeProjectNavigationNode[][],

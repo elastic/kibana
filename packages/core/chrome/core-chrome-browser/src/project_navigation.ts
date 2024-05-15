@@ -129,7 +129,7 @@ interface NodeDefinitionBase {
    */
   href?: string;
   /**
-   * Custom handler to execute when clicking on the node. Not compatible with the "link" or "href" props.
+   * Custom handler to execute when clicking on the node. This handler takes precedence over the "link" or "href" props.
    */
   onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   /**
@@ -440,11 +440,10 @@ export interface SolutionNavigationDefinitions {
 }
 
 /**
- * This helper type is there to help with having maintaining both the legacy side navigation
- * and the new ones. The legacy uses EuiSideNavItemType and its properties are not fully compatible
- * with our NodeDefinition. Solution used to declare their navigation using the legacy EuiSideNavItemType.
- * Converting those to NodeDefinition require some prop to be slightly different (e.g. a ReactNode that can only
- * be a string in the new nav).
+ * Temporary helper interface while we have to maintain both the legacy side navigation
+ * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible
+ * with the NodeDefinition. Solution teams declare their "classic" navigation using the EuiSideNavItemType.
+ * Converting those to the `NodeDefinition` require some additional props.
  */
 export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>, 'items'> & {
   items?: Array<EuiSideNavItemTypeEnhanced<unknown>>;
