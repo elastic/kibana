@@ -33,7 +33,6 @@ import {
   fillMaxSignals,
   fillNote,
   fillReferenceUrls,
-  fillRelatedIntegrations,
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
@@ -69,7 +68,8 @@ describe.skip('Common rule creation flows', { tags: ['@ess', '@serverless'] }, (
   it('Creates and enables a rule', function () {
     cy.log('Filling define section');
     importSavedQuery(this.timelineId);
-    fillRelatedIntegrations();
+    // The following step is flaky due to a recent EUI upgrade. There is not currently a ticket for the underlying EUI issue, but when there is it will be linked on the test-failure ticket: https://github.com/elastic/kibana/issues/183437
+    // fillRelatedIntegrations();
     cy.get(DEFINE_CONTINUE_BUTTON).click();
 
     cy.log('Filling about section');
