@@ -1,11 +1,11 @@
 TO_STRING
 
-AliasTO_STR
+Syntax
 Parameters
-v
+field
 Input value. The input can be a single- or multi-valued column or an expression.
 DescriptionConverts an input value into a string.Supported types
-Example
+Examples
 ```esql
 ROW a=10
 | EVAL j = TO_STRING(a)

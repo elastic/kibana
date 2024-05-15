@@ -291,7 +291,7 @@
         "label": "isKibanaResponse",
         "description": [],
         "signature": [
-          "(response: Record<string, any>) => boolean"
+          "(response: Record<string, any> | undefined) => boolean"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
@@ -305,12 +305,12 @@
             "label": "response",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, any> | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3555,6 +3555,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_active_space.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.ts"
+              },
+              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/health.ts"
               },
@@ -5533,6 +5537,10 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_active_space.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9424,7 +9432,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -9695,18 +9703,6 @@
                 "path": "x-pack/plugins/actions/server/routes/delete.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/index.test.ts"
               },
@@ -9785,6 +9781,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -12522,7 +12530,7 @@
             "tags": [],
             "label": "description",
             "description": [
-              "Human-friendly description of this endpoint"
+              "A short, human-friendly description of this endpoint"
             ],
             "signature": [
               "string | undefined"
@@ -15368,10 +15376,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/fields_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/indices.ts"
               },
               {
                 "plugin": "ml",

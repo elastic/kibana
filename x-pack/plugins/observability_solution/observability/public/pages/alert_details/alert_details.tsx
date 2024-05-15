@@ -189,7 +189,7 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} />
+        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
     )
   ) : (
@@ -240,6 +240,7 @@ export function AlertDetails() {
           >
             <HeaderActions
               alert={alertDetail?.formatted ?? null}
+              alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />
