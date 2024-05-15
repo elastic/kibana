@@ -18,7 +18,8 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+
+export const FUNCTION_DESCRIBE_BLOCK_NAME = 'functions';
 
 const fieldTypes = [
   'number',
@@ -1993,7 +1994,7 @@ describe('validation logic', () => {
 
     describe('functions', () => {
       // This section will expand in time, especially with https://github.com/elastic/kibana/issues/182390
-      describe('date_diff', () => {
+      describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
         testErrorsAndWarnings(
           `row var = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
           []
