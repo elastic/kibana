@@ -7,8 +7,8 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import { EntityRiskLevels } from '../../../../api/entity_analytics/common';
-import type { EntityRiskScore } from '../../../../api/entity_analytics/common';
+import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
@@ -23,7 +23,7 @@ export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
   data: UserRiskScore[] | undefined;
 }
 
-export interface RiskStats extends EntityRiskScore {
+export interface RiskStats extends EntityRiskScoreRecord {
   rule_risks: RuleRisk[];
   multipliers: string[];
 }
@@ -90,9 +90,9 @@ export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is Us
   'user' in risk;
 
 export const EMPTY_SEVERITY_COUNT = {
-  [EntityRiskLevels.enum.Critical]: 0,
-  [EntityRiskLevels.enum.High]: 0,
-  [EntityRiskLevels.enum.Low]: 0,
-  [EntityRiskLevels.enum.Moderate]: 0,
-  [EntityRiskLevels.enum.Unknown]: 0,
+  [EntityRiskLevelsEnum.Critical]: 0,
+  [EntityRiskLevelsEnum.High]: 0,
+  [EntityRiskLevelsEnum.Low]: 0,
+  [EntityRiskLevelsEnum.Moderate]: 0,
+  [EntityRiskLevelsEnum.Unknown]: 0,
 };

@@ -8,7 +8,7 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
@@ -196,7 +196,7 @@ export class RiskEngineDataClient {
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    if (legacyRiskEngineStatus === RiskEngineStatus.enum.NOT_INSTALLED) {
+    if (legacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
       return true;
     }
 
@@ -218,17 +218,17 @@ export class RiskEngineDataClient {
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    return newlegacyRiskEngineStatus === RiskEngineStatus.enum.NOT_INSTALLED;
+    return newlegacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED;
   }
 
   private async getCurrentStatus() {
     const configuration = await this.getConfiguration();
 
     if (configuration) {
-      return configuration.enabled ? RiskEngineStatus.enum.ENABLED : RiskEngineStatus.enum.DISABLED;
+      return configuration.enabled ? RiskEngineStatusEnum.ENABLED : RiskEngineStatusEnum.DISABLED;
     }
 
-    return RiskEngineStatus.enum.NOT_INSTALLED;
+    return RiskEngineStatusEnum.NOT_INSTALLED;
   }
 
   private async getIsMaxAmountOfRiskEnginesReached() {
@@ -268,9 +268,9 @@ export class RiskEngineDataClient {
     });
 
     if (transforms.length === 0) {
-      return RiskEngineStatus.enum.NOT_INSTALLED;
+      return RiskEngineStatusEnum.NOT_INSTALLED;
     }
 
-    return RiskEngineStatus.enum.ENABLED;
+    return RiskEngineStatusEnum.ENABLED;
   }
 }

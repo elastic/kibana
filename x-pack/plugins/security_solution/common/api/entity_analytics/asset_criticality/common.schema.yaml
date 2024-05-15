@@ -18,16 +18,16 @@ components:
       in: query
       required: true
       schema:
-        $ref: "#/components/schemas/IdField"
-      example: "host.name"
+        $ref: '#/components/schemas/IdField'
+      example: 'host.name'
       description: The field representing the ID.
 
   schemas:
     IdField:
       type: string
       enum:
-        - "host.name"
-        - "user.name"
+        - 'host.name'
+        - 'user.name'
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -35,8 +35,8 @@ components:
           type: string
           description: The ID value of the asset.
         id_field:
-          $ref: "#/components/schemas/IdField"
-          example: "host.name"
+          $ref: '#/components/schemas/IdField'
+          example: 'host.name'
           description: The field representing the ID.
       required:
         - id_value
@@ -52,11 +52,11 @@ components:
 
     CreateAssetCriticalityRecord:
       allOf:
-        - $ref: "#/components/schemas/AssetCriticalityRecordIdParts"
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
         - type: object
           properties:
             criticality_level:
-              $ref: "#/components/schemas/AssetCriticalityLevel"
+              $ref: '#/components/schemas/AssetCriticalityLevel'
             refresh:
               type: string
               enum: [wait_for]
@@ -65,7 +65,7 @@ components:
             - criticality_level
     DeleteAssetCriticalityRecord:
       allOf:
-        - $ref: "#/components/schemas/AssetCriticalityRecordIdParts"
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
         - type: object
           properties:
             refresh:
@@ -74,13 +74,13 @@ components:
               description: If 'wait_for' the request will wait for the index refresh.
     AssetCriticalityRecord:
       allOf:
-        - $ref: "#/components/schemas/CreateAssetCriticalityRecord"
+        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
         - type: object
           properties:
-            "@timestamp":
+            '@timestamp':
               type: string
-              format: "date-time"
-              example: "2017-07-21T17:32:28Z"
+              format: 'date-time'
+              example: '2017-07-21T17:32:28Z'
               description: The time the record was created or updated.
           required:
-            - "@timestamp"
+            - '@timestamp'

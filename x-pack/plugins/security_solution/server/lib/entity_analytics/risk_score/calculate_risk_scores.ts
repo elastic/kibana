@@ -21,7 +21,7 @@ import {
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type {
   AfterKeys,
-  EntityRiskScore,
+  EntityRiskScoreRecord,
   RiskScoreWeights,
 } from '../../../../common/api/entity_analytics/common';
 import {
@@ -69,7 +69,7 @@ const formatForResponse = ({
   now: string;
   identifierField: string;
   includeNewFields: boolean;
-}): EntityRiskScore => {
+}): EntityRiskScoreRecord => {
   const riskDetails = bucket.top_inputs.risk_details;
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
@@ -251,7 +251,7 @@ const processScores = async ({
   identifierField: string;
   logger: Logger;
   now: string;
-}): Promise<EntityRiskScore[]> => {
+}): Promise<EntityRiskScoreRecord[]> => {
   if (buckets.length === 0) {
     return [];
   }

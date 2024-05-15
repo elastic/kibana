@@ -6,7 +6,7 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
@@ -52,10 +52,10 @@ export const useRiskEngineStatus = () => {
     }
     const response = await fetchRiskEngineStatus({ signal });
     const isUpdateAvailable =
-      response?.legacy_risk_engine_status === RiskEngineStatus.enum.ENABLED &&
-      response.risk_engine_status === RiskEngineStatus.enum.NOT_INSTALLED;
+      response?.legacy_risk_engine_status === RiskEngineStatusEnum.ENABLED &&
+      response.risk_engine_status === RiskEngineStatusEnum.NOT_INSTALLED;
     const isNewRiskScoreModuleInstalled =
-      response.risk_engine_status !== RiskEngineStatus.enum.NOT_INSTALLED;
+      response.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
     return {
       isUpdateAvailable,
       isNewRiskScoreModuleInstalled,

@@ -4,12 +4,12 @@ info:
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 servers:
-  - url: "http://{kibana_host}:{port}"
+  - url: 'http://{kibana_host}:{port}'
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 
 paths:
   /internal/risk_score/engine/init:
@@ -17,24 +17,24 @@ paths:
       summary: Initialize the Risk Engine
       description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RiskEngineInitResponse"
-        "400":
+                $ref: '#/components/schemas/RiskEngineInitResponse'
+        '400':
           description: Task manager is unavailable
           content:
             application/json:
               schema:
-                $ref: "../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse"
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RiskEngineInitErrorResponse"
+                $ref: '#/components/schemas/RiskEngineInitErrorResponse'
 
 components:
   schemas:
@@ -66,7 +66,7 @@ components:
         - result
       properties:
         result:
-          $ref: "#/components/schemas/RiskEngineInitResult"
+          $ref: '#/components/schemas/RiskEngineInitResult'
 
     RiskEngineInitErrorResponse:
       type: object

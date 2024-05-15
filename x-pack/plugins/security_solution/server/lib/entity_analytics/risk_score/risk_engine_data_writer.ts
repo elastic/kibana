@@ -7,7 +7,7 @@
 
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { EntityRiskScore } from '../../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
 interface WriterBulkResponse {
@@ -17,8 +17,8 @@ interface WriterBulkResponse {
 }
 
 interface BulkParams {
-  host?: EntityRiskScore[];
-  user?: EntityRiskScore[];
+  host?: EntityRiskScoreRecord[];
+  user?: EntityRiskScoreRecord[];
   refresh?: 'wait_for';
 }
 
@@ -84,7 +84,7 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
     return hostBody.concat(userBody) as BulkOperationContainer[];
   };
 
-  private scoreToEcs = (score: EntityRiskScore, identifierType: IdentifierType): unknown => {
+  private scoreToEcs = (score: EntityRiskScoreRecord, identifierType: IdentifierType): unknown => {
     const { '@timestamp': _, ...rest } = score;
     return {
       '@timestamp': score['@timestamp'],

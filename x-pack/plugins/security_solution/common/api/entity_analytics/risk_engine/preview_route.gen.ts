@@ -24,7 +24,7 @@ import {
   IdentifierType,
   DateRange,
   RiskScoreWeights,
-  EntityRiskScore,
+  EntityRiskScoreRecord,
 } from '../common/common.gen';
 
 export type RiskScoresPreviewRequest = z.infer<typeof RiskScoresPreviewRequest>;
@@ -76,10 +76,10 @@ export const RiskScoresPreviewResponse = z.object({
     /**
      * A list of host risk scores
      */
-    host: z.array(EntityRiskScore).optional(),
+    host: z.array(EntityRiskScoreRecord).optional(),
     /**
      * A list of user risk scores
      */
-    user: z.array(EntityRiskScore).optional(),
+    user: z.array(EntityRiskScoreRecord).optional(),
   }),
 });

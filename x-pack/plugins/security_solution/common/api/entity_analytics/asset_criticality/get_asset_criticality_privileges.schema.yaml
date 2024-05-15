@@ -3,28 +3,28 @@ info:
   title: Get Asset Criticality Privileges Schema
   version: 1.0.0
 servers:
-  - url: "http://{kibana_host}:{port}"
+  - url: 'http://{kibana_host}:{port}'
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /internal/asset_criticality/privileges:
     get:
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityAnalyticsPrivileges"
+                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
               example:
                 elasticsearch:
                   index:
-                    ".asset-criticality.asset-criticality-*":
+                    '.asset-criticality.asset-criticality-*':
                       read: true
                       write: false
                 has_all_required: false

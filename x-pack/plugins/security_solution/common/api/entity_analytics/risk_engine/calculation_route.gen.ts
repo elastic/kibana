@@ -24,7 +24,7 @@ import {
   IdentifierType,
   DateRange,
   RiskScoreWeights,
-  EntityRiskScore,
+  EntityRiskScoreRecord,
 } from '../common/common.gen';
 
 export type RiskScoresCalculationRequest = z.infer<typeof RiskScoresCalculationRequest>;
@@ -76,11 +76,11 @@ export const RiskScoresCalculationResponse = z.object({
       /**
        * A list of host risk scores
        */
-      host: z.array(EntityRiskScore).optional(),
+      host: z.array(EntityRiskScoreRecord).optional(),
       /**
        * A list of user risk scores
        */
-      user: z.array(EntityRiskScore).optional(),
+      user: z.array(EntityRiskScoreRecord).optional(),
       /**
        * If 'wait_for' the request will wait for the index refresh.
        */

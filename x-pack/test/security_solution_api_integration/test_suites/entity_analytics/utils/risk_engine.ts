@@ -24,7 +24,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { EntityRiskScore } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -35,7 +35,7 @@ import {
   routeWithNamespace,
 } from '../../../../common/utils/security_solution';
 
-const sanitizeScore = (score: Partial<EntityRiskScore>): Partial<EntityRiskScore> => {
+const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
   const {
     '@timestamp': timestamp,
     inputs,
@@ -48,12 +48,12 @@ const sanitizeScore = (score: Partial<EntityRiskScore>): Partial<EntityRiskScore
 };
 
 export const sanitizeScores = (
-  scores: Array<Partial<EntityRiskScore>>
-): Array<Partial<EntityRiskScore>> => scores.map(sanitizeScore);
+  scores: Array<Partial<EntityRiskScoreRecord>>
+): Array<Partial<EntityRiskScoreRecord>> => scores.map(sanitizeScore);
 
 export const normalizeScores = (
   scores: Array<Partial<EcsRiskScore>>
-): Array<Partial<EntityRiskScore>> =>
+): Array<Partial<EntityRiskScoreRecord>> =>
   scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
 
 export const buildDocument = (body: object, id?: string) => {

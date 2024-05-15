@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
@@ -146,7 +146,7 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
   if (!currentRiskEngineStatus) {
     return <EuiHealth color="subdued">{'-'}</EuiHealth>;
   }
-  if (currentRiskEngineStatus === RiskEngineStatus.enum.ENABLED) {
+  if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
     return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
   }
   return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
@@ -179,7 +179,7 @@ const RiskEngineStatusRow: React.FC<{
         <EuiSwitch
           label={''}
           data-test-subj="risk-score-switch"
-          checked={currentRiskEngineStatus === RiskEngineStatus.enum.ENABLED}
+          checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
           onChange={onSwitchClick}
           compressed
           disabled={btnIsDisabled}
@@ -237,11 +237,11 @@ export const RiskScoreEnableSection: React.FC<{
       return;
     }
 
-    if (currentRiskEngineStatus === RiskEngineStatus.enum.NOT_INSTALLED) {
+    if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
       initRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.enum.ENABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
       disableRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.enum.DISABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
       enableRiskEngineMutation.mutate();
     }
   };
@@ -253,7 +253,7 @@ export const RiskScoreEnableSection: React.FC<{
   }
 
   if (
-    currentRiskEngineStatus !== RiskEngineStatus.enum.ENABLED &&
+    currentRiskEngineStatus !== RiskEngineStatusEnum.ENABLED &&
     riskEngineStatus?.is_max_amount_of_risk_engines_reached
   ) {
     return (

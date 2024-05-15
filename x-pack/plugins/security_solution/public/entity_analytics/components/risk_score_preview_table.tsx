@@ -9,22 +9,22 @@ import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityRiskScore } from '../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
 import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 
-type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScore> & {
-  field: keyof EntityRiskScore;
+type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
+  field: keyof EntityRiskScoreRecord;
 };
 
 export const RiskScorePreviewTable = ({
   items,
   type,
 }: {
-  items: EntityRiskScore[];
+  items: EntityRiskScoreRecord[];
   type: RiskScoreEntity;
 }) => {
   const columns: RiskScoreColumn[] = [
@@ -79,7 +79,7 @@ export const RiskScorePreviewTable = ({
   ];
 
   return (
-    <EuiInMemoryTable<EntityRiskScore>
+    <EuiInMemoryTable<EntityRiskScoreRecord>
       data-test-subj={
         type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
       }

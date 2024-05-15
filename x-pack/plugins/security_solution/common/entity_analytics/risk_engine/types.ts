@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityRiskScore, RiskScoreInput } from '../../api/entity_analytics/common';
+import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
 
 export enum RiskScoreEntity {
   host = 'host',
@@ -23,11 +23,11 @@ export interface EcsRiskScore {
   '@timestamp': string;
   host?: {
     name: string;
-    risk: Omit<EntityRiskScore, '@timestamp'>;
+    risk: Omit<EntityRiskScoreRecord, '@timestamp'>;
   };
   user?: {
     name: string;
-    risk: Omit<EntityRiskScore, '@timestamp'>;
+    risk: Omit<EntityRiskScoreRecord, '@timestamp'>;
   };
 }
 

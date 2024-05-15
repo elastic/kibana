@@ -102,8 +102,8 @@ export const EntityRiskLevels = z.enum(['Unknown', 'Low', 'Moderate', 'High', 'C
 export type EntityRiskLevelsEnum = typeof EntityRiskLevels.enum;
 export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
 
-export type EntityRiskScore = z.infer<typeof EntityRiskScore>;
-export const EntityRiskScore = z.object({
+export type EntityRiskScoreRecord = z.infer<typeof EntityRiskScoreRecord>;
+export const EntityRiskScoreRecord = z.object({
   /**
    * The time at which the risk score was calculated.
    */

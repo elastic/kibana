@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
-import { IdentifierType, EntityRiskScore } from '../common/common.gen';
+import { IdentifierType, EntityRiskScoreRecord } from '../common/common.gen';
 
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;
 export const RiskScoresEntityCalculationRequest = z.object({
@@ -39,5 +39,5 @@ export type RiskScoresEntityCalculationResponse = z.infer<
 >;
 export const RiskScoresEntityCalculationResponse = z.object({
   success: z.boolean(),
-  score: EntityRiskScore.optional(),
+  score: EntityRiskScoreRecord.optional(),
 });
