@@ -22,7 +22,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { UpsellingProvider } from '../../components/upselling_provider';
 import { ConsoleManager } from '../../../management/components/console';
 import { MockAssistantProvider } from '../mock_assistant_provider';
-import { RouteCapture } from '../../components/agents/route_capture';
+import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins, StartServices } from '../../../types';
 
 /**

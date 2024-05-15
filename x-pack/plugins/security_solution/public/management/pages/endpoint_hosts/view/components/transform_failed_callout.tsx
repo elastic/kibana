@@ -15,7 +15,7 @@ import type { ImmutableArray } from '../../../../../../common/endpoint/types';
 import type { TransformStats } from '../../types';
 import { WARNING_TRANSFORM_STATES } from '../../../../../../common/constants';
 import { metadataTransformPrefix } from '../../../../../../common/endpoint/constants';
-import { LinkToApp } from '../../../../../common/components/agents/link_to_app';
+import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import { CallOut } from '../../../../../common/components/callouts';
 import type { EndpointAction } from '../../store/action';
 

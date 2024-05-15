@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
-import { LinkToApp } from '../../../common/components/agents/link_to_app';
+import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';

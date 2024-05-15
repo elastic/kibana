@@ -18,7 +18,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MissingEncryptionKeyCallout } from '../../../../../management/components/missing_encryption_key_callout';
+import { MissingEncryptionKeyCallout } from '../../../../management/components/missing_encryption_key_callout';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM, UNISOLATE, ISOLATED } from './translations';
 import type { EndpointIsolatedFormProps } from './isolate_form';
 

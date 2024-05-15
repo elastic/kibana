@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
-import type { EndpointIsolatedFormProps } from '../../../common/components/agents/endpoint/host_isolation';
+import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
 import {
   EndpointIsolateForm,
   ActionCompletionReturnButton,
-} from '../../../common/components/agents/endpoint/host_isolation';
+} from '../../../common/components/endpoint/host_isolation';
 import type { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const IsolateHost = React.memo(

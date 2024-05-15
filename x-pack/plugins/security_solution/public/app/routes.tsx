@@ -12,7 +12,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../common/constants';
-import { RouteCapture } from '../common/components/agents/route_capture';
+import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';

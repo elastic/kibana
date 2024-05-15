@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useReducer } from 'react';
 
-import { useWithCaseDetailsRefresh } from '../../../../common/components/agents/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 
 interface HostIsolationStateReducer {
   isolateAction: 'isolateHost' | 'unisolateHost';

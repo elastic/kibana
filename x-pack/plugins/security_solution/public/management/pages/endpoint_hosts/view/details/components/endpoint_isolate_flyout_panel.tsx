@@ -13,13 +13,13 @@ import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEndpointHostIsolated } from '../../../../../../common/utils/validators';
 import type { HostMetadata } from '../../../../../../../common/endpoint/types';
-import type { EndpointIsolatedFormProps } from '../../../../../../common/components/agents/endpoint/host_isolation';
+import type { EndpointIsolatedFormProps } from '../../../../../../common/components/endpoint/host_isolation';
 import {
   ActionCompletionReturnButton,
   EndpointIsolateForm,
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
-} from '../../../../../../common/components/agents/endpoint/host_isolation';
+} from '../../../../../../common/components/endpoint/host_isolation';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
 import {
