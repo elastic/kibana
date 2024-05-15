@@ -77,7 +77,7 @@ interface FilterQueryParams {
   [key: string]: 'unset' | 'on' | 'off';
 }
 
-function serializeFilterOptions(options: EuiSelectableOption[]) {
+export function serializeFilterOptions(options: EuiSelectableOption[]) {
   return options.reduce((list, option) => {
     return {
       ...list,
@@ -86,7 +86,7 @@ function serializeFilterOptions(options: EuiSelectableOption[]) {
   }, {}) as FilterQueryParams;
 }
 
-function deserializeFilterOptions(options: FilterQueryParams) {
+export function deserializeFilterOptions(options: FilterQueryParams) {
   return defaultFilterOptions.map((filter: EuiSelectableOption) => {
     const filterKey = filter.key ? filter.key : '';
     return {
