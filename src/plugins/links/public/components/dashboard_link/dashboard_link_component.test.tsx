@@ -9,8 +9,6 @@
 import React from 'react';
 
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { getDashboardLocatorParamsFromEmbeddable } from '@kbn/dashboard-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
@@ -23,15 +21,33 @@ import { getMockLinksApi } from '../../mocks';
 import { ResolvedLink } from '../../embeddable/types';
 import { BehaviorSubject } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 
-jest.mock('@kbn/dashboard-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/dashboard-plugin/public');
-  return {
-    __esModule: true,
-    ...originalModule,
-    getDashboardLocatorParamsFromEmbeddable: jest.fn(),
+function createMockLinksParent({
+  overrides,
+  initialQuery,
+  initialFilters,
+  savedObjectId,
+}: {
+  overrides?: Partial<DashboardContainerInput>;
+  initialQuery?: Query | AggregateQuery;
+  initialFilters?: Filter[];
+  savedObjectId?: string;
+}) {
+  const parent = buildMockDashboard({ overrides, savedObjectId });
+  parent.locator = {
+    getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
+    navigate: jest.fn(),
   };
-});
+
+  // setting the filter$ and query$ are delayed in the DashboardContainer
+  // so we manually set them for these tests
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(initialQuery);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters ?? []);
+  parent.query$ = query$;
+  parent.filters$ = filters$;
+  return parent;
+}
 
 describe('Dashboard link component', () => {
   const defaultLinkInfo = {
@@ -41,14 +57,8 @@ describe('Dashboard link component', () => {
     type: 'dashboardLink' as const,
   };
 
-  let dashboardContainer: DashboardContainer;
   beforeEach(async () => {
     window.open = jest.fn();
-    dashboardContainer = buildMockDashboard();
-    dashboardContainer.locator = {
-      getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
-      navigate: jest.fn(),
-    };
   });
 
   afterEach(() => {
@@ -56,9 +66,10 @@ describe('Dashboard link component', () => {
   });
 
   test('by default uses navigate to open in same tab', async () => {
+    const parentApi = createMockLinksParent({});
     const linksApi = getMockLinksApi({
       attributes: { links: [defaultLinkInfo] },
-      parentApi: dashboardContainer,
+      parentApi,
     });
     render(
       <DashboardLinkComponent
@@ -78,16 +89,21 @@ describe('Dashboard link component', () => {
 
     // calls `navigate` on click
     userEvent.click(link);
-    expect(dashboardContainer.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
+      filters: [],
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
     });
-    expect(dashboardContainer.locator?.navigate).toBeCalledTimes(1);
+    expect(parentApi.locator?.navigate).toBeCalledTimes(1);
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
     const linksApi = getMockLinksApi({
       attributes: { links: [defaultLinkInfo] },
-      parentApi: dashboardContainer,
+      parentApi: createMockLinksParent({}),
     });
     render(
       <DashboardLinkComponent
@@ -104,13 +120,14 @@ describe('Dashboard link component', () => {
   });
 
   test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
+    const parentApi = createMockLinksParent({});
     const linkInfo = {
       ...defaultLinkInfo,
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
     };
     const linksApi = getMockLinksApi({
       attributes: { links: [linkInfo] },
-      parentApi: dashboardContainer,
+      parentApi,
     });
     render(
       <DashboardLinkComponent
@@ -121,30 +138,39 @@ describe('Dashboard link component', () => {
     );
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
-
     // external link icon is rendered
     const externalIcon = within(link).getByText('External link');
     expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
 
     // calls `window.open`
     userEvent.click(link);
-    expect(dashboardContainer.locator?.navigate).toBeCalledTimes(0);
+    expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
 
-  test('passes linkOptions to getDashboardLocatorParamsFromEmbeddable', async () => {
+  test('passes query, filters, and timeRange to locator.getRedirectUrl by default', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: {
-        ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-        useCurrentFilters: false,
-        useCurrentTimeRange: false,
-        useCurrentDateRange: false,
-      },
+      options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
     };
+    const initialFilters = [
+      {
+        query: { match_phrase: { foo: 'bar' } },
+        meta: { alias: null, disabled: false, negate: false },
+      },
+    ];
+    const initialQuery = { query: 'fiddlesticks: "*"', language: 'lucene' };
+    const parentApi = createMockLinksParent({
+      overrides: {
+        timeRange: { from: 'now-7d', to: 'now' },
+      },
+      initialQuery,
+      initialFilters,
+    });
+
     const linksApi = getMockLinksApi({
       attributes: { links: [linkInfo] },
-      parentApi: dashboardContainer,
+      parentApi,
     });
     render(
       <DashboardLinkComponent
@@ -153,17 +179,100 @@ describe('Dashboard link component', () => {
         api={linksApi}
       />
     );
+    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+      dashboardId: '456',
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: initialFilters,
+      query: initialQuery,
+    });
+  });
 
-    expect(getDashboardLocatorParamsFromEmbeddable).toHaveBeenCalledWith(
-      linksApi,
-      linkInfo.options
+  test('does not pass timeRange to locator.getRedirectUrl if useCurrentDateRange is false', async () => {
+    const linkInfo = {
+      ...defaultLinkInfo,
+      options: {
+        ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+        useCurrentDateRange: false,
+      },
+    };
+    const initialFilters = [
+      {
+        query: { match_phrase: { foo: 'bar' } },
+        meta: { alias: null, disabled: false, negate: false },
+      },
+    ];
+    const initialQuery = { query: 'fiddlesticks: "*"', language: 'lucene' };
+    const parentApi = createMockLinksParent({
+      overrides: {
+        timeRange: { from: 'now-7d', to: 'now' },
+      },
+      initialQuery,
+      initialFilters,
+    });
+
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi,
+    });
+    render(
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
+    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+      dashboardId: '456',
+      filters: initialFilters,
+      query: initialQuery,
+    });
+  });
+
+  test('does not pass filters or query to locator.getRedirectUrl if useCurrentFilters is false', async () => {
+    const linkInfo = {
+      ...defaultLinkInfo,
+      options: {
+        ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+        useCurrentFilters: false,
+      },
+    };
+    const initialFilters = [
+      {
+        query: { match_phrase: { foo: 'bar' } },
+        meta: { alias: null, disabled: false, negate: false },
+      },
+    ];
+    const initialQuery = { query: 'fiddlesticks: "*"', language: 'lucene' };
+    const parentApi = createMockLinksParent({
+      overrides: {
+        timeRange: { from: 'now-7d', to: 'now' },
+      },
+      initialQuery,
+      initialFilters,
+    });
+
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi,
+    });
+    render(
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
+    );
+    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+      dashboardId: '456',
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: [],
+    });
   });
 
   test('shows an error when fetchDashboard fails', async () => {
     const linksApi = getMockLinksApi({
       attributes: { links: [defaultLinkInfo] },
-      parentApi: dashboardContainer,
+      parentApi: createMockLinksParent({}),
     });
     const resolvedLink: ResolvedLink = {
       ...defaultLinkInfo,
@@ -183,12 +292,14 @@ describe('Dashboard link component', () => {
       destination: '123',
       id: 'bar',
     };
+    const parentApi = createMockLinksParent({
+      overrides: { title: 'current dashboard' },
+      savedObjectId: '123',
+    });
+
     const linksApi = getMockLinksApi({
       attributes: { links: [linkInfo] },
-      parentApi: buildMockDashboard({
-        overrides: { title: 'current dashboard' },
-        savedObjectId: '123',
-      }),
+      parentApi,
     });
     render(
       <DashboardLinkComponent
@@ -201,14 +312,14 @@ describe('Dashboard link component', () => {
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
     userEvent.click(link);
-    expect(dashboardContainer.locator?.navigate).toBeCalledTimes(0);
+    expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toBeCalledTimes(0);
   });
 
   test('shows dashboard title and description in tooltip', async () => {
     const linksApi = getMockLinksApi({
       attributes: { links: [defaultLinkInfo] },
-      parentApi: dashboardContainer,
+      parentApi: createMockLinksParent({}),
     });
     const resolvedLink = {
       ...linksApi.resolvedLinks$.value[0],
@@ -272,7 +383,7 @@ describe('Dashboard link component', () => {
     };
     const linksApi = getMockLinksApi({
       attributes: { links: [linkInfo] },
-      parentApi: dashboardContainer,
+      parentApi: createMockLinksParent({}),
     });
     render(
       <DashboardLinkComponent
@@ -298,7 +409,7 @@ describe('Dashboard link component', () => {
     };
     const linksApi = getMockLinksApi({
       attributes: { links: [linkInfo] },
-      parentApi: buildMockDashboard({
+      parentApi: createMockLinksParent({
         overrides: { title: 'current dashboard' },
         savedObjectId: '123',
       }),

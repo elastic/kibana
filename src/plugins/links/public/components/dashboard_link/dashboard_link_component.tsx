@@ -11,16 +11,14 @@ import React, { useMemo } from 'react';
 
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  DashboardLocatorParams,
-  getDashboardLocatorParamsFromEmbeddable,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { isFilterPinned, Query } from '@kbn/es-query';
 import {
   DASHBOARD_LINK_TYPE,
   LinksLayoutType,
@@ -39,12 +37,21 @@ export const DashboardLinkComponent = ({
   layout: LinksLayoutType;
   api: LinksApi;
 }) => {
-  const [parentDashboardId, parentDashboardTitle, parentDashboardDescription] =
-    useBatchedPublishingSubjects(
-      api.parentApi.savedObjectId,
-      api.parentApi.panelTitle,
-      api.parentApi.panelDescription
-    );
+  const [
+    parentDashboardId,
+    parentDashboardTitle,
+    parentDashboardDescription,
+    timeRange,
+    filters,
+    query,
+  ] = useBatchedPublishingSubjects(
+    api.parentApi.savedObjectId,
+    api.parentApi.panelTitle,
+    api.parentApi.panelDescription,
+    api.parentApi.timeRange$,
+    api.parentApi.filters$,
+    api.parentApi.query$
+  );
 
   /**
    * Returns the title and description of the dashboard that the link points to; note that, if the link points to
@@ -91,8 +98,16 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(api, linkOptions),
     };
+    if (linkOptions.useCurrentFilters && query) {
+      params.query = query as Query;
+    }
+
+    if (linkOptions.useCurrentDateRange && timeRange) {
+      params.timeRange = timeRange;
+    }
+
+    params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);
 
     const locator = api.parentApi.locator;
     if (!locator) return;
@@ -121,7 +136,15 @@ export const DashboardLinkComponent = ({
         }
       },
     };
-  }, [link, parentDashboardId, api]);
+  }, [
+    link.destination,
+    link.options,
+    parentDashboardId,
+    filters,
+    api.parentApi.locator,
+    query,
+    timeRange,
+  ]);
 
   const id = `dashboardLink--${link.id}`;
 
