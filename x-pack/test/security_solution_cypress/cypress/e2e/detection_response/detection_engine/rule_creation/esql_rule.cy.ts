@@ -89,12 +89,12 @@ describe(
       beforeEach(() => {
         deleteAlertsAndRules();
         login();
+
+        visit(CREATE_RULE_URL);
+        workaroundForResizeObserver();
       });
 
       it('creates an ES|QL rule', function () {
-        visit(CREATE_RULE_URL);
-        workaroundForResizeObserver();
-
         selectEsqlRuleType();
         expandEsqlQueryBar();
 
@@ -117,9 +117,6 @@ describe(
 
       // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
       it('creates an ES|QL rule and overrides its name', function () {
-        visit(CREATE_RULE_URL);
-        workaroundForResizeObserver();
-
         selectEsqlRuleType();
         expandEsqlQueryBar();
 
@@ -137,10 +134,10 @@ describe(
       beforeEach(() => {
         login();
         visit(CREATE_RULE_URL);
+
+        workaroundForResizeObserver();
       });
       it('shows error when ES|QL query is empty', function () {
-        workaroundForResizeObserver();
-
         selectEsqlRuleType();
         expandEsqlQueryBar();
         getDefineContinueButton().click();
@@ -149,8 +146,6 @@ describe(
       });
 
       it('proceeds further once invalid query is fixed', function () {
-        workaroundForResizeObserver();
-
         selectEsqlRuleType();
         expandEsqlQueryBar();
         getDefineContinueButton().click();
@@ -165,8 +160,6 @@ describe(
       });
 
       it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
-        workaroundForResizeObserver();
-
         const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
         selectEsqlRuleType();
         expandEsqlQueryBar();
@@ -179,8 +172,6 @@ describe(
       });
 
       it('shows error when non-aggregating ES|QL query does not return _id field', function () {
-        workaroundForResizeObserver();
-
         const invalidNonAggregatingQuery =
           'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
 
@@ -195,7 +186,6 @@ describe(
       });
 
       it('shows error when ES|QL query is invalid', function () {
-        workaroundForResizeObserver();
         const invalidEsqlQuery =
           'from auditbeat* metadata _id, _version, _index | not_existing_operator';
         visit(CREATE_RULE_URL);

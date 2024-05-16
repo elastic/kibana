@@ -72,11 +72,12 @@ describe(
       login();
       deleteAlertsAndRules();
       createRule(rule);
+
+      visit(RULES_MANAGEMENT_URL);
+      editFirstRule();
     });
 
     it('edits ES|QL rule and checks details page', () => {
-      visit(RULES_MANAGEMENT_URL);
-      editFirstRule();
       expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
@@ -91,8 +92,6 @@ describe(
     });
 
     it('edits ES|QL rule query and override rule name with new property', () => {
-      visit(RULES_MANAGEMENT_URL);
-      editFirstRule();
       clearEsqlQueryBar();
       fillEsqlQueryBar(expectedValidEsqlQuery);
 
@@ -107,9 +106,6 @@ describe(
     });
 
     it('adds ES|QL override rule name on edit', () => {
-      visit(RULES_MANAGEMENT_URL);
-      editFirstRule();
-
       expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
