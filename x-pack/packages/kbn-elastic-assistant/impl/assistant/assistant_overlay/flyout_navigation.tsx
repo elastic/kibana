@@ -65,7 +65,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           }
         />
       ),
-      [isExpanded, onToggle]
+      [isAssistantEnabled, isExpanded, onToggle]
     );
 
     return (
