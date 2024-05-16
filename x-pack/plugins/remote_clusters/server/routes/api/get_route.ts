@@ -7,6 +7,8 @@
 
 import { get } from 'lodash';
 
+
+import type { IndicesResolveClusterResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -37,7 +39,7 @@ export const register = (deps: RouteDependencies): void => {
       // Retrieve the cluster information for all the configured remote clusters.
       // _none is never a valid index/alias/data-stream name so that way we can avoid
       // using * which could be computationally expensive.
-      let clustersStatus = {};
+      let clustersStatus: IndicesResolveClusterResponse = {};
       if (clusterNames.length > 0) {
         clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
           name: clusterNames.map((cluster) => `${cluster}:_none`),
