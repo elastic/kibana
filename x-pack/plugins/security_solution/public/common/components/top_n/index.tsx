@@ -111,6 +111,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
+  const applyGlobalQueriesAndFilters = !isActiveTimeline(scopeId ?? '');
 
   const combinedQueries = useMemo(
     () =>
@@ -158,7 +159,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}
-      showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={
         isActiveTimeline(scopeId ?? '') ? InputsModelId.timeline : InputsModelId.global
       }
@@ -167,6 +167,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
+      applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
     />
   );
 };
