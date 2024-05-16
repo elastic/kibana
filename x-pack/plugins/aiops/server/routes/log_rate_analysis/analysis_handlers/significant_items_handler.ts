@@ -105,7 +105,6 @@ export const significantItemsHandlerFactory =
 
     logDebugMessage('Fetch p-values.');
 
-    // console.log('---- fetchSignificantTermPValues');
     const pValuesQueue = queue(async function (fieldCandidate: string) {
       stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
 
