@@ -36,9 +36,9 @@ for config in "${configs[@]}"; do
     echo "^^^ +++"
 
     if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
+      failedConfigs="${failedConfigs}"$'\n'"- ${config}"
     else
-      failedConfigs="$config"
+      failedConfigs="### Failed FTR Configs"$'\n'"- ${config}"
     fi
   fi
 done
