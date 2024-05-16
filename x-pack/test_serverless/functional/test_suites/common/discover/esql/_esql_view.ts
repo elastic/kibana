@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/183493
+  describe.skip('discover esql view', async function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
@@ -49,7 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('test', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183193
+    describe.skip('test', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
