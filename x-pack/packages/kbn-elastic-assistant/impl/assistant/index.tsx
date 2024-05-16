@@ -944,6 +944,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
+                    isAssistantEnabled={isAssistantEnabled}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -983,16 +984,19 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  {/* <BlockBotCallToAction
-                    connectorPrompt={connectorPrompt}
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                    isWelcomeSetup={isWelcomeSetup}
-                  /> */}
+                  {!isAssistantEnabled ? (
+                    <BlockBotCallToAction
+                      connectorPrompt={connectorPrompt}
+                      http={http}
+                      isAssistantEnabled={isAssistantEnabled}
+                      isWelcomeSetup={isWelcomeSetup}
+                    />
+                  ) : (
+                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
