@@ -34,6 +34,11 @@ export const register = (deps: RouteDependencies): void => {
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
+      // Retrieve the cluster information for all the configured remote clusters
+      const clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
+        name: clusterNames.map((cluster) => `${cluster}*:*`),
+      });
+
       const body = clusterNames.map((clusterName: string): any => {
         const cluster = clustersByName[clusterName];
         const isTransient = transientClusterNames.includes(clusterName);
@@ -59,6 +64,9 @@ export const register = (deps: RouteDependencies): void => {
             config.isCloudEnabled
           ),
           isConfiguredByNode,
+          // We prioritize the cluster status from the resolve cluster api, and fallback to
+          // the cluster connected status in case its not present.
+          isConnected: clustersStatus[clusterName]?.connected || cluster.connected,
         };
       });
 
