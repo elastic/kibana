@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Import Rules API endpoint
+  version: '2024-05-15'
+paths:
+  /api/detection_engine/rules/_import:
+    post:
+      operationId: ImportRulesV2
+      x-codegen-enabled: true
+      summary: Import rules
+      description: Imports rules
+      tags:
+        - Import/Export API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleCreateProps'
+      parameters:
+        - name: overwrite
+          in: query
+          required: false
+          description: Determines whether existing rules with the same `rule_id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_exceptions
+          in: query
+          required: false
+          description: Determines whether existing exception lists with the same `list_id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_action_connectors
+          in: query
+          required: false
+          description: Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: as_new_list
+          in: query
+          required: false
+          description: Generates a new list ID for each imported exception list.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - imported_rules_count
+                  - success
+                  - errors
+                properties:
+                  imported_rules_count:
+                    type: integer
+                    minimum: 0
+                  success:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'

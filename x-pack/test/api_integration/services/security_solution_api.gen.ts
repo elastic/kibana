@@ -30,6 +30,7 @@ import {
   ExportRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
 import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import { FindRulesV2RequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.v2.gen';
 import { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
 import {
   GetEndpointSuggestionsRequestParamsInput,
@@ -45,6 +46,10 @@ import {
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
+import {
+  ImportRulesV2RequestQueryInput,
+  ImportRulesV2RequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.v2.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import {
   PerformBulkActionRequestQueryInput,
@@ -149,6 +154,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Finds rules that match the given query.
+     */
+    findRulesV2(props: FindRulesV2Props) {
+      return supertest
+        .get('/api/detection_engine/rules/_find')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2024-05-15')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     getAgentPolicySummary(props: GetAgentPolicySummaryProps) {
       return supertest
         .get('/api/endpoint/policy/summaries')
@@ -209,6 +225,18 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Imports rules
+     */
+    importRulesV2(props: ImportRulesV2Props) {
+      return supertest
+        .post('/api/detection_engine/rules/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2024-05-15')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
         .query(props.query);
     },
     installPrebuiltRulesAndTimelines() {
@@ -320,6 +348,9 @@ export interface ExportRulesProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface FindRulesV2Props {
+  query: FindRulesV2RequestQueryInput;
+}
 export interface GetAgentPolicySummaryProps {
   query: GetAgentPolicySummaryRequestQueryInput;
 }
@@ -340,6 +371,10 @@ export interface GetRuleExecutionResultsProps {
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
+}
+export interface ImportRulesV2Props {
+  query: ImportRulesV2RequestQueryInput;
+  body: ImportRulesV2RequestBodyInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
