@@ -19,19 +19,7 @@ export const getDashboard = (
   genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini',
   dashboardId: string
 ): SavedObject<DashboardAttributes> => {
-  // const attributes =
-  //   genAIProvider === 'OpenAI'
-  //     ? {
-  //         provider: OPENAI_TITLE,
-  //         dashboardTitle: getDashboardTitle(OPENAI_TITLE),
-  //         actionTypeId: OPENAI_CONNECTOR_ID,
-  //       }
-  //     : {
-  //         provider: BEDROCK_TITLE,
-  //         dashboardTitle: getDashboardTitle(BEDROCK_TITLE),
-  //         actionTypeId: BEDROCK_CONNECTOR_ID,
-  //       };
-
+  
   let attributes = {
     provider: OPENAI_TITLE,
     dashboardTitle: getDashboardTitle(OPENAI_TITLE),
@@ -59,8 +47,6 @@ export const getDashboard = (
     }
 
   }
-
-  
 
   const ids: Record<string, string> = {
     genAiSavedObjectId: dashboardId,

@@ -32,7 +32,7 @@ const messageBody = {
 }
 
 export const DEFAULT_BODY = JSON.stringify({
-  gemini_version: 'gemini-1.5-pro-preview-0409',
+  gemini_version: DEFAULT_GEMINI_MODEL,
   messages: messageBody,
 });
 
@@ -50,7 +50,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
           geminiAPIUrlDocs: (
             <EuiLink
               data-test-subj="gemini-api-doc"
-              href="https://ai.google.dev/docs"
+              href="https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#gemini-setup-environment-drest"
               target="_blank"
             >
               {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
@@ -87,7 +87,6 @@ export const geminiConfig: ConfigFieldSchema[] = [
     id: 'gcpProjectID',
     label: i18n.GCP_PROJECT_ID,
     isUrlField: false,
-    // defaultValue: DEFAULT_GEMINI_URL,
     helpText: (
       <FormattedMessage
         defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled . For more information on the URL, refer to the {geminiVertexAIDocs}."

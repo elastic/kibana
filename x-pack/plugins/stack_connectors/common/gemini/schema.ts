@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+// "candidates": [
+//   {
+//     "content": {
+//       "parts": [
+//         {
+//           "text": string
+//         }
+//       ]
+//     },
+// ]
 
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_GEMINI_MODEL } from './constants';
 
-// Connector schema
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
@@ -30,17 +39,10 @@ export const RunActionParamsSchema = schema.object({
 
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.any(),
-  // messages: schema.arrayOf(
-  //   schema.object({
-  //     role: schema.string(),
-  //     content: schema.string(),
-  //   })
-  // ),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   signal: schema.maybe(schema.any()),
-  // system: schema.maybe(schema.string()),
   timeout: schema.maybe(schema.number()),
 });
 
@@ -48,15 +50,16 @@ export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
 });
 
-export const StreamActionParamsSchema = schema.object({
-  body: schema.string(),
-  model: schema.maybe(schema.string()),
-});
-
 export const RunApiLatestResponseSchema = schema.object(
   {
     candidates: schema.any(),
-    usageMetadata: schema.any(),
+    usageMetadata: schema.object(
+      {
+        promptTokenCount: schema.number(),
+        candidatesTokenCount: schema.number(),
+        totalTokenCount: schema.number(),
+      }
+    ),
   }
 );
 
@@ -74,9 +77,6 @@ export const RunActionResponseSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-export const StreamingResponseSchema = schema.any();
-
-// Run action schema
 export const DashboardActionParamsSchema = schema.object({
   dashboardId: schema.string(),
 });

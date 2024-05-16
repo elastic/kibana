@@ -11,7 +11,6 @@ import {
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
@@ -34,7 +33,6 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
-    GenerativeAIForObservabilityConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,

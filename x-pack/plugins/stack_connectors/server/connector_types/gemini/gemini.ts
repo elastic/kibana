@@ -7,15 +7,11 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
-// import { IncomingMessage } from 'http';
-// import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
-  // StreamingResponseSchema,
-  RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/gemini/schema';
 import {
@@ -25,38 +21,16 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-  // StreamActionParams,
   RunApiLatestResponse,
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
-  // StreamingResponse,
 } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
-/** Interfaces that define the Gemini model response */
-interface Part {
-  text: string;
-}
-
-interface Content {
-  parts: Part[];
-  role: string;
-}
-
-interface Candidate {
-  content: {
-    parts: {
-      text: string;
-    }[];
-  };
-}
-
-interface Data {
-  candidates: Candidate[];
-}
+/** Interfaces to define the Gemini model response type */
 
 interface MessagePart {
   text: string;
@@ -115,12 +89,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
     });
-
-    this.registerSubAction({
-      name: SUB_ACTION.INVOKE_STREAM,
-      method: 'invokeStream',
-      schema: InvokeAIActionParamsSchema,
-    });
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
@@ -131,10 +99,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       error.response.status === 400 &&
       error.response?.data?.message === 'The requested operation is not recognized by the service.'
     ) {
-      // Leave space in the string below, \n is not being rendered in the UI
-      return `API Error: ${error.response.data.message}
-
-The Kibana Connector in use may need to be reconfigured with an updated Amazon Gemini endpoint, like \`gemini-runtime\`.`;
+      return `API Error: ${error.response.data.message}`;
     }
     if (error.response.status === 401) {
       return `Unauthorized API Error${
@@ -183,18 +148,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunApiLatestResponse> 
   ): Promise<RunActionResponse> {
 
     const response = await this.request(params);
     const candidate = response.data.candidates[0];
     const completionText = candidate.content.parts[0].text;
-    console.log("Completion:", completionText);
-
     return { completion: completionText }
+
   }
 
   /**
+   * This method is called on TEST subaction
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
@@ -214,7 +179,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      // give up to 2 minutes for response
       timeout: 120000,
     };
     
@@ -222,7 +186,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   }
 
   /**
-   * responsible for making a POST request to the external API endpoint and returning the response data
+   * responsible for making a POST request to the Vertex AI API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
@@ -248,7 +212,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
        'Content-Type': 'application/json'
      },
      signal,
-     // give up to 2 minutes for response
      timeout: 120000,
    };
 
@@ -273,24 +236,24 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
 
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = (data: string): Payload => {
-  let payload: Payload = {
-      contents: [],
-      generation_config: {
-          temperature: 0,
-          maxOutputTokens: DEFAULT_TOKEN_LIMIT
-      }
-  };
-  
-  for (const row of JSON.parse(data)) {
-      payload.contents.push({
-          role: row.role,
-          parts: [
-              {
-                  text: row.content
-              }
-          ]
-      });
-  }
-  
-  return payload;
+    let payload: Payload = {
+        contents: [],
+        generation_config: {
+            temperature: 0,
+            maxOutputTokens: DEFAULT_TOKEN_LIMIT
+        }
+    };
+    
+    for (const row of JSON.parse(data)) {
+        payload.contents.push({
+            role: row.role,
+            parts: [
+                {
+                    text: row.content
+                }
+            ]
+        });
+    }
+    
+    return payload;
   };
