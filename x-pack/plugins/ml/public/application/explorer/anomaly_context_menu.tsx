@@ -233,7 +233,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
               id="selectMaxSeriesToPlot"
               name="selectMaxSeriesToPlot"
               value={maxSeriesToPlot}
-              // @todo: parseInt out of range
               onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
               min={1}
               max={MAX_ANOMALY_CHARTS_ALLOWED}

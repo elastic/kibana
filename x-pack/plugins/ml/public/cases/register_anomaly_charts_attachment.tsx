@@ -11,22 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
-import { getEmbeddableComponent } from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
+import { getAnomalyChartsServiceDependencies } from '../embeddables/anomaly_charts/get_anomaly_charts_services_dependencies';
 
-// @TODO: detach this from react embeddable
 export function registerAnomalyChartsCasesAttachment(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
-  const EmbeddableComponent = getEmbeddableComponent(
-    CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-    coreStart,
-    pluginStart
-  );
-
   cases.attachmentFramework.registerPersistableState({
     id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
     icon: PLUGIN_ICON,
@@ -42,9 +35,12 @@ export function registerAnomalyChartsCasesAttachment(
       ),
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
-        const { initComponent } = await import('./anomaly_charts_attachments');
+        const { initializeAnomalyChartsAttachment } = await import('./anomaly_charts_attachments');
+        const getStartServices = async () => [coreStart, pluginStart];
+        const services = await getAnomalyChartsServiceDependencies(getStartServices);
+
         return {
-          default: initComponent(pluginStart.fieldFormats, EmbeddableComponent),
+          default: initializeAnomalyChartsAttachment(pluginStart.fieldFormats, services),
         };
       }),
     }),

@@ -39,7 +39,6 @@ export function getJobsObservable(
           modelPlotEnabled: job.model_plot_config?.enabled === true,
         };
       });
-
       return explorerJobs;
     })
   );

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useMemo } from 'react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { Subscription, BehaviorSubject, combineLatest, map, skipWhile } from 'rxjs';
+import { Subscription, combineLatest, map, skipWhile } from 'rxjs';
 import { apiHasParentApi, apiPublishesTimeRange, fetch$ } from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,19 +18,14 @@ import {
   initializeTimeRange,
   initializeTitles,
 } from '@kbn/presentation-publishing';
-import { dynamic } from '@kbn/shared-ux-utility';
 import useObservable from 'react-use/lib/useObservable';
-import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { MlDependencies } from '../../application/app';
-import type { AnomalyChartsEmbeddableServices } from '..';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeAnomalyChartsControls } from './initialize_anomaly_charts_controls';
 import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from './types';
-
-const EmbeddableAnomalyChartsContainer = dynamic(() => import('./anomaly_charts_react_container'));
+import { LazyEmbeddableAnomalyChartsContainer } from './lazy_anomaly_charts_container';
+import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -43,69 +38,12 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         if (!apiHasExecutionContext(parentApi)) {
           throw new Error('Parent API does not have execution context');
         }
-
-        const [
-          [coreStartServices, pluginsStartServices],
-          { AnomalyDetectorService },
-          { fieldFormatServiceFactory },
-          { indexServiceFactory },
-          { mlApiServicesProvider },
-          { mlResultsServiceProvider },
-        ] = await Promise.all([
-          await getStartServices(),
-          await import('../../application/services/anomaly_detector_service'),
-          await import('../../application/services/field_format_service_factory'),
-          await import('../../application/util/index_service'),
-          await import('../../application/services/ml_api_service'),
-          await import('../../application/services/results_service'),
-        ]);
-        const httpService = new HttpService(coreStartServices.http);
-        const anomalyDetectorService = new AnomalyDetectorService(httpService);
-        const mlApiServices = mlApiServicesProvider(httpService);
-        const mlResultsService = mlResultsServiceProvider(mlApiServices);
-        const anomalyExplorerService = new AnomalyExplorerChartsService(
-          pluginsStartServices.data.query.timefilter.timefilter,
-          mlApiServices,
-          mlResultsService
+        const anomalyChartsDependencies = await getAnomalyChartsServiceDependencies(
+          getStartServices
         );
-
-        // Note on the following services:
-        // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
-        //   but it's not being made available as part of global services. Since it's just
-        //   some stateless utils `useMlIndexUtils()` should be used from within components.
-        // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
-        //   so because of its own state it needs to be made available as a global service.
-        //   In the long run we should again try to get rid of it here and make it available via
-        //   its own context or possibly without having a singleton like state at all, since the
-        //   way this manages its own state right now doesn't consider React component lifecycles.
-        const mlIndexUtils = indexServiceFactory(pluginsStartServices.data.dataViews);
-        const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
-
-        const anomalyChartsEmbeddableServices: AnomalyChartsEmbeddableServices = [
-          coreStartServices,
-          pluginsStartServices as MlDependencies,
-          {
-            anomalyDetectorService,
-            anomalyExplorerService,
-            mlFieldFormatService,
-            mlResultsService,
-          },
-        ];
+        const [coreStartServices, pluginsStartServices, mlServices] = anomalyChartsDependencies;
 
         const subscriptions = new Subscription();
-        const interval$ = new BehaviorSubject<number | undefined>(undefined);
-        const dataLoading = new BehaviorSubject<boolean | undefined>(true);
-        const blockingError = new BehaviorSubject<Error | undefined>(undefined);
-        const query$ =
-          // @ts-ignore
-          (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
-          new BehaviorSubject(undefined);
-        const filters$ =
-          // @ts-ignore
-          (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
-          new BehaviorSubject(undefined);
-
-        const refresh$ = new BehaviorSubject<void>(undefined);
 
         const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
         const {
@@ -116,13 +54,11 @@ export const getAnomalyChartsReactEmbeddableFactory = (
 
         const {
           anomalyChartsControlsApi,
+          dataLoadingApi,
           serializeAnomalyChartsState,
           anomalyChartsComparators,
           onAnomalyChartsDestroy,
-        } = initializeAnomalyChartsControls(state, titlesApi);
-
-        // Helpers for swim lane data fetching
-        const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
+        } = initializeAnomalyChartsControls(state, titlesApi, parentApi);
 
         const api = buildApi(
           {
@@ -161,12 +97,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             ...titlesApi,
             ...timeRangeApi,
             ...anomalyChartsControlsApi,
-            query$,
-            filters$,
-            interval$,
-            refresh$,
-            setInterval: (v) => interval$.next(v),
-            dataLoading,
+            ...dataLoadingApi,
             serializeState: () => {
               return {
                 rawState: {
@@ -210,18 +141,15 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           })
         ) as Observable<TimeRange | undefined>;
 
-        const onRenderComplete = () => dataLoading.next(false);
-        const onLoading = (v) => dataLoading.next(v);
-        const onError = (error) => blockingError.next(error);
-
+        const { onRenderComplete, onLoading, onError } = dataLoadingApi;
         const contextServices = {
           mlServices: {
-            ...anomalyChartsEmbeddableServices[2],
+            ...anomalyChartsDependencies[2],
           },
-          ...anomalyChartsEmbeddableServices[0],
-          ...anomalyChartsEmbeddableServices[1],
+          ...anomalyChartsDependencies[0],
+          ...anomalyChartsDependencies[1],
         };
-        const initialstate = api.serializeState().rawState;
+        const initialState = api.serializeState().rawState;
 
         return {
           api,
@@ -255,10 +183,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             return (
               <KibanaRenderContextProvider {...coreStartServices}>
                 <KibanaContextProvider services={contextServices}>
-                  <EmbeddableAnomalyChartsContainer
-                    initialstate={initialstate}
+                  <LazyEmbeddableAnomalyChartsContainer
+                    severityThreshold={initialState.severityThreshold}
                     api={api}
-                    services={anomalyChartsEmbeddableServices}
+                    services={anomalyChartsDependencies}
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}

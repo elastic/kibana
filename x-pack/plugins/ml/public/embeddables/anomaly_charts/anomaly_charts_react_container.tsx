@@ -76,7 +76,7 @@ function useAnomalyChartsData(
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const chartWidth$ = useMemo(() => new Subject<number>(), []);
+  const chartWidth$ = useMemo(() => new Subject<number>(100), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
 
   useEffect(() => {
@@ -174,7 +174,7 @@ function useAnomalyChartsData(
       });
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
       chartWidth$.complete();
       severity$.complete();
     };
@@ -204,8 +204,8 @@ function useAnomalyChartsData(
 const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
   appliedTimeRange$,
-  initialstate,
-  embeddableApi$,
+  // @todo: update this just to severityThreshold
+  severityThreshold,
   services,
   onInputChange,
   onOutputChange,
@@ -216,7 +216,9 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
-    optionValueToThreshold(initialstate.severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING)
+    optionValueToThreshold(
+      severityThreshold !== undefined ? severityThreshold : ML_ANOMALY_THRESHOLD.WARNING
+    )
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =

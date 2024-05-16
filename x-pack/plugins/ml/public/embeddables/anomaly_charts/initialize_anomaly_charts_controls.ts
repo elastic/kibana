@@ -12,21 +12,37 @@ import type { AnomalyChartsComponentApi, AnomalyChartsEmbeddableState } from './
 
 export const initializeAnomalyChartsControls = (
   rawState: AnomalyChartsEmbeddableState,
-  titlesApi: TitlesApi
+  titlesApi: TitlesApi,
+  parentApi // @todo: fix type
 ) => {
   const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const maxSeriesToPlot$ = new BehaviorSubject<number>(rawState.maxSeriesToPlot);
   const severityThreshold$ = new BehaviorSubject<number>(rawState.severityThreshold);
   const entityFields$ = new BehaviorSubject<number>(rawState.selectedEntities);
+  const interval$ = new BehaviorSubject<number | undefined>(undefined);
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const query$ =
+    // @ts-ignore
+    (rawState.query ? new BehaviorSubject(rawState.query) : parentApi?.query$) ??
+    new BehaviorSubject(undefined);
+  const filters$ =
+    // @ts-ignore
+    (rawState.query ? new BehaviorSubject(rawState.filters) : parentApi?.filters$) ??
+    new BehaviorSubject(undefined);
+  const refresh$ = new BehaviorSubject<void>(undefined);
 
   const updateUserInput = (update: AnomalyChartsEmbeddableState) => {
     jobIds$.next(update.jobIds);
     maxSeriesToPlot$.next(update.maxSeriesToPlot);
-    titlesApi.setPanelTitle(update.panelTitle);
+    if (titlesApi) {
+      titlesApi.setPanelTitle(update.panelTitle);
+    }
   };
 
   const updateSeverityThreshold = (v) => severityThreshold$.next(v.severityThreshold);
   const updateEntityFields = (v) => entityFields$.next(v);
+  const setInterval = (v) => interval$.next(v);
 
   const serializeAnomalyChartsState = (): AnomalyChartsEmbeddableState => {
     return {
@@ -43,6 +59,9 @@ export const initializeAnomalyChartsControls = (
     severityThreshold: [severityThreshold$, (arg) => severityThreshold$.next(arg)],
     entityFields: [entityFields$, (arg) => severityThreshold$.next(arg)],
   };
+  const onRenderComplete = () => dataLoading$.next(false);
+  const onLoading = (v) => dataLoading$.next(v);
+  const onError = (error) => blockingError$.next(error);
 
   return {
     anomalyChartsControlsApi: {
@@ -54,6 +73,16 @@ export const initializeAnomalyChartsControls = (
       updateSeverityThreshold,
       updateEntityFields,
     } as unknown as AnomalyChartsComponentApi,
+    dataLoadingApi: {
+      query$,
+      filters$,
+      refresh$,
+      dataLoading$,
+      setInterval,
+      onRenderComplete,
+      onLoading,
+      onError,
+    },
     serializeAnomalyChartsState,
     anomalyChartsComparators,
     onAnomalyChartsDestroy: () => {

@@ -5,20 +5,84 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { memoize } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '../embeddables';
+import { LazyEmbeddableAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
+import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/initialize_anomaly_charts_controls';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableServices } from '../embeddables';
 
-export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalyChartsEmbeddableInput>) => {
+const AnomalyChartsCaseAttachment = ({
+  services,
+  ...initialState
+}: {
+  jobIds: JobId[];
+  maxSeriesToPlot: number;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange?: TimeRange;
+  severityThreshold?: number;
+  services: AnomalyChartsEmbeddableServices;
+}) => {
+  const [coreStartServices, pluginStartServices, mlServices] = services;
+  const contextServices = useMemo(
+    () => ({
+      mlServices: {
+        ...mlServices,
+      },
+      ...pluginStartServices,
+      ...coreStartServices,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const api = useMemo(
+    () => {
+      const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
+      return { ...anomalyChartsApi.anomalyChartsControlsApi, ...anomalyChartsApi.dataLoadingApi };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const appliedTimeRange$ = useMemo(
+    () => new BehaviorSubject(initialState.timeRange),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [initialState.timeRange?.from, initialState.timeRange?.to]
+  );
+
+  return (
+    <div css={css({ display: 'flex', width: '100%' })}>
+      <KibanaRenderContextProvider {...coreStartServices}>
+        <KibanaContextProvider services={contextServices}>
+          <LazyEmbeddableAnomalyChartsContainer
+            severityThreshold={initialState.severityThreshold}
+            api={api}
+            services={services}
+            onLoading={api.onLoading}
+            onRenderComplete={api.onRenderComplete}
+            onError={api.onError}
+            appliedTimeRange$={appliedTimeRange$}
+          />
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
+    </div>
+  );
+};
+
+export const initializeAnomalyChartsAttachment = memoize(
+  (fieldFormats: FieldFormatsStart, services: AnomalyChartsEmbeddableServices) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;
@@ -67,7 +131,7 @@ export const initComponent = memoize(
         return (
           <>
             <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
-            <EmbeddableComponent {...inputProps} />
+            <AnomalyChartsCaseAttachment services={services} {...inputProps} />
           </>
         );
       },
