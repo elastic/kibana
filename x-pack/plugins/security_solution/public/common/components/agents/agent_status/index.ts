@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './endpoint_agent_status';
-export type { EndpointAgentStatusProps } from './endpoint_agent_status';
+export * from './endpoint/endpoint_agent_status';
+export type { EndpointAgentStatusProps } from './endpoint/endpoint_agent_status';
+export * from './agent_status';
