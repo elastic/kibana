@@ -108,4 +108,11 @@ describe('IngestPipelinePanel', () => {
       true
     );
   });
+
+  describe('when there exists no ingest pipeline', () => {
+    it('should display an empty list of pipelines', () => {
+      find('ingestPipelinePanelSelect').simulate('click');
+      expect(exists('ingestPipelinePanelOptions')).toBe(false);
+    });
+  });
 });
