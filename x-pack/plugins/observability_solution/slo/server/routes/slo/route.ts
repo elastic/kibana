@@ -28,6 +28,8 @@ import {
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -664,6 +666,37 @@ const putSloSettings = (isServerless?: boolean) =>
     },
   });
 
+const getSLOsOverview = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/overview',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: getOverviewParamsSchema,
+  handler: async ({ context, params, request, logger, dependencies }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const racClient = await dependencies.getRacClientWithRequest(request);
+
+    const spaces = await dependencies.getSpacesStart();
+    const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const rulesClient = await dependencies.getRulesClientWithRequest(request);
+
+    const slosOverview = new GetSLOsOverview(
+      soClient,
+      esClient,
+      spaceId,
+      logger,
+      rulesClient,
+      racClient
+    );
+    return await slosOverview.execute(params?.query ?? {});
+  },
+});
+
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
     ...fetchSloHealthRoute,
@@ -687,5 +720,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
+    ...getSLOsOverview,
   };
 };

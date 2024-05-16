@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ALL_VALUE,
-  kqlQuerySchema,
-  kqlWithFiltersSchema,
+  FiltersSchema,
   QuerySchema,
   SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { formatAllFilters } from '../../helpers/format_filters';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { GroupByCardinality } from '../common/group_by_cardinality';
@@ -44,7 +44,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
     tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
-  const groupByCardinalityFilters: Filter[] = getGroupByCardinalityFilters(
+  const groupByCardinalityFilters = getGroupByCardinalityFilters(
     filters.monitorIds,
     filters.projects,
     filters.tags
@@ -155,7 +155,7 @@ export const getGroupByCardinalityFilters = (
   monitorIds: string[],
   projects: string[],
   tags: string[]
-): Filter[] => {
+): FiltersSchema => {
   const monitorIdFilters = monitorIds.length
     ? {
         meta: {
@@ -234,19 +234,5 @@ export const getGroupByCardinalityFilters = (
       }
     : null;
 
-  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as Filter[];
-};
-
-export const formatAllFilters = (
-  globalFilters: QuerySchema = '',
-  groupByCardinalityFilters: Filter[]
-) => {
-  if (kqlQuerySchema.is(globalFilters)) {
-    return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
-  } else if (kqlWithFiltersSchema) {
-    return {
-      kqlQuery: globalFilters.kqlQuery,
-      filters: [...globalFilters.filters, ...groupByCardinalityFilters],
-    };
-  }
+  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as FiltersSchema;
 };

@@ -1008,7 +1008,7 @@
             "label": "playground",
             "description": [],
             "signature": [
-              "{ readonly chatPlayground: string; }"
+              "{ readonly chatPlayground: string; readonly retrievalOptimize: string; readonly retrieval: string; readonly context: string; readonly hiddenFields: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

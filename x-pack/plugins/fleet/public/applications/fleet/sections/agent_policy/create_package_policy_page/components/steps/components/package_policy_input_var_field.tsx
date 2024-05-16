@@ -36,7 +36,7 @@ import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
-import { DatasetComboBox } from './dataset_combo';
+import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -88,7 +88,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     isEditPage = false,
   }) => {
     const fleetStatus = useFleetStatus();
-
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
@@ -100,6 +99,20 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
 
     const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
     const useSecretsUi = secretsStorageEnabled && varDef.secret;
+
+    if (name === DATASET_VAR_NAME && packageType === 'input') {
+      return (
+        <DatasetComponent
+          pkgName={packageName}
+          datastreams={datastreams}
+          value={value}
+          onChange={onChange}
+          isDisabled={isEditPage}
+          fieldLabel={fieldLabel}
+          description={description}
+        />
+      );
+    }
 
     let field: JSX.Element;
 
@@ -127,10 +140,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         value,
         onChange,
         frozen,
-        packageName,
-        packageType,
-        datastreams,
-        isEditPage,
         isInvalid,
         fieldLabel,
         fieldTestSelector,
@@ -171,16 +180,12 @@ function getInputComponent({
   value,
   onChange,
   frozen,
-  packageName,
-  packageType,
-  datastreams = [],
-  isEditPage,
   isInvalid,
   fieldLabel,
   fieldTestSelector,
   setIsDirty,
 }: InputComponentProps) {
-  const { multi, type, name, options } = varDef;
+  const { multi, type, options } = varDef;
   if (multi) {
     return (
       <MultiTextInput
@@ -190,17 +195,6 @@ function getInputComponent({
         onBlur={() => setIsDirty(true)}
         isDisabled={frozen}
         data-test-subj={`multiTextInput-${fieldTestSelector}`}
-      />
-    );
-  }
-  if (name === DATASET_VAR_NAME && packageType === 'input') {
-    return (
-      <DatasetComboBox
-        pkgName={packageName}
-        datastreams={datastreams}
-        value={value}
-        onChange={onChange}
-        isDisabled={isEditPage}
       />
     );
   }
