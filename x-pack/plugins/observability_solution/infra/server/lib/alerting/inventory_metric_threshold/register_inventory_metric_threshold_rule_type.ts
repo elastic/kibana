@@ -17,12 +17,12 @@ import {
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
-} from '../../../../common/http_api/snapshot_api';
+} from '../../../../common/http_api';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -56,7 +56,7 @@ const comparators: string[] = Object.values(COMPARATORS);
 comparators.push(LEGACY_OUTSIDE_RANGE);
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(comparators),
+  comparator: oneOfLiterals(comparators) as Type<COMPARATORS>,
   timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,

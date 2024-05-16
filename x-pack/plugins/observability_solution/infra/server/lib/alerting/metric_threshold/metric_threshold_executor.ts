@@ -24,7 +24,7 @@ import { TimeUnitChar, getAlertUrl, LEGACY_OUTSIDE_RANGE } from '@kbn/observabil
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates } from '../../../../common/alerting/metrics';
+import { AlertStates, MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -122,7 +122,7 @@ export const createMetricThresholdExecutor =
     } = options;
 
     const { criteria } = params;
-    criteria.forEach((criteriaItem: Record<string, any>) => {
+    criteria.forEach((criteriaItem: MetricExpressionParams) => {
       // For backwards-compatibility check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
       // Then, change it on-the-fly to NOT_BETWEEN
       // @ts-ignore
