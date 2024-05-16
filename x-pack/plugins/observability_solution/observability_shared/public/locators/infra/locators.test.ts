@@ -10,6 +10,7 @@ import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
 import { HostsLocatorDefinition } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
+import querystring from 'querystring';
 
 const setupAssetDetailsLocator = async () => {
   const assetDetailsLocator = new AssetDetailsLocatorDefinition();
@@ -184,8 +185,8 @@ describe('Infra Locators', () => {
         autoBounds: true,
         boundsOverride: { max: 1, min: 0 },
       },
-      customMetrics: '',
-      customOptions: '',
+      customMetrics: undefined,
+      customOptions: undefined,
       groupBy: { field: 'cloud.provider' },
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
       metric: '(type:cpu)',
@@ -196,28 +197,21 @@ describe('Infra Locators', () => {
       view: 'map' as const,
     };
 
-    const waffleFilter = rison.encodeUnknown(params.waffleFilter);
-    const waffleTime = rison.encodeUnknown(params.waffleTime);
-    const waffleOptions = rison.encodeUnknown(params.waffleOptions);
-    const customMetrics = rison.encodeUnknown(params.customMetrics);
-    const customOptions = rison.encodeUnknown(params.customOptions);
-    const groupBy = rison.encodeUnknown(params.groupBy);
-    const legend = rison.encodeUnknown(params.legend);
-    const metric = params.metric;
-    const nodeType = rison.encodeUnknown(params.nodeType);
-    const region = rison.encodeUnknown(params.region);
-    const sort = rison.encodeUnknown(params.sort);
-    const timelineOpen = rison.encodeUnknown(params.timelineOpen);
-    const view = rison.encodeUnknown(params.view);
+    const expected = Object.keys(params).reduce((acc, key) => {
+      acc[key] =
+        key === 'metric' || key === 'customOptions' || key === 'customMetrics'
+          ? params[key]
+          : rison.encodeUnknown(params[key]);
+      return acc;
+    }, {});
+    const queryStringParams = querystring.stringify(expected);
 
     it('should create a link to Inventory with no state', async () => {
       const { inventoryLocator } = await setupInventoryLocator();
       const { app, path, state } = await inventoryLocator.getLocation(params);
 
       expect(app).toBe('metrics');
-      expect(path).toBe(
-        `/inventory?waffleFilter=${waffleFilter}&waffleTime=${waffleTime}&waffleOptions=${waffleOptions}&customMetrics=${customMetrics}&customOptions=${customOptions}&groupBy=${groupBy}&legend=${legend}&metric=${metric}&nodeType=${nodeType}&region=${region}&sort=${sort}&timelineOpen=${timelineOpen}&view=${view}`
-      );
+      expect(path).toBe(`/inventory?${queryStringParams}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
@@ -227,9 +221,7 @@ describe('Infra Locators', () => {
       const { app, path, state } = await inventoryLocator.getLocation(params);
 
       expect(app).toBe('metrics');
-      expect(path).toBe(
-        `/inventory?waffleFilter=${waffleFilter}&waffleTime=${waffleTime}&waffleOptions=${waffleOptions}&customMetrics=${customMetrics}&customOptions=${customOptions}&groupBy=${groupBy}&legend=${legend}&metric=${metric}&nodeType=${nodeType}&region=${region}&sort=${sort}&timelineOpen=${timelineOpen}&view=${view}`
-      );
+      expect(path).toBe(`/inventory?${queryStringParams}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });

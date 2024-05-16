@@ -7,6 +7,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import querystring from 'querystring';
 
 export type InventoryLocator = LocatorPublic<InventoryLocatorParams>;
 
@@ -69,8 +70,8 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
           boundsOverride: { max: 1, min: 0 },
         }
       ),
-      customMetrics: params.customMetrics || rison.encodeUnknown(''),
-      customOptions: params.customOptions || rison.encodeUnknown(''),
+      customMetrics: params.customMetrics,
+      customOptions: params.customOptions,
       groupBy: rison.encodeUnknown(params.groupBy ?? {}),
       legend: rison.encodeUnknown(
         params.legend ?? { palette: 'cool', reverseColors: false, steps: 10 }
@@ -83,9 +84,10 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       view: rison.encodeUnknown(params.view ?? 'map'),
     };
 
+    const queryStringParams = querystring.stringify(paramsWithDefaults);
     return {
       app: 'metrics',
-      path: `/inventory?waffleFilter=${paramsWithDefaults.waffleFilter}&waffleTime=${paramsWithDefaults.waffleTime}&waffleOptions=${paramsWithDefaults.waffleOptions}&customMetrics=${paramsWithDefaults.customMetrics}&customOptions=${paramsWithDefaults.customOptions}&groupBy=${paramsWithDefaults.groupBy}&legend=${paramsWithDefaults.legend}&metric=${paramsWithDefaults.metric}&nodeType=${paramsWithDefaults.nodeType}&region=${paramsWithDefaults.region}&sort=${paramsWithDefaults.sort}&timelineOpen=${paramsWithDefaults.timelineOpen}&view=${paramsWithDefaults.view}`,
+      path: `/inventory?${queryStringParams}`,
       state: params.state ? params.state : {},
     };
   };
