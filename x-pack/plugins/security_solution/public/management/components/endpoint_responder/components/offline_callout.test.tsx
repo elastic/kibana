@@ -14,7 +14,7 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetSentinelOneAgentStatus,
+  useGetExternalAgentStatus,
 } from '../../../hooks/agents/use_get_agent_status';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
