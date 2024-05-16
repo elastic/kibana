@@ -237,8 +237,10 @@ function getFunctionDefinition(ESFunctionDefinition) {
           description: undefined,
         })),
         returnType: elasticsearchToKibanaType(signature.returnType),
-        // TODO compute minParams
-        variadic: undefined,
+        variadic: undefined, // we don't support variadic property
+        minParams: signature.variadic
+          ? signature.params.filter((param) => !param.optional).length
+          : undefined,
       })),
       (el) => JSON.stringify(el)
     ),

@@ -221,6 +221,7 @@ const cidrMatchDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 2,
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
@@ -247,6 +248,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -262,6 +264,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -272,6 +275,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -287,6 +291,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -297,6 +302,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
     {
       params: [
@@ -312,6 +318,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
@@ -342,6 +349,7 @@ const concatDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 2,
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
@@ -751,6 +759,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -766,6 +775,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -781,6 +791,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -791,6 +802,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -806,6 +818,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'ip',
+      minParams: 1,
     },
     {
       params: [
@@ -816,6 +829,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
     {
       params: [
@@ -831,6 +845,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
     {
       params: [
@@ -846,6 +861,7 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'version',
+      minParams: 1,
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
@@ -872,6 +888,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -887,6 +904,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
     },
     {
       params: [
@@ -902,6 +920,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -912,6 +931,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'number',
+      minParams: 1,
     },
     {
       params: [
@@ -927,6 +947,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'ip',
+      minParams: 1,
     },
     {
       params: [
@@ -937,6 +958,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
     {
       params: [
@@ -952,6 +974,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'string',
+      minParams: 1,
     },
     {
       params: [
@@ -967,6 +990,7 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'version',
+      minParams: 1,
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
