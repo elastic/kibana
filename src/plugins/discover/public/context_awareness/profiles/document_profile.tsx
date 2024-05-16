@@ -32,6 +32,8 @@ export const documentProfileService = new ProfileService<
   DocumentContext
 >();
 
+export type DocumentProfileProvider = Parameters<typeof documentProfileService.registerProvider>[0];
+
 export const recordHasProfile = (
   record?: DataTableRecord
 ): record is DataTableRecordWithProfile => {

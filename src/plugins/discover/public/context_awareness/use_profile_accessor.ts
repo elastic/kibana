@@ -7,23 +7,18 @@
  */
 
 import { DataTableRecord } from '@kbn/discover-utils';
-import { useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useMemo } from 'react';
 import { useAppStateSelector } from '../application/main/state_management/discover_app_state_container';
 import { useInternalStateSelector } from '../application/main/state_management/discover_internal_state_container';
-import { useDiscoverServices } from '../hooks/use_discover_services';
 import { getMergedAccessor, Profile } from './composable_profile';
-import { dataSourceProfileService, recordHasProfile, rootProfileService } from './profiles';
+import { dataSourceProfileService, recordHasProfile } from './profiles';
+import { useProfiles } from './profiles_provider';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,
   baseImpl: Profile[TKey],
   { record }: { record?: DataTableRecord } = {}
 ) => {
-  const { chrome } = useDiscoverServices();
-  const [solutionNavId$] = useState(() => chrome.getActiveSolutionNavId$());
-  const solutionNavId = useObservable(solutionNavId$);
-  const rootProfile = useMemo(() => rootProfileService.resolve({ solutionNavId }), [solutionNavId]);
   const dataSource = useAppStateSelector((state) => state.dataSource);
   const dataView = useInternalStateSelector((state) => state.dataView);
   const query = useAppStateSelector((state) => state.query);
@@ -31,14 +26,15 @@ export const useProfileAccessor = <TKey extends keyof Profile>(
     () => dataSourceProfileService.resolve({ dataSource, dataView, query }),
     [dataSource, dataView, query]
   );
+  const { profiles } = useProfiles();
 
   return useMemo(() => {
-    const profiles = [rootProfile, dataSourceProfile];
+    const allProfiles = [...profiles, dataSourceProfile];
 
     if (recordHasProfile(record)) {
-      profiles.push(record.profile);
+      allProfiles.push(record.profile);
     }
 
-    return getMergedAccessor(profiles, key, baseImpl);
-  }, [rootProfile, dataSourceProfile, record, key, baseImpl]);
+    return getMergedAccessor(allProfiles, key, baseImpl);
+  }, [baseImpl, dataSourceProfile, key, profiles, record]);
 };

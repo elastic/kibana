@@ -29,11 +29,17 @@ export interface DataSourceContext {
   category: DataSourceCategory;
 }
 
+export type DataSourceProfile = Profile;
+
 export const dataSourceProfileService = new ProfileService<
-  Profile,
+  DataSourceProfile,
   DataSourceProfileProviderParams,
   DataSourceContext
 >();
+
+export type DataSourceProfileProvider = Parameters<
+  typeof dataSourceProfileService.registerProvider
+>[0];
 
 dataSourceProfileService.registerProvider({
   order: 0,

@@ -344,10 +344,11 @@ export class DiscoverPlugin
         const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
           .getActiveSolutionNavId$()
           .pipe(
-            map((navId) => ({
+            map((solutionNavId) => ({
               ...defaultCustomizationContext,
+              solutionNavId,
               inlineTopNav:
-                this.inlineTopNav.get(navId) ??
+                this.inlineTopNav.get(solutionNavId) ??
                 this.inlineTopNav.get(null) ??
                 defaultCustomizationContext.inlineTopNav,
             }))
