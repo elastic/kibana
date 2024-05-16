@@ -8,8 +8,6 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiPanel,
   EuiCodeBlock,
@@ -17,26 +15,22 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { TryInConsoleButton } from '@kbn/try-in-console';
-
-import { useKibana } from '../../../shared_imports';
 
 const bulkRequestExample = `PUT books/_bulk?pipeline=my-pipeline
 { "create":{ } }
-{ "@timestamp": "2099-03-07T11:04:06.000Z", "my-keyword-field": "foo" }
+{ "name": "Snow Crash", "author": "Neal Stephenson" }
 { "create":{ } }
-{ "@timestamp": "2099-03-07T11:04:07.000Z", "my-keyword-field": "bar" }
+{ "name": "Revelation Space", "author": "Alastair Reynolds" }
 `;
 
 const singleRequestExample = `POST books/_doc?pipeline=my-pipeline-name
 {
-  "@timestamp": "2099-03-07T11:04:05.000Z",
-  "my-keyword-field": "foo"
+  "name": "Snow Crash",
+  "author": "Neal Stephenson"
 }
 `;
 
 export const BulkRequestPanel = () => {
-  const { services } = useKibana();
   const [showBulkToggle, setShowBulkToggle] = useState(true);
 
   return (
@@ -52,30 +46,17 @@ export const BulkRequestPanel = () => {
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            label={
-              <FormattedMessage
-                id="xpack.ingestPipelines.form.bulkRequestToggle"
-                defaultMessage="Bulk request"
-              />
-            }
-            checked={showBulkToggle}
-            onChange={(e: EuiSwitchEvent) => setShowBulkToggle(e.target.checked)}
+      <EuiSwitch
+        compressed
+        label={
+          <FormattedMessage
+            id="xpack.ingestPipelines.form.bulkRequestToggle"
+            defaultMessage="Bulk request"
           />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={showBulkToggle ? bulkRequestExample : singleRequestExample}
-            application={services.application}
-            consolePlugin={services.consolePlugin}
-            sharePlugin={services.share}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        checked={showBulkToggle}
+        onChange={(e: EuiSwitchEvent) => setShowBulkToggle(e.target.checked)}
+      />
 
       <EuiSpacer size="m" />
 
