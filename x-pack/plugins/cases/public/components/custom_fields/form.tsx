@@ -18,7 +18,7 @@ import { customFieldSerializer } from './utils';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
-  submit: FormHook<CustomFieldConfiguration>['submit'];
+  submit: FormHook<CustomFieldConfiguration | {}>['submit'];
 }
 
 interface Props {

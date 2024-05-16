@@ -51,6 +51,10 @@ export const CASE_FIELDS = i18n.translate('xpack.cases.templates.caseFields', {
   defaultMessage: 'Case fields',
 });
 
+export const CONNECTOR_FIELDS = i18n.translate('xpack.cases.templates.connectorFields', {
+  defaultMessage: 'External Connector Fields',
+});
+
 // export const SAVE = i18n.translate('xpack.cases.templates.saveTemplate', {
 //   defaultMessage: 'Save',
 // });

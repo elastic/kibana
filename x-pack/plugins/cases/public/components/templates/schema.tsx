@@ -6,6 +6,7 @@
  */
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FIELD_TYPES, FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   MAX_DESCRIPTION_LENGTH,
@@ -16,13 +17,14 @@ import {
 import { OptionalFieldLabel } from '../create/optional_field_label';
 import { SEVERITY_TITLE } from '../severity/translations';
 import * as i18n from './translations';
+import type { TemplateFormProps } from './types';
 
 const { emptyField, maxLengthField } = fieldValidators;
 const isInvalidTag = (value: string) => value.trim() === '';
 
 const isTagCharactersInLimit = (value: string) => value.trim().length > MAX_LENGTH_PER_TAG;
 
-export const schema = {
+export const schema: FormSchema<TemplateFormProps> = {
   key: {
     validations: [
       {
@@ -119,16 +121,24 @@ export const schema = {
       label: SEVERITY_TITLE,
       labelAppend: OptionalFieldLabel,
     },
-    // connectorId: {
-    //   type: FIELD_TYPES.SUPER_SELECT,
-    //   label: i18n.CONNECTORS,
-    //   defaultValue: 'none',
-    //   labelAppend: OptionalFieldLabel,
-    // },
     assignees: {
       labelAppend: OptionalFieldLabel,
     },
     category: {
+      labelAppend: OptionalFieldLabel,
+    },
+    connectorId: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      labelAppend: OptionalFieldLabel,
+      label: i18n.CONNECTORS,
+      defaultValue: 'none',
+    },
+    fields: {
+      defaultValue: null,
+    },
+    syncAlerts: {
+      helpText: i18n.SYNC_ALERTS_HELP,
+      defaultValue: true,
       labelAppend: OptionalFieldLabel,
     },
   },

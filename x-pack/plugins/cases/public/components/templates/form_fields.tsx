@@ -11,13 +11,24 @@ import { TextField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/co
 import { EuiSteps } from '@elastic/eui';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
+import { schema } from './schema';
+import { Connector } from './connector';
+import { ActionConnector } from '../../containers/configure/types';
+import { CasesConfigurationUI } from '../../containers/types';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
   isEditMode?: boolean;
+  connectors: ActionConnector[];
+  configurationConnector: CasesConfigurationUI['connector'];
 }
 
-const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMode }) => {
+const FormFieldsComponent: React.FC<FormFieldsProps> = ({
+  isSubmitting = false,
+  isEditMode,
+  connectors,
+  configurationConnector,
+}) => {
   const firstStep = useMemo(
     () => ({
       title: i18n.TEMPLATE_FIELDS,
@@ -61,7 +72,28 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMo
     []
   );
 
-  const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);
+  const thirdStep = useMemo(
+    () => ({
+      title: i18n.CONNECTOR_FIELDS,
+      children: (
+        <div>
+          <Connector
+            connectors={connectors}
+            isLoading={isSubmitting}
+            configurationConnector={configurationConnector}
+            path="caseFields.connectorId"
+            schema={schema}
+          />
+        </div>
+      ),
+    }),
+    [connectors, isSubmitting]
+  );
+
+  const allSteps = useMemo(
+    () => [firstStep, secondStep, thirdStep],
+    [firstStep, secondStep, thirdStep]
+  );
 
   return (
     <>

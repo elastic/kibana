@@ -21,17 +21,26 @@ import type { CustomFieldFormState } from '../custom_fields/form';
 import type { TemplateFormState } from '../templates/form';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
-import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  CustomFieldConfiguration,
+  TemplateConfiguration,
+} from '../../../common/types/domain';
 
 import * as i18n from './translations';
+import type { TemplateFormProps } from '../templates/types';
+import { CaseActionConnector } from '../types';
+import { CasesConfigurationUI } from '../../containers/types';
 
 export interface FlyoutProps {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: CustomFieldConfiguration | TemplateConfiguration | null) => void;
+  onSaveField: (data: CustomFieldConfiguration | TemplateFormProps | null) => void;
   data: CustomFieldConfiguration | TemplateConfiguration | null;
   type: 'customField' | 'template';
+  connectors: ActionConnector[];
+  configurationConnector: CasesConfigurationUI['connector'];
 }
 
 const FlyoutComponent: React.FC<FlyoutProps> = ({
@@ -41,6 +50,8 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
   disabled,
   data: initialValue,
   type,
+  connectors,
+  configurationConnector,
 }) => {
   const dataTestSubj = `${type}Flyout`;
 
@@ -48,7 +59,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
-      data: null,
+      data: {},
     }),
   });
 
@@ -58,7 +69,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
     const { isValid, data } = await submit();
 
     if (isValid) {
-      onSaveField(data as CustomFieldConfiguration | TemplateConfiguration | null);
+      onSaveField(data as CustomFieldConfiguration | TemplateFormProps | null);
     }
   }, [onSaveField, submit]);
 
@@ -81,7 +92,9 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
         {type === 'template' ? (
           <TemplateForm
             onChange={setFormState}
-            initialValue={initialValue as TemplateConfiguration}
+            initialValue={initialValue as TemplateFormProps}
+            connectors={connectors}
+            configurationConnector={configurationConnector}
           />
         ) : null}
       </EuiFlyoutBody>

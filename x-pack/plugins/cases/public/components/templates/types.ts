@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { TemplateConfiguration } from '../../../common/types/domain';
+import type {
+  CaseBaseOptionalFields,
+  ConnectorTypeFields,
+  TemplateConfiguration,
+} from '../../../common/types/domain';
 
-export interface TemplateConfigurationUI
-  extends Pick<TemplateConfiguration, 'key' | 'name' | 'description'> {
-  caseFields: Omit<TemplateConfiguration['caseFields'], 'customFields'> & {
-    customFields?: Record<string, string | boolean>;
-  };
-}
+export type TemplateFormProps = Omit<TemplateConfiguration, 'caseFields'> & {
+  caseFields:
+    | (Omit<CaseBaseOptionalFields, 'customFields' | 'connector' | 'settings'> & {
+        customFields?: Record<string, string | boolean>;
+        connectorId?: string;
+        fields?: ConnectorTypeFields['fields'];
+        syncAlerts?: boolean;
+      })
+    | null;
+};
