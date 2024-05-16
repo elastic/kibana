@@ -550,16 +550,12 @@ export class DashboardContainer
     let explicitInput: Partial<EmbeddableInput>;
     let attributes: unknown;
     try {
-      if (initialInput) {
-        explicitInput = initialInput;
+      const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, this);
+      if (isExplicitInputWithAttributes(explicitInputReturn)) {
+        explicitInput = { ...initialInput, ...explicitInputReturn.newInput };
+        attributes = explicitInputReturn.attributes;
       } else {
-        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, this);
-        if (isExplicitInputWithAttributes(explicitInputReturn)) {
-          explicitInput = explicitInputReturn.newInput;
-          attributes = explicitInputReturn.attributes;
-        } else {
-          explicitInput = explicitInputReturn;
-        }
+        explicitInput = { ...initialInput, ...explicitInputReturn };
       }
     } catch (e) {
       // error likely means user canceled embeddable creation
