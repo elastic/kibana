@@ -117,6 +117,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
 
   const isBadRequest = queryErrors && doesErrorIndicateBadQuery(queryErrors);
+
   const itemsToDisplay = isBadRequest ? [] : apiKeys;
 
   columns.push(

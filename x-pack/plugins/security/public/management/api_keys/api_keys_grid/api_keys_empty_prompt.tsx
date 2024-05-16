@@ -184,10 +184,10 @@ function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<stri
 }
 
 export function doesErrorIndicateBadQuery(error: Record<string, any>) {
-  const message = error.body?.message || '';
-  const errorString = error.body?.error || '';
+  const message = error?.message || '';
+  const errorString = error?.name || '';
 
   return (
-    errorString.indexOf('Bad Request') > '-1' || message.indexOf('illegal_argument_exception') > -1
+    errorString.indexOf('ResponseError') > -1 || message.indexOf('illegal_argument_exception') > -1
   );
 }
