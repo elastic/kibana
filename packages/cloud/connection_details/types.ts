@@ -31,3 +31,5 @@ export interface ConnectionDetailsOptsApiKeys {
   }>;
   hasPermission: () => Promise<boolean>;
 }
+
+export type TabID = 'endpoints' | 'apiKeys';
