@@ -13,12 +13,12 @@ import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
-} from '../../../../common/endpoint/service/response_actions/constants';
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_ACTIONS_DS,
   failedFleetActionErrorCode,
-} from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActivityLogAction,
@@ -33,9 +33,9 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   WithAllKeys,
-} from '../../../../common/endpoint/types';
-import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
-import type { EndpointMetadataService } from '../metadata';
+} from '../../../../../common/endpoint/types';
+import { ActivityLogItemTypes } from '../../../../../common/endpoint/types';
+import type { EndpointMetadataService } from '../../metadata';
 
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
