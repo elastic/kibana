@@ -88,6 +88,34 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
       const api = buildApi(
         {
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.ml.singleMetricViewerEmbeddable.typeDisplayName', {
+              defaultMessage: 'single metric viewer',
+            }),
+          onEdit: async () => {
+            try {
+              const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
+                './single_metric_viewer_setup_flyout'
+              );
+              const [coreStart, { data, share }, { mlApiServices }] = services;
+              const result = await resolveEmbeddableSingleMetricViewerUserInput(
+                coreStart,
+                parentApi,
+                uuid,
+                { data, share },
+                mlApiServices,
+                {
+                  ...serializeTitles(),
+                  ...serializeSingleMetricViewerState(),
+                }
+              );
+
+              singleMetricViewerControlsApi.updateUserInput(result);
+            } catch (e) {
+              return Promise.reject();
+            }
+          },
           ...titlesApi,
           ...timeRangeApi,
           ...singleMetricViewerControlsApi,
@@ -282,7 +310,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
                       >
                         {singleMetricViewerData !== undefined &&
                           autoZoomDuration !== undefined &&
-                          jobsLoaded && (
+                          jobsLoaded &&
+                          selectedJobId === selectedJob?.job_id && (
                             <TimeSeriesExplorerEmbeddableChart
                               chartWidth={chartWidth - containerPadding}
                               dataViewsService={services[1].data.dataViews}

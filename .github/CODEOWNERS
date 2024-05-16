@@ -406,6 +406,7 @@ packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 packages/kbn-esql-ast @elastic/kibana-esql
+examples/esql_ast_inspector @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
@@ -592,8 +593,8 @@ x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
-x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
-x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
+x-pack/plugins/monitoring_collection @elastic/stack-monitoring
+x-pack/plugins/monitoring @elastic/stack-monitoring
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
@@ -863,6 +864,7 @@ x-pack/plugins/translations @elastic/kibana-localization
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
+packages/kbn-try-in-console @elastic/enterprise-search-frontend
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
@@ -1378,6 +1380,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
+x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
+x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 
 # Security Solution sub teams
 
@@ -1560,6 +1565,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/components/agents/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows

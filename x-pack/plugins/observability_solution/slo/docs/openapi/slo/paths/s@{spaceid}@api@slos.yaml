@@ -97,6 +97,11 @@ get:
         enum: [asc, desc]
         default: asc
       example: asc
+    - name: hideStale
+      in: query
+      description: Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings
+      schema:
+        type: boolean
   responses:
     '200':
       description: Successful request

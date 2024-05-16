@@ -58,11 +58,13 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
-        const { body: responseBody } = await supertest
+        const { body } = await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(responseBody.items.length).to.eql(1);
+        expect(body.items.length).to.eql(1);
+        const { id, updated_at: updatedAt, ...rest } = body.items[0];
+        expectSnapshot(rest).toMatch();
       });
 
       it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
@@ -1343,6 +1345,25 @@ export default function (providerContext: FtrProviderContext) {
         expect(items[0].package_policies.length).equal(1);
         expect(items[0].package_policies[0]).to.have.property('package');
         expect(items[0].package_policies[0].package.name).equal('system');
+        const { package_policies: packagePolicies, id, updated_at: updatedAt, ...rest } = items[0];
+        expectSnapshot({
+          ...rest,
+          package_policies: packagePolicies.map(
+            ({
+              inputs,
+              id: ppId,
+              policy_id: ppPolicyId,
+              created_at: ppcreatedAt,
+              updated_at: ppupdatedAt,
+              version,
+              package: { version: pkgVersion, ...pkgRest },
+              ...ppRest
+            }: any) => ({
+              ...ppRest,
+              package: pkgRest,
+            })
+          ),
+        }).toMatch();
       });
 
       it('should return a 404 with invalid ids', async () => {
