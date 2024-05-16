@@ -15,7 +15,7 @@ import supertest from 'supertest';
 import { format } from 'url';
 import { Subtract } from 'utility-types';
 
-export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
       type?: 'form-data';

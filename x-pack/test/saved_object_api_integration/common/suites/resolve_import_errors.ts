@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { SavedObjectReference, SavedObjectsImportRetry } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
@@ -197,7 +197,7 @@ export const resolveImportErrorsTestCaseFailures = {
 export function resolveImportErrorsTestSuiteFactory(
   es: Client,
   esArchiver: any,
-  supertest: SuperTest<any>
+  supertest: SuperTestAgent
 ) {
   const expectSavedObjectForbidden = (action: string, typeOrTypes: string | string[]) =>
     expectResponses.forbiddenTypes(action)(typeOrTypes);

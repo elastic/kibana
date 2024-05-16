@@ -159,10 +159,7 @@ export const createCaseAction = async (supertest: SuperTest.Agent) => {
 /**
  * Remove a connector
  */
-export const deleteCaseAction = async (
-  supertest: SuperTest.Agent,
-  id: string
-) => {
+export const deleteCaseAction = async (supertest: SuperTest.Agent, id: string) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
 };
 

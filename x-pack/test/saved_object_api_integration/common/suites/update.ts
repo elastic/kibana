@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -34,7 +34,7 @@ export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
 
 const createRequest = ({ type, id, upsert }: UpdateTestCase) => ({ type, id, upsert });
 
-export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
   const expectResponseBody =
     (testCase: UpdateTestCase): ExpectResponseBody =>

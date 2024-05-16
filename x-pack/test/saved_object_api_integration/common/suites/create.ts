@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
@@ -85,7 +85,7 @@ const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
   initialNamespaces,
 });
 
-export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function createTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody =
     (testCase: CreateTestCase, user?: TestUser): ExpectResponseBody =>
