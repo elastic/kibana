@@ -1202,13 +1202,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'linux.advanced.events.aggregate',
+    key: 'linux.advanced.events.aggregate_process',
     first_supported_version: '8.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate',
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
       }
     ),
   },
