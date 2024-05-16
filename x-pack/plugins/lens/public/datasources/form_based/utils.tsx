@@ -111,17 +111,16 @@ export function isColumnInvalid(
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
 
-  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
+  const operationDefinition = operationDefinitionMap[column.operationType];
   // check also references for errors
   const referencesHaveErrors =
     true &&
     'references' in column &&
     Boolean(
-      getReferencesErrors(layer, column, indexPattern, dateRange, targetBars).filter(Boolean).length
+      hasReferencesErrors(layer, column, indexPattern, dateRange, targetBars).filter(Boolean).length
     );
 
   const operationErrorMessages =
-    operationDefinition &&
     operationDefinition.getErrorMessage?.(
       layer,
       columnId,
@@ -129,27 +128,23 @@ export function isColumnInvalid(
       dateRange,
       operationDefinitionMap,
       targetBars
-    );
+    ) ?? [];
 
   // it looks like this is just a back-stop since we prevent
   // invalid filters from being set at the UI level
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
-  return (
-    (operationErrorMessages && operationErrorMessages.length > 0) ||
-    referencesHaveErrors ||
-    filterHasError
-  );
+  return operationErrorMessages.length > 0 || referencesHaveErrors || filterHasError;
 }
 
-function getReferencesErrors(
+function hasReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
   dateRange: DateRange | undefined,
   targetBars: number
-) {
-  return column.references?.map((referenceId: string) => {
+): boolean {
+  return column.references.some((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
     return referencedDefinition?.getErrorMessage?.(

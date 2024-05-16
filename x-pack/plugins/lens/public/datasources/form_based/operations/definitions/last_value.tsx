@@ -93,10 +93,12 @@ function getInvalidSortFieldMessage(
     };
   }
   if (field.type !== 'date') {
-    return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
-      defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
-      values: { invalidField: sortField },
-    });
+    return {
+      message: i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
+        defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
+        values: { invalidField: sortField },
+      }),
+    };
   }
 }
 
@@ -228,7 +230,7 @@ export const lastValueOperation: OperationDefinition<
     }
 
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
-    return errorMessages.length ? errorMessages : undefined;
+    return errorMessages;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];

@@ -613,9 +613,7 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    const externalUserMessagesHandler = this.input.handleUserMessages
-      ? this.input.handleUserMessages
-      : (d: UserMessage[]) => d;
+    const externalUserMessagesHandler = this.input.handleUserMessages ?? ((m: UserMessage[]) => m); // nop
 
     const userMessages: UserMessage[] = [];
     userMessages.push(

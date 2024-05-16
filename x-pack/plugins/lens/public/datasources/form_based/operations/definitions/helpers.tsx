@@ -28,9 +28,9 @@ export function getInvalidFieldMessage(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern?: IndexPattern
-): FieldBasedOperationErrorMessage[] | undefined {
+): FieldBasedOperationErrorMessage[] {
   if (!indexPattern) {
-    return;
+    return [];
   }
 
   const column = layer.columns[columnId] as FieldBasedIndexPatternColumn;
@@ -77,19 +77,21 @@ export function getInvalidFieldMessage(
       const wrongTypeFields =
         operationDefinition?.getNonTransferableFields?.(column, indexPattern) ?? fieldNames;
       return [
-        i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
-          defaultMessage:
-            '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
-          values: {
-            count: wrongTypeFields.length,
-            invalidFields: wrongTypeFields.join(', '),
-          },
-        }),
+        {
+          message: i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
+            defaultMessage:
+              '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
+            values: {
+              count: wrongTypeFields.length,
+              invalidFields: wrongTypeFields.join(', '),
+            },
+          }),
+        },
       ];
     }
   }
 
-  return undefined;
+  return [];
 }
 
 export const generateMissingFieldMessage = (
@@ -123,10 +125,9 @@ export const generateMissingFieldMessage = (
 });
 
 export function combineErrorMessages(
-  errorMessages: Array<FieldBasedOperationErrorMessage[] | undefined>
-): FieldBasedOperationErrorMessage[] | undefined {
-  const messages = (errorMessages.filter(Boolean) as FieldBasedOperationErrorMessage[][]).flat();
-  return messages.length ? messages : undefined;
+  errorMessages: FieldBasedOperationErrorMessage[][]
+): FieldBasedOperationErrorMessage[] {
+  return errorMessages.flat();
 }
 
 export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {

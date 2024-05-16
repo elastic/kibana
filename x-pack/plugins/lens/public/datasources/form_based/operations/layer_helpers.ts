@@ -1557,7 +1557,7 @@ export function getErrorMessages(
   layerId: string,
   core: CoreStart,
   data: DataPublicPluginStart
-): LayerErrorMessage[] | undefined {
+): LayerErrorMessage[] {
   const columns = Object.entries(layer.columns);
   const visibleManagedReferences = columns.filter(
     ([columnId, column]) =>
@@ -1608,7 +1608,7 @@ export function getErrorMessages(
     // remove the undefined values
     .filter((v) => v != null) as LayerErrorMessage[];
 
-  return errors.length ? errors : undefined;
+  return errors;
 }
 
 export function isReferenced(layer: FormBasedLayer, columnId: string): boolean {

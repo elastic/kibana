@@ -68,16 +68,23 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
+    getErrorMessage(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap,
+      targetBars
+    ): FieldBasedOperationErrorMessage[] {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
-        return;
+        return [];
       }
 
       const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
       const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
       if (error || root == null) {
-        return error?.message ? [error.message] : [];
+        return error?.message ? [{ message: error.message }] : [];
       }
 
       const errors = runASTValidation(
@@ -94,7 +101,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         return uniqBy(errors, ({ message }) => message).map(({ type, message, extraInfo }) =>
           type === 'missingField' && extraInfo?.missingFields
             ? generateMissingFieldMessage(extraInfo.missingFields, columnId)
-            : message
+            : { message }
         );
       }
 
@@ -149,7 +156,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         });
       }
 
-      return innerErrors.length ? innerErrors : undefined;
+      return innerErrors;
     },
     getPossibleOperation() {
       return {
