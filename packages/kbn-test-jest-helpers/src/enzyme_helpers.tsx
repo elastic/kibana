@@ -14,7 +14,14 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { mount, ReactWrapper, render, shallow } from 'enzyme';
+import {
+  mount,
+  ReactWrapper,
+  render,
+  shallow,
+  MountRendererProps,
+  ShallowRendererProps,
+} from 'enzyme';
 import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
@@ -25,15 +32,8 @@ import { act as reactAct } from 'react-dom/test-utils';
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(node: React.ReactElement) {
-  return shallow(node, {
-    wrappingComponent: I18nProvider,
-    wrappingComponentProps: {
-      locale: 'en',
-      defaultLocale: 'en',
-      messages: {},
-    },
-  });
+export function shallowWithIntl(node: React.ReactElement, options?: ShallowRendererProps) {
+  return shallow(<I18nProvider>{node}</I18nProvider>, options);
 }
 
 /**
@@ -43,15 +43,8 @@ export function shallowWithIntl(node: React.ReactElement) {
  *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function mountWithIntl(node: React.ReactElement) {
-  return mount(node, {
-    wrappingComponent: I18nProvider,
-    wrappingComponentProps: {
-      locale: 'en',
-      defaultLocale: 'en',
-      messages: {},
-    },
-  });
+export function mountWithIntl(node: React.ReactElement, options?: MountRendererProps) {
+  return mount(<I18nProvider>{node}</I18nProvider>, options);
 }
 
 /**
