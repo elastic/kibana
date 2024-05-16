@@ -49,13 +49,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    // if (mode === 'savedObject') {
-    // await PageObjects.share.exportAsSavedObject();
-    // }
     return PageObjects.share.getSharedUrl();
   };
 
-  describe.skip('share dashboard', () => {
+  describe('share dashboard', () => {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl(mode)).to.not.contain('filters');
