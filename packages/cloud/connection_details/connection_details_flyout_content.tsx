@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ConnectionDetails } from './connection_details';
 import { useConnectionDetailsOpts } from './context';
+import { Tabs } from './tabs';
 
 export const ConnectionDetailsFlyoutContent: React.FC = () => {
   const ctx = useConnectionDetailsOpts();
@@ -46,6 +47,10 @@ export const ConnectionDetailsFlyoutContent: React.FC = () => {
           )}
         </p>
       </EuiText>
+      {/* The -25px is as per EUI example: https://eui.elastic.co/#/layout/flyout */}
+      <div style={{ marginBottom: '-25px' }}>
+        <Tabs />
+      </div>
     </EuiFlyoutHeader>
   );
 

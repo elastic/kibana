@@ -5235,7 +5235,7 @@
           },
           "<Params> | ",
           "SanitizedRuleWithLegacyId",
-          "<Params>>; delete: (params: { id: string; }) => Promise<{}>; getGlobalExecutionLogWithAuth: (params: ",
+          "<Params>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; getGlobalExecutionLogWithAuth: (params: ",
           "GetGlobalExecutionLogParams",
           ") => Promise<",
           {

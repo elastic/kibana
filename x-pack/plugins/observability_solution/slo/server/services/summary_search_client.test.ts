@@ -121,4 +121,117 @@ describe('Summary Search Client', () => {
     expect(results).toMatchSnapshot();
     expect(results.total).toBe(5);
   });
+
+  it('handles hideStale filter', async () => {
+    await service.search('', '', defaultSort, defaultPagination, true);
+    expect(esClientMock.search.mock.calls[0]).toEqual([
+      {
+        from: 0,
+        index: ['.slo-observability.summary-v3*'],
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  spaceId: 'default',
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        isTempDoc: true,
+                      },
+                    },
+                    {
+                      range: {
+                        summaryUpdatedAt: {
+                          gte: 'now-2h',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+            must_not: [],
+          },
+        },
+        size: 40,
+        sort: {
+          isTempDoc: {
+            order: 'asc',
+          },
+          sliValue: {
+            order: 'asc',
+          },
+        },
+        track_total_hits: true,
+      },
+    ]);
+
+    await service.search('', '', defaultSort, defaultPagination);
+    expect(esClientMock.search.mock.calls[1]).toEqual([
+      {
+        from: 0,
+        index: ['.slo-observability.summary-v3*'],
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  spaceId: 'default',
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+            must_not: [],
+          },
+        },
+        size: 40,
+        sort: {
+          isTempDoc: {
+            order: 'asc',
+          },
+          sliValue: {
+            order: 'asc',
+          },
+        },
+        track_total_hits: true,
+      },
+    ]);
+  });
+
+  it('handles summaryUpdate kql filter override', async () => {
+    await service.search('summaryUpdatedAt > now-2h', '', defaultSort, defaultPagination, true);
+    expect(esClientMock.search.mock.calls[0]).toEqual([
+      {
+        from: 0,
+        index: ['.slo-observability.summary-v3*'],
+        query: {
+          bool: {
+            filter: [
+              { term: { spaceId: 'default' } },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ range: { summaryUpdatedAt: { gt: 'now-2h' } } }],
+                },
+              },
+            ],
+            must_not: [],
+          },
+        },
+        size: 40,
+        sort: { isTempDoc: { order: 'asc' }, sliValue: { order: 'asc' } },
+        track_total_hits: true,
+      },
+    ]);
+  });
 });

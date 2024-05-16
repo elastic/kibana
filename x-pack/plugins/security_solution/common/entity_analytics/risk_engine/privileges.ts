@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/common';
+import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
