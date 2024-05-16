@@ -63,7 +63,6 @@ function createObservabilityAIAssistantAPIConfig({
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-  // const kibanaServerUrl = format(kibanaServer);
   const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
 
   const createTest: Omit<CreateTest, 'testFiles'> = {
