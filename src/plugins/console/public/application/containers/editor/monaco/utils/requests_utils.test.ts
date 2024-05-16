@@ -7,6 +7,7 @@
  */
 
 import {
+  getAutoIndentedRequests,
   getCurlRequest,
   replaceRequestVariables,
   stringifyRequest,
@@ -158,6 +159,197 @@ describe('requests_utils', () => {
       expect(mockMetricsTracker.count).toHaveBeenCalledTimes(2);
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(1, 'GET__search');
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(2, 'POST__test');
+    });
+  });
+
+  describe('getAutoIndentedRequests', () => {
+    const sampleEditorTextLines = [
+      '                                    ', // line 1
+      'GET    _search                      ', // line 2
+      '{                                   ', // line 3
+      '  "query":     {                    ', // line 4
+      '    "match_all":    {      }        ', // line 5
+      '    }                               ', // line 6
+      '   }                                ', // line 7
+      '                                    ', // line 8
+      '// single comment before Request 2  ', // line 9
+      '  GET  _all                         ', // line 10
+      '                                    ', // line 11
+      '/*                                  ', // line 12
+      ' multi-line comment before Request 3', // line 13
+      '*/                                  ', // line 14
+      'POST   /_bulk                       ', // line 15
+      '{                                   ', // line 16
+      '       "index":{                    ', // line 17
+      '          "_index":"books"          ', // line 18
+      '     }                              ', // line 19
+      ' }                                  ', // line 20
+      '{                                   ', // line 21
+      '"name":"1984"                       ', // line 22
+      '}{"name":"Atomic habits"}           ', // line 23
+      '                                    ', // line 24
+      'GET    _search  // test comment     ', // line 25
+      '{                                   ', // line 26
+      '  "query":     {                    ', // line 27
+      '    "match_all":    {   } // comment', // line 28
+      '    }                               ', // line 29
+      '}                                   ', // line 30
+      ' // some comment                    ', // line 31
+      '                                    ', // line 32
+    ];
+
+    const TEST_REQUEST_1 = {
+      method: 'GET',
+      url: '_search',
+      data: [{ query: { match_all: {} } }],
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 2,
+      endLineNumber: 7,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    const TEST_REQUEST_2 = {
+      method: 'GET',
+      url: '_all',
+      data: [],
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 10,
+      endLineNumber: 10,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    const TEST_REQUEST_3 = {
+      method: 'POST',
+      url: '/_bulk',
+      // Multi-data
+      data: [{ index: { _index: 'books' } }, { name: '1984' }, { name: 'Atomic habits' }],
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 15,
+      endLineNumber: 23,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    const TEST_REQUEST_4 = {
+      method: 'GET',
+      url: '_search',
+      data: [{ query: { match_all: {} } }],
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 24,
+      endLineNumber: 30,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    it('correctly auto-indents a single request with data', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_1],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_1.startLineNumber - 1, TEST_REQUEST_1.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
+      const expectedResultLines = [
+        'GET _search',
+        '{',
+        '  "query": {',
+        '    "match_all": {}',
+        '  }',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
+    });
+
+    it('correctly auto-indents a single request with no data', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_2],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_2.startLineNumber - 1, TEST_REQUEST_2.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
+      const expectedResult = 'GET _all';
+
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('correctly auto-indents a single request with multiple data', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_3],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_3.startLineNumber - 1, TEST_REQUEST_3.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
+      const expectedResultLines = [
+        'POST /_bulk',
+        '{',
+        '  "index": {',
+        '    "_index": "books"',
+        '  }',
+        '}',
+        '{',
+        '  "name": "1984"',
+        '}',
+        '{',
+        '  "name": "Atomic habits"',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
+    });
+
+    it('auto-indents multiple request with comments in between', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
+        sampleEditorTextLines.slice(1, 23).join('\n'),
+        sampleEditorTextLines.join('\n')
+      );
+      const expectedResultLines = [
+        'GET _search',
+        '{',
+        '  "query": {',
+        '    "match_all": {}',
+        '  }',
+        '}',
+        '',
+        '// single comment before Request 2',
+        'GET _all',
+        '',
+        '/*',
+        'multi-line comment before Request 3',
+        '*/',
+        'POST /_bulk',
+        '{',
+        '  "index": {',
+        '    "_index": "books"',
+        '  }',
+        '}',
+        '{',
+        '  "name": "1984"',
+        '}',
+        '{',
+        '  "name": "Atomic habits"',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
+    });
+
+    it('does not auto-indent a request with comments', () => {
+      const requestText = sampleEditorTextLines
+        .slice(TEST_REQUEST_4.startLineNumber - 1, TEST_REQUEST_4.endLineNumber)
+        .join('\n');
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_4],
+        requestText,
+        sampleEditorTextLines.join('\n')
+      );
+
+      expect(formattedData).toBe(requestText);
     });
   });
 });
