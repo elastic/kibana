@@ -20,6 +20,7 @@ import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 import { DataControlStateManager } from './initialize_data_control';
 import { DataEditorState } from './types';
+import { BehaviorSubject } from 'rxjs';
 
 export const openDataControlEditor = async (
   stateManager: DataControlStateManager,
@@ -72,24 +73,36 @@ export const openDataControlEditor = async (
         });
     };
 
+    /**
+     * Duplicate all state managaer into a new manager because we do not want to actually apply the changes
+     * to the control until the user hits save.
+     */
+    const stateManagerCopy: DataControlStateManager = Object.keys(stateManager).reduce(
+      (prev, key) => {
+        return { ...prev, [key]: new BehaviorSubject(stateManager[key].getValue()) };
+      },
+      {} as DataControlStateManager
+    );
+
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
         <DataControlEditor
-          // api={embeddable}
           controlType={controlType}
           parentApi={controlGroupApi}
-          onCancel={(newState: DataEditorState) => onCancel(overlay, newState)}
-          onSave={(newState: DataEditorState) => {
-            stateManager.dataViewId.next(newState.dataViewId);
-            stateManager.fieldName.next(newState.fieldName);
-            stateManager.grow.next(newState.grow);
-            stateManager.width.next(newState.width);
-            stateManager.title.next(newState.title);
-            // stateManager.settings.next(newState.settings);
+          onCancel={() => {
+            const newState = Object.keys(stateManagerCopy).map((key) => {
+              return stateManagerCopy[key].getValue();
+            });
+            onCancel(overlay, newState);
+          }}
+          onSave={() => {
+            Object.keys(stateManager).forEach((key) => {
+              stateManager[key].next(stateManagerCopy[key].getValue());
+            });
             closeOverlay(overlay);
             resolve(undefined);
           }}
-          stateManager={stateManager}
+          stateManager={stateManagerCopy}
           services={{ dataViews: services.dataViews }}
         />,
         {

@@ -30,7 +30,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -48,8 +51,12 @@ import {
   getControlTypeErrorMessage,
   getDataControlFieldRegistry,
 } from './data_control_editor_utils';
-import { DataControlStateManager } from './initialize_data_control';
-import { DataControlFactory, DataEditorState, isDataControlFactory } from './types';
+import {
+  DataControlFactory,
+  DataControlStateManager,
+  DataEditorState,
+  isDataControlFactory,
+} from './types';
 
 export interface ControlEditorProps {
   controlType?: string; // if provided, then editing existing control; otherwise, creating a new control
@@ -80,15 +87,15 @@ export const DataControlEditor = ({
     controlGroup.width
   );
 
-  /**
-   * Duplicate all state from stateManager into React state because we do not want to actually apply the changes
-   * to the control until the user hits save. This can be removed once we do inline editing with a push flyout
-   */
-  const [selectedDataViewId, setSelectedDataViewId] = useState(stateManager.dataViewId.getValue());
-  const [selectedFieldName, setSelectedFieldName] = useState(stateManager.fieldName.getValue());
+  const [selectedDataViewId, selectedFieldName, selectedGrow, selectedWidth] =
+    useBatchedPublishingSubjects(
+      stateManager.dataViewId,
+      stateManager.fieldName,
+      stateManager.grow,
+      stateManager.width
+    );
+
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
-  const [selectedGrow, setSelectedGrow] = useState(stateManager.grow.getValue());
-  const [selectedWidth, setSelectedWidth] = useState(stateManager.width.getValue());
   const [currentTitle, setCurrentTitle] = useState<string | undefined>(
     stateManager.title.getValue() || selectedFieldName
   );
@@ -278,7 +285,7 @@ export const DataControlEditor = ({
                 dataViews={dataViewListItems}
                 selectedDataViewId={selectedDataViewId}
                 onChangeDataViewId={(newDataViewId) => {
-                  setSelectedDataViewId(newDataViewId);
+                  stateManager.dataViewId.next(newDataViewId);
                 }}
                 trigger={{
                   label:
@@ -310,7 +317,7 @@ export const DataControlEditor = ({
                 onSelectField={(field) => {
                   // setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
                   const newDefaultTitle = field.displayName ?? field.name;
-                  setSelectedFieldName(field.name);
+                  stateManager.fieldName.next(field.name);
                   setSelectedFieldDisplayName(newDefaultTitle);
                   if (!currentTitle || currentTitle === selectedFieldDisplayName) {
                     setCurrentTitle(newDefaultTitle);
@@ -384,7 +391,7 @@ export const DataControlEditor = ({
                   )}
                   options={CONTROL_WIDTH_OPTIONS}
                   idSelected={selectedWidth ?? defaultWidth}
-                  onChange={(newWidth: string) => setSelectedWidth(newWidth as ControlWidth)}
+                  onChange={(newWidth: string) => stateManager.width.next(newWidth as ControlWidth)}
                 />
                 <EuiSpacer size="s" />
                 <EuiSwitch
@@ -396,7 +403,7 @@ export const DataControlEditor = ({
                   )}
                   color="primary"
                   checked={selectedGrow === undefined ? defaultGrow : selectedGrow}
-                  onChange={() => setSelectedGrow(!selectedGrow)}
+                  onChange={() => stateManager.grow.next(!selectedGrow)}
                   data-test-subj="control-editor-grow-switch"
                 />
               </div>
