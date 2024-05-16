@@ -138,7 +138,7 @@ export function registerAnomalyDetectionRule(
 '{{/context.topRecords.length}}'
 
 '{{! Replace kibanaBaseUrl if not configured in Kibana }}'
-[Open in Anomaly Explorer]('{{\\{kibanaBaseUrl}}'\\}'{{\\{context.anomalyExplorerUrl}}'\\})
+[Open in Anomaly Explorer]('{{{kibanaBaseUrl}}}{{{context.anomalyExplorerUrl}}'})
 `,
       }
     ),

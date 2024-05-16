@@ -4,10 +4,9 @@ exports[`ActionsSection renders with no actions selected 1`] = `
 <Fragment>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -29,10 +28,9 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         id="skip_result_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
             id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
-            values={Object {}}
           />
         }
         onChange={[MockFunction]}
@@ -43,10 +41,9 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The result will not be created."
             id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-            values={Object {}}
           />
         }
         position="right"
@@ -72,10 +69,9 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         id="skip_model_update_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"
             id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
-            values={Object {}}
           />
         }
         onChange={[MockFunction]}
@@ -86,10 +82,9 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The value for that series will not be used to update the model."
             id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-            values={Object {}}
           />
         }
         position="right"
@@ -104,10 +99,9 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
 <Fragment>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -129,10 +123,9 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         id="skip_result_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
             id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
-            values={Object {}}
           />
         }
         onChange={[Function]}
@@ -143,10 +136,9 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The result will not be created."
             id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-            values={Object {}}
           />
         }
         position="right"
@@ -172,10 +164,9 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         id="skip_model_update_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"
             id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
-            values={Object {}}
           />
         }
         onChange={[Function]}
@@ -186,10 +177,9 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The value for that series will not be used to update the model."
             id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-            values={Object {}}
           />
         }
         position="right"
@@ -204,10 +194,9 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
 <Fragment>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -229,10 +218,9 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         id="skip_result_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
             id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
-            values={Object {}}
           />
         }
         onChange={[MockFunction]}
@@ -243,10 +231,9 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The result will not be created."
             id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
-            values={Object {}}
           />
         }
         position="right"
@@ -272,10 +259,9 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         id="skip_model_update_cb"
         indeterminate={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"
             id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
-            values={Object {}}
           />
         }
         onChange={[MockFunction]}
@@ -286,10 +272,9 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <EuiIconTip
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="The value for that series will not be used to update the model."
             id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
-            values={Object {}}
           />
         }
         position="right"

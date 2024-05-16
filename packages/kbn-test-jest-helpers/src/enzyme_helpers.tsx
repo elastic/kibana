@@ -33,7 +33,10 @@ import { act as reactAct } from 'react-dom/test-utils';
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function shallowWithIntl(node: React.ReactElement, options?: ShallowRendererProps) {
-  return shallow(<I18nProvider>{node}</I18nProvider>, options);
+  return shallow(node, {
+    wrappingComponent: I18nProvider,
+    ...options,
+  });
 }
 
 /**
@@ -44,7 +47,10 @@ export function shallowWithIntl(node: React.ReactElement, options?: ShallowRende
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function mountWithIntl(node: React.ReactElement, options?: MountRendererProps) {
-  return mount(<I18nProvider>{node}</I18nProvider>, options);
+  return mount(node, {
+    wrappingComponent: I18nProvider,
+    ...options,
+  });
 }
 
 /**

@@ -4,7 +4,7 @@ exports[`AddToFilterListLink renders the add to filter list link for a value 1`]
 <EuiLink
   onClick={[Function]}
 >
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="Add {fieldValue} to {filterId}"
     id="xpack.ml.ruleEditor.addValueToFilterListLinkText"
     values={
