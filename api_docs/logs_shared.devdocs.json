@@ -3007,6 +3007,26 @@
           },
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.discoverShared",
+            "type": "Object",
+            "tags": [],
+            "label": "discoverShared",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discoverShared",
+                "scope": "public",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-public.DiscoverSharedPublicStart",
+                "text": "DiscoverSharedPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.observabilityAIAssistant",
             "type": "Object",
             "tags": [],

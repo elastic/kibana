@@ -23,7 +23,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
@@ -99,6 +99,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -681,7 +682,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...omit(schema.index, 'label'),
+                  ...schema.index,
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
@@ -1114,6 +1115,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

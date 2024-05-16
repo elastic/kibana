@@ -136,6 +136,11 @@ export class DataGridService extends FtrService {
     await actionButton.click();
   }
 
+  public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    await actionButton.click();
+  }
+
   /**
    * The same as getCellElement, but useful when multiple data grids are on the page.
    */
@@ -285,7 +290,7 @@ export class DataGridService extends FtrService {
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
     const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+      '.euiDataGridHeaderCell--controlColumn .euiDataGridHeaderCell__content'
     );
 
     const textArr = [];

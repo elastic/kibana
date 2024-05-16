@@ -40,7 +40,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
@@ -52,7 +52,7 @@ export interface AppServicesContext {
   share: SharePluginStart;
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export enum ChatFormFields {
@@ -74,7 +74,7 @@ export interface ChatForm {
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
-  [ChatFormFields.sourceFields]: string[];
+  [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
 }
@@ -98,9 +98,16 @@ export interface DocAnnotation {
   pageContent: string;
 }
 
-export interface Annotation {
+export type Annotation = AnnotationDoc | AnnotationTokens;
+
+export interface AnnotationDoc {
   type: 'citations' | 'retrieved_docs';
   documents: DocAnnotation[];
+}
+
+export interface AnnotationTokens {
+  type: 'prompt_token_count' | 'context_token_count';
+  count: number;
 }
 
 export interface Doc {
@@ -112,6 +119,10 @@ export interface AIMessage extends Message {
   role: MessageRole.assistant;
   citations: Doc[];
   retrievalDocs: Doc[];
+  inputTokens: {
+    context: number;
+    total: number;
+  };
 }
 
 export interface ElasticsearchIndex {
@@ -205,4 +216,5 @@ export interface LLMModel {
   connectorType: string;
   icon: ComponentType;
   disabled: boolean;
+  promptTokenLimit?: number;
 }

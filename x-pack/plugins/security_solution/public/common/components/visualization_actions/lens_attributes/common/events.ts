@@ -24,6 +24,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           isVisible: true,
           position: 'right',
           legendSize: 'xlarge',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -50,7 +51,6 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
-        valuesInLegend: true,
       },
       query: {
         query: '',

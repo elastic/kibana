@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataDocuments$ } from '../../services/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -19,12 +19,13 @@ import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppState } from '../../services/discover_app_state_container';
+import { DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const customisationService = createCustomizationService();
 
@@ -39,7 +40,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+  });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {

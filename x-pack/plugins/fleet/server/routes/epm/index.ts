@@ -192,7 +192,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
       },
     })
     .addVersion(
@@ -359,7 +359,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
 
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
       },
     })
     .addVersion(

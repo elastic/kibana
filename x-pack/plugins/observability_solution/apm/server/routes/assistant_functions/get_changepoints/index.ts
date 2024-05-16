@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmTimeseriesType, getApmTimeseries, TimeseriesChangePoint } from '../get_apm_timeseries';
@@ -18,14 +17,16 @@ export interface ChangePointGrouping {
 
 export async function getServiceChangePoints({
   apmEventClient,
-  alertStartedAt,
+  start,
+  end,
   serviceName,
   serviceEnvironment,
   transactionType,
   transactionName,
 }: {
   apmEventClient: APMEventClient;
-  alertStartedAt: string;
+  start: string;
+  end: string;
   serviceName: string | undefined;
   serviceEnvironment: string | undefined;
   transactionType: string | undefined;
@@ -38,8 +39,8 @@ export async function getServiceChangePoints({
   const res = await getApmTimeseries({
     apmEventClient,
     arguments: {
-      start: moment(alertStartedAt).subtract(12, 'hours').toISOString(),
-      end: alertStartedAt,
+      start,
+      end,
       stats: [
         {
           title: 'Latency',
@@ -95,12 +96,14 @@ export async function getServiceChangePoints({
 
 export async function getExitSpanChangePoints({
   apmEventClient,
-  alertStartedAt,
+  start,
+  end,
   serviceName,
   serviceEnvironment,
 }: {
   apmEventClient: APMEventClient;
-  alertStartedAt: string;
+  start: string;
+  end: string;
   serviceName: string | undefined;
   serviceEnvironment: string | undefined;
 }): Promise<ChangePointGrouping[]> {
@@ -111,8 +114,8 @@ export async function getExitSpanChangePoints({
   const res = await getApmTimeseries({
     apmEventClient,
     arguments: {
-      start: moment(alertStartedAt).subtract(30, 'minute').toISOString(),
-      end: alertStartedAt,
+      start,
+      end,
       stats: [
         {
           title: 'Exit span latency',

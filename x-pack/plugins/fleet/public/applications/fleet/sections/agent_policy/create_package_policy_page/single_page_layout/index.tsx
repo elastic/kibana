@@ -226,10 +226,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     };
 
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
     if (isFleetEnabled && agentPolicyId) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyId, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']

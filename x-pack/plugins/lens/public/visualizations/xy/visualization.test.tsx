@@ -3837,23 +3837,6 @@ describe('xy_visualization', () => {
         },
       ]);
     });
-
-    it('should transform legendStats to valuesInLegend', () => {
-      const state = exampleState();
-      const { state: noLegendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
-      expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
-
-      state.legend.legendStats = [XYLegendValue.CurrentAndLastValue];
-      const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsState.legend.legendStats).not.toBeDefined();
-      expect(legendStatsState.valuesInLegend).toEqual(true);
-
-      state.legend.legendStats = [];
-      const { state: legendStatsStateFalsy } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsStateFalsy.legend.legendStats).not.toBeDefined();
-      expect(legendStatsStateFalsy.valuesInLegend).toEqual(false);
-    });
   });
 
   describe('getSupportedActionsForLayer', () => {

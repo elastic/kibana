@@ -8,6 +8,7 @@
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import type { Primitive } from '@elastic/eui/src/services/sort/comparators';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
@@ -20,9 +21,11 @@ import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactiv
 export type Direction = 'asc' | 'desc';
 export type SortField = keyof DataStreamStat;
 
-const sortingOverrides: Partial<{ [key in SortField]: SortField }> = {
+const sortingOverrides: Partial<{
+  [key in SortField]: SortField | ((item: DataStreamStat) => Primitive);
+}> = {
   ['title']: 'name',
-  ['size']: 'sizeBytes',
+  ['size']: DataStreamStat.calculateFilteredSize,
 };
 
 export const useDatasetQualityTable = () => {
@@ -33,6 +36,7 @@ export const useDatasetQualityTable = () => {
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+  const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
 
   const {
     inactive: showInactiveDatasets,
@@ -113,6 +117,7 @@ export const useDatasetQualityTable = () => {
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
+        isSizeStatsAvailable,
         isActiveDataset: isActive,
       }),
     [
@@ -122,6 +127,7 @@ export const useDatasetQualityTable = () => {
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
+      isSizeStatsAvailable,
       isActive,
     ]
   );
@@ -205,6 +211,7 @@ export const useDatasetQualityTable = () => {
     sort: { sort },
     onTableChange,
     pagination,
+    filteredItems,
     renderedItems,
     columns,
     loading,
@@ -215,5 +222,6 @@ export const useDatasetQualityTable = () => {
     showFullDatasetNames,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
+    isSizeStatsAvailable,
   };
 };

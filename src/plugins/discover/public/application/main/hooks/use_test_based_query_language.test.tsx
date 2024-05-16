@@ -12,16 +12,16 @@ import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { FetchStatus } from '../../types';
-import { RecordRawType } from '../services/discover_data_state_container';
+import { RecordRawType } from '../state_management/discover_data_state_container';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../services/discover_state_provider';
-import { DiscoverAppState } from '../services/discover_app_state_container';
-import { DiscoverStateContainer } from '../services/discover_state';
+import { DiscoverMainProvider } from '../state_management/discover_state_provider';
+import { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 
@@ -269,13 +269,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1', 'field2'],
-      });
-    });
-    replaceUrlState.mockReset();
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,

@@ -154,7 +154,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to add a filter in the grid cell or document flyout
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Function triggered when a column is resized by the user
    */
@@ -372,13 +372,16 @@ export interface UnifiedDataTableProps {
    * This data is sent directly to actions.
    */
   cellActionsMetadata?: Record<string, unknown>;
-
   /**
    *
    * Custom cell Popover Render Component.
    *
    */
   renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+  /**
+   * Optional extra props passed to the renderCellValue function/component.
+   */
+  cellContext?: EuiDataGridProps['cellContext'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -447,6 +450,7 @@ export const UnifiedDataTable = ({
   customControlColumnsConfiguration,
   enableComparisonMode,
   renderCellPopover,
+  cellContext,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -517,11 +521,13 @@ export const UnifiedDataTable = ({
       },
       valueToStringConverter,
       componentsTourSteps,
+      isPlainRecord,
     }),
     [
       componentsTourSteps,
       darkMode,
       dataView,
+      isPlainRecord,
       displayedRows,
       expandedDoc,
       isFilterActive,
@@ -1070,6 +1076,7 @@ export const UnifiedDataTable = ({
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}
               renderCellPopover={renderCustomPopover}
+              cellContext={cellContext}
             />
           )}
         </div>

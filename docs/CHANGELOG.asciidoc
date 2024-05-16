@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.13.4>>
 * <<release-notes-8.13.3>>
 * <<release-notes-8.13.2>>
 * <<release-notes-8.13.1>>
@@ -65,6 +66,19 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+[[release-notes-8.13.4]]
+== {kib} 8.13.4
+
+The 8.13.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.13.4]]
+=== Bug Fixes
+Lens & Visualizations::
+* Fixes table sorting when changing the interval on the time picker in *Lens* ({kibana-pull}182173[#182173]).
+Dashboards::
+* Fixes a bug with drilldowns where the control group on a source dashboard could be replaced by the control group from the destination dashboard ({kibana-pull}179485[#179485]).
+
 [[release-notes-8.13.3]]
 == {kib} 8.13.3
 
@@ -82,8 +96,9 @@ Fleet::
 * Fixes managed agent policy preconfiguration update ({kibana-pull}181624[#181624]).
 * Use lowercase dataset in template names ({kibana-pull}180887[#180887]).
 * Fixes KQL/kuery for getting Fleet Server agent count ({kibana-pull}180650[#180650]).
+Index Management::
+* Fixes `allow_auto_create` field in the Index Template form ({kibana-pull}178321[#178321]).
 Lens & Visualizations::
-* Fixes table sorting on time picker interval change in *Lens* ({kibana-pull}182173[#182173]).
 * Fixes controls on fields with custom label ({kibana-pull}180615[#180615]).
 Machine Learning::
 * Fixes deep link for Index data visualizer & ES|QL data visualizer ({kibana-pull}180389[#180389]).

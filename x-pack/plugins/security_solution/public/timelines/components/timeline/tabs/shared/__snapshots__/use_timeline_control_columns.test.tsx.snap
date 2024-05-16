@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useTimelineColumns leadingControlColumns should return the leading control columns 1`] = `
+Array [
+  Object {
+    "headerCellRender": [Function],
+    "id": "default-timeline-control-column",
+    "rowCellRender": Object {
+      "$$typeof": Symbol(react.memo),
+      "compare": null,
+      "type": [Function],
+    },
+    "width": 152,
+  },
+]
+`;

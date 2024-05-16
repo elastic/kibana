@@ -37,7 +37,7 @@ export function registerContextFunction({
       name: 'context',
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.Internal,
       parameters: {
         type: 'object',
         properties: {

@@ -480,6 +480,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
+      ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
         hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
@@ -577,21 +578,33 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-custom-threshold-alert-rule`
         : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
       monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
-      monitorUptime: `${OBSERVABILITY_DOCS}monitor-uptime.html`,
+      monitorUptime: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}monitor-synthetics`
+        : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
       tlsCertificate: `${OBSERVABILITY_DOCS}tls-certificate-alert.html`,
       uptimeDurationAnomaly: `${OBSERVABILITY_DOCS}duration-anomaly-alert.html`,
-      monitorLogs: `${OBSERVABILITY_DOCS}monitor-logs.html`,
+      monitorLogs: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}discover-and-explore-logs`
+        : `${OBSERVABILITY_DOCS}monitor-logs.html`,
       analyzeMetrics: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}infrastructure-monitoring`
         : `${OBSERVABILITY_DOCS}analyze-metrics.html`,
-      monitorUptimeSynthetics: `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
+      monitorUptimeSynthetics: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}monitor-synthetics`
+        : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
       userExperience: `${OBSERVABILITY_DOCS}user-experience.html`,
       createAlerts: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}alerting`
         : `${OBSERVABILITY_DOCS}create-alerts.html`,
-      syntheticsAlerting: `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
-      syntheticsCommandReference: `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
-      syntheticsProjectMonitors: `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
+      syntheticsAlerting: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-settings#alerting`
+        : `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
+      syntheticsCommandReference: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-configuration#playwrightoptions`
+        : `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
+      syntheticsProjectMonitors: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-get-started-project`
+        : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
       syntheticsMigrateFromIntegration: `${OBSERVABILITY_DOCS}synthetics-migrate-from-integration.html`,
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-slo-burn-rate-alert-rule`
@@ -790,6 +803,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
       processors: `${ELASTICSEARCH_DOCS}processors.html`,
+      arrayOrJson: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-array-json-handling`,
+      dataEnrichment: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-enrichment`,
+      dataFiltering: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-filtering`,
+      dataTransformation: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-transformation`,
+      pipelineHandling: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-pipeline-handling`,
       remove: `${ELASTICSEARCH_DOCS}remove-processor.html`,
       rename: `${ELASTICSEARCH_DOCS}rename-processor.html`,
       script: `${ELASTICSEARCH_DOCS}script-processor.html`,
@@ -934,13 +952,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys#restrict-privileges`,
     },
     synthetics: {
-      featureRoles: `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
+      featureRoles: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-feature-roles`
+        : `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
     playground: {
       chatPlayground: `${KIBANA_DOCS}playground.html`,
+      retrievalOptimize: `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
+      retrieval: `${KIBANA_DOCS}playground-query.html`,
+      context: `${KIBANA_DOCS}playground-context.html`,
+      hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
   });
 };

@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults':
           '{  "from": "2015-09-18T19:37:13.000Z",  "to": "2015-09-22T23:30:30.000Z"}',
       });
+      await PageObjects.visualize.gotoVisualizationLandingPage({ forceRefresh: true });
     });
 
     after(async () => {

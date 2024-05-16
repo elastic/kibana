@@ -147,4 +147,67 @@ describe('Editor actions provider', () => {
       expect(link).toBe(docsLink);
     });
   });
+
+  describe('provideCompletionItems', () => {
+    const mockModel = {
+      getWordUntilPosition: () => {
+        return {
+          startColumn: 1,
+        };
+      },
+      getPositionAt: () => {
+        return {
+          lineNumber: 1,
+        };
+      },
+      getLineCount: () => 1,
+      getLineContent: () => 'GET ',
+      getValueInRange: () => 'GET ',
+    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+    const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
+    const mockContext = {} as jest.Mocked<monaco.languages.CompletionContext>;
+    const token = {} as jest.Mocked<monaco.CancellationToken>;
+    it('returns completion items for method if no requests', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext,
+        token
+      );
+      expect(completionItems?.suggestions.length).toBe(6);
+      const methods = completionItems?.suggestions.map((suggestion) => suggestion.label);
+      expect((methods as string[]).sort()).toEqual([
+        'DELETE',
+        'GET',
+        'HEAD',
+        'PATCH',
+        'POST',
+        'PUT',
+      ]);
+    });
+
+    it('returns completion items for url path if method already typed in', async () => {
+      // mock a parsed request that only has a method
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          method: 'GET',
+        },
+      ]);
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [{ name: '_search' }, { name: '_cat' }];
+      });
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext,
+        token
+      );
+      expect(completionItems?.suggestions.length).toBe(2);
+      const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);
+      expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
+    });
+  });
 });

@@ -16,6 +16,9 @@ import { defaultUdtHeaders } from '../default_headers';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+
+jest.mock('../../../../../common/hooks/use_selector');
 
 const testDataRows = structuredClone(mockTimelineData);
 
@@ -37,6 +40,8 @@ const mockVisibleColumns = ['@timestamp', 'message', 'user.name']
   .map((id) => defaultUdtHeaders.find((h) => h.id === id) as EuiDataGridColumn)
   .concat(additionalTrailingColumn);
 
+const mockEventIdsAddingNotes = new Set<string>();
+
 const defaultProps: CustomTimelineDataGridBodyProps = {
   Cell: MockCellComponent,
   visibleRowData: { startRow: 0, endRow: 2, visibleRowCount: 2 },
@@ -44,6 +49,34 @@ const defaultProps: CustomTimelineDataGridBodyProps = {
   enabledRowRenderers: [],
   setCustomGridBodyProps: jest.fn(),
   visibleColumns: mockVisibleColumns,
+  eventIdsAddingNotes: mockEventIdsAddingNotes,
+  eventIdToNoteIds: {
+    event1: ['noteId1', 'noteId2'],
+    event2: ['noteId3'],
+  },
+  events: [
+    {
+      _id: 'event1',
+      _index: 'logs-*',
+      data: [],
+      ecs: { _id: 'event1', _index: 'logs-*' },
+    },
+    {
+      _id: 'event2',
+      _index: 'logs-*',
+      data: [],
+      ecs: { _id: 'event2', _index: 'logs-*' },
+    },
+  ],
+  onToggleShowNotes: (eventId?: string) => {
+    if (eventId) {
+      if (mockEventIdsAddingNotes.has(eventId)) {
+        mockEventIdsAddingNotes.delete(eventId);
+      } else {
+        mockEventIdsAddingNotes.add(eventId);
+      }
+    }
+  },
 };
 
 const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
@@ -64,6 +97,7 @@ const mockIntersectionObserverReturnValue = {
 
 describe('CustomTimelineDataGridBody', () => {
   beforeEach(() => {
+    const now = new Date();
     (useStatefulRowRenderer as jest.Mock).mockReturnValue({
       canShowRowRenderer: true,
     });
@@ -75,6 +109,30 @@ describe('CustomTimelineDataGridBody', () => {
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     window.IntersectionObserver = mockIntersectionObserver as unknown as any;
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+      noteId1: {
+        created: now,
+        eventId: 'event1',
+        id: 'test',
+        lastEdit: now,
+        note: 'note',
+        user: 'test',
+        saveObjectId: 'id',
+        timelineId: 'timeline-1',
+        version: '',
+      },
+      noteId2: {
+        created: now,
+        eventId: 'event1',
+        id: 'test',
+        lastEdit: now,
+        note: 'note',
+        user: 'test',
+        saveObjectId: 'id',
+        timelineId: 'timeline-1',
+        version: '',
+      },
+    });
   });
 
   afterEach(() => {
@@ -121,5 +179,19 @@ describe('CustomTimelineDataGridBody', () => {
     const { getByText, queryByText } = renderTestComponents();
     expect(queryByText('Cell-0-3')).toBeFalsy();
     expect(getByText('Cell-1-3')).toBeInTheDocument();
+  });
+
+  it('should render a note when notes are present', () => {
+    const { getByText } = renderTestComponents();
+    expect(getByText('note')).toBeInTheDocument();
+  });
+
+  it('should render the note creation form when the set of eventIds adding a note includes the eventId', () => {
+    const { getByTestId } = renderTestComponents({
+      ...defaultProps,
+      eventIdsAddingNotes: new Set(['event1']),
+    });
+
+    expect(getByTestId('new-note-tabs')).toBeInTheDocument();
   });
 });
