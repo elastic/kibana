@@ -9,8 +9,8 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { generateIndexName } from '../helpers/generate_index_name';
 
 function createIdTemplate(definition: EntityDefinition) {
-  return definition.identityFields.reduce((template, field) => {
-    return template.replaceAll(field, `entity.identity.${field}`);
+  return definition.identityFields.reduce((template, id) => {
+    return template.replaceAll(id.field, `entity.identity.${id.field}`);
   }, definition.identityTemplate);
 }
 

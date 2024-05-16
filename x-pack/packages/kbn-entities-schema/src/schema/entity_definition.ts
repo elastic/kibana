@@ -13,6 +13,7 @@ import {
   metadataSchema,
   filterSchema,
   durationSchema,
+  identityFieldsSchema,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
@@ -22,7 +23,7 @@ export const entityDefinitionSchema = z.object({
   type: entityTypeSchema,
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
-  identityFields: arrayOfStringsSchema,
+  identityFields: z.array(identityFieldsSchema),
   identityTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),

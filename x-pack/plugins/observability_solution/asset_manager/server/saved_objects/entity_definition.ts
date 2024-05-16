@@ -23,7 +23,7 @@ export const entityDefinition: SavedObjectsType = {
       type: { type: 'keyword' },
       filter: { type: 'keyword' },
       indexPatterns: { type: 'keyword' },
-      identityFields: { type: 'keyword' },
+      identityFields: { type: 'object' },
       categories: { type: 'keyword' },
       metadata: { type: 'object' },
       metrics: { type: 'object' },

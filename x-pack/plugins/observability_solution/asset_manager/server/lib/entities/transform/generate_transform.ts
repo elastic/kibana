@@ -64,9 +64,11 @@ export function generateTransform(definition: EntityDefinition): TransformPutTra
     },
     pivot: {
       group_by: definition.identityFields.reduce(
-        (acc, field) => ({
+        (acc, id) => ({
           ...acc,
-          [`entity.identity.${field}`]: { terms: { field } },
+          [`entity.identity.${id.field}`]: {
+            terms: { field: id.field, missing_bucket: id.optional },
+          },
         }),
         {}
       ),
