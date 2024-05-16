@@ -22,7 +22,7 @@ import { useGetEndpointDetails } from '../../../../management/hooks';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetSentinelOneAgentStatus,
+  useGetExternalAgentStatus,
 } from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -139,7 +139,30 @@ describe('<HighlightedFieldsCell />', () => {
       expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
     }
   );
+  it.each(Object.keys(hooksToMock))(
+    'should render Crowdstrike agent status cell if field is agent.status and `origialField` is `crowdstrike.event.DeviceId` with %s hook',
+    (hookName) => {
+      const hook = hooksToMock[hookName];
+      useAgentStatusHookMock.mockImplementation(() => hook);
 
+      (hook as jest.Mock).mockReturnValue({
+        isFetched: true,
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="crowdstrike.event.DeviceId"
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
+    }
+  );
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>

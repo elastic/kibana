@@ -20,3 +20,5 @@ export interface GetAgentStatusOptions {
   connectorActionsClient: ActionsClient;
   logger: Logger;
 }
+
+export type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';

@@ -9,6 +9,7 @@ import type { VFC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { AgentType } from '../../../../../server/endpoint/services';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
@@ -82,13 +83,7 @@ export interface HighlightedFieldsCellProps {
 }
 
 const FieldsAgentStatus = memo(
-  ({
-    value,
-    agentType,
-  }: {
-    value: string | undefined;
-    agentType: 'sentinel_one' | 'crowdstrike' | 'endpoint';
-  }) => {
+  ({ value, agentType }: { value: string | undefined; agentType: AgentType }) => {
     const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
     if (agentType !== 'endpoint' || agentStatusClientEnabled) {
       return (

@@ -8,7 +8,10 @@
 import { buildCrowdstrikeRoutePath } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
-import { createCrowdstrikeGetAgentsApiResponseMock } from '../mocks';
+import {
+  createCrowdstrikeAgentDetailsMock,
+  createCrowdstrikeGetAgentsApiResponseMock,
+} from '../mocks';
 
 export const getAgentDetailsRouteDefinition = (): EmulatorServerRouteDefinition => {
   return {
@@ -19,5 +22,5 @@ export const getAgentDetailsRouteDefinition = (): EmulatorServerRouteDefinition 
 };
 
 const getAgentDetailsHandler: ExternalEdrServerEmulatorRouteHandlerMethod<{}> = async () => {
-  return createCrowdstrikeGetAgentsApiResponseMock({ agentType: 'crowdstrike' });
+  return createCrowdstrikeGetAgentsApiResponseMock([createCrowdstrikeAgentDetailsMock({})]);
 };

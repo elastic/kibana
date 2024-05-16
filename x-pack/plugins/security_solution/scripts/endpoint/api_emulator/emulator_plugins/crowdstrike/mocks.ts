@@ -21,7 +21,7 @@ export const createCrowdstrikeGetAgentsApiResponseMock = (
       trace_id: '4567898765-432423432432-42342342',
     },
     errors: null,
-    resources: [createCrowdstrikeAgentDetailsMock(data)],
+    resources: data,
   };
 };
 
