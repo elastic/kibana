@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverLayout } from './discover_layout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -39,7 +39,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
-import { I18nProvider } from '@kbn/i18n-react';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -107,7 +107,11 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+    interval: 'auto',
+    query,
+  });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -125,14 +129,12 @@ async function mountComponent(
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
-  const component = mount(
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverLayout {...props} />
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    </I18nProvider>,
+  const component = mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverLayout {...props} />
+      </DiscoverMainProvider>
+    </KibanaContextProvider>,
     mountOptions
   );
 

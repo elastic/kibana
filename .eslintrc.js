@@ -177,6 +177,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
+  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
