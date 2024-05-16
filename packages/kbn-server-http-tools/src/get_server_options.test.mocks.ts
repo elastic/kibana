@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IHttpConfig } from './types';
+export const getServerListenerMock = jest.fn();
 
-export interface ListenerOptions {
-  keepaliveTimeout: number;
-  socketTimeout: number;
-}
-
-export function getListenerOptions(config: IHttpConfig): ListenerOptions {
+jest.doMock('./get_listener', () => {
+  const actual = jest.requireActual('./get_listener');
   return {
-    keepaliveTimeout: config.keepaliveTimeout,
-    socketTimeout: config.socketTimeout,
+    ...actual,
+    getServerListener: getServerListenerMock,
   };
-}
+});
