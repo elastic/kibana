@@ -62,7 +62,6 @@ export const getSearchEmbeddableFactory = ({
             idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
-              // setSearchTechnique(newSearchTechnique);
               stateManager.searchTechnique.next(newSearchTechnique);
             }}
           />

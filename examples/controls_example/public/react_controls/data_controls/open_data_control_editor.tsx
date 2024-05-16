@@ -8,6 +8,7 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
+import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -18,12 +19,12 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DataControlStateManager } from './initialize_data_control';
-import { DataEditorState } from './types';
-import { BehaviorSubject } from 'rxjs';
+import { DataControlStateManager, DefaultDataControlState } from './types';
 
-export const openDataControlEditor = async (
-  stateManager: DataControlStateManager,
+export const openDataControlEditor = async <
+  State extends DefaultDataControlState = DefaultDataControlState
+>(
+  stateManager: DataControlStateManager<State>,
   controlGroupApi: ControlGroupApi,
   services: {
     core: CoreStart;
@@ -32,6 +33,20 @@ export const openDataControlEditor = async (
   controlType?: string
 ): Promise<undefined> => {
   return new Promise((resolve) => {
+    /**
+     * Duplicate all state into a new manager because we do not want to actually apply the changes
+     * to the control until the user hits save.
+     */
+    const editorStateManager: DataControlStateManager<State> = Object.keys(stateManager).reduce(
+      (prev, key) => {
+        return {
+          ...prev,
+          [key as keyof State]: new BehaviorSubject(stateManager[key as keyof State].getValue()),
+        };
+      },
+      {} as DataControlStateManager<State>
+    );
+
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
         controlGroupApi.parentApi.clearOverlays();
@@ -39,10 +54,13 @@ export const openDataControlEditor = async (
       overlayRef.close();
     };
 
-    const onCancel = (overlay: OverlayRef, newState: DataEditorState) => {
-      const initialState = Object.keys(stateManager).reduce((prev, key) => {
-        return { ...prev, [key]: stateManager[key as keyof DataControlStateManager].getValue() };
-      }, {});
+    const onCancel = (overlay: OverlayRef) => {
+      const initialState = Object.keys(stateManager).map((key) => {
+        return stateManager[key as keyof State].getValue();
+      });
+      const newState = Object.keys(editorStateManager).map((key) => {
+        return editorStateManager[key as keyof State].getValue();
+      });
 
       if (deepEqual(initialState, newState)) {
         closeOverlay(overlay);
@@ -73,36 +91,24 @@ export const openDataControlEditor = async (
         });
     };
 
-    /**
-     * Duplicate all state managaer into a new manager because we do not want to actually apply the changes
-     * to the control until the user hits save.
-     */
-    const stateManagerCopy: DataControlStateManager = Object.keys(stateManager).reduce(
-      (prev, key) => {
-        return { ...prev, [key]: new BehaviorSubject(stateManager[key].getValue()) };
-      },
-      {} as DataControlStateManager
-    );
-
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
         <DataControlEditor
           controlType={controlType}
           parentApi={controlGroupApi}
           onCancel={() => {
-            const newState = Object.keys(stateManagerCopy).map((key) => {
-              return stateManagerCopy[key].getValue();
-            });
-            onCancel(overlay, newState);
+            onCancel(overlay);
           }}
           onSave={() => {
             Object.keys(stateManager).forEach((key) => {
-              stateManager[key].next(stateManagerCopy[key].getValue());
+              stateManager[key as keyof State].next(
+                editorStateManager[key as keyof State].getValue()
+              );
             });
             closeOverlay(overlay);
             resolve(undefined);
           }}
-          stateManager={stateManagerCopy}
+          stateManager={editorStateManager}
           services={{ dataViews: services.dataViews }}
         />,
         {

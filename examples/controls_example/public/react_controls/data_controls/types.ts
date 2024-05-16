@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '@kbn/controls-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { BehaviorSubject } from 'rxjs';
@@ -19,25 +17,17 @@ export type DataControlApi = DefaultControlApi &
   HasEditCapabilities &
   PublishesDataView;
 
-export type DataControlStateManager<
-  State extends DefaultDataControlState = DefaultDataControlState
-> = {
+export type DataControlStateManager<State extends object = object> = {
   [key in keyof Required<State>]: BehaviorSubject<State[key]>;
 };
 
-// export type DataControlSettingsManager<Settings extends object = {}> = {
-//   [key in keyof Required<Settings>]: BehaviorSubject<Settings[key]>;
-// };
-
-export interface DataControlFactory<State extends object = object>
+export interface DataControlFactory<State extends DefaultDataControlState = DefaultDataControlState>
   extends ControlFactory<State, DataControlApi> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    // initialState: State;
-    // api: PublishesSettings;
     stateManager: DataControlStateManager<State>;
     setControlEditorValid: (valid: boolean) => void; // Remove?
-  }>; // internal api manages state
+  }>;
 }
 
 export const isDataControlFactory = (factory: unknown): factory is DataControlFactory => {
@@ -48,19 +38,4 @@ export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
   title?: string; // custom control label
-  // settings?: object;
 }
-
-export interface DataEditorState {
-  dataViewId: string;
-  fieldName: string;
-  grow?: boolean;
-  width?: ControlWidth;
-  title?: string;
-  settings?: object;
-}
-
-// {
-//   customSettings?: PublishingSubject<object | undefined>;
-//   fieldName: PublishingSubject<string>;
-// };

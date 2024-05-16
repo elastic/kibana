@@ -8,12 +8,12 @@
 
 import { memoize } from 'lodash';
 
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import { DataControlFieldRegistry } from '@kbn/controls-plugin/public/types';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { isDataControlFactory } from './types';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 /** This is duplicated from the controls plugin to avoid exporting it */
 export const getDataControlFieldRegistry = memoize(

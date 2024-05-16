@@ -30,12 +30,11 @@ export type EditorStateManager<State> = {
 };
 
 export const initializeDataControl = <
-  State extends DefaultDataControlState,
-  EditorState extends object = object
+  State extends DefaultDataControlState = DefaultDataControlState
 >(
   controlType: string,
   state: State,
-  editorStateManager: DataControlStateManager<EditorState>,
+  editorStateManager: DataControlStateManager<State>,
   controlGroup: ControlGroupApi,
   services: {
     core: CoreStart;
@@ -67,7 +66,7 @@ export const initializeDataControl = <
     fieldName,
     title: panelTitle,
   };
-  console.log(editorStateManager, stateManager);
+
   /**
    * The default panel title will always be the same as the field name, so keep these two things in sync;
    * Skip the first fired event because it was initialized above
@@ -86,8 +85,8 @@ export const initializeDataControl = <
   });
 
   const onEdit = async () => {
-    openDataControlEditor(
-      { ...stateManager, ...editorStateManager },
+    openDataControlEditor<State>(
+      { ...editorStateManager, ...stateManager },
       controlGroup,
       services,
       controlType

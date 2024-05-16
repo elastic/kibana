@@ -5,7 +5,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -54,15 +54,17 @@ import {
 import {
   DataControlFactory,
   DataControlStateManager,
-  DataEditorState,
+  DefaultDataControlState,
   isDataControlFactory,
 } from './types';
 
-export interface ControlEditorProps {
+export interface ControlEditorProps<
+  State extends DefaultDataControlState = DefaultDataControlState
+> {
   controlType?: string; // if provided, then editing existing control; otherwise, creating a new control
-  onCancel: (state: DataEditorState) => void;
-  onSave: (state: DataEditorState, type?: string) => void;
-  stateManager: DataControlStateManager;
+  onCancel: () => void;
+  onSave: (type?: string) => void;
+  stateManager: DataControlStateManager<State>;
   parentApi: ControlGroupApi; // controls must always have a parent API
   services: {
     dataViews: DataViewsPublicPluginStart;
@@ -87,25 +89,20 @@ export const DataControlEditor = ({
     controlGroup.width
   );
 
-  const [selectedDataViewId, selectedFieldName, selectedGrow, selectedWidth] =
+  const [selectedDataViewId, selectedFieldName, currentTitle, selectedGrow, selectedWidth] =
     useBatchedPublishingSubjects(
       stateManager.dataViewId,
       stateManager.fieldName,
+      stateManager.title,
       stateManager.grow,
       stateManager.width
     );
 
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
-  const [currentTitle, setCurrentTitle] = useState<string | undefined>(
-    stateManager.title.getValue() || selectedFieldName
-  );
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
-  // const [selectedSettings, setSelectedSettings] = useState(stateManager.settings.getValue());
+  const [controlEditorValid, setControlEditorValid] = useState(false);
 
   // const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
-
-  const [controlEditorValid, setControlEditorValid] = useState(false);
-  // const [customSettings, setCustomSettings] = useState<Partial<ControlInput>>();
 
   const { loading: dataViewListLoading, value: dataViewListItems = [] } = useAsync(() => {
     return dataViewService.getIdsWithTitle();
@@ -220,24 +217,6 @@ export const DataControlEditor = ({
     );
   }, [fieldRegistry, selectedControlType, selectedFieldName, stateManager]);
 
-  const getCurrentState = useCallback(() => {
-    return {
-      dataViewId: selectedDataViewId,
-      fieldName: selectedFieldName,
-      title:
-        currentTitle === '' || currentTitle === selectedFieldDisplayName ? undefined : currentTitle,
-      grow: selectedGrow,
-      width: selectedWidth,
-    };
-  }, [
-    selectedDataViewId,
-    selectedFieldName,
-    selectedFieldDisplayName,
-    currentTitle,
-    selectedGrow,
-    selectedWidth,
-  ]);
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -315,12 +294,12 @@ export const DataControlEditor = ({
                 selectedFieldName={selectedFieldName}
                 dataView={selectedDataView}
                 onSelectField={(field) => {
-                  // setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
+                  setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
                   const newDefaultTitle = field.displayName ?? field.name;
                   stateManager.fieldName.next(field.name);
                   setSelectedFieldDisplayName(newDefaultTitle);
                   if (!currentTitle || currentTitle === selectedFieldDisplayName) {
-                    setCurrentTitle(newDefaultTitle);
+                    stateManager.title.next(newDefaultTitle);
                   }
                 }}
                 selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
@@ -368,7 +347,7 @@ export const DataControlEditor = ({
                 data-test-subj="control-editor-title-input"
                 placeholder={selectedFieldDisplayName ?? selectedFieldName}
                 value={currentTitle}
-                onChange={(e) => setCurrentTitle(e.target.value)}
+                onChange={(e) => stateManager.title.next(e.target.value)}
               />
             </EuiFormRow>
             {/* {!editorConfig?.hideWidthSettings && ( */}
@@ -439,7 +418,7 @@ export const DataControlEditor = ({
               data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
-                onCancel(getCurrentState());
+                onCancel();
               }}
             >
               {i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
@@ -455,7 +434,7 @@ export const DataControlEditor = ({
               color="primary"
               disabled={!controlEditorValid}
               onClick={() => {
-                onSave(getCurrentState());
+                onSave();
               }}
             >
               {i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {

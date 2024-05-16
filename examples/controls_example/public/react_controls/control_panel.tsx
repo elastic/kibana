@@ -61,6 +61,8 @@ export const ControlPanel = <
     blockingError,
     panelTitle,
     defaultPanelTitle,
+    grow,
+    width,
     // controlGroupSettings,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
@@ -68,9 +70,11 @@ export const ControlPanel = <
     api?.blockingError,
     api?.panelTitle,
     api?.defaultPanelTitle,
+    api?.grow,
+    api?.width,
     viewModeSubject
   );
-  console.log(panelTitle, defaultPanelTitle);
+  console.log(panelTitle, defaultPanelTitle, grow, width);
 
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
@@ -120,6 +124,7 @@ export const ControlPanel = <
         >
           <ControlComponent
             ref={(newApi) => {
+              console.log(newApi);
               if (newApi && !api) setApi(newApi);
             }}
           />
