@@ -2317,6 +2317,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = concat(5, 5)', [
           'Argument of [concat] must be [string], found value [5] type [number]',
+          'Argument of [concat] must be [string], found value [5] type [number]',
         ]);
 
         testErrorsAndWarnings(
@@ -2325,6 +2326,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | where length(concat(numberField, numberField)) > 0', [
+          'Argument of [concat] must be [string], found value [numberField] type [number]',
           'Argument of [concat] must be [string], found value [numberField] type [number]',
         ]);
 
@@ -2337,6 +2339,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval concat(numberField, numberField)', [
+          'Argument of [concat] must be [string], found value [numberField] type [number]',
           'Argument of [concat] must be [string], found value [numberField] type [number]',
         ]);
 
@@ -2447,30 +2450,30 @@ describe('validation logic', () => {
       });
 
       describe('date_format', () => {
-        testErrorsAndWarnings('row var = date_format(now(), "a")', []);
-        testErrorsAndWarnings('row date_format(now(), "a")', []);
-        testErrorsAndWarnings('from a_index | eval var = date_format(dateField, stringField)', []);
-        testErrorsAndWarnings('from a_index | eval date_format(dateField, stringField)', []);
+        testErrorsAndWarnings('row var = date_format("a", now())', []);
+        testErrorsAndWarnings('row date_format("a", now())', []);
+        testErrorsAndWarnings('from a_index | eval var = date_format(stringField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_format(to_datetime(stringField), to_string(stringField))',
+          'from a_index | eval var = date_format(to_string(stringField), to_datetime(stringField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval date_format(stringField, numberField)', [
-          'Argument of [date_format] must be [date], found value [stringField] type [string]',
-          'Argument of [date_format] must be [string], found value [numberField] type [number]',
+          'Argument of [date_format] must be [date], found value [numberField] type [number]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval date_format(dateField, stringField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, dateField, extraArg)', [
           'Error: [date_format] function expects no more than 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort date_format(dateField, stringField)', []);
+        testErrorsAndWarnings('from a_index | sort date_format(stringField, dateField)', []);
       });
 
       describe('date_parse', () => {
         testErrorsAndWarnings('row var = date_parse("a", "a")', []);
+        testErrorsAndWarnings('row var = date_parse("a")', []);
         testErrorsAndWarnings('row date_parse("a", "a")', []);
         testErrorsAndWarnings('row var = date_parse(to_string("a"), to_string("a"))', []);
 
@@ -2479,6 +2482,7 @@ describe('validation logic', () => {
           'Argument of [date_parse] must be [string], found value [5] type [number]',
         ]);
 
+        testErrorsAndWarnings('from a_index | eval var = date_parse(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = date_parse(stringField, stringField)', []);
         testErrorsAndWarnings('from a_index | eval date_parse(stringField, stringField)', []);
 
@@ -2494,7 +2498,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | eval date_parse(stringField, stringField, extraArg)',
-          ['Error: [date_parse] function expects exactly 2 arguments, got 3.']
+          ['Error: [date_parse] function expects no more than 2 arguments, got 3.']
         );
 
         testErrorsAndWarnings('from a_index | sort date_parse(stringField, stringField)', []);
@@ -3048,7 +3052,9 @@ describe('validation logic', () => {
 
       describe('mv_zip', () => {
         testErrorsAndWarnings('row var = mv_zip("a", "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_zip("a", "a")', []);
         testErrorsAndWarnings('row mv_zip("a", "a", "a")', []);
+        testErrorsAndWarnings('row mv_zip("a", "a")', []);
 
         testErrorsAndWarnings(
           'row var = mv_zip(to_string("a"), to_string("a"), to_string("a"))',
@@ -3080,6 +3086,8 @@ describe('validation logic', () => {
           []
         );
 
+        testErrorsAndWarnings('from a_index | eval mv_zip(stringField, stringField)', []);
+
         testErrorsAndWarnings(
           'from a_index | eval mv_zip(stringField, stringField, stringField)',
           []
@@ -3098,7 +3106,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | eval mv_zip(stringField, stringField, stringField, extraArg)',
-          ['Error: [mv_zip] function expects exactly 3 arguments, got 4.']
+          ['Error: [mv_zip] function expects no more than 3 arguments, got 4.']
         );
 
         testErrorsAndWarnings(
@@ -3536,8 +3544,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_contains(to_geopoint("a"), to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_contains("a", "a")', [
-          'Argument of [st_contains] must be [geo_point], found value ["a"] type [string]',
-          'Argument of [st_contains] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_contains] must be [cartesian_point], found value ["a"] type [string]',
+          'Argument of [st_contains] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -3647,8 +3655,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval st_contains(stringField, stringField)', [
-          'Argument of [st_contains] must be [geo_point], found value [stringField] type [string]',
-          'Argument of [st_contains] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_contains] must be [cartesian_point], found value [stringField] type [string]',
+          'Argument of [st_contains] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -3791,8 +3799,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_disjoint(to_geopoint("a"), to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_disjoint("a", "a")', [
-          'Argument of [st_disjoint] must be [geo_point], found value ["a"] type [string]',
-          'Argument of [st_disjoint] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_disjoint] must be [cartesian_point], found value ["a"] type [string]',
+          'Argument of [st_disjoint] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -3902,8 +3910,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval st_disjoint(stringField, stringField)', [
-          'Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]',
-          'Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_disjoint] must be [cartesian_point], found value [stringField] type [string]',
+          'Argument of [st_disjoint] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4046,8 +4054,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_intersects(to_geopoint("a"), to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_intersects("a", "a")', [
-          'Argument of [st_intersects] must be [geo_point], found value ["a"] type [string]',
-          'Argument of [st_intersects] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_intersects] must be [cartesian_point], found value ["a"] type [string]',
+          'Argument of [st_intersects] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4161,8 +4169,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval st_intersects(stringField, stringField)', [
-          'Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]',
-          'Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_intersects] must be [cartesian_point], found value [stringField] type [string]',
+          'Argument of [st_intersects] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4320,8 +4328,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_within(to_geopoint("a"), to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_within("a", "a")', [
-          'Argument of [st_within] must be [geo_point], found value ["a"] type [string]',
-          'Argument of [st_within] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_within] must be [cartesian_point], found value ["a"] type [string]',
+          'Argument of [st_within] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4431,8 +4439,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval st_within(stringField, stringField)', [
-          'Argument of [st_within] must be [geo_point], found value [stringField] type [string]',
-          'Argument of [st_within] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_within] must be [cartesian_point], found value [stringField] type [string]',
+          'Argument of [st_within] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4567,7 +4575,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_x(to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_x("a")', [
-          'Argument of [st_x] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_x] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('row var = st_x(to_cartesianpoint("POINT (30 10)"))', []);
@@ -4578,7 +4586,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = st_x(to_geopoint(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval st_x(stringField)', [
-          'Argument of [st_x] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_x] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval st_x(geoPointField, extraArg)', [
@@ -4606,7 +4614,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = st_y(to_geopoint("a"))', []);
 
         testErrorsAndWarnings('row var = st_y("a")', [
-          'Argument of [st_y] must be [geo_point], found value ["a"] type [string]',
+          'Argument of [st_y] must be [cartesian_point], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('row var = st_y(to_cartesianpoint("POINT (30 10)"))', []);
@@ -4617,7 +4625,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = st_y(to_geopoint(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval st_y(stringField)', [
-          'Argument of [st_y] must be [geo_point], found value [stringField] type [string]',
+          'Argument of [st_y] must be [cartesian_point], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval st_y(geoPointField, extraArg)', [
@@ -4675,7 +4683,9 @@ describe('validation logic', () => {
 
       describe('substring', () => {
         testErrorsAndWarnings('row var = substring("a", 5, 5)', []);
+        testErrorsAndWarnings('row var = substring("a", 5)', []);
         testErrorsAndWarnings('row substring("a", 5, 5)', []);
+        testErrorsAndWarnings('row substring("a", 5)', []);
 
         testErrorsAndWarnings(
           'row var = substring(to_string("a"), to_integer("a"), to_integer("a"))',
@@ -4728,13 +4738,14 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | eval substring(stringField, numberField, numberField, extraArg)',
-          ['Error: [substring] function expects exactly 3 arguments, got 4.']
+          ['Error: [substring] function expects no more than 3 arguments, got 4.']
         );
 
         testErrorsAndWarnings(
           'from a_index | sort substring(stringField, numberField, numberField)',
           []
         );
+        testErrorsAndWarnings('from a_index | sort substring(stringField, numberField)', []);
       });
 
       describe('tan', () => {
