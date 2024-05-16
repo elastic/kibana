@@ -18,7 +18,7 @@ import { getWebHookAction } from './get_web_hook_action';
  * @param supertest The supertest deps
  */
 export const createWebHookRuleAction = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<RuleAction> => {
   return (
     await supertest

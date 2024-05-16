@@ -31,7 +31,7 @@ const SIMPLE_APM_RULE_DATA = {
  * @param supertest The supertest deps
  */
 export async function createNonSecurityRule(
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<void> {
   await supertest
     .post('/api/alerting/rule')

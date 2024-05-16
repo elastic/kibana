@@ -74,7 +74,7 @@ export const createAndSyncRuleAndAlertsFactory =
     log,
     namespace,
   }: {
-    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    supertest: SuperTest.Agent;
     log: ToolingLog;
     namespace?: string;
   }) =>
@@ -413,7 +413,7 @@ export const clearLegacyDashboards = async ({
   supertest,
   log,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
 }): Promise<void> => {
   try {
@@ -485,7 +485,7 @@ export const getLegacyRiskScoreDashboards = async ({
 };
 
 export const riskEngineRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   namespace?: string
 ) => ({
   init: async (expectStatusCode: number = 200) =>
@@ -539,7 +539,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>
@@ -582,7 +582,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
 export const installLegacyRiskScore = async ({
   supertest,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }) => {
   await supertest
     .post('/internal/risk_score')

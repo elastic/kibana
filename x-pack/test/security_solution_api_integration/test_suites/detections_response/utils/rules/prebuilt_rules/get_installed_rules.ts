@@ -18,7 +18,7 @@ import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/dete
  */
 
 export const getInstalledRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<FindRulesResponse> => {
   const { body: rulesResponse } = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)

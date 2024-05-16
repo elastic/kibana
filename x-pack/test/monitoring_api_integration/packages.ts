@@ -31,7 +31,7 @@ export const getPackagesArgs = (): string[] => {
 export const bundledPackagesLocation = path.join(path.dirname(__filename), '/fixtures/packages');
 
 export function installPackage(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   packageName: SupportedPackage
 ) {
   const pkg = PACKAGES.find(({ name }) => name === packageName);
