@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import { i18n } from '@kbn/i18n';
+import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -52,8 +53,8 @@ export const isLogsEndpointAction = (
  * @param item
  */
 export const isLogsEndpointActionResponse = (
-  item: EndpointActionResponse | LogsEndpointActionResponse<EndpointActionResponseDataOutput>
-): item is LogsEndpointActionResponse<EndpointActionResponseDataOutput> => {
+  item: EndpointActionResponse | LogsEndpointActionResponse
+): item is LogsEndpointActionResponse => {
   return 'EndpointActions' in item && 'agent' in item;
 };
 
@@ -130,14 +131,13 @@ type ActionCompletionInfo = Pick<
 >;
 
 export const getActionCompletionInfo = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
 >(
   /** The normalized action request */
   action: NormalizedActionRequest,
-  /** List of action Log responses received for the action */
-  actionResponses: Array<
-    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
-  >
+  /** List of responses (from both Endpoint and Fleet) */
+  actionResponses: FetchActionResponsesResult<TOutputContent, TResponseMeta>
 ): ActionCompletionInfo => {
   const agentIds = action.agents;
   const completedInfo: ActionCompletionInfo = {
@@ -178,10 +178,10 @@ export const getActionCompletionInfo = <
 
       if (
         agentResponses.endpointResponse &&
-        agentResponses.endpointResponse.item.data.EndpointActions.data.output
+        agentResponses.endpointResponse.EndpointActions.data.output
       ) {
         completedInfo.outputs[agentId] =
-          agentResponses.endpointResponse.item.data.EndpointActions.data.output;
+          agentResponses.endpointResponse.EndpointActions.data.output;
       }
     }
   }
@@ -255,14 +255,15 @@ export const getActionStatus = ({
 };
 
 interface NormalizedAgentActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
 > {
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
   errors: undefined | string[];
-  fleetResponse: undefined | ActivityLogActionResponse;
-  endpointResponse: undefined | EndpointActivityLogActionResponse<TOutputContent>;
+  fleetResponse: undefined | EndpointActionResponse;
+  endpointResponse: undefined | LogsEndpointActionResponse<TOutputContent, TResponseMeta>;
 }
 
 type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
@@ -273,20 +274,19 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  * @param actionResponses
  */
 const mapActionResponsesByAgentId = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
 >(
-  actionResponses: Array<
-    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
-  >
+  actionResponses: FetchActionResponsesResult<TOutputContent, TResponseMeta>
 ): ActionResponseByAgentId => {
-  const response: ActionResponseByAgentId = {};
+  const response = [
+    ...actionResponses.endpointResponses,
+    ...actionResponses.fleetResponses,
+  ].reduce<ActionResponseByAgentId>((acc, actionResponseRecord) => {
+    const agentId = getAgentIdFromActionResponse(actionResponseRecord);
 
-  for (const actionResponse of actionResponses) {
-    const agentId = getAgentIdFromActionResponse(actionResponse);
-    let thisAgentActionResponses = response[agentId];
-
-    if (!thisAgentActionResponses) {
-      response[agentId] = {
+    if (!acc[agentId]) {
+      acc[agentId] = {
         isCompleted: false,
         completedAt: undefined,
         wasSuccessful: false,
@@ -294,62 +294,61 @@ const mapActionResponsesByAgentId = <
         fleetResponse: undefined,
         endpointResponse: undefined,
       };
-
-      thisAgentActionResponses = response[agentId];
     }
 
-    if (actionResponse.type === 'fleetResponse') {
-      thisAgentActionResponses.fleetResponse = actionResponse;
+    if (isLogsEndpointActionResponse(actionResponseRecord)) {
+      acc[agentId].endpointResponse = actionResponseRecord;
     } else {
-      thisAgentActionResponses.endpointResponse = actionResponse;
+      acc[agentId].fleetResponse = actionResponseRecord;
     }
 
-    thisAgentActionResponses.isCompleted =
+    return acc;
+  }, {});
+
+  for (const agentNormalizedResponse of Object.values(response)) {
+    agentNormalizedResponse.isCompleted =
       // Action is complete if an Endpoint Action Response was received
-      Boolean(thisAgentActionResponses.endpointResponse) ||
+      Boolean(agentNormalizedResponse.endpointResponse) ||
       // OR:
       // If we did not have an endpoint response and the Fleet response has `error`, then
       // action is complete. Elastic Agent was unable to deliver the action request to the
       // endpoint, so we are unlikely to ever receive an Endpoint Response.
-      Boolean(thisAgentActionResponses.fleetResponse?.item.data.error);
+      Boolean(agentNormalizedResponse.fleetResponse?.error);
 
     // When completed, calculate additional properties about the action
-    if (thisAgentActionResponses.isCompleted) {
-      if (thisAgentActionResponses.endpointResponse) {
-        thisAgentActionResponses.completedAt =
-          thisAgentActionResponses.endpointResponse?.item.data['@timestamp'];
-        thisAgentActionResponses.wasSuccessful = true;
+    if (agentNormalizedResponse.isCompleted) {
+      if (agentNormalizedResponse.endpointResponse) {
+        agentNormalizedResponse.completedAt =
+          agentNormalizedResponse.endpointResponse?.['@timestamp'];
+        agentNormalizedResponse.wasSuccessful = true;
       } else if (
         // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
         // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
         // a Response from endpoint, thus mark the Action as completed and use the Fleet Message's
         // timestamp for the complete data/time.
-        thisAgentActionResponses.fleetResponse &&
-        thisAgentActionResponses.fleetResponse.item.data.error
+        agentNormalizedResponse.fleetResponse &&
+        agentNormalizedResponse.fleetResponse.error
       ) {
-        thisAgentActionResponses.isCompleted = true;
-        thisAgentActionResponses.completedAt =
-          thisAgentActionResponses.fleetResponse.item.data['@timestamp'];
+        agentNormalizedResponse.isCompleted = true;
+        agentNormalizedResponse.completedAt = agentNormalizedResponse.fleetResponse['@timestamp'];
       }
 
       const errors: NormalizedAgentActionResponse['errors'] = [];
 
       // only one of the errors should be in there
-      if (thisAgentActionResponses.endpointResponse?.item.data.error?.message) {
+      if (agentNormalizedResponse.endpointResponse?.error?.message) {
         errors.push(
-          `Endpoint action response error: ${thisAgentActionResponses.endpointResponse.item.data.error.message}`
+          `Endpoint action response error: ${agentNormalizedResponse.endpointResponse.error.message}`
         );
       }
 
-      if (thisAgentActionResponses.fleetResponse?.item.data.error) {
-        errors.push(
-          `Fleet action response error: ${thisAgentActionResponses.fleetResponse?.item.data.error}`
-        );
+      if (agentNormalizedResponse.fleetResponse?.error) {
+        errors.push(`Fleet action response error: ${agentNormalizedResponse.fleetResponse.error}`);
       }
 
       if (errors.length) {
-        thisAgentActionResponses.wasSuccessful = false;
-        thisAgentActionResponses.errors = errors;
+        agentNormalizedResponse.wasSuccessful = false;
+        agentNormalizedResponse.errors = errors;
       }
     }
   }
@@ -362,17 +361,15 @@ const mapActionResponsesByAgentId = <
  * @param actionResponse
  */
 const getAgentIdFromActionResponse = (
-  actionResponse:
-    | ActivityLogActionResponse
-    | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
+  actionResponse: EndpointActionResponse | LogsEndpointActionResponse
 ): string => {
-  const responseData = actionResponse.item.data;
-
-  if (isLogsEndpointActionResponse(responseData)) {
-    return Array.isArray(responseData.agent.id) ? responseData.agent.id[0] : responseData.agent.id;
+  if (isLogsEndpointActionResponse(actionResponse)) {
+    return Array.isArray(actionResponse.agent.id)
+      ? actionResponse.agent.id[0]
+      : actionResponse.agent.id;
   }
 
-  return responseData.agent_id;
+  return actionResponse.agent_id;
 };
 
 // common helpers used by old and new log API
@@ -554,7 +551,7 @@ export const getAgentHostNamesWithIds = async ({
 
 export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(
   actionRequest: NormalizedActionRequest,
-  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>,
+  actionResponses: FetchActionResponsesResult,
   agentHostInfo: Record<string, string>
 ): T => {
   const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
