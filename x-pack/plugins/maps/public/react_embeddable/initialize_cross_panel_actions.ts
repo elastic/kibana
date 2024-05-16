@@ -200,7 +200,10 @@ export function initializeCrossPanelActions({
       return;
     }
 
-    if (getIsFilterByMapExtent() && !_.isEqual(prevMapExtent, savedMap.getStore().getState())) {
+    if (
+      getIsFilterByMapExtent() &&
+      !_.isEqual(prevMapExtent, getMapExtent(savedMap.getStore().getState()))
+    ) {
       setMapExtentFilter();
     }
   });
