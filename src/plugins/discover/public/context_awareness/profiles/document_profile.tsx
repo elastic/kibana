@@ -9,6 +9,7 @@
 import { DataTableRecord } from '@kbn/discover-utils';
 import { Profile } from '../composable_profile';
 import { ProfileService } from '../profile_service';
+import { DataTableRecordWithProfile } from '../types';
 
 export enum DocumentType {
   Log = 'log',
@@ -31,6 +32,12 @@ export const documentProfileService = new ProfileService<
   DocumentContext
 >();
 
+export const recordHasProfile = (
+  record?: DataTableRecord
+): record is DataTableRecordWithProfile => {
+  return Boolean(record && 'profile' in record);
+};
+
 documentProfileService.registerProvider({
   order: 0,
   profile: {
@@ -40,7 +47,10 @@ documentProfileService.registerProvider({
     },
   },
   resolve: (params) => {
-    if ('message' in params.record.flattened) {
+    if (
+      'message' in params.record.flattened &&
+      typeof params.record.flattened.message === 'string'
+    ) {
       return {
         isMatch: true,
         context: {

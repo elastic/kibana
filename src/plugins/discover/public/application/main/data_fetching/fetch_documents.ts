@@ -16,6 +16,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
+import { DataTableRecordWithProfile, documentProfileService } from '../../../context_awareness';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -67,7 +68,16 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => !isRunningResponse(res)),
       map((res) => {
-        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
+        return buildDataTableRecordList<DataTableRecordWithProfile>(
+          res.rawResponse.hits.hits as EsHitRecord[],
+          dataView,
+          {
+            processRecord: (record) => {
+              const profile = documentProfileService.resolve({ record });
+              return { ...record, profile };
+            },
+          }
+        );
       })
     );
 
