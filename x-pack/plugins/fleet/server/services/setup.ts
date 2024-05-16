@@ -87,6 +87,25 @@ async function createSetupSideEffects(
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
+  // check if fleet setup is already started
+  const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+  if (settings && settings.fleet_setup_status === 'in_progress') {
+    logger.info('Fleet setup already in progress, aborting');
+    return {
+      isInitialized: false,
+      nonFatalErrors: [],
+    };
+  }
+
+  try {
+    await settingsService.saveSettings(soClient, {
+      fleet_setup_status: 'in_progress',
+    });
+  } catch (error) {
+    logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
+  }
+
   await cleanUpOldFileIndices(esClient, logger);
 
   await ensureFleetDirectories();
@@ -226,6 +245,14 @@ async function createSetupSideEffects(
         logger.info(error);
         apm.captureError(error);
       });
+  }
+
+  try {
+    await settingsService.saveSettings(soClient, {
+      fleet_setup_status: 'completed',
+    });
+  } catch (error) {
+    logger.warn(`Error setting fleet setup status to completed: ${error}`);
   }
 
   logger.info('Fleet setup completed');

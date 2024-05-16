@@ -114,6 +114,7 @@ export const getSavedObjectTypes = (
           prerelease_integrations_enabled: { type: 'boolean' },
           secret_storage_requirements_met: { type: 'boolean' },
           output_secret_storage_requirements_met: { type: 'boolean' },
+          fleet_setup_status: { type: 'keyword' },
         },
       },
       migrations: {
@@ -123,6 +124,16 @@ export const getSavedObjectTypes = (
       },
       modelVersions: {
         1: settingsV1,
+        2: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                fleet_setup_status: { type: 'keyword' },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

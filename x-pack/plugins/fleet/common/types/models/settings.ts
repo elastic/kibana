@@ -16,4 +16,5 @@ export interface Settings extends BaseSettings {
   preconfigured_fields?: Array<'fleet_server_hosts'>;
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  fleet_setup_status?: string;
 }
