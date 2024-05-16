@@ -39,25 +39,3 @@ export const recordHasProfile = (
 ): record is DataTableRecordWithProfile => {
   return Boolean(record && 'profile' in record);
 };
-
-documentProfileService.registerProvider({
-  order: 0,
-  profile: {
-    getDocViewsRegistry: (prev) => (registry) => {
-      registry.enableById('doc_view_logs_overview');
-      return prev(registry);
-    },
-  },
-  resolve: (params) => {
-    if ('message' in params.record.flattened && params.record.flattened.message != null) {
-      return {
-        isMatch: true,
-        context: {
-          type: DocumentType.Log,
-        },
-      };
-    }
-
-    return { isMatch: false };
-  },
-});

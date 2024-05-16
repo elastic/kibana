@@ -33,32 +33,3 @@ export const rootProfileService = new AsyncProfileService<
 >();
 
 export type RootProfileProvider = Parameters<typeof rootProfileService.registerProvider>[0];
-
-rootProfileService.registerProvider({
-  order: 0,
-  profile: {
-    getTopNavItems: (prev) => () =>
-      [
-        {
-          id: 'o11y-root-entry',
-          label: 'O11y project entry',
-          run: () => {
-            alert('HELLO WORLD');
-          },
-        },
-        ...prev(),
-      ],
-  },
-  resolve: (params) => {
-    if (params.solutionNavId === 'oblt') {
-      return {
-        isMatch: true,
-        context: {
-          solutionType: SolutionType.Observability,
-        },
-      };
-    }
-
-    return { isMatch: false };
-  },
-});
