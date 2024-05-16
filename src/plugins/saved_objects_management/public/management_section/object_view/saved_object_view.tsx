@@ -147,7 +147,7 @@ export class SavedObjectEdition extends Component<
           }
         ),
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
-          defaultMessage: `Delete '{title}'?`,
+          defaultMessage: `Delete ''{title}''?`,
           values: {
             title: object?.meta?.title || 'saved Kibana object',
           },
@@ -165,7 +165,7 @@ export class SavedObjectEdition extends Component<
         title: i18n.translate(
           'savedObjectsManagement.objectView.unableDeleteSavedObjectNotificationMessage',
           {
-            defaultMessage: `Failed to delete '{title}' {type} object`,
+            defaultMessage: `Failed to delete ''{title}'' {type} object`,
             values: {
               type,
               title: object?.meta?.title,
@@ -178,7 +178,15 @@ export class SavedObjectEdition extends Component<
       return;
     }
 
-    notifications.toasts.addSuccess(`Deleted '${object?.meta?.title}' ${type} object`);
+    notifications.toasts.addSuccess(
+      i18n.translate('savedObjectsManagement.objectView.deleteSavedObjectNotificationMessage', {
+        defaultMessage: `Deleted ''{title}'' {type} object`,
+        values: {
+          type,
+          title: object?.meta?.title,
+        },
+      })
+    );
     this.redirectToListing();
   }
 

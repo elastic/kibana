@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import type {
   FieldFormat,
@@ -877,7 +877,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { isReady, isCreating, spec } = this.state;
 
     return isReady ? (
-      <div>
+      <I18nProvider>
         <EuiText>
           <h3>
             {isCreating ? (
@@ -909,7 +909,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           {this.renderDeleteModal()}
         </EuiForm>
         <EuiSpacer size="l" />
-      </div>
+      </I18nProvider>
     ) : null;
   }
 }

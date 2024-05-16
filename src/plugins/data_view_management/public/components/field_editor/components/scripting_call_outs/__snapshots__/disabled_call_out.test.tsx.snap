@@ -6,19 +6,17 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
     color="danger"
     iconType="warning"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Scripting disabled"
         description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
         id="indexPatternManagement.disabledCallOutHeader"
-        values={Object {}}
       />
     }
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
         id="indexPatternManagement.disabledCallOutLabel"
-        values={Object {}}
       />
     </p>
   </EuiCallOut>

@@ -13,7 +13,7 @@
  * intl context around them.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider, IntlShape } from '@kbn/i18n-react';
 import {
   mount,
   ReactWrapper,
@@ -25,6 +25,32 @@ import {
 import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
+// Use fake component to extract `intl` property to use in tests.
+const { intl } = mount(
+  <I18nProvider>
+    <br />
+  </I18nProvider>
+)
+  .find('IntlProvider')
+  .instance().state;
+
+/**
+ * When using @kbn/i18n `injectI18n` on components, props.intl is required.
+ */
+export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: IntlShape }> {
+  return React.cloneElement<any>(node, { intl });
+}
+
+function getOptions(context = {}, props = {}) {
+  return {
+    context: {
+      ...context,
+      intl,
+    },
+    ...props,
+  };
+}
+
 /**
  *  Creates the wrapper instance using shallow with provided intl object into context
  *
@@ -33,9 +59,13 @@ import { act as reactAct } from 'react-dom/test-utils';
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function shallowWithIntl(node: React.ReactElement, options?: ShallowRendererProps) {
-  return shallow(node, {
+  const { context, ...props } = options || {};
+
+  const optionsWithIntl = getOptions(context, props);
+
+  return shallow(nodeWithIntlProp(node), {
     wrappingComponent: I18nProvider,
-    ...options,
+    ...optionsWithIntl,
   });
 }
 
@@ -47,7 +77,7 @@ export function shallowWithIntl(node: React.ReactElement, options?: ShallowRende
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function mountWithIntl(node: React.ReactElement, options?: MountRendererProps) {
-  return mount(node, {
+  return mount(nodeWithIntlProp(node), {
     wrappingComponent: I18nProvider,
     ...options,
   });
@@ -148,14 +178,12 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
 };
 
-export function shallowWithI18nProvider<T>(child: ReactElement<T>) {
-  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>);
-  const name = typeof child.type === 'string' ? child.type : child.type.name;
-  return wrapped.find(name).dive();
+export function shallowWithI18nProvider<T>(child: ReactElement<T>, options?: ShallowRendererProps) {
+  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>, options);
+  return wrapped.children().dive();
 }
 
-export function mountWithI18nProvider<T>(child: ReactElement<T>) {
-  const wrapped = mount(<I18nProvider>{child}</I18nProvider>);
-  const name = typeof child.type === 'string' ? child.type : child.type.name;
-  return wrapped.find(name);
+export function mountWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
+  const wrapped = mount(<I18nProvider>{child}</I18nProvider>, options);
+  return wrapped.children().childAt(0);
 }

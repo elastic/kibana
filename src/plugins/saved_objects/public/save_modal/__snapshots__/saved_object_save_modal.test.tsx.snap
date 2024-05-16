@@ -8,7 +8,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -34,10 +34,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -58,10 +57,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -69,10 +67,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
@@ -99,10 +96,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -132,7 +128,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -158,10 +154,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -182,10 +177,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -193,10 +187,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
@@ -223,10 +216,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -256,7 +248,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -282,10 +274,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -306,10 +297,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -317,10 +307,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
@@ -347,10 +336,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -380,7 +368,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -410,10 +398,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             hasEmptyLabelSpace={false}
             isInvalid={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Title"
                 id="savedObjects.saveModal.titleLabel"
-                values={Object {}}
               />
             }
             labelType="label"
@@ -434,10 +421,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Description"
                 id="savedObjects.saveModal.descriptionLabel"
-                values={Object {}}
               />
             }
             labelAppend={
@@ -445,10 +431,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 color="subdued"
                 size="xs"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Optional"
                   id="savedObjects.saveModal.optional"
-                  values={Object {}}
                 />
               </EuiText>
             }
@@ -485,10 +470,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
