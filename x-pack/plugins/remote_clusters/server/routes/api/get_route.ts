@@ -36,7 +36,7 @@ export const register = (deps: RouteDependencies): void => {
 
       // Retrieve the cluster information for all the configured remote clusters
       const clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
-        name: clusterNames.map((cluster) => `${cluster}*:*`),
+        name: clusterNames.map((cluster) => `${cluster}:*`),
       });
 
       const body = clusterNames.map((clusterName: string): any => {
