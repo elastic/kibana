@@ -23,6 +23,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
@@ -124,7 +125,17 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
           overflow: hidden;
           position: relative;
         `}
-        title={slo.summary.status}
+        title={
+          slo.summary.summaryUpdatedAt
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
+                defaultMessage: '{status}, Last updated: {value}',
+                values: {
+                  status: slo.summary.status,
+                  value: moment(slo.summary.summaryUpdatedAt).fromNow(),
+                },
+              })
+            : slo.summary.status
+        }
       >
         <SloCardChart
           slo={slo}
