@@ -1593,7 +1593,7 @@ export class Embeddable
     try {
       return mapAndFlattenFilters(
         this.deps.injectFilterReferences(
-          this.savedVis?.state.filters ?? [],
+          (this.getInput() as LensByValueInput).attributes?.state.filters ?? this.savedVis?.state.filters ?? [],
           this.savedVis?.references ?? []
         )
       );
@@ -1608,7 +1608,7 @@ export class Embeddable
    * @returns Local/panel-level query for Lens embeddable
    */
   public getQuery() {
-    return this.savedVis?.state.query;
+    return (this.getInput() as LensByValueInput).attributes?.state.query ?? this.savedVis?.state.query;
   }
 
   public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
