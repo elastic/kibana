@@ -127,39 +127,46 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
             field: string;
           };
         };
+        const metricField = customMetric?.field || metric;
+        const thresholdFormatted = threshold.map((thresholdToFormat) => {
+          if (
+            metricField.endsWith('.pct') ||
+            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'percent')
+          ) {
+            thresholdToFormat = thresholdToFormat / 100;
+          } else if (
+            metricField.endsWith('.bytes') ||
+            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'bits')
+          ) {
+            thresholdToFormat = thresholdToFormat / 8;
+          }
+          return thresholdToFormat;
+        });
 
         let observedValueFormatted: string;
         let thresholdFormattedAsString: string;
-
         if (customMetric.field) {
           observedValueFormatted = metricValueFormatter(
             observedValue as number,
             customMetric.field
           );
           thresholdFormattedAsString = threshold
-            .map((thresholdToFormat) => metricValueFormatter(thresholdToFormat, customMetric.field))
+            .map((thresholdToStringFormat) =>
+              metricValueFormatter(thresholdToStringFormat, metricField)
+            )
             .join(' AND ');
         } else {
           const infraType = METRIC_FORMATTERS[metric].formatter;
           const formatter = createFormatter(infraType);
-          const formatThreshold = threshold.map((v: number) => {
-            if (infraType === 'percent') {
-              v = Number(v) / 100;
-            }
-            if (infraType === 'bits') {
-              v = Number(v) / 8;
-            }
-            return v;
-          });
           observedValueFormatted = formatter(observedValue);
-          thresholdFormattedAsString = formatThreshold.map(formatter).join(' AND ');
+          thresholdFormattedAsString = thresholdFormatted.map(formatter).join(' AND ');
         }
 
         return {
           observedValue: observedValueFormatted,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(observedValue, thresholdFormatted),
         } as unknown as FlyoutThresholdData;
       });
 

@@ -215,7 +215,7 @@ describe('Map rules params with flyout', () => {
       results: [
         {
           observedValue: '10.4 Mbit',
-          threshold: ['3 Mbit'],
+          threshold: '3 Mbit',
           comparator: '>',
           pctAboveThreshold: ' (247.54% above the threshold)',
         },
