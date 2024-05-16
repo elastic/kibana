@@ -43,15 +43,18 @@ deploy() {
   }'
 
   echo "--- Create $PROJECT_TYPE_LABEL project"
-  DEPLOY_LOGS=$(mktemp --suffix ".json")
 
   echo "Checking if project already exists..."
+  PROJECT_DEPLOY_LOGS=$(mktemp --suffix ".json")
+  PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
+  PROJECT_INFO_LOGS=$(mktemp --suffix ".json")
+
   curl -s \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
-    -XGET &>> $DEPLOY_LOGS
+    -XGET &> $PROJECT_EXISTS_LOGS
 
-  PROJECT_ID=$(jq -r --slurp '[.[0].items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $DEPLOY_LOGS)
+  PROJECT_ID=$(jq -r '[.items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $PROJECT_EXISTS_LOGS)
   if is_pr_with_label "ci:project-redeploy"; then
     if [ -z "${PROJECT_ID}" ]; then
       echo "No project to remove"
@@ -72,21 +75,16 @@ deploy() {
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
-      -XPOST -d "$PROJECT_CREATE_CONFIGURATION" &>> $DEPLOY_LOGS
+      -XPOST -d "$PROJECT_CREATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
 
-    PROJECT_ID=$(jq -r --slurp '.[1].id' $DEPLOY_LOGS)
+    PROJECT_ID=$(jq -r '.id' $PROJECT_DEPLOY_LOGS)
     if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
       echo "Failed to create project. Deploy logs:"
-      cat $DEPLOY_LOGS
+      cat $PROJECT_DEPLOY_LOGS
       exit 1
     fi
-
-    echo "Get credentials..."
-    curl -s -XPOST -H "Authorization: ApiKey $PROJECT_API_KEY" \
-      "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}/_reset-internal-credentials" &>> $DEPLOY_LOGS
-
-    PROJECT_USERNAME=$(jq -r --slurp '.[2].username' $DEPLOY_LOGS)
-    PROJECT_PASSWORD=$(jq -r --slurp '.[2].password' $DEPLOY_LOGS)
+    PROJECT_USERNAME=$(jq -r '.credentials.username' $PROJECT_DEPLOY_LOGS)
+    PROJECT_PASSWORD=$(jq -r '.credentials.password' $PROJECT_DEPLOY_LOGS)
 
     echo "Write to vault..."
 
@@ -107,12 +105,18 @@ deploy() {
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &>> $DEPLOY_LOGS
+      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
-  PROJECT_KIBANA_URL=$(jq -r --slurp '.[1].endpoints.kibana' $DEPLOY_LOGS)
+  echo "Getting project info..."
+  curl -s \
+    -H "Authorization: ApiKey $PROJECT_API_KEY" \
+    "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
+    -XGET &> $PROJECT_INFO_LOGS
+
+  PROJECT_KIBANA_URL=$(jq -r '.endpoints.kibana' $PROJECT_INFO_LOGS)
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
-  PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
+  PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
   # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
   if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
