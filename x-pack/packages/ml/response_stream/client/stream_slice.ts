@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { AnyAction, PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
-import { fetchStream } from '.';
+import { fetchStream } from './fetch_stream';
+import { DATA_THROTTLE_MS } from './constants';
 
 /**
  * Async thunk to start the stream.
@@ -29,6 +31,30 @@ export const startStream = createAsyncThunk(
   ) => {
     const { http, endpoint, apiVersion, abortCtrl, body, headers } = options;
 
+    const fetchState = { isActive: true };
+
+    // Custom buffering to avoid hammering the DOM with updates.
+    // We can revisit this once Kibana is on React 18.
+    const actionBuffer: AnyAction[] = [];
+    function flushBuffer(withTimeout = true) {
+      batch(() => {
+        for (const action of actionBuffer) {
+          thunkApi.dispatch(action);
+        }
+      });
+      actionBuffer.length = 0;
+
+      if (withTimeout) {
+        setTimeout(() => {
+          if (fetchState.isActive) {
+            flushBuffer();
+          }
+        }, DATA_THROTTLE_MS);
+      }
+    }
+
+    flushBuffer();
+
     for await (const [fetchStreamError, action] of fetchStream(
       http,
       endpoint,
@@ -39,11 +65,14 @@ export const startStream = createAsyncThunk(
       headers
     )) {
       if (fetchStreamError !== null) {
-        thunkApi.dispatch(addError(fetchStreamError));
+        actionBuffer.push(addError(fetchStreamError));
       } else if (action) {
-        thunkApi.dispatch(action);
+        actionBuffer.push(action);
       }
     }
+
+    fetchState.isActive = false;
+    flushBuffer(false);
   },
   {
     condition: (_, { getState }) => {
