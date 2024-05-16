@@ -17,9 +17,6 @@ KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
@@ -35,10 +32,10 @@ node scripts/build \
   --docker-namespace="kibana-ci" \
   --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
+  --skip-docker-chainguard \
   --skip-docker-ubi \
   --skip-docker-fips \
-  --skip-docker-cloud \
-  --skip-docker-contexts
+  --skip-docker-cloud
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -67,8 +64,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
     --amend "$KIBANA_IMAGE-amd64"
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
 fi
-
-docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Serverless Images
@@ -106,8 +101,9 @@ ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/val
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 
