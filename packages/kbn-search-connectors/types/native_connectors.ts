@@ -4033,7 +4033,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
-          i18n.translate('searchConnectors.content.nativeConnectors.salesforce.useDocumentLevelSecurity.tooltip', {
+          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
             defaultMessage: 'Salesforce',
           })
         ),
