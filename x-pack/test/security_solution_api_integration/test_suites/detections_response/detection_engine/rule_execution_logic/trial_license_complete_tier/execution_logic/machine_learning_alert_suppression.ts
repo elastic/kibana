@@ -530,28 +530,11 @@ export default ({ getService }: FtrProviderContext) => {
           const previewAlerts = await getPreviewAlerts({
             es,
             previewId,
-            sort: [ALERT_ORIGINAL_TIME],
+            sort: [ALERT_SUPPRESSION_DOCS_COUNT],
           });
 
           expect(previewAlerts.length).toEqual(2);
           expect(previewAlerts[0]._source).toEqual(
-            expect.objectContaining({
-              [ALERT_SUPPRESSION_TERMS]: [
-                {
-                  field: 'host.name',
-                  value: ['relevant'],
-                },
-              ],
-              [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
-              [ALERT_ORIGINAL_TIME]: timestamp,
-              [ALERT_SUPPRESSION_START]: timestamp,
-              [ALERT_SUPPRESSION_END]: timestamp,
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // the anomaly without `host.name` is not represented here
-            })
-          );
-
-          expect(previewAlerts[1]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -565,6 +548,23 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_START]: timestamp,
               [ALERT_SUPPRESSION_END]: timestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+
+          expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['relevant'],
+                },
+              ],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // the anomaly without `host.name` is not represented here
             })
           );
         });
