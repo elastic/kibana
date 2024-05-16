@@ -22,6 +22,7 @@ import type {
   SentinelOneActivityEsDoc,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  SentinelOneActivityDataForType80,
 } from '../types';
 
 export class SentinelOneDataGenerator extends EndpointActionGenerator {
@@ -41,12 +42,13 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
   }
 
   /** Generate a SentinelOne activity index ES doc */
-  generateActivityEsDoc(
+  generateActivityEsDoc<TData>(
     overrides: DeepPartial<SentinelOneActivityEsDoc> = {}
-  ): SentinelOneActivityEsDoc {
+  ): SentinelOneActivityEsDoc<TData> {
     const doc: SentinelOneActivityEsDoc = {
       sentinel_one: {
         activity: {
+          data: {},
           agent: {
             id: this.seededUUIDv4(),
           },
@@ -60,13 +62,13 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
       },
     };
 
-    return merge(doc, overrides);
+    return merge(doc, overrides) as SentinelOneActivityEsDoc<TData>;
   }
 
-  generateActivityEsSearchHit(
-    overrides: DeepPartial<SentinelOneActivityEsDoc> = {}
-  ): SearchHit<SentinelOneActivityEsDoc> {
-    const hit = this.toEsSearchHit<SentinelOneActivityEsDoc>(
+  generateActivityEsSearchHit<TData>(
+    overrides: DeepPartial<SentinelOneActivityEsDoc<TData>> = {}
+  ): SearchHit<SentinelOneActivityEsDoc<TData>> {
+    const hit = this.toEsSearchHit<SentinelOneActivityEsDoc<TData>>(
       this.generateActivityEsDoc(overrides),
       SENTINEL_ONE_ACTIVITY_INDEX_PATTERN
     );
@@ -81,10 +83,39 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
     return hit;
   }
 
-  generateActivityEsSearchResponse(
-    docs: Array<SearchHit<SentinelOneActivityEsDoc>> = [this.generateActivityEsSearchHit()]
-  ): SearchResponse<SentinelOneActivityEsDoc> {
-    return this.toEsSearchResponse<SentinelOneActivityEsDoc>(docs);
+  generateActivityEsSearchResponse<TData>(
+    docs: Array<SearchHit<SentinelOneActivityEsDoc<TData>>> = [this.generateActivityEsSearchHit()]
+  ): SearchResponse<SentinelOneActivityEsDoc<TData>> {
+    return this.toEsSearchResponse<SentinelOneActivityEsDoc<TData>>(docs);
+  }
+
+  generateActivityFetchFileResponseData(
+    overrides: DeepPartial<SentinelOneActivityDataForType80> = {}
+  ): SentinelOneActivityDataForType80 {
+    const data: SentinelOneActivityDataForType80 = {
+      flattened: {
+        commandId: Number([...this.randomNGenerator(1000, 2)].join('')),
+        commandBatchUuid: this.seededUUIDv4(),
+        filename: 'file.zip',
+        sourceType: 'API',
+        uploadedFilename: 'file_fetch.zip',
+      },
+      site: { name: 'Default site' },
+      group_name: 'Default Group',
+      scope: { level: 'Group', name: 'Default Group' },
+      fullscope: {
+        details: 'Group Default Group in Site Default site of Account Foo',
+        details_path: 'Global / Foo / Default site / Default Group',
+      },
+      downloaded: {
+        url: `/agents/${[...this.randomNGenerator(100, 4)].join('')}/uploads/${[
+          ...this.randomNGenerator(100, 4),
+        ].join('')}`,
+      },
+      account: { name: 'Foo' },
+    };
+
+    return merge(data, overrides);
   }
 
   generateSentinelOneApiActivityResponse(
