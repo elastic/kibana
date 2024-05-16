@@ -14,6 +14,7 @@ import {
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
 import {
+  enableInfrastructureContainerAssetView,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
 } from '@kbn/observability-plugin/common';
@@ -90,6 +91,7 @@ export const SourceConfigurationSettings = ({
   const infraUiSettings = useEditableSettings([
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
+    enableInfrastructureContainerAssetView,
   ]);
 
   const resetAllUnsavedChanges = useCallback(() => {
