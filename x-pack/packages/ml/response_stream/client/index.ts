@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { fetchStream } from './fetch_stream';
 export { useFetchStream } from './use_fetch_stream';
