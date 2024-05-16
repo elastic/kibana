@@ -213,6 +213,7 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  langChainTimeout?: number;
   llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
