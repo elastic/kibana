@@ -212,7 +212,7 @@ const processScores = async ({
 
 export const getGlobalWeightForIdentifierType = (
   identifierType: IdentifierType,
-  weights?: RiskWeights
+  weights?: RiskScoreWeights
 ): number | undefined =>
   weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
 
