@@ -7,65 +7,21 @@
  */
 
 import * as React from 'react';
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
+import { useConnectionDetailsService } from './context';
 import { EndpointsTab } from './tabs/endpoints_tab';
 import { ApiKeysTab } from './tabs/api_keys_tab';
+import { useBehaviorSubject } from './hooks/use_behavior_subject';
 
 export const ConnectionDetails: React.FC = () => {
-  type TabID = 'endpoints' | 'apiKeys';
-  type Tab = [id: TabID, name: string, content: React.ReactNode];
-
-  const ctx = useConnectionDetailsOpts();
   const service = useConnectionDetailsService();
-  const [tab, setTab] = React.useState<TabID>('endpoints');
+  const tab = useBehaviorSubject(service.tabId$);
 
-  const tabs: Tab[] = [];
-
-  if (ctx.endpoints) {
-    tabs.push([
-      'endpoints',
-      i18n.translate('cloud.connectionDetails.tab.endpoints', {
-        defaultMessage: 'Endpoints',
-      }),
-      <EndpointsTab />,
-    ]);
+  switch (tab) {
+    case 'endpoints':
+      return <EndpointsTab />;
+    case 'apiKeys':
+      return <ApiKeysTab />;
+    default:
+      return null;
   }
-
-  if (ctx.apiKeys) {
-    tabs.push([
-      'apiKeys',
-      i18n.translate('cloud.connectionDetails.tab.apiKeys', {
-        defaultMessage: 'API key',
-      }),
-      <ApiKeysTab />,
-    ]);
-  }
-
-  if (tabs.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiTabs>
-        {tabs.map(([id, name]) => (
-          <EuiTab
-            key={id}
-            onClick={() => {
-              service.emitTelemetryEvent(['tab_switched', { tab: id }]);
-              setTab(id);
-            }}
-            isSelected={tab === id}
-            data-test-subj={`connectionDetailsTabBtn-${id}`}
-          >
-            {name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer />
-      {tabs.find(([id]) => id === tab)?.[2] || null}
-    </>
-  );
 };

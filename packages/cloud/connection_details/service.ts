@@ -10,9 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
-import type { ConnectionDetailsOpts, ConnectionDetailsTelemetryEvents } from './types';
+import type { ConnectionDetailsOpts, TabID, ConnectionDetailsTelemetryEvents } from './types';
 
 export class ConnectionDetailsService {
+  public readonly tabId$ = new BehaviorSubject<TabID>('endpoints');
   public readonly showCloudId$ = new BehaviorSubject<boolean>(false);
   public readonly apiKeyName$ = new BehaviorSubject<string>('');
   public readonly apiKeyStatus$ = new BehaviorSubject<'configuring' | 'creating'>('configuring');
@@ -32,6 +33,10 @@ export class ConnectionDetailsService {
         console.error('Error checking API key creation permissions', error);
       });
   }
+
+  public readonly setTab = (tab: TabID) => {
+    this.tabId$.next(tab);
+  };
 
   public readonly toggleShowCloudId = () => {
     this.emitTelemetryEvent(['show_cloud_id_toggled']);

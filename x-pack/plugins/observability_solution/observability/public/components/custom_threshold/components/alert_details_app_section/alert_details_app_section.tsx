@@ -39,7 +39,6 @@ import type {
 import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
-import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
@@ -293,7 +292,6 @@ export default function AlertDetailsAppSection({
       {hasLogRateAnalysisLicense && (
         <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
       )}
-      <AlertHistoryChart alert={alert} dataView={dataView} rule={rule} />
     </EuiFlexGroup>
   );
 }

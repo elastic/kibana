@@ -23,6 +23,7 @@ export interface ConnectionDetailsOptsLinks {
 export interface ConnectionDetailsOptsEndpoints {
   url?: string;
   id?: string;
+  cloudIdLearMoreLink?: string;
 }
 
 export interface ConnectionDetailsOptsApiKeys {
@@ -48,3 +49,5 @@ export type ConnectionDetailsTelemetryEvents =
   | ConnectionDetailsTelemetryEvent<'manage_api_keys_clicked'>
   | ConnectionDetailsTelemetryEvent<'key_encoding_changed', { format: string }>
   | ConnectionDetailsTelemetryEvent<'copy_api_key_clicked', { format: string }>;
+
+export type TabID = 'endpoints' | 'apiKeys';
