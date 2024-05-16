@@ -56,13 +56,18 @@ export const getSignificantTermRequest = (
     ];
   }
 
-  const pValueAgg: Record<'change_point_p_value', estypes.AggregationsAggregationContainer> = {
-    value_count: {
+  const pValueAgg: Record<
+    'sig_term_p_value' | 'distinct_count',
+    estypes.AggregationsAggregationContainer
+  > = {
+    // Used to identify fields with only one distinct value which we'll ignore in the analysis.
+    distinct_count: {
       cardinality: {
         field: fieldName,
       },
     },
-    change_point_p_value: {
+    // Used to calculate the p-value for terms of the field.
+    sig_term_p_value: {
       significant_terms: {
         field: fieldName,
         background_filter: {
@@ -163,25 +168,25 @@ export const fetchSignificantTermPValues = async (
     }
 
     const overallResult = (
-      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'change_point_p_value', Aggs>
-    ).change_point_p_value;
+      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'sig_term_p_value', Aggs>
+    ).sig_term_p_value;
 
-    const valueCount = (
+    const distinctCount = (
       randomSamplerWrapper.unwrap(resp.aggregations) as Record<
-        'value_count',
+        'distinct_count',
         estypes.AggregationsCardinalityAggregate
       >
-    ).value_count.value;
-
-    // console.log('valueCount', fieldName, valueCount, overallResult.buckets.length);
+    ).distinct_count.value;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
       if (
         typeof pValue === 'number' &&
+        // Skip items where the p-value is not significant.
         pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD &&
-        valueCount > 1
+        // Skip items where the field has only one distinct value.
+        distinctCount > 1
       ) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
