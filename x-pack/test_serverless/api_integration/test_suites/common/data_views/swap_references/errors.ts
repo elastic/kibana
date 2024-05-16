@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(`${dataViewConfig.path}/${id}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
 
       expect(response.status).to.be(404);
     });
@@ -35,8 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(`${dataViewConfig.path}/${id}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
 
       expect(response.status).to.be(400);
       expect(response.body.message).to.be(

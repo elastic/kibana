@@ -28,8 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({})
         .expect(400));
 
@@ -37,8 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           pattern: '*',
           include_unmapped: true,
@@ -49,8 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           pattern: randomness.word(),
           [randomness.word()]: randomness.word(),

@@ -90,8 +90,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'basic_index' })
         .expect(200, {
           fields: testFields,
@@ -104,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'basic_index', fields: JSON.stringify(['bar']) })
         .expect(200, {
           fields: [testFields[0]],
@@ -117,8 +117,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           pattern: 'basic_index',
           meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
@@ -212,8 +212,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'bad_index,basic_index' })
         .expect(200, {
           fields: testFields,
@@ -225,8 +225,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'bad_index,bad_index_2' })
         .expect(404);
     });
@@ -235,8 +235,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           pattern: 'bad_index',
         })

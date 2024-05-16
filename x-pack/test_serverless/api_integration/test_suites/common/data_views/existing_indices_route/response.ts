@@ -9,6 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { EXISTING_INDICES_PATH } from '@kbn/data-views-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -19,19 +20,22 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('_existing_indices response', () => {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+    });
+    after(async () => {
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('returns an array of existing indices', async () => {
       await supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: ['basic_index', 'bad_index'],
         })
@@ -42,8 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: ['bad_index'],
         })

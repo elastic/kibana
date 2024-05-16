@@ -37,8 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
       const a = await supertestWithoutAuth
         .put(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'helloworld*' })
         .send({ index_filter: { exists: { field: 'bye' } } });
 

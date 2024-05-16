@@ -14,6 +14,7 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
@@ -29,20 +30,23 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       const result = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)
         .send({ data_view: { title } })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
       dataViewId = result.body.data_view.id;
     });
     after(async () => {
       await supertestWithoutAuth
         .delete(SPECIFIC_DATA_VIEW_PATH.replace('{id}', dataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
     beforeEach(async () => {
       await kibanaServer.importExport.load(
@@ -59,8 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -72,8 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           fromType: 'index-pattern',
@@ -86,8 +90,8 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -102,8 +106,8 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -117,8 +121,8 @@ export default function ({ getService }: FtrProviderContext) {
       const res2 = await supertestWithoutAuth
         .get(SPECIFIC_DATA_VIEW_PATH.replace('{id}', prevDataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
 
       expect(res2).to.have.property('statusCode', 404);
     });
