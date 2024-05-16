@@ -147,6 +147,32 @@ const atan2Definition: FunctionDefinition = {
   // examples: ["ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)"],
 };
 
+const cbrtDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'cbrt',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cbrt', {
+    defaultMessage:
+      'Returns the cube root of a number. The input can be any numeric value, the return value is always a double.\nCube roots of infinities are null.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'number',
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  // examples: ["ROW d = 1000.0\n| EVAL c = cbrt(d)"],
+};
+
 const ceilDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'ceil',
@@ -711,7 +737,8 @@ const greatestDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'greatest',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.greatest', {
-    defaultMessage: 'Returns the maximum value from many columns.',
+    defaultMessage:
+      'Returns the maximum value from multiple columns. This is similar to <<esql-mv_max>>\nexcept it is intended to run on multiple columns at once.',
   }),
   alias: undefined,
   signatures: [
@@ -824,14 +851,15 @@ const greatestDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: [],
+  // examples: ["ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)"],
 };
 
 const leastDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'least',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.least', {
-    defaultMessage: 'Returns the minimum value from many columns.',
+    defaultMessage:
+      'Returns the minimum value from multiple columns. This is similar to <<esql-mv_min>> except it is intended to run on multiple columns at once.',
   }),
   alias: undefined,
   signatures: [
@@ -944,7 +972,7 @@ const leastDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: [],
+  // examples: ["ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)"],
 };
 
 const leftDefinition: FunctionDefinition = {
@@ -2239,6 +2267,25 @@ const mvZipDefinition: FunctionDefinition = {
   // examples: ["ROW a = [\"x\", \"y\", \"z\"], b = [\"1\", \"2\"]\n| EVAL c = mv_zip(a, b, \"-\")\n| KEEP a, b, c"],
 };
 
+const nowDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'now',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.now', {
+    defaultMessage: 'Returns current date and time.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [],
+      returnType: 'date',
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  // examples: ["ROW current_date = NOW()","FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour"],
+};
+
 const piDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'pi',
@@ -2532,7 +2579,7 @@ const sqrtDefinition: FunctionDefinition = {
   name: 'sqrt',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sqrt', {
     defaultMessage:
-      'Returns the square root of a number. The input can be any numeric value, the return value is always a double.\nSquare roots of negative numbers and infinites are null.',
+      'Returns the square root of a number. The input can be any numeric value, the return value is always a double.\nSquare roots of negative numbers and infinities are null.',
   }),
   alias: undefined,
   signatures: [
@@ -2557,7 +2604,8 @@ const stContainsDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_contains',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_contains', {
-    defaultMessage: 'Returns whether the first geometry contains the second geometry.',
+    defaultMessage:
+      'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the <<esql-st_within,ST_WITHIN>> function.',
   }),
   alias: undefined,
   signatures: [
@@ -2692,7 +2740,8 @@ const stDisjointDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_disjoint',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_disjoint', {
-    defaultMessage: 'Returns whether the two geometries or geometry columns are disjoint.',
+    defaultMessage:
+      'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the <<esql-st_intersects,ST_INTERSECTS>> function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
   }),
   alias: undefined,
   signatures: [
@@ -2827,7 +2876,8 @@ const stIntersectsDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_intersects',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_intersects', {
-    defaultMessage: 'Returns whether the two geometries or geometry columns intersect.',
+    defaultMessage:
+      'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the <<esql-st_disjoint,ST_DISJOINT>> function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
   }),
   alias: undefined,
   signatures: [
@@ -2962,7 +3012,8 @@ const stWithinDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_within',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_within', {
-    defaultMessage: 'Returns whether the first geometry is within the second geometry.',
+    defaultMessage:
+      'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the <<esql-st_contains,ST_CONTAINS>> function.',
   }),
   alias: undefined,
   signatures: [
@@ -3097,7 +3148,8 @@ const stXDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_x',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_x', {
-    defaultMessage: 'Extracts the x-coordinate from a point geometry.',
+    defaultMessage:
+      'Extracts the `x` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
   alias: undefined,
   signatures: [
@@ -3125,14 +3177,15 @@ const stXDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: [],
+  // examples: ["ROW point = TO_GEOPOINT(\"POINT(42.97109629958868 14.7552534006536)\")\n| EVAL x =  ST_X(point), y = ST_Y(point)"],
 };
 
 const stYDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'st_y',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_y', {
-    defaultMessage: 'Extracts the y-coordinate from a point geometry.',
+    defaultMessage:
+      'Extracts the `y` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
   alias: undefined,
   signatures: [
@@ -3160,7 +3213,7 @@ const stYDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: [],
+  // examples: ["ROW point = TO_GEOPOINT(\"POINT(42.97109629958868 14.7552534006536)\")\n| EVAL x =  ST_X(point), y = ST_Y(point)"],
 };
 
 const startsWithDefinition: FunctionDefinition = {
@@ -4155,32 +4208,13 @@ const caseDefinition: FunctionDefinition = {
   validate: undefined,
   // examples: [],
 };
-
-const nowDefinition: FunctionDefinition = {
-  type: 'eval',
-  name: 'now',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.now', {
-    defaultMessage: 'Returns current date and time.',
-  }),
-  alias: undefined,
-  signatures: [
-    {
-      params: [],
-      returnType: 'date',
-      examples: ['ROW current_date = NOW()'],
-    },
-  ],
-  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-  validate: undefined,
-  // examples: [],
-};
 export const evalFunctionDefinitions = [
   absDefinition,
   acosDefinition,
   asinDefinition,
   atanDefinition,
   atan2Definition,
+  cbrtDefinition,
   ceilDefinition,
   cidrMatchDefinition,
   coalesceDefinition,
@@ -4217,6 +4251,7 @@ export const evalFunctionDefinitions = [
   mvSortDefinition,
   mvSumDefinition,
   mvZipDefinition,
+  nowDefinition,
   piDefinition,
   powDefinition,
   replaceDefinition,
@@ -4259,5 +4294,4 @@ export const evalFunctionDefinitions = [
   toVersionDefinition,
   trimDefinition,
   caseDefinition,
-  nowDefinition,
 ];

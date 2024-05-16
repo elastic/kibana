@@ -50,19 +50,6 @@ const extraFunctions = [
       },
     ],
   },
-  {
-    type: 'eval',
-    name: 'now',
-    description: 'Returns current date and time.',
-    ...evalSupportedCommandsAndOptions,
-    signatures: [
-      {
-        params: [],
-        returnType: 'date',
-        examples: [`ROW current_date = NOW()`],
-      },
-    ],
-  },
 ];
 
 const elasticsearchToKibanaType = (elasticsearchType) => {
@@ -224,12 +211,6 @@ const functionEnrichments = {
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
-  // TODO — reenable this when the signature is fixed on the ES side
-  // auto_bucket: {
-  //   signatures: new Array(4).fill({
-  //     params: [{}, {}, { literalOnly: true }, { literalOnly: true }],
-  //   }),
-  // },
 };
 
 /**
