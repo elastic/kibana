@@ -33,7 +33,6 @@ import {
   fillMaxSignals,
   fillNote,
   fillReferenceUrls,
-  fillRelatedIntegrations,
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
@@ -52,6 +51,7 @@ import { visit } from '../../../../tasks/navigation';
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
 // in the creation form. For any rule type specific functionalities, please include
 // them in the relevant /rule_creation/[RULE_TYPE].cy.ts test.
+
 describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
@@ -67,7 +67,10 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
   it('Creates and enables a rule', function () {
     cy.log('Filling define section');
     importSavedQuery(this.timelineId);
-    fillRelatedIntegrations();
+    // The following step is flaky due to a recent EUI upgrade.
+    // Underlying EUI issue: https://github.com/elastic/eui/issues/7761
+    // Issue to uncomment this once EUI fix is in place: https://github.com/elastic/kibana/issues/183485
+    // fillRelatedIntegrations();
     cy.get(DEFINE_CONTINUE_BUTTON).click();
 
     cy.log('Filling about section');
