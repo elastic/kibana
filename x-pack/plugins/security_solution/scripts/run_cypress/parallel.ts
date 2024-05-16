@@ -207,14 +207,25 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
 
       const runSpecs = async (filePaths: string[]) =>
-        pMap(
+        pMap<
+          string,
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+        >(
           filePaths,
           async (filePath) => {
             let result:
               | CypressCommandLine.CypressRunResult
               | CypressCommandLine.CypressFailedRunResult
               | undefined;
-            await withProcRunner(log, async (procs) => {
+            failedSpecFilePaths.push(filePath);
+
+            await withProcRunner<
+              | CypressCommandLine.CypressRunResult
+              | CypressCommandLine.CypressFailedRunResult
+              | undefined
+            >(log, async (procs) => {
               const abortCtrl = new AbortController();
 
               const onEarlyExit = (msg: string) => {
@@ -421,7 +432,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
@@ -434,13 +445,13 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
+                    runnerUi: !process.env.CI,
                   });
-                  if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
-                    failedSpecFilePaths.push(filePath);
+                  if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                    _.pull(failedSpecFilePaths, filePath);
                   }
                 } catch (error) {
                   result = error;
-                  failedSpecFilePaths.push(filePath);
                 }
               }
 
@@ -465,7 +476,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       // If there are failed tests, retry them
       const retryResults = await runSpecs([...failedSpecFilePaths]);
 
-      renderSummaryTable([
+      const finalResults = [
         // Don't include failed specs from initial run in results
         ..._.filter(
           initialResults,
@@ -477,7 +488,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             )
         ),
         ...retryResults,
-      ] as CypressCommandLine.CypressRunResult[]);
+      ] as CypressCommandLine.CypressRunResult[];
+
+      renderSummaryTable(finalResults);
+
       const hasFailedTests = (
         runResults: Array<
           | CypressCommandLine.CypressFailedRunResult
@@ -497,7 +511,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       const hasFailedRetryTests = hasFailedTests(retryResults);
 
       // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
-      if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
+      if (
+        (hasFailedRetryTests && failedSpecFilePaths.length) ||
+        (hasFailedInitialTests && !retryResults.length)
+      ) {
         throw createFailError('Not all tests passed');
       }
     },
