@@ -10,7 +10,7 @@
 
 agents:
   image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-qa
+  imageProject: elastic-images-prod
   provider: gcp
   machineType: n2-standard-2
 
@@ -36,7 +36,7 @@ steps:
         timeout_in_minutes: 10
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-2
 
@@ -44,7 +44,7 @@ steps:
         command: .buildkite/scripts/steps/build_kibana.sh
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-16
         key: build
@@ -75,13 +75,13 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 2
+        parallelism: 3
         retry:
           automatic:
             - exit_status: '-1'
@@ -92,7 +92,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -109,7 +109,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -126,7 +126,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -143,13 +143,13 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 2
+        parallelism: 1
         retry:
           automatic:
             - exit_status: '-1'
@@ -160,7 +160,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -177,7 +177,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -194,7 +194,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -211,7 +211,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
@@ -230,7 +230,7 @@ steps:
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           preemptible: true

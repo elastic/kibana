@@ -11,10 +11,9 @@ import {
   ALL_VALUE,
   SyntheticsAvailabilityIndicator,
   QuerySchema,
-  kqlQuerySchema,
-  kqlWithFiltersSchema,
+  FiltersSchema,
 } from '@kbn/slo-schema';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { useFormContext } from 'react-hook-form';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -23,6 +22,7 @@ import { FieldSelector } from '../synthetics_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { GroupByCardinality } from '../common/group_by_cardinality';
+import { formatAllFilters } from '../../helpers/format_filters';
 
 const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
 
@@ -53,7 +53,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
     tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
-  const groupByCardinalityFilters: Filter[] = getGroupByCardinalityFilters(
+  const groupByCardinalityFilters = getGroupByCardinalityFilters(
     filters.monitorIds,
     filters.projects,
     filters.tags
@@ -164,7 +164,7 @@ export const getGroupByCardinalityFilters = (
   monitorIds: string[],
   projects: string[],
   tags: string[]
-): Filter[] => {
+): FiltersSchema => {
   const monitorIdFilters = monitorIds.length
     ? {
         meta: {
@@ -243,19 +243,5 @@ export const getGroupByCardinalityFilters = (
       }
     : null;
 
-  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as Filter[];
-};
-
-export const formatAllFilters = (
-  globalFilters: QuerySchema = '',
-  groupByCardinalityFilters: Filter[]
-) => {
-  if (kqlQuerySchema.is(globalFilters)) {
-    return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
-  } else if (kqlWithFiltersSchema) {
-    return {
-      kqlQuery: globalFilters.kqlQuery,
-      filters: [...globalFilters.filters, ...groupByCardinalityFilters],
-    };
-  }
+  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as FiltersSchema;
 };

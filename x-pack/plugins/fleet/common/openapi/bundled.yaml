@@ -4674,6 +4674,7 @@ components:
               properties:
                 log_level:
                   type: string
+                  nullable: true
                   enum:
                     - debug
                     - info
@@ -4863,6 +4864,8 @@ components:
         revision:
           type: number
         agents:
+          type: number
+        unprivileged_agents:
           type: number
         agent_features:
           type: array

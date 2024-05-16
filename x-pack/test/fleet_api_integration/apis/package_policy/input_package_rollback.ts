@@ -79,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
       .send(policy)
       .expect(expectStatusCode);
 
-    return res.body.item;
+    return expectStatusCode === 200 ? res.body.item : res;
   };
 
   const createAgentPolicy = async (name = 'Input Package Test 3') => {
@@ -117,7 +117,10 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     it('should rollback package install on package policy create failure', async () => {
-      await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
+      const res = await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
+      expect(res.body.message).to.eql(
+        'Package policy is invalid: inputs.logfile.streams.input_package_upgrade.logs.vars.data_stream.dataset: Dataset contains invalid characters'
+      );
 
       const pkg = await getPackage(PACKAGE_NAME, START_VERSION);
       expect(pkg?.status).to.eql('not_installed');

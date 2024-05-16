@@ -30,7 +30,7 @@ describe('ChartContent', () => {
     riskEntity: RiskScoreEntity.host,
     severityCount: undefined,
     timerange: { from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' },
-    selectedSeverity: [RiskSeverity.unknown],
+    selectedSeverity: [RiskSeverity.Unknown],
   };
   beforeEach(() => {
     jest.clearAllMocks();

@@ -152,6 +152,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
               const result = await resolveAnomalySwimlaneUserInput(
                 { ...coreStartServices, ...pluginsStartServices },
+                parentApi,
+                uuid,
                 {
                   ...serializeTitles(),
                   ...serializeSwimLaneState(),

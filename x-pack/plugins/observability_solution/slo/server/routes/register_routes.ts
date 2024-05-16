@@ -8,7 +8,11 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import {
+  AlertsClient,
+  RuleDataPluginService,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
   decodeRequestParams,
   parseEndpoint,
@@ -34,10 +38,12 @@ interface RegisterRoutes {
 export interface RegisterRoutesDependencies {
   pluginsSetup: {
     core: CoreSetup;
+    ruleRegistry: RuleRegistryPluginSetupContract;
   };
   getSpacesStart: () => Promise<SpacesPluginStart | undefined>;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
+  getRacClientWithRequest: (request: KibanaRequest) => Promise<AlertsClient>;
   getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
 }
 
