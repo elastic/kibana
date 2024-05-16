@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 
-
 import type { IndicesResolveClusterResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
