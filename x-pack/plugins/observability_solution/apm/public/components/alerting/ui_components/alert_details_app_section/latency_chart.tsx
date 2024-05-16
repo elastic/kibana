@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Theme } from '@elastic/charts';
-import { RecursivePartial, transparentize } from '@elastic/eui';
+import { RecursivePartial } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import chroma from 'chroma-js';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -164,7 +164,7 @@ function LatencyChart({
         <AlertActiveTimeRangeAnnotation
           alertStart={alert.start}
           alertEnd={alertEnd}
-          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
+          color={euiTheme.colors.danger}
           id={'alertActiveRect'}
           key={'alertActiveRect'}
         />,
