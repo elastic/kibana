@@ -34,8 +34,8 @@ export default defineCypressConfig({
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
-  viewportHeight: 946,
-  viewportWidth: 1680,
+  viewportHeight: 1440,
+  viewportWidth: 2560,
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],

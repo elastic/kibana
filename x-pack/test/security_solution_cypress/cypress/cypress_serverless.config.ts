@@ -20,8 +20,8 @@ export default defineCypressConfig({
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
-  viewportHeight: 946,
-  viewportWidth: 1680,
+  viewportHeight: 1440,
+  viewportWidth: 2560,
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
