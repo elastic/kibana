@@ -30,6 +30,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
+    async getOverviewTab() {
+      return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
     async getAssetDetailsKPITileValue(type: string) {
       const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');

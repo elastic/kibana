@@ -22,18 +22,20 @@ interface Props {
 export const ContainerMetrics = (props: Props) => {
   const isK8sContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesContainer });
 
-  return isK8sContainer ? (
+  return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGrid columns={2} gutterSize="s">
-        <KubernetesContainerCharts {...props} metric="cpu" />
-        <KubernetesContainerCharts {...props} metric="memory" />
-      </EuiFlexGrid>
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexGrid columns={2} gutterSize="s">
-        <DockerCharts {...props} metric="cpu" />
-        <DockerCharts {...props} metric="memory" />
+        {isK8sContainer ? (
+          <>
+            <KubernetesContainerCharts {...props} metric="cpu" />
+            <KubernetesContainerCharts {...props} metric="memory" />
+          </>
+        ) : (
+          <>
+            <DockerCharts {...props} metric="cpu" />
+            <DockerCharts {...props} metric="memory" />
+          </>
+        )}
       </EuiFlexGrid>
     </EuiFlexGroup>
   );

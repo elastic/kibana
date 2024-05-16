@@ -8,7 +8,10 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureContainerAssetView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -86,6 +89,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
     await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
     await browser.refresh();
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -632,34 +641,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await synthEsClient.clean();
         });
 
-        it('should render container overview tab', async () => {
-          await navigateToNodeDetails('container-id-1', 'container-id-1', 'container');
-          await pageObjects.header.waitUntilLoadingHasFinished();
-
-          await pageObjects.assetDetails.clickOverviewTab();
+        describe('when container asset view is disabled', () => {
+          it('should show old view of container details', async () => {
+            await setInfrastructureContainerAssetViewUiSetting(false);
+            await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await testSubjects.find('metricsEmptyViewState');
+          });
         });
-        // Add this test after implementing the creation of metadata for containers in sythtrace
-        // [
-        //   { metric: 'cpuUsage', value: '13.9%' },
-        //   { metric: 'memoryUsage', value: '94.9%' },
-        // ].forEach(({ metric, value }) => {
-        //   it(`${metric} tile should show ${value}`, async () => {
-        //     await retry.tryForTime(3 * 1000, async () => {
-        //       const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
-        //       expect(tileValue).to.eql(value);
-        //     });
-        //   });
-        // });
 
-        [
-          { metric: 'cpu', chartsCount: 1 },
-          { metric: 'memory', chartsCount: 1 },
-        ].forEach(({ metric, chartsCount }) => {
-          it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
-            const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
-              metric
-            );
-            expect(containers.length).to.equal(chartsCount);
+        describe('when container asset view is enabled', () => {
+          it('should show asset container details page', async () => {
+            await setInfrastructureContainerAssetViewUiSetting(true);
+            await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            await pageObjects.assetDetails.getOverviewTab();
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 1 },
+            { metric: 'memory', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
+                metric
+              );
+              expect(charts.length).to.equal(chartsCount);
+            });
           });
         });
       });
