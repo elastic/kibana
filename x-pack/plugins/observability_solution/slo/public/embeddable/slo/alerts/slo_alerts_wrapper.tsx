@@ -92,6 +92,7 @@ export function SloAlertsWrapper({
   return (
     <Wrapper>
       <EuiFlexGroup
+        data-shared-item=""
         justifyContent="flexEnd"
         wrap
         css={`
