@@ -54,3 +54,5 @@ export class ResponseActionsConnectorNotConfiguredError extends ResponseActionsC
     super(`No stack connector instance configured for [${connectorTypeId}]`, statusCode, meta);
   }
 }
+
+export class ResponseActionAgentResponseEsDocNotFound extends ResponseActionsClientError {}

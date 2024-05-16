@@ -13,7 +13,11 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { fetchActionResponses } from '../../fetch_action_responses';
+import { validateActionId } from '../../utils/validate_action_id';
+import {
+  fetchActionResponses,
+  fetchEndpointActionResponses,
+} from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -33,6 +37,7 @@ import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
+  GetFileDownloadMethodResponse,
 } from './types';
 import type {
   ActionDetails,
@@ -52,6 +57,7 @@ import type {
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
   WithAllKeys,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -140,6 +146,13 @@ export type ResponseActionsClientValidateRequestResponse =
       isValid: false;
       error: ResponseActionsClientError;
     };
+
+export interface FetchActionResponseEsDocsResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
 
 /**
  * Base class for a Response Actions client
@@ -281,6 +294,38 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       this.options.esClient,
       this.options.endpointService.getEndpointMetadataService(),
       actionId
+    );
+  }
+
+  /**
+   * Fetches the Response Action ES response documents for a given action id
+   * @param actionId
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchActionResponseEsDocs<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionId: string,
+    /** Specific Agent IDs to retrieve. default is to retrieve all */
+    agentIds?: string[]
+  ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
+    const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
+      esClient: this.options.esClient,
+      actionIds: [actionId],
+      agentIds,
+    });
+
+    return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
+      (acc, response) => {
+        const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+
+        acc[agentId] = response;
+
+        return acc;
+      },
+      {}
     );
   }
 
@@ -499,6 +544,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
+  protected async ensureValidActionId(actionId: string): Promise<void> {
+    return validateActionId(this.options.esClient, actionId, this.agentType);
+  }
+
   protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = {
@@ -652,5 +701,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
+  }
+
+  public async getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<GetFileDownloadMethodResponse> {
+    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+  }
+
+  public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
+    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }
