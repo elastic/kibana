@@ -117,7 +117,7 @@ const mockRiskScoreResponse = {
 const mockRelatedHostsResponse = {
   inspect: jest.fn(),
   refetch: jest.fn(),
-  relatedHosts: [{ host: 'test host', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
+  relatedHosts: [{ host: 'test host', ip: ['100.XXX.XXX'], risk: RiskSeverity.Low }],
   loading: false,
 };
 

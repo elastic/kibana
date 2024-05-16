@@ -13,10 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  EcsRiskScore,
-  RiskScore,
-} from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import type { EcsRiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -28,6 +25,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -38,7 +36,7 @@ import {
   routeWithNamespace,
 } from '../../../../common/utils/security_solution';
 
-const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
+const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
   const {
     '@timestamp': timestamp,
     inputs,
@@ -50,10 +48,13 @@ const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   return rest;
 };
 
-export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
-  scores.map(sanitizeScore);
+export const sanitizeScores = (
+  scores: Array<Partial<EntityRiskScoreRecord>>
+): Array<Partial<EntityRiskScoreRecord>> => scores.map(sanitizeScore);
 
-export const normalizeScores = (scores: Array<Partial<EcsRiskScore>>): Array<Partial<RiskScore>> =>
+export const normalizeScores = (
+  scores: Array<Partial<EcsRiskScore>>
+): Array<Partial<EntityRiskScoreRecord>> =>
   scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
 
 export const buildDocument = (body: object, id?: string) => {
