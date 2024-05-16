@@ -42,6 +42,10 @@ export default defineCypressConfig({
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'chrome' && browser.isHeadless) {
+          launchOptions.args.push('--window-size=1920,1080');
+          return launchOptions;
+        }
         if (browser.family === 'chromium') {
           launchOptions.args.push(
             '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
