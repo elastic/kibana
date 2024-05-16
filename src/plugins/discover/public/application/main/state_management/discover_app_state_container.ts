@@ -19,6 +19,7 @@ import {
   FilterCompareOptions,
   FilterStateStore,
   Query,
+  isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +31,13 @@ import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import {
+  createDataViewDataSource,
+  createEsqlDataSource,
+  DataSourceType,
+  DiscoverDataSource,
+  isDataSourceType,
+} from '../../../../common/data_sources';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -100,9 +108,9 @@ export interface DiscoverAppState {
    */
   hideChart?: boolean;
   /**
-   * id of the used data view
+   * The current data source
    */
-  index?: string;
+  dataSource?: DiscoverDataSource;
   /**
    * Used interval of the histogram
    */
@@ -174,15 +182,23 @@ export const getDiscoverAppStateContainer = ({
   const enhancedAppContainer = {
     ...appStateContainer,
     set: (value: DiscoverAppState | null) => {
-      if (value) {
-        previousState = appStateContainer.getState();
-        appStateContainer.set(value);
+      if (!value) {
+        return;
       }
+
+      previousState = appStateContainer.getState();
+
+      // When updating to an ES|QL query, sync the data source
+      if (isOfAggregateQueryType(value.query)) {
+        value.dataSource = createEsqlDataSource();
+      }
+
+      appStateContainer.set(value);
     },
   };
 
   const hasChanged = () => {
-    return !isEqualState(initialState, appStateContainer.getState());
+    return !isEqualState(initialState, enhancedAppContainer.getState());
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
@@ -195,17 +211,17 @@ export const getDiscoverAppStateContainer = ({
   const resetToState = (state: DiscoverAppState) => {
     addLog('[appState] reset state to', state);
     previousState = state;
-    appStateContainer.set(state);
+    enhancedAppContainer.set(state);
   };
 
   const resetInitialState = () => {
     addLog('[appState] reset initial state to the current state');
-    initialState = appStateContainer.getState();
+    initialState = enhancedAppContainer.getState();
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
-    const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
+    const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
@@ -220,17 +236,28 @@ export const getDiscoverAppStateContainer = ({
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
-    const { data } = services;
-    const dataView = currentSavedSearch.searchSource.getField('index');
 
-    if (appStateContainer.getState().index !== dataView?.id) {
+    const { data } = services;
+    const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
+    const appState = enhancedAppContainer.getState();
+    const setDataViewFromSavedSearch =
+      !appState.dataSource ||
+      (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
+        appState.dataSource.dataViewId !== savedSearchDataView?.id);
+
+    if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, { index: dataView?.id });
+      setState(enhancedAppContainer, {
+        dataSource: savedSearchDataView?.id
+          ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
+          : undefined,
+      });
     }
+
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
-      appStateContainer,
+      enhancedAppContainer,
       {
         filters: FilterStateStore.APP_STATE,
         query: true,
@@ -244,6 +271,7 @@ export const getDiscoverAppStateContainer = ({
     );
 
     const { start, stop } = startAppStateUrlSync();
+
     // current state need to be pushed to url
     replaceUrlState({}).then(() => start());
 
@@ -259,8 +287,8 @@ export const getDiscoverAppStateContainer = ({
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
-      previousState = { ...appStateContainer.getState() };
-      setState(appStateContainer, newPartial);
+      previousState = { ...enhancedAppContainer.getState() };
+      setState(enhancedAppContainer, newPartial);
     }
   };
 
@@ -291,6 +319,10 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
    * Necessary to take care of legacy links [fieldName,direction]
    */
   sort?: string[][] | [string, string];
+  /**
+   * Legacy data view ID prop
+   */
+  index?: string;
 }
 
 export function getInitialState(
@@ -298,17 +330,17 @@ export function getInitialState(
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
+  const appStateFromUrl = stateStorage?.get<AppStateUrl>(APP_STATE_URL_KEY);
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
   return handleSourceColumnState(
-    stateStorageURL === null
+    appStateFromUrl == null
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...cleanupUrlState(stateStorageURL, services.uiSettings),
+          ...cleanupUrlState(appStateFromUrl, services.uiSettings),
         },
     services.uiSettings
   );
@@ -353,7 +385,7 @@ export function isEqualFilters(
 export function isEqualState(
   stateA: DiscoverAppState,
   stateB: DiscoverAppState,
-  exclude: string[] = []
+  exclude: Array<keyof DiscoverAppState> = []
 ) {
   if (!stateA && !stateB) {
     return true;
@@ -361,8 +393,8 @@ export function isEqualState(
     return false;
   }
 
-  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude);
-  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude);
+  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude as string[]);
+  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude as string[]);
 
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
