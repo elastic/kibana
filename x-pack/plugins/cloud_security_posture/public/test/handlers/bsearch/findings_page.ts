@@ -6,17 +6,22 @@
  */
 
 import { http, HttpResponse } from 'msw';
+import { estypes } from '@elastic/elasticsearch';
+import { isArray } from 'lodash';
 import * as findingsJson from './mocks/findings.json';
 import * as filteredFindingJson from './mocks/filtered_finding.json';
 
 export const bsearchFindingsPageDefault = http.post(
   'http://localhost/internal/bsearch',
   async ({ request }) => {
-    const jsonRequest = await request.json();
+    const jsonRequest = (await request.json()) as Partial<estypes.SearchRequest>;
+
+    const filter = jsonRequest?.query?.bool?.filter;
 
     if (
-      jsonRequest?.query?.bool?.filter?.[0]?.bool?.should[0]?.term['rule.section']?.value ===
-      'Logging and Monitoring'
+      isArray(filter) &&
+      isArray(filter?.[0]?.bool?.should) &&
+      filter?.[0]?.bool?.should?.[0]?.term?.['rule.section']?.value === 'Logging and Monitoring'
     ) {
       return HttpResponse.json(filteredFindingJson);
     }

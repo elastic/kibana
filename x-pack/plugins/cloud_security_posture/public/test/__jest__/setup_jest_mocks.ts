@@ -4,18 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SetupServerApi } from 'msw/lib/node';
+
+// Replace rxjs Observable lastValueFrom() with a Promise
+jest.mock('rxjs', () => {
+  const actual = jest.requireActual('rxjs');
+  return {
+    ...actual,
+    lastValueFrom: async (source: any) => {
+      const value = await source;
+      return value.result;
+    },
+  };
+});
 
 /**
  * This function wraps beforeAll, afterAll and beforeEach for setup MSW server into a single call.
  * That makes the describe code further down easier to read and makes
  * sure you don't forget the handlers. Can easily be shared between tests.
  */
-export const setupMockServiceWorkerServer = (server: SetupServerApi) => {
+const setupMockServiceWorkerServer = (server: SetupServerApi) => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
   afterAll(() => server.close());
   beforeEach(() => {
     server.resetHandlers();
   });
 };
+export { setupMockServiceWorkerServer };

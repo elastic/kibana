@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setupMockServiceWorkerServer } from '../test/__jest__/setup_jest_mocks';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { TestProvider } from '../test/test_provider';
@@ -14,7 +15,6 @@ import {
   cspmStatusCspmNotDeployed,
 } from '../test/handlers/status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../test/mock_server';
-import { setupMockServiceWorkerServer } from '../test/setup_server.test';
 
 const server = setupMockServiceWorker(true);
 

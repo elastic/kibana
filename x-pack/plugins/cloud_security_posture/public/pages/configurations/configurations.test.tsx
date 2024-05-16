@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setupMockServiceWorkerServer } from '../../test/__jest__/setup_jest_mocks';
 import React from 'react';
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
@@ -19,20 +20,8 @@ import {
 } from '../../test/handlers/status_handlers';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '../../common/navigation/constants';
-import { setupMockServiceWorkerServer } from '../../test/setup_server.test';
 import { bsearchFindingsPageDefault } from '../../test/handlers/bsearch/findings_page';
 import userEvent from '@testing-library/user-event';
-
-jest.mock('rxjs', () => {
-  const actual = jest.requireActual('rxjs');
-  return {
-    ...actual,
-    lastValueFrom: async (source: any) => {
-      const value = await source;
-      return value.result;
-    },
-  };
-});
 
 const renderFindingsPage = () => {
   return render(

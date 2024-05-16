@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setupMockServiceWorkerServer } from '../../test/__jest__/setup_jest_mocks';
 import React from 'react';
 import { Vulnerabilities } from './vulnerabilities';
 import {
@@ -22,7 +23,6 @@ import {
   cspmStatusIndexed,
 } from '../../test/handlers/status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../../test/mock_server';
-import { setupMockServiceWorkerServer } from '../../test/setup_server.test';
 import { bsearchVulnerabilitiesPageDefault } from '../../test/handlers/bsearch/vulnerabilities_page';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '../../common/navigation/constants';
