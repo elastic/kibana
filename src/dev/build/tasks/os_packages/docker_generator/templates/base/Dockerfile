@@ -12,11 +12,14 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN {{packageManager}} install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip
 {{/ubi}}
 {{#ubuntu}}
-RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
 {{/ubuntu}}
+{{#chainguard}}
+RUN apk --no-cache add curl
+{{/chainguard}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
@@ -32,8 +35,8 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
-# Exclude serverless.yml disabled assets
 {{#serverless}}
+# Exclude serverless.yml disabled assets
   --exclude=screenshotting-plugin/chromium \
   --exclude=screenshotting-plugin/server/assets \
 {{/serverless}}
@@ -44,48 +47,6 @@ RUN tar \
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-{{#cloud}}
-
-COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
-COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
-
-RUN mkdir -p /opt/filebeat /opt/metricbeat && \
-  tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
-  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
-{{/cloud}}
-
-################################################################################
-# Build stage 1 (the actual Kibana image):
-#
-# Copy kibana from stage 0
-# Add entrypoint
-################################################################################
-FROM {{{baseImageName}}}
-EXPOSE 5601
-
-{{#ubi}}
-RUN for iter in {1..10}; do \
-      {{packageManager}} update --setopt=tsflags=nodocs -y && \
-      {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
-      {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
-{{/ubi}}
-{{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      {{packageManager}} update  && \
-      {{packageManager}} upgrade -y  && \
-      {{packageManager}} install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
-      {{packageManager}} clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
-{{/ubuntu}}
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -106,17 +67,68 @@ RUN set -e ; \
   rm "${TINI_BIN}.sha256sum" ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
+{{^serverless}}
+RUN mkdir -p /usr/share/fonts/local && \
+  curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
+  echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+{{/serverless}}
 
-RUN mkdir /usr/share/fonts/local
-RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
-RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
-RUN fc-cache -v
+{{#cloud}}
+COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
+COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
+
+RUN mkdir -p /opt/filebeat /opt/metricbeat && \
+  tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
+  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
+{{/cloud}}
+
+################################################################################
+# Build stage 1 (the actual Kibana image):
+#
+# Copy kibana from stage 0
+# Add entrypoint
+################################################################################
+FROM {{{baseImageName}}}
+EXPOSE 5601
+
+{{#ubi}}
+RUN for iter in {1..10}; do \
+      microdnf update --setopt=tsflags=nodocs -y && \
+      microdnf install --setopt=tsflags=nodocs -y \
+        fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
+      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
+      sleep 10; \
+    done; \
+    (exit $exit_code)
+{{/ubi}}
+{{#ubuntu}}
+RUN for iter in {1..10}; do \
+      export DEBIAN_FRONTEND=noninteractive && \
+      apt-get update  && \
+      apt-get upgrade -y  && \
+      apt-get install -y --no-install-recommends \
+       fontconfig libnss3 ca-certificates && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
+      sleep 10; \
+    done; \
+    (exit $exit_code)
+{{/ubuntu}}
+{{#chainguard}}
+RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+{{/chainguard}}
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+COPY --from=builder --chown=0:0 /bin/tini /bin/tini
 {{#cloud}}
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
+{{^serverless}}
+# Load reporting fonts
+COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
+RUN fc-cache -v
+{{/serverless}}
 WORKDIR /usr/share/kibana
 {{#fips}}
 
