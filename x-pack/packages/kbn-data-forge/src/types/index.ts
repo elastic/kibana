@@ -178,5 +178,5 @@ export interface CliOptions {
   eventTemplate: string;
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
-  alignEventsToInterval: number;
+  alignEventsToInterval: boolean;
 }
