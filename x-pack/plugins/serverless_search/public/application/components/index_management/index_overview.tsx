@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
 import {
@@ -88,7 +87,6 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
   }
 
   const indexData = data.index;
-  console.log('indexData', indexData);
   return (
     <>
       {aliasesFlyoutOpen && (

@@ -9,7 +9,6 @@ jest.mock('@kbn/search-connectors', () => ({
   fetchConnectorByIndexName: jest.fn(),
 }));
 
-import { ByteSizeValue } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
@@ -49,7 +48,7 @@ describe('fetch index lib function', () => {
       pri: '3',
       rep: '1',
       'docs.count': '100',
-      'docs.deleted': '0',
+      'docs.deleted': '2',
       'store.size': '0b',
       'pri.store.size': '0b',
       'dataset.size': '37.4kb',
@@ -58,6 +57,120 @@ describe('fetch index lib function', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+  describe('should return totalSize and deleted docs in expected format', () => {
+    beforeAll(() => {
+      mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
+      mockClient.count.mockResolvedValue(indexCountResponse);
+      (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
+    });
+    it('should convert deleted docs to string correctly', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        { ...regularIndexCatResponse[0], 'dataset.size': '2b', 'docs.deleted': '0' },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 0,
+            totalStoreSize: '2B',
+          },
+        },
+      });
+    });
+    it('should convert totalSize to uppercase GB', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        { ...regularIndexCatResponse[0], 'dataset.size': '105.32gb' },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 2,
+            totalStoreSize: '105.32GB',
+          },
+        },
+      });
+    });
+    it('should convert totalSize to uppercase MB', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        { ...regularIndexCatResponse[0], 'dataset.size': '23mb' },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 2,
+            totalStoreSize: '23MB',
+          },
+        },
+      });
+    });
+    it('should convert totalSize to uppercase PB', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        { ...regularIndexCatResponse[0], 'dataset.size': '2.65pb' },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 2,
+            totalStoreSize: '2.65PB',
+          },
+        },
+      });
+    });
+    it('should convert totalSize to uppercase TB', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        { ...regularIndexCatResponse[0], 'dataset.size': '20000tb' },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 2,
+            totalStoreSize: '20000TB',
+          },
+        },
+      });
+    });
+
+    it('should set to default value when deleted docs and totalStorageSize is undefined', async () => {
+      mockClient.cat.indices.mockResolvedValue([
+        {
+          health: 'green',
+          status: 'open',
+          index: 'search-regular-index',
+          uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+          pri: '3',
+          rep: '1',
+          'docs.count': '100',
+          'store.size': '0b',
+          'pri.store.size': '0b',
+        },
+      ]);
+      await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+        index: {
+          aliases: {},
+          count: 100,
+          connector: indexConnector,
+          indexStorage: {
+            deletedDocs: 0,
+            totalStoreSize: '0KB',
+          },
+        },
+      });
+    });
   });
 
   it('should return index if all client calls succeed', async () => {
@@ -71,11 +184,13 @@ describe('fetch index lib function', () => {
         aliases: {},
         count: 100,
         connector: indexConnector,
-        indexCat: regularIndexCatResponse[0],
+        indexStorage: {
+          deletedDocs: 2,
+          totalStoreSize: '37.4KB',
+        },
       },
     });
   });
-
   it('should throw an error if get index rejects', async () => {
     const expectedError = new Error('Boom!');
 
@@ -100,7 +215,10 @@ describe('fetch index lib function', () => {
         aliases: {},
         count: 0,
         connector: indexConnector,
-        indexCat: regularIndexCatResponse[0],
+        indexStorage: {
+          deletedDocs: 2,
+          totalStoreSize: '37.4KB',
+        },
       },
     });
   });
@@ -117,7 +235,10 @@ describe('fetch index lib function', () => {
       index: {
         aliases: {},
         count: 100,
-        indexCat: regularIndexCatResponse[0],
+        indexStorage: {
+          deletedDocs: 2,
+          totalStoreSize: '37.4KB',
+        },
       },
     });
   });

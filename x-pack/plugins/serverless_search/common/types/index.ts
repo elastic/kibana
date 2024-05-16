@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IndicesIndexState,
-  CatIndicesResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { Connector } from '@kbn/search-connectors/types/connectors';
 
 export interface CreateAPIKeyArgs {
@@ -27,8 +24,8 @@ export interface FetchIndicesResult {
   indices: IndexData[];
 }
 export interface IndexStorage {
-  deletedDocs :number;
-  totalStoreSize:string;
+  deletedDocs: number;
+  totalStoreSize: string;
 }
 export interface FetchIndexResult {
   index: IndicesIndexState & {
