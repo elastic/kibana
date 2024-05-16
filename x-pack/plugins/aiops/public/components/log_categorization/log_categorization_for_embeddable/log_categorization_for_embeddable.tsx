@@ -7,7 +7,7 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -409,6 +409,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         latest={latest}
         query={searchQuery}
       />
+
+      <EuiSpacer size="s" />
 
       <EuiFlexItem css={style}>
         <EuiFlexGroup

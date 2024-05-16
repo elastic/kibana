@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -113,6 +113,8 @@ export const DiscoverMainContent = ({
     ]
   );
 
+  const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
+
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
   return (
@@ -133,7 +135,7 @@ export const DiscoverMainContent = ({
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              viewModeToggle={renderViewModeToggle()}
+              viewModeToggle={viewModeToggle}
               dataView={dataView}
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
@@ -142,7 +144,7 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{renderViewModeToggle()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}

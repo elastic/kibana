@@ -75,11 +75,7 @@ export const DiscoverTabs: FC<Props> = ({
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem>
-                <div
-                  className="unifiedDataTableToolbarControlGroup"
-                  color="subdued"
-                  css={{ marginRight: '8px' }}
-                >
+                <div className="unifiedDataTableToolbarControlGroup" css={{ marginRight: '8px' }}>
                   <div className="unifiedDataTableToolbarControlIconButton">
                     <EmbeddableMenu
                       randomSampler={randomSampler}
@@ -92,8 +88,8 @@ export const DiscoverTabs: FC<Props> = ({
                       categoryCount={data?.totalCategories}
                     />
                   </div>
-                  <div className="unifiedDataTableToolbarControlIconButton">
-                    {selectedField !== null && earliest !== undefined && latest !== undefined ? (
+                  {selectedField !== null && earliest !== undefined && latest !== undefined ? (
+                    <div className="unifiedDataTableToolbarControlIconButton">
                       <CreateCategorizationJobButton
                         dataView={dataview}
                         field={selectedField}
@@ -102,8 +98,8 @@ export const DiscoverTabs: FC<Props> = ({
                         latest={latest}
                         iconOnly={true}
                       />
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>

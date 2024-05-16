@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { type EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
+import { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_embeddable';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
@@ -39,40 +40,31 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
 
   useEffect(() => {
     // Track should only be called once when component is loaded
-    trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
-  }, [trackUiMetric]);
+    if (aiopsService !== undefined) {
+      trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
+    }
+  }, [aiopsService, trackUiMetric]);
+
+  const patternAnalysisComponentProps: LogCategorizationEmbeddableProps = useMemo(
+    () => ({
+      input: Object.assign(
+        {},
+        pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']),
+        { lastReloadRequestTime }
+      ),
+      renderViewModeToggle: props.renderViewModeToggle,
+    }),
+    [lastReloadRequestTime, props]
+  );
 
   if (aiopsService === undefined) {
     return null;
   }
 
-  const deps = pick(services, [
-    'i18n',
-    'theme',
-    'data',
-    'uiSettings',
-    'http',
-    'notifications',
-    'lens',
-    'fieldFormats',
-    'application',
-    'charts',
-    'uiActions',
-  ]);
-
-  const input: EmbeddablePatternAnalysisInput = Object.assign(
-    {},
-    pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']),
-    { lastReloadRequestTime }
-  );
-
   return (
     <aiopsService.PatternAnalysisComponent
-      props={{
-        input,
-        renderViewModeToggle: props.renderViewModeToggle,
-      }}
-      deps={deps}
+      props={patternAnalysisComponentProps}
+      deps={services}
       embeddingOrigin="discover"
     />
   );

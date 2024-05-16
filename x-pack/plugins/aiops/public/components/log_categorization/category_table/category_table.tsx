@@ -130,7 +130,7 @@ export const CategoryTable: FC<Props> = ({
               defaultMessage: 'Examples',
             })
           : i18n.translate('xpack.aiops.logCategorization.column.examplesWithFieldName', {
-              defaultMessage: '{fieldName} examples',
+              defaultMessage: 'Examples of {fieldName}',
               values: { fieldName },
             }),
       sortable: true,
