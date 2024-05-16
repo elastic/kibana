@@ -2040,6 +2040,9 @@
       "fleet_server_hosts": {
         "type": "keyword"
       },
+      "fleet_setup_status": {
+        "type": "keyword"
+      },
       "has_seen_add_data_notice": {
         "index": false,
         "type": "boolean"
