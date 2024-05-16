@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CoreStart } from '@kbn/core/public';
 import { HttpService } from '../../application/services/http_service';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import type { AnomalyChartsEmbeddableServices } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export const getAnomalyChartsServiceDependencies = async (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  coreStartServices: CoreStart,
+  pluginsStartServices: MlStartDependencies
 ): Promise<AnomalyChartsEmbeddableServices> => {
   const [
-    [coreStartServices, pluginsStartServices],
     { AnomalyDetectorService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { mlApiServicesProvider },
     { mlResultsServiceProvider },
   ] = await Promise.all([
-    await getStartServices(),
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),

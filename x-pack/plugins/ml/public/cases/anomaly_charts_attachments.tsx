@@ -15,25 +15,27 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { LazyEmbeddableAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
 import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/initialize_anomaly_charts_controls';
-import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableServices } from '../embeddables';
+import type {
+  AnomalyChartsApi,
+  AnomalyChartsEmbeddableCustomInput,
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableServices,
+} from '../embeddables';
 
+interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsEmbeddableCustomInput {
+  services: AnomalyChartsEmbeddableServices;
+}
 const AnomalyChartsCaseAttachment = ({
   services,
   ...initialState
-}: {
-  jobIds: JobId[];
-  maxSeriesToPlot: number;
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-  severityThreshold?: number;
-  services: AnomalyChartsEmbeddableServices;
-}) => {
+}: AnomalyChartsCaseAttachmentProps) => {
+  const id = useMemo(() => htmlIdGenerator()(), []);
   const [coreStartServices, pluginStartServices, mlServices] = services;
   const contextServices = useMemo(
     () => ({
@@ -50,13 +52,17 @@ const AnomalyChartsCaseAttachment = ({
   const api = useMemo(
     () => {
       const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
-      return { ...anomalyChartsApi.anomalyChartsControlsApi, ...anomalyChartsApi.dataLoadingApi };
+      const combined: AnomalyChartsApi = {
+        ...anomalyChartsApi.anomalyChartsControlsApi,
+        ...anomalyChartsApi.dataLoadingApi,
+      };
+      return combined;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const appliedTimeRange$ = useMemo(
+  const timeRange$ = useMemo(
     () => new BehaviorSubject(initialState.timeRange),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [initialState.timeRange?.from, initialState.timeRange?.to]
@@ -67,19 +73,24 @@ const AnomalyChartsCaseAttachment = ({
       <KibanaRenderContextProvider {...coreStartServices}>
         <KibanaContextProvider services={contextServices}>
           <LazyEmbeddableAnomalyChartsContainer
+            id={`case-anomaly-charts-${id}`}
             severityThreshold={initialState.severityThreshold}
             api={api}
             services={services}
             onLoading={api.onLoading}
             onRenderComplete={api.onRenderComplete}
             onError={api.onError}
-            appliedTimeRange$={appliedTimeRange$}
+            timeRange$={timeRange$}
           />
         </KibanaContextProvider>
       </KibanaRenderContextProvider>
     </div>
   );
 };
+
+function isValidTimeRange(arg: unknown): arg is TimeRange {
+  return isPopulatedObject(arg, ['from', 'to']);
+}
 
 export const initializeAnomalyChartsAttachment = memoize(
   (fieldFormats: FieldFormatsStart, services: AnomalyChartsEmbeddableServices) => {
@@ -94,43 +105,56 @@ export const initializeAnomalyChartsAttachment = memoize(
         const inputProps =
           persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableInput;
 
-        const listItems = [
-          {
-            title: (
-              <FormattedMessage
-                id="xpack.ml.cases.anomalyCharts.description.jobIdsLabel"
-                defaultMessage="Job IDs"
-              />
-            ),
-            description: inputProps.jobIds.join(', '),
-          },
-          {
-            title: (
-              <FormattedMessage
-                id="xpack.ml.cases.anomalyCharts.description.timeRangeLabel"
-                defaultMessage="Time range"
-              />
-            ),
-            description: `${dataFormatter.convert(
-              inputProps.timeRange.from
-            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
-          },
-        ];
+        const descriptions = useMemo(() => {
+          const listItems = [
+            {
+              title: (
+                <FormattedMessage
+                  id="xpack.ml.cases.anomalyCharts.description.jobIdsLabel"
+                  defaultMessage="Job IDs"
+                />
+              ),
+              description: inputProps.jobIds.join(', '),
+            },
+          ];
 
-        if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-          listItems.push({
-            title: (
-              <FormattedMessage
-                id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
-                defaultMessage="Query"
-              />
-            ),
-            description: inputProps.query?.query,
-          });
-        }
+          if (isValidTimeRange(inputProps.timeRange)) {
+            listItems.push({
+              title: (
+                <FormattedMessage
+                  id="xpack.ml.cases.anomalyCharts.description.timeRangeLabel"
+                  defaultMessage="Time range"
+                />
+              ),
+              description: `${dataFormatter.convert(
+                inputProps.timeRange.from
+              )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+            });
+          }
+
+          if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
+            listItems.push({
+              title: (
+                <FormattedMessage
+                  id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
+                  defaultMessage="Query"
+                />
+              ),
+              description: inputProps.query?.query,
+            });
+          }
+          return listItems;
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [
+          dataFormatter,
+          inputProps.jobIds,
+          inputProps.query?.query,
+          inputProps.timeRange?.from,
+          inputProps.timeRange?.to,
+        ]);
         return (
           <>
-            <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
+            <EuiDescriptionList compressed type={'inline'} listItems={descriptions} />
             <AnomalyChartsCaseAttachment services={services} {...inputProps} />
           </>
         );

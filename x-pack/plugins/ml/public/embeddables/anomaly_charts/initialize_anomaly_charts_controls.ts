@@ -8,17 +8,31 @@
 import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { AnomalyChartsComponentApi, AnomalyChartsEmbeddableState } from './types';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import type { Filter, Query } from '@kbn/es-query';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
+import type {
+  AnomalyChartsComponentApi,
+  AnomalyChartsDataLoadingApi,
+  AnomalyChartsEmbeddableRuntimeState,
+  AnomalyChartsEmbeddableState,
+} from '../types';
 
 export const initializeAnomalyChartsControls = (
   rawState: AnomalyChartsEmbeddableState,
-  titlesApi: TitlesApi,
-  parentApi // @todo: fix type
+  titlesApi?: TitlesApi,
+  parentApi?: unknown
 ) => {
   const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
-  const maxSeriesToPlot$ = new BehaviorSubject<number>(rawState.maxSeriesToPlot);
-  const severityThreshold$ = new BehaviorSubject<number>(rawState.severityThreshold);
-  const entityFields$ = new BehaviorSubject<number>(rawState.selectedEntities);
+  const maxSeriesToPlot$ = new BehaviorSubject<number>(
+    rawState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+  );
+  const severityThreshold$ = new BehaviorSubject<number | undefined>(rawState.severityThreshold);
+  const selectedEntities$ = new BehaviorSubject<MlEntityField[] | undefined>(
+    rawState.selectedEntities
+  );
   const interval$ = new BehaviorSubject<number | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -36,43 +50,45 @@ export const initializeAnomalyChartsControls = (
     jobIds$.next(update.jobIds);
     maxSeriesToPlot$.next(update.maxSeriesToPlot);
     if (titlesApi) {
-      titlesApi.setPanelTitle(update.panelTitle);
+      titlesApi.setPanelTitle(update.title);
     }
   };
 
-  const updateSeverityThreshold = (v) => severityThreshold$.next(v.severityThreshold);
-  const updateEntityFields = (v) => entityFields$.next(v);
-  const setInterval = (v) => interval$.next(v);
+  const updateSeverityThreshold = (v: number) => severityThreshold$.next(v);
+  const updateSelectedEntities = (v: MlEntityField[]) => selectedEntities$.next(v);
+  const setInterval = (v: number) => interval$.next(v);
 
   const serializeAnomalyChartsState = (): AnomalyChartsEmbeddableState => {
     return {
       jobIds: jobIds$.value,
       maxSeriesToPlot: maxSeriesToPlot$.value,
       severityThreshold: severityThreshold$.value,
-      entityFields: entityFields$.value,
+      selectedEntities: selectedEntities$.value,
     };
   };
 
-  const anomalyChartsComparators: StateComparators<AnomalyAnomalyChartsControlsState> = {
-    jobIds: [jobIds$, (arg) => jobIds$.next(arg), fastIsEqual],
-    maxSeriesToPlot: [maxSeriesToPlot$, (arg) => maxSeriesToPlot$.next(arg)],
-    severityThreshold: [severityThreshold$, (arg) => severityThreshold$.next(arg)],
-    entityFields: [entityFields$, (arg) => severityThreshold$.next(arg)],
+  const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
+    jobIds: [jobIds$, (arg: JobId[]) => jobIds$.next(arg), fastIsEqual],
+    maxSeriesToPlot: [maxSeriesToPlot$, (arg: number) => maxSeriesToPlot$.next(arg)],
+    severityThreshold: [severityThreshold$, (arg?: number) => severityThreshold$.next(arg)],
+    selectedEntities: [selectedEntities$, (arg?: MlEntityField[]) => selectedEntities$.next(arg)],
+    filters: [filters$, (arg?: Filter[]) => filters$.next(arg)],
+    query: [query$, (arg?: Query) => query$.next(arg)],
   };
   const onRenderComplete = () => dataLoading$.next(false);
-  const onLoading = (v) => dataLoading$.next(v);
-  const onError = (error) => blockingError$.next(error);
+  const onLoading = (v: boolean) => dataLoading$.next(v);
+  const onError = (error?: Error) => blockingError$.next(error);
 
   return {
     anomalyChartsControlsApi: {
       jobIds$,
       maxSeriesToPlot$,
       severityThreshold$,
-      entityFields$,
+      selectedEntities$,
       updateUserInput,
       updateSeverityThreshold,
-      updateEntityFields,
-    } as unknown as AnomalyChartsComponentApi,
+      updateSelectedEntities,
+    } as AnomalyChartsComponentApi,
     dataLoadingApi: {
       query$,
       filters$,
@@ -82,14 +98,14 @@ export const initializeAnomalyChartsControls = (
       onRenderComplete,
       onLoading,
       onError,
-    },
+    } as AnomalyChartsDataLoadingApi,
     serializeAnomalyChartsState,
     anomalyChartsComparators,
     onAnomalyChartsDestroy: () => {
       jobIds$.complete();
       maxSeriesToPlot$.complete();
       severityThreshold$.complete();
-      entityFields$.complete();
+      selectedEntities$.complete();
     },
   };
 };

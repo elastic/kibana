@@ -11,14 +11,14 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
+import type { AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
-import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 
-export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
+export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
-export type CreateSwimlanePanelActionContext = EmbeddableApiContext & {
-  embeddable: AnomalySwimLaneEmbeddableApi;
+export type CreateAnomalyChartsPanelActionContext = EmbeddableApiContext & {
+  embeddable: AnomalyChartsEmbeddableApi;
 };
 
 const parentApiIsCompatible = async (
@@ -31,7 +31,7 @@ const parentApiIsCompatible = async (
 
 export function createAddAnomalyChartsPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateSwimlanePanelActionContext> {
+): UiActionsActionDefinition<CreateAnomalyChartsPanelActionContext> {
   return {
     id: 'create-anomaly-charts',
     grouping: [
@@ -70,10 +70,7 @@ export function createAddAnomalyChartsPanelAction(
 
         presentationContainerParent.addNewPanel({
           panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-          initialState: {
-            ...initialState,
-            title: initialState.panelTitle,
-          },
+          initialState,
         });
       } catch (e) {
         // eslint-disable-next-line no-console

@@ -21,10 +21,14 @@ import {
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import { Subject, catchError } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import type { TimeRange } from '@kbn/es-query';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { CoreStart } from '@kbn/core/public';
 import type {
-  AnomalyChartsEmbeddableInput,
-  AnomalyChartsEmbeddableOutput,
+  AnomalyChartsEmbeddableCustomInput,
   AnomalyChartsEmbeddableServices,
+  AnomalyChartsServices,
+  AnomalyChartsApi,
 } from '..';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
@@ -35,34 +39,38 @@ import type { MlLocatorParams } from '../../../common/types/locator';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { processFilters } from '../common/process_filters';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
 } from '../../application/explorer/explorer_utils';
+import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
+import type { MlStartDependencies } from '../../plugin';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
-export interface EmbeddableAnomalyChartsContainerProps extends AnomalyChartsEmbeddableInput {
+export interface EmbeddableAnomalyChartsContainerProps
+  extends Partial<AnomalyChartsEmbeddableCustomInput> {
+  lastReloadRequestTime?: number;
+  api: AnomalyChartsApi;
   id: string;
   services: AnomalyChartsEmbeddableServices;
-  refresh$: Observable<any>;
-  onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
-  onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
+  timeRange$: Observable<TimeRange | undefined>;
   onRenderComplete: () => void;
-  onLoading: () => void;
+  onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
 }
 function useAnomalyChartsData(
-  api: AnomalyChartsEmbeddableInput,
+  api: AnomalyChartsApi,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
-  appliedTimeRange$,
+  timeRange$: Observable<TimeRange | undefined>,
   chartWidth: number,
   severity: number,
   renderCallbacks: {
     onRenderComplete: () => void;
-    onLoading: () => void;
+    onLoading: (v: boolean) => void;
     onError: (error: Error) => void;
   }
 ): {
@@ -76,14 +84,14 @@ function useAnomalyChartsData(
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const chartWidth$ = useMemo(() => new Subject<number>(100), []);
+  const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
 
   useEffect(() => {
     const subscription = combineLatest([
       getJobsObservable(api.jobIds$, anomalyDetectorService, setError),
       api.maxSeriesToPlot$,
-      appliedTimeRange$,
+      timeRange$,
       api.filters$,
       api.query$,
       chartWidth$.pipe(skipWhile((v) => !v)),
@@ -94,10 +102,10 @@ function useAnomalyChartsData(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         tap(() => {
-          renderCallbacks.onLoading();
+          renderCallbacks.onLoading(true);
         }),
-        switchMap(
-          ([
+        switchMap((args) => {
+          const [
             explorerJobs,
             maxSeriesToPlot,
             timeRangeInput,
@@ -105,57 +113,55 @@ function useAnomalyChartsData(
             query,
             embeddableContainerWidth,
             severityValue,
-          ]) => {
-            if (!explorerJobs) {
-              // couldn't load the list of jobs
-              return of(undefined);
-            }
-
-            const viewBySwimlaneFieldName = OVERALL_LABEL;
-
-            anomalyExplorerService.setTimeRange(timeRangeInput);
-
-            let influencersFilterQuery: InfluencersFilterQuery | undefined;
-            try {
-              if (filters || query) {
-                influencersFilterQuery = processFilters(filters, query);
-              }
-            } catch (e) {
-              // handle query syntax errors
-              setError(e);
-              return of(undefined);
-            }
-
-            const bounds = anomalyExplorerService.getTimeBounds();
-
-            // Can be from input time range or from the timefilter bar
-            const selections: AppStateSelectedCells = {
-              lanes: [OVERALL_LABEL],
-              times: [bounds.min?.unix()!, bounds.max?.unix()!],
-              type: SWIMLANE_TYPE.OVERALL,
-            };
-
-            const selectionInfluencers = getSelectionInfluencers(
-              selections,
-              viewBySwimlaneFieldName
-            );
-
-            const jobIds = getSelectionJobIds(selections, explorerJobs);
-
-            const timeRange = getSelectionTimeRange(selections, bounds);
-
-            return anomalyExplorerService.getAnomalyData$(
-              jobIds,
-              embeddableContainerWidth,
-              timeRange.earliestMs,
-              timeRange.latestMs,
-              influencersFilterQuery,
-              selectionInfluencers,
-              severityValue ?? 0,
-              maxSeriesToPlot
-            );
+          ] = args;
+          if (!explorerJobs) {
+            // couldn't load the list of jobs
+            return of(undefined);
           }
-        ),
+
+          const viewBySwimlaneFieldName = OVERALL_LABEL;
+
+          if (timeRangeInput) {
+            anomalyExplorerService.setTimeRange(timeRangeInput);
+          }
+
+          let influencersFilterQuery: InfluencersFilterQuery | undefined;
+          try {
+            if (filters || query) {
+              influencersFilterQuery = processFilters(filters, query);
+            }
+          } catch (e) {
+            // handle query syntax errors
+            setError(e);
+            return of(undefined);
+          }
+
+          const bounds = anomalyExplorerService.getTimeBounds();
+
+          // Can be from input time range or from the timefilter bar
+          const selections: AppStateSelectedCells = {
+            lanes: [OVERALL_LABEL],
+            times: [bounds.min?.unix()!, bounds.max?.unix()!],
+            type: SWIMLANE_TYPE.OVERALL,
+          };
+
+          const selectionInfluencers = getSelectionInfluencers(selections, viewBySwimlaneFieldName);
+
+          const jobIds = getSelectionJobIds(selections, explorerJobs);
+
+          const timeRange = getSelectionTimeRange(selections, bounds);
+
+          return anomalyExplorerService.getAnomalyData$(
+            jobIds,
+            embeddableContainerWidth,
+            timeRange.earliestMs,
+            timeRange.latestMs,
+            influencersFilterQuery,
+            selectionInfluencers,
+            severityValue ?? 0,
+            maxSeriesToPlot
+          );
+        }),
         catchError((e) => {
           // eslint-disable-next-line no-console
           console.error(`Error occured fetching anomaly charts data for embeddable\n`, e);
@@ -168,7 +174,7 @@ function useAnomalyChartsData(
           setError(null);
           setChartsData(results);
           setIsLoading(false);
-
+          renderCallbacks.onLoading(false);
           renderCallbacks.onRenderComplete();
         }
       });
@@ -203,12 +209,9 @@ function useAnomalyChartsData(
 
 const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
-  appliedTimeRange$,
-  // @todo: update this just to severityThreshold
+  timeRange$,
   severityThreshold,
   services,
-  onInputChange,
-  onOutputChange,
   onRenderComplete,
   onError,
   onLoading,
@@ -224,7 +227,7 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
     services;
   const { timefilter } = dataServices.query.timefilter;
-  const timeRange = useObservable(appliedTimeRange$);
+  const timeRange = useObservable(timeRange$);
 
   const mlLocator = useMemo(
     () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
@@ -243,19 +246,17 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
 
   useEffect(() => {
     if (api?.updateSeverityThreshold) {
-      api.updateSeverityThreshold({
-        severityThreshold: severity.val,
-      });
+      api.updateSeverityThreshold(severity.val);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity.val, api?.updateSeverityThreshold]);
 
   useEffect(() => {
-    if (api?.updateEntityFields) {
-      api.updateEntityFields(selectedEntities);
+    if (api?.updateSelectedEntities) {
+      api.updateSelectedEntities(selectedEntities);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEntities, api?.updateEntityFields]);
+  }, [selectedEntities, api?.updateSelectedEntities]);
 
   const renderCallbacks = useMemo(() => {
     return { onRenderComplete, onError, onLoading };
@@ -264,14 +265,7 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(
-    api,
-    services,
-    appliedTimeRange$,
-    chartWidth,
-    severity.val,
-    renderCallbacks
-  );
+  } = useAnomalyChartsData(api, services, timeRange$, chartWidth, severity.val, renderCallbacks);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();

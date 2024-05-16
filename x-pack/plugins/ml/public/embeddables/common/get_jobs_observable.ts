@@ -17,7 +17,7 @@ export function getJobsObservable(
   jobIds$: Observable<JobId[]>,
   anomalyDetectorService: AnomalyDetectorService,
   setErrorHandler: (e: Error) => void
-) {
+): Observable<ExplorerJob[]> {
   return jobIds$.pipe(
     distinctUntilChanged(isEqual),
     switchMap((jobsIds) => {
