@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CUSTOM_BASE_URL, isInternalURL } from './is_internal_url';
+import { isInternalURL } from './is_internal_url';
 
 describe('isInternalURL', () => {
   describe('with basePath defined', () => {
@@ -69,9 +69,10 @@ describe('isInternalURL', () => {
           `/${char}//${basePath}app/kibana`,
           `//${char}/${basePath}app/kibana`,
           `htt${char}ps://example.com${basePath}`,
-          CUSTOM_BASE_URL,
-          `${CUSTOM_BASE_URL}${basePath}`,
-          `${CUSTOM_BASE_URL}example.com${basePath}`,
+          `htt${char}p://example.org:5601${basePath}`,
+          `file${char}://example.com${basePath}`,
+          `htt${char}p://example.org:5601${char}${basePath}`,
+          `https:/${char}/example.com${char}${basePath}`,
         ]) {
           expect(isInternalURL(url, basePath)).toBe(false);
         }
@@ -109,11 +110,23 @@ describe('isInternalURL', () => {
           `/${char}/app/kibana`,
           `/${char}//app/kibana`,
           `//${char}/app/kibana`,
+          `/${char}/example.com`,
+          `/${char}//example.com`,
+          `//${char}/example.com`,
           `htt${char}ps://example.com`,
+          `/${char}/example.org`,
+          `/${char}//example.org`,
+          `//${char}/example.org`,
+          `htt${char}ps://example.org`,
+          `/${char}/example.org:5601`,
+          `/${char}//example.org:5601`,
+          `//${char}/example.org:5601`,
+          `htt${char}ps://example.org:5601`,
           `java${char}script:alert(1)`,
-          CUSTOM_BASE_URL,
-          `${CUSTOM_BASE_URL}app/kibana`,
-          `${CUSTOM_BASE_URL}example.com/path`,
+          `htt${char}p://example.org:5601`,
+          `https:/${char}/example.com`,
+          `file${char}://example.com`,
+          `https://example${char}.com/path`,
         ]) {
           expect(isInternalURL(url)).toBe(false);
         }
