@@ -17,6 +17,7 @@ import type {
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
 import { withoutControlCharacters } from '../lib/string_utils';
 
@@ -55,7 +56,11 @@ export function getConnectorType(): ServerLogConnectorType {
     name: i18n.translate('xpack.stackConnectors.serverLog.title', {
       defaultMessage: 'Server log',
     }),
-    supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: { schema: schema.object({}, { defaultValue: {} }) },
