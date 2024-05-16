@@ -300,7 +300,7 @@ Specifies the maximum number of fields to show in the document column of the *Di
 When enabled, removes the columns that are not in the new data view.
 
 [[discover-row-height-option]]`discover:rowHeightOption`::
-The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.
+The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line. This setting is not applied to the ES|QL Table view.
 
 [[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
 Limits the number of rows per page in the document table.
