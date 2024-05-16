@@ -44,7 +44,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
-import type { State } from '../../../common/store';
+import type { State, inputsModel } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 import { getAlertsDefaultModel } from './default_config';
@@ -134,9 +134,15 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const getGlobalKqlQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalKqlQuery = useDeepEqualSelector(getGlobalKqlQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const getGlobalQueriesSelector = useMemo(() => inputsSelectors.globalQuery(), []);
+  const globalQueries = useDeepEqualSelector(getGlobalQueriesSelector);
+  const customRefetch = useCallback(() => {
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [globalQueries]);
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -167,18 +173,18 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         indexPattern: indexPatterns,
         browserFields,
         filters: [...allFilters],
-        kqlQuery: globalQuery,
-        kqlMode: globalQuery.language,
+        kqlQuery: globalKqlQuery,
+        kqlMode: globalKqlQuery.language,
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, globalKqlQuery, indexPatterns, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableId,
     filterQuery: combinedQuery?.filterQuery,
     kqlError: combinedQuery?.kqlError,
-    query: globalQuery,
+    query: globalKqlQuery,
     startDate: from,
     endDate: to,
   });
@@ -286,6 +292,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showSortSelector: !isEventRenderedView,
       },
       dynamicRowHeight: isEventRenderedView,
+      customRefetch,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -300,6 +307,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       runtimeMappings,
       isEventRenderedView,
       cellContext,
+      customRefetch,
     ]
   );
 
