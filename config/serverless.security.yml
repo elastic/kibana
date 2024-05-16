@@ -14,9 +14,9 @@ xpack.cloud.serverless.project_type: security
 xpack.securitySolutionServerless.enabled: true
 xpack.securitySolutionServerless.productTypes:
   [
-    { product_line: 'security', product_tier: 'essentials' },
-    { product_line: 'endpoint', product_tier: 'essentials' },
-    { product_line: 'cloud', product_tier: 'complete' },
+    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+#    { product_line: 'cloud', product_tier: 'essentials' },
   ]
 
 xpack.securitySolution.offeringSettings: {

@@ -23,9 +23,8 @@
       "share",
       "kibanaUtils",
       "alerting",
-//       "securitySolution",
-//       "securitySolutionServerless",
     ],
+    "runtimePluginDependencies": ["securitySolution"],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]
   }

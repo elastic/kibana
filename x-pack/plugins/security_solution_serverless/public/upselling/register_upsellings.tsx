@@ -17,6 +17,7 @@ import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { CloudSecurityPosturePLIBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
@@ -151,6 +152,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'cloud_security_posture_integration_installation',
+    pli: ProductFeatureKey.cloudSecurityPosture,
+    component: CloudSecurityPosturePLIBlockLazy,
   },
 ];
 

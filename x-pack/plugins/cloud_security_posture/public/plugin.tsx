@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { SecuritySolutionContext } from './application/security_solution_context';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type {
@@ -19,6 +20,40 @@ import type {
 } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
+
+// const LazyCspPolicyTemplateForm = lazy(
+//   () => import('./components/fleet_extensions/policy_template_form')
+// );
+
+// const LazyCspPolicyTemplateForm = React.lazy(async ({ props, core }) => {
+//   const { CspPolicyTemplateForm } = await import(
+//     './components/fleet_extensions/policy_template_form'
+//   );
+//
+//   console.log(props, core);
+//
+//   // Wrap the lazy-loaded component with the HOC
+//   return {
+//     default: CspPolicyTemplateForm({ props, core }),
+//   };
+// });
+
+// const LazyCspPolicyTemplateForm = (props: any, core: CoreStart) => {
+//   const [upselling, setUpselling] = React.useState();
+//
+//   React.useEffect(() => {
+//     const getUpselling = async () => {
+//       const res = await core.plugins.onStart('securitySolution');
+//       const service = await res.securitySolution?.contract.getUpselling();
+//       console.log(service?.sections?.get('cloud_security_posture'));
+//       setUpselling(service);
+//     };
+//     getUpselling();
+//   }, [core.plugins]);
+//
+//   if (!upselling?.sections) return <></>;
+//   return <CspPolicyTemplateForm {...props} upselling={upselling} />;
+// };
 
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')
@@ -56,10 +91,26 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
+    // core.plugins.onStart('securitySolution').then((res) => {
+    //   console.log('securitySolution plugin started successfully:', res);
+    // });
+
+    // plugins.fleet.registerExtension({
+    //   package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    //   view: 'package-policy-replace-define-step',
+    //   Component: LazyCspPolicyTemplateForm,
+    // });
+
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',
-      Component: LazyCspPolicyTemplateForm,
+      Component: (props) => (
+        <LazyCspPolicyTemplateForm
+          {...props}
+          pluginsOnStart={core.plugins.onStart}
+          isServerless={plugins.cloud.isServerlessEnabled}
+        />
+      ),
     });
 
     plugins.fleet.registerExtension({
@@ -76,7 +127,9 @@ export class CspPlugin
         <RedirectAppLinks coreStart={core}>
           <div style={{ width: '100%', height: '100%' }}>
             <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
-              <CspRouter {...props} />
+              <SecuritySolutionContext.Provider value={props.securitySolutionContext}>
+                <CspRouter {...props} />
+              </SecuritySolutionContext.Provider>
             </SetupContext.Provider>
           </div>
         </RedirectAppLinks>

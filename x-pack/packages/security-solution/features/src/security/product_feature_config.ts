@@ -110,4 +110,5 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
+  [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
 };

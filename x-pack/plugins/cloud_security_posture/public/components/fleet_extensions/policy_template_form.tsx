@@ -30,9 +30,8 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-// import { getProductProductFeatures } from '@kbn/security-solution-serverless/common/pli/pli_features';
-import { registerUpsellings } from '@kbn/security-solution-serverless/public';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { PluginContractResolver } from '@kbn/core-plugins-contracts-browser';
+import { useServerlessServices } from '../../common/hooks/use_serverless_services';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
@@ -530,7 +529,9 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+export const CspPolicyTemplateForm = memo<
+  PackagePolicyReplaceDefineStepExtensionComponentProps & { pluginsOnStart: PluginContractResolver }
+>(
   ({
     agentPolicy,
     newPolicy,
@@ -540,11 +541,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     packageInfo,
     handleSetupTechnologyChange,
     agentlessPolicy,
+    pluginsOnStart,
+    isServerless,
   }) => {
-    const { licensing } = useKibana().services;
-    // const t = getProductProductFeatures([]);
-    const t = registerUpsellings();
-    console.log(t);
+    const { upsellingService } = useServerlessServices(pluginsOnStart, isServerless);
+    // ##########################################
+    // ##########################################
+    // ##########################################
+    // ##########################################
+    // ##########################################
+    console.log(upsellingService);
+    const CspIntegrationInstallationUpsellingPliBlock = upsellingService?.sections.get(
+      'cloud_security_posture_integration_installation'
+    );
 
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -552,6 +561,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
+
+    useEffect(() => {
+      // If the PLI block component is available, we want to disable the save button to prevent saving the policy
+      setIsValid(!CspIntegrationInstallationUpsellingPliBlock);
+    }, [CspIntegrationInstallationUpsellingPliBlock]);
+
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
       input,
@@ -680,6 +695,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ),
       },
     ];
+
+    if (CspIntegrationInstallationUpsellingPliBlock) {
+      return <CspIntegrationInstallationUpsellingPliBlock />;
+    }
 
     return (
       <>

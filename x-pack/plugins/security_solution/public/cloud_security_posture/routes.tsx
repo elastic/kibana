@@ -18,6 +18,7 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { useUpsellingComponent } from '../common/hooks/use_upselling';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (
@@ -27,11 +28,13 @@ const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityP
 const cspSecuritySolutionContext: CspSecuritySolutionContext = {
   getFiltersGlobalComponent: () => FiltersGlobal,
   getSpyRouteComponent: () => CloudPostureSpyRoute,
+  useUpsellingComponent,
 };
 
 const CloudSecurityPosture = () => {
   const { cloudSecurityPosture } = useKibana().services;
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
+  console.log(useUpsellingComponent('cloud_security_posture'));
 
   return (
     <PluginTemplateWrapper>

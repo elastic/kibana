@@ -25,6 +25,8 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { UpsellingSectionId } from '@kbn/security-solution-upselling/service';
+import React from 'react';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -83,4 +85,6 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
+
+  useUpsellingComponent: (id: UpsellingSectionId) => React.ComponentType | null;
 }

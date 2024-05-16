@@ -43,7 +43,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     ],
   },
   cloud: {
-    essentials: [],
+    essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [],
   },
 } as const;
