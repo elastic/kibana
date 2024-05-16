@@ -36,6 +36,14 @@ import {
   EuiToolTip,
   EuiPanel,
   EuiContextMenu,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiContextMenuPanelProps,
+  EuiFieldText,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
@@ -199,12 +207,31 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [editorLanguage, setEditorLanguage] = useState(ESQL_LANG_ID);
   const [abortController, setAbortController] = useState(new AbortController());
   const [integrations, setIntegrations] = useState<FleetResponse['items']>([]);
   const [indices, setIndices] = useState<Array<{ name: string }>>([]);
   // const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
+
+  const [inputValue, setInputValue] = useState('');
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === 'from') {
+      // setEditorLanguage(ESQL_LANG_ID);
+      // setCode(`from ${indices[0]?.name} | limit 10`);
+      // setCodeOneLiner(`from ${indices[0]?.name} | limit 10`);
+      onUpdateAndSubmit(`from ${indices[0]?.name} | limit 10`);
+      setIsFlyoutVisible(false);
+    } else if (e.target.value === '/') {
+      setIsFlyoutVisible(true);
+    } else if (e.target.value === '') {
+      setIsFlyoutVisible(false);
+    }
+    setInputValue(e.target.value);
+  };
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -232,15 +259,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     (value: string) => {
       setCode(value);
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
+      if (value === '') {
+        if (editorModel.current && editorLanguage !== 'plaintext') {
+          monaco.editor.setModelLanguage(editorModel.current, 'plaintext');
+        }
+      } else {
+        if (editorModel.current && editorLanguage !== ESQL_LANG_ID) {
+          monaco.editor.setModelLanguage(editorModel.current, ESQL_LANG_ID);
+        }
+      }
     },
-    [language, onTextLangQueryChange]
+    [editorLanguage, language, onTextLangQueryChange]
   );
 
   const addSourceDecoration = useCallback(
     (newCode?: string) => {
-      // we need to remove the previous decorations
-      // const decorationIds = editor1?.current?.getLineDecorations(1) ?? [];
-      // editor1?.current?.removeDecorations(decorationIds);
+      // we need to remove the previous decorations first
+      const decorations = editor1?.current?.getLineDecorations(1) ?? [];
+      editor1?.current?.removeDecorations(decorations.map((d) => d.id));
       const pattern = getIndexPatternFromESQLQuery(newCode ?? code);
       const range = new monaco.Range(1, 6, 1, pattern.length + 6);
       editor1?.current?.createDecorationsCollection([
@@ -276,6 +312,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
+      setEditorLanguage(ESQL_LANG_ID);
       // update the query first
       onQueryUpdate(qs);
       // submit the query with some latency
@@ -338,7 +375,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpandedFocused,
     Boolean(documentationSections),
     Boolean(editorIsInline),
-    isHistoryOpen
+    isHistoryOpen,
+    editorLanguage === 'plaintext'
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -526,17 +564,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
-  // useEffect(() => {
-  //   if (decorationIds.length > 0) {
-  //     setTimeout(() => {
-  //       const elements = document.getElementsByClassName('mySourcePill');
-  //       elements[0].addEventListener('click', function () {
-  //         console.log('Button clicked!');
-  //       });
-  //     }, 500);
-  //   }
-  // }, [decorationIds.length]);
-
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
@@ -589,18 +616,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => (language === 'esql' ? ESQLLang.getSuggestionProvider?.(esqlCallbacks) : undefined),
-    [language, esqlCallbacks]
+    () =>
+      editorLanguage === ESQL_LANG_ID ? ESQLLang.getSuggestionProvider?.(esqlCallbacks) : undefined,
+    [editorLanguage, esqlCallbacks]
   );
 
   const hoverProvider = useMemo(
-    () => (language === 'esql' ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined),
-    [language, esqlCallbacks]
+    () =>
+      editorLanguage === ESQL_LANG_ID ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined,
+    [editorLanguage, esqlCallbacks]
   );
 
   const codeActionProvider = useMemo(
-    () => (language === 'esql' ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined),
-    [language, esqlCallbacks]
+    () =>
+      editorLanguage === ESQL_LANG_ID ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined,
+    [editorLanguage, esqlCallbacks]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
@@ -743,6 +773,78 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           setIsPopoverVisible(false);
         },
       })),
+    },
+  ];
+
+  const quickActionsPanels: EuiContextMenuPanelProps = [
+    {
+      id: 11,
+      title: 'Actions',
+      items: [
+        {
+          name: 'Select from my saved ES|QL queries',
+          icon: 'apps',
+          panel: 12,
+        },
+        {
+          name: 'Ask help from our AI assistant',
+          icon: 'editorComment',
+          panel: 13,
+        },
+      ],
+    },
+    {
+      id: 12,
+      title: 'Select from my saved ES|QL queries',
+      items: [
+        {
+          renderItem: () => (
+            <>
+              <EuiCodeBlock language="sql" isCopyable paddingSize="s">
+                from logs-* | sort @timestamp desc
+              </EuiCodeBlock>
+            </>
+          ),
+        },
+        {
+          isSeparator: true,
+          key: 'sep',
+        },
+        {
+          renderItem: () => (
+            <EuiCodeBlock language="sql" isCopyable paddingSize="s">
+              from logs-* | sort @timestamp desc | stats p99 = percentile(memory, 99)
+            </EuiCodeBlock>
+          ),
+        },
+      ],
+    },
+    {
+      id: 13,
+      title: 'Ask help from our AI assistant',
+      items: [
+        {
+          name: 'Use natural language to ask a question',
+          icon: 'questionInCircle',
+          onClick: () => {
+            // open the assistant with a prompt
+          },
+        },
+        {
+          name: 'Explain this ES|QL query',
+          icon: 'training',
+          onClick: () => {
+            // open the assistant with a prompt
+          },
+        },
+        {
+          name: 'Add a visualization to a new dashboard based on this query',
+          icon: 'dashboardApp',
+          onClick: () => {
+            // open the assistant with a prompt
+          },
+        },
+      ],
     },
   ];
 
@@ -976,7 +1078,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   className={editorClassName}
                 >
                   <div css={styles.editorContainer}>
-                    {!isCompactFocused && (
+                    {editorLanguage === ESQL_LANG_ID && !isCompactFocused && (
                       <EuiBadge
                         color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
@@ -991,15 +1093,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         )}
                       </EuiBadge>
                     )}
-                    {!isCompactFocused && editorMessages.errors.length > 0 && (
-                      <ErrorsWarningsCompactViewPopover
-                        items={editorMessages.errors}
-                        type="error"
-                        onErrorClick={onErrorClick}
-                        popoverCSS={styles.errorsBadge}
-                      />
-                    )}
-                    {!isCompactFocused &&
+                    {editorLanguage === ESQL_LANG_ID &&
+                      !isCompactFocused &&
+                      editorMessages.errors.length > 0 && (
+                        <ErrorsWarningsCompactViewPopover
+                          items={editorMessages.errors}
+                          type="error"
+                          onErrorClick={onErrorClick}
+                          popoverCSS={styles.errorsBadge}
+                        />
+                      )}
+                    {editorLanguage === ESQL_LANG_ID &&
+                      !isCompactFocused &&
                       editorMessages.warnings.length > 0 &&
                       editorMessages.errors.length === 0 && (
                         <ErrorsWarningsCompactViewPopover
@@ -1009,178 +1114,201 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           popoverCSS={styles.errorsBadge}
                         />
                       )}
-                    <CodeEditor
-                      languageId={ESQL_LANG_ID}
-                      value={codeOneLiner || code}
-                      options={codeEditorOptions}
-                      width="100%"
-                      suggestionProvider={suggestionProvider}
-                      hoverProvider={{
-                        provideHover: (model, position, token) => {
-                          if (isCompactFocused || !hoverProvider?.provideHover) {
-                            return { contents: [] };
+                    {editorLanguage === ESQL_LANG_ID && (
+                      <CodeEditor
+                        languageId={editorLanguage}
+                        value={codeOneLiner || code}
+                        options={codeEditorOptions}
+                        width="100%"
+                        suggestionProvider={suggestionProvider}
+                        hoverProvider={{
+                          provideHover: (model, position, token) => {
+                            if (isCompactFocused || !hoverProvider?.provideHover) {
+                              return { contents: [] };
+                            }
+                            return hoverProvider?.provideHover(model, position, token);
+                          },
+                        }}
+                        codeActions={codeActionProvider}
+                        onChange={onQueryUpdate}
+                        editorDidMount={(editor) => {
+                          editor1.current = editor;
+                          const model = editor.getModel();
+                          if (model) {
+                            editorModel.current = model;
                           }
-                          return hoverProvider?.provideHover(model, position, token);
-                        },
-                      }}
-                      codeActions={codeActionProvider}
-                      onChange={onQueryUpdate}
-                      editorDidMount={(editor) => {
-                        editor1.current = editor;
-                        const model = editor.getModel();
-                        if (model) {
-                          editorModel.current = model;
-                        }
-                        if (isCodeEditorExpanded) {
-                          lines = model?.getLineCount() || 1;
-                        }
-
-                        addSourceDecoration();
-
-                        editor.onDidChangeModelContent((e) => {
-                          if (updateLinesFromModel) {
+                          if (isCodeEditorExpanded) {
                             lines = model?.getLineCount() || 1;
                           }
-                          const currentPosition = editor.getPosition();
-                          const content = editorModel.current?.getValueInRange({
-                            startLineNumber: 0,
-                            startColumn: 0,
-                            endLineNumber: currentPosition?.lineNumber ?? 1,
-                            endColumn: currentPosition?.column ?? 1,
+
+                          addSourceDecoration();
+
+                          editor.onDidChangeModelContent((e) => {
+                            if (updateLinesFromModel) {
+                              lines = model?.getLineCount() || 1;
+                            }
+                            const currentPosition = editor.getPosition();
+                            const content = editorModel.current?.getValueInRange({
+                              startLineNumber: 0,
+                              startColumn: 0,
+                              endLineNumber: currentPosition?.lineNumber ?? 1,
+                              endColumn: currentPosition?.column ?? 1,
+                            });
+                            if (currentPosition && content) {
+                              const currentWord = model?.getWordAtPosition(currentPosition);
+                              const pattern = getIndexPatternFromESQLQuery(content);
+                              if (currentWord?.word === pattern.trim()) {
+                                addSourceDecoration(content);
+                              }
+                            }
+
+                            // const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
+                            if (content) {
+                              codeRef.current = content || editor.getValue();
+                            }
                           });
-                          if (currentPosition && content) {
-                            const currentWord = model?.getWordAtPosition(currentPosition);
-                            const pattern = getIndexPatternFromESQLQuery(content);
-                            if (currentWord?.word === pattern.trim()) {
-                              addSourceDecoration(content);
+
+                          // this is fixing a bug between the EUIPopover and the monaco editor
+                          // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                          // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                          // and the user needs to click again the editor.
+                          // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                          editor.onMouseDown((e) => {
+                            setTimeout(() => {
+                              editor.focus();
+                            }, 100);
+                            const mousePosition = e.target.position;
+
+                            if (mousePosition) {
+                              const currentWord = model?.getWordAtPosition(mousePosition);
+                              const pattern = getIndexPatternFromESQLQuery(
+                                editor1.current?.getValue()
+                              );
+                              if (currentWord?.word === pattern.trim()) {
+                                openQuickActionsPopover();
+                              } else {
+                                setIsPopoverVisible(false);
+                                isMacroMenuVisible = true;
+                              }
                             }
-                          }
+                          });
 
-                          // const pattern = getIndexPatternFromESQLQuery(editor1.current?.getValue());
-                          if (content) {
-                            codeRef.current = content || editor.getValue();
-                          }
-                        });
+                          editor.onDidFocusEditorText(() => {
+                            onEditorFocus();
+                          });
 
-                        // this is fixing a bug between the EUIPopover and the monaco editor
-                        // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-                        // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-                        // and the user needs to click again the editor.
-                        // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                        editor.onMouseDown((e) => {
-                          setTimeout(() => {
-                            editor.focus();
-                          }, 100);
-                          const mousePosition = e.target.position;
+                          editor.onKeyDown((e) => {
+                            onEditorFocus();
+                            const currentPosition = editor.getPosition();
+                            const editorValue = editor.getValue();
+                            if (currentPosition && editorValue) {
+                              const currentWord = model?.getWordAtPosition(currentPosition);
+                              const pattern = getIndexPatternFromESQLQuery(editorValue);
 
-                          if (mousePosition) {
-                            const currentWord = model?.getWordAtPosition(mousePosition);
-                            const pattern = getIndexPatternFromESQLQuery(
-                              editor1.current?.getValue()
-                            );
-                            if (currentWord?.word === pattern.trim()) {
-                              openQuickActionsPopover();
-                            } else {
-                              setIsPopoverVisible(false);
-                              isMacroMenuVisible = true;
+                              if (
+                                currentWord?.word === pattern.trim() &&
+                                e.keyCode === monaco.KeyCode.DownArrow &&
+                                !isMacroMenuVisible
+                              ) {
+                                openQuickActionsPopover();
+                              }
                             }
-                          }
-                        });
-
-                        editor.onDidFocusEditorText(() => {
-                          onEditorFocus();
-                        });
-
-                        editor.onKeyDown((e) => {
-                          onEditorFocus();
-                          const currentPosition = editor.getPosition();
-                          const editorValue = editor.getValue();
-                          if (currentPosition && editorValue) {
-                            const currentWord = model?.getWordAtPosition(currentPosition);
-                            const pattern = getIndexPatternFromESQLQuery(editorValue);
 
                             if (
-                              currentWord?.word === pattern.trim() &&
-                              e.keyCode === monaco.KeyCode.DownArrow &&
-                              !isMacroMenuVisible
+                              isMacroMenuVisible &&
+                              (e.keyCode === monaco.KeyCode.UpArrow ||
+                                e.keyCode === monaco.KeyCode.DownArrow)
                             ) {
-                              openQuickActionsPopover();
-                            }
-                          }
-
-                          if (
-                            isMacroMenuVisible &&
-                            (e.keyCode === monaco.KeyCode.UpArrow ||
-                              e.keyCode === monaco.KeyCode.DownArrow)
-                          ) {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            popoverRef.current?.focus();
-                          }
-                        });
-
-                        editor.onKeyUp((e) => {
-                          if (
-                            isMacroMenuVisible &&
-                            (e.keyCode === monaco.KeyCode.UpArrow ||
-                              e.keyCode === monaco.KeyCode.DownArrow)
-                          ) {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            popoverRef.current?.focus();
-                          }
-                        });
-
-                        // // can be used in commands
-                        // const myCondition1 = editor.createContextKey(
-                        //   'myCondition1',
-                        //   false
-                        // ) as monaco.editor.IContextKey<boolean>;
-
-                        // // on CMD/CTRL + Enter submit the query
-                        // editor.addCommand(monaco.KeyCode.Slash, openQuickActionsPopover, 'myCondition1');
-
-                        editor.onDidChangeCursorPosition((e) => {
-                          const cursorPosition = e.position;
-                          const cursorLine = editor
-                            .getModel()
-                            ?.getLineContent(cursorPosition.lineNumber);
-
-                          const preCursorColumnContent = cursorLine?.substring(
-                            0,
-                            cursorPosition.column - 1
-                          );
-
-                          if (
-                            cursorPosition.column === 2 &&
-                            preCursorColumnContent?.includes('/')
-                          ) {
-                            openQuickActionsPopover();
-                          } else {
-                            isMacroMenuVisible = false;
-                            setIsPopoverVisible(false);
-                          }
-                        });
-
-                        // on CMD/CTRL + Enter submit the query
-                        editor.addCommand(
-                          // eslint-disable-next-line no-bitwise
-                          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                          onQuerySubmit
-                        );
-
-                        if (!isCodeEditorExpanded) {
-                          editor.onDidContentSizeChange((e) => {
-                            // @ts-expect-error the property _oldContentHeight exists on the event object received but
-                            // is not available on the type definition
-                            if (e.contentHeight !== e._oldContentHeight) {
-                              updateHeight(editor);
+                              e.stopPropagation();
+                              e.preventDefault();
+                              popoverRef.current?.focus();
                             }
                           });
-                        }
-                      }}
-                    />
-                    {isCompactFocused && !isCodeEditorExpanded && (
+
+                          editor.onKeyUp((e) => {
+                            if (
+                              isMacroMenuVisible &&
+                              (e.keyCode === monaco.KeyCode.UpArrow ||
+                                e.keyCode === monaco.KeyCode.DownArrow)
+                            ) {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              popoverRef.current?.focus();
+                            }
+                          });
+
+                          // // can be used in commands
+                          // const myCondition1 = editor.createContextKey(
+                          //   'myCondition1',
+                          //   false
+                          // ) as monaco.editor.IContextKey<boolean>;
+
+                          // // on CMD/CTRL + Enter submit the query
+                          // editor.addCommand(monaco.KeyCode.Slash, openQuickActionsPopover, 'myCondition1');
+
+                          editor.onDidChangeCursorPosition((e) => {
+                            isMacroMenuVisible = false;
+                            setIsPopoverVisible(false);
+                            // const cursorPosition = e.position;
+                            // const cursorLine = editor
+                            //   .getModel()
+                            //   ?.getLineContent(cursorPosition.lineNumber);
+
+                            // const preCursorColumnContent = cursorLine?.substring(
+                            //   0,
+                            //   cursorPosition.column - 1
+                            // );
+
+                            // if (
+                            //   cursorPosition.column === 2 &&
+                            //   preCursorColumnContent?.includes('/')
+                            // ) {
+                            //   // openQuickActionsPopover();
+                            //   setIsFlyoutVisible(true);
+                            // } else if (preCursorColumnContent === '') {
+                            //   setIsFlyoutVisible(false);
+                            // } else {
+                            //   isMacroMenuVisible = false;
+                            //   setIsPopoverVisible(false);
+                            // }
+                          });
+
+                          editor.onDidChangeModelLanguage((e) => {
+                            setEditorLanguage(e.newLanguage);
+                            isMacroMenuVisible = false;
+                            setIsPopoverVisible(false);
+                            setInputValue('');
+                          });
+
+                          // on CMD/CTRL + Enter submit the query
+                          editor.addCommand(
+                            // eslint-disable-next-line no-bitwise
+                            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                            onQuerySubmit
+                          );
+
+                          if (!isCodeEditorExpanded) {
+                            editor.onDidContentSizeChange((e) => {
+                              // @ts-expect-error the property _oldContentHeight exists on the event object received but
+                              // is not available on the type definition
+                              if (e.contentHeight !== e._oldContentHeight) {
+                                updateHeight(editor);
+                              }
+                            });
+                          }
+                        }}
+                      />
+                    )}
+                    {editorLanguage === 'plaintext' && (
+                      <EuiFieldText
+                        placeholder="Type 'from' to begin a query or '/' for quick adds"
+                        value={inputValue}
+                        onChange={(e) => onChange(e)}
+                        aria-label="Type from to begin a query or '/' for quick adds"
+                        fullWidth
+                      />
+                    )}
+                    {isCompactFocused && !isCodeEditorExpanded && editorLanguage === ESQL_LANG_ID && (
                       <EditorFooter
                         lines={lines}
                         styles={{
@@ -1314,31 +1442,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           editorIsInline={editorIsInline}
         />
       )}
-      {/* {isModalVisible && (
-        <EuiModal onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle id="modal">Integrations</EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiDescriptionList
-              listItems={integrations.map((i) => {
-                return {
-                  title: i.title,
-                  description: i.description,
-                };
-              })}
-            />
-            <EuiSpacer />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      )} */}
 
       {createPortal(
         isPopoverVisible && (
@@ -1366,6 +1469,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </div>
         ),
         document.body
+      )}
+
+      {isFlyoutVisible && (
+        <EuiFlyout
+          ownFocus
+          onClose={() => setIsFlyoutVisible(false)}
+          aria-labelledby="quick actions flyout"
+          type="push"
+          side="left"
+          maxWidth={450}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>Quick actions</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiPanel>
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={integrationsPanels}
+                css={{ width: '100%' }}
+              />
+              <EuiContextMenu initialPanelId={10} panels={indicesPanels} css={{ width: '100%' }} />
+            </EuiPanel>
+            <EuiSpacer />
+
+            <EuiPanel>
+              <EuiContextMenu
+                initialPanelId={11}
+                panels={quickActionsPanels}
+                css={{ width: '100%' }}
+              />
+            </EuiPanel>
+          </EuiFlyoutBody>
+        </EuiFlyout>
       )}
     </>
   );
