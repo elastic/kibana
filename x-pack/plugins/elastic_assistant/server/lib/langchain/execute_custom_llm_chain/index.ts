@@ -70,7 +70,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // This is where the LangSmith logs (Metadata > Invocation Params) are set
     temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
-    streaming: true, // isStream,
+    streaming: isStream,
     // prevents the agent from retrying on failure
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
@@ -143,6 +143,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
         },
       });
+
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
