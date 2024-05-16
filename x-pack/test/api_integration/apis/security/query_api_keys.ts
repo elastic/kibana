@@ -275,5 +275,26 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       expect(expiredKeys.apiKeys.length).to.be(5);
     });
+
+    it('should correctly filter keys with combined filters', async () => {
+      await createExpiredKeys();
+      await setTimeoutAsync(2500);
+
+      const { body: expiredRestKeys } = await supertest
+        .post('/internal/security/api_key/_query')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          query: {
+            match_all: {},
+          },
+          filters: {
+            type: 'rest',
+            expired: true,
+          },
+        })
+        .expect(200);
+
+      expect(expiredRestKeys.apiKeys.length).to.be(5);
+    });
   });
 }

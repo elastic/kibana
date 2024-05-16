@@ -77,6 +77,10 @@ export function defineQueryApiKeysAndAggregationsRoute({
             },
           });
         }
+
+        const alertingPrefixFilter = { prefix: { name: { value: 'Alerting: ' } } };
+        const managedMetadataFilter = { term: { 'metadata.managed': true } };
+
         const { query, size, from, sort, filters } = request.body;
 
         const queryPayload: {
@@ -91,23 +95,15 @@ export function defineQueryApiKeysAndAggregationsRoute({
         if (filters) {
           const { usernames, type, expired } = filters;
 
-          if (type) {
-            if (type === 'managed') {
-              queryPayload.bool.must.push({
-                bool: {
-                  should: [
-                    { prefix: { name: { value: 'Alerting:' } } },
-                    { term: { 'metadata.managed': true } },
-                  ],
-                },
-              });
-            } else if (type === 'rest' || type === 'cross_cluster') {
-              queryPayload.bool.must.push({ term: { type } });
-              queryPayload.bool.must_not.push(
-                { prefix: { name: 'Alerting:' } },
-                { term: { 'metadata.managed': true } }
-              );
-            }
+          if (type === 'managed') {
+            queryPayload.bool.must.push({
+              bool: {
+                should: [alertingPrefixFilter, managedMetadataFilter],
+              },
+            });
+          } else if (type === 'rest' || type === 'cross_cluster') {
+            queryPayload.bool.must.push({ term: { type } });
+            queryPayload.bool.must_not.push(alertingPrefixFilter, managedMetadataFilter);
           }
 
           if (expired === false) {
@@ -147,13 +143,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
           }
 
           if (usernames && usernames.length > 0) {
-            queryPayload.bool.must.push({
-              bool: {
-                should: usernames.map((username) => ({
-                  match: { username: { query: username, operator: 'or' } },
-                })),
-              },
-            });
+            queryPayload.bool.must.push({ terms: { username: usernames } });
           }
         }
 
@@ -210,8 +200,8 @@ export function defineQueryApiKeysAndAggregationsRoute({
             managed: {
               filters: {
                 filters: {
-                  metadataBased: { term: { 'metadata.managed': true } },
-                  namePrefixBased: { prefix: { name: { value: 'Alerting: ' } } },
+                  metadataBased: managedMetadataFilter,
+                  namePrefixBased: alertingPrefixFilter,
                 },
               },
             },

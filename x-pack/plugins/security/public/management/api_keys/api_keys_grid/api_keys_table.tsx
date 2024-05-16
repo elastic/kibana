@@ -392,11 +392,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           iconSide="left"
           hasActiveFilters={filters.type === 'rest'}
           onClick={() => {
-            if (filters.type === 'rest') {
-              onFilterChange({ ...filters, type: undefined });
-            } else {
-              onFilterChange({ ...filters, type: 'rest' });
-            }
+            onFilterChange({ ...filters, type: filters.type === 'rest' ? undefined : 'rest' });
           }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
         >
@@ -412,11 +408,10 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           iconSide="left"
           hasActiveFilters={filters.type === 'cross_cluster'}
           onClick={() => {
-            if (filters.type === 'cross_cluster') {
-              onFilterChange({ ...filters, type: undefined });
-            } else {
-              onFilterChange({ ...filters, type: 'cross_cluster' });
-            }
+            onFilterChange({
+              ...filters,
+              type: filters.type === 'cross_cluster' ? undefined : 'cross_cluster',
+            });
           }}
           withNext={types.includes('managed')}
         >
@@ -432,11 +427,10 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           iconSide="left"
           hasActiveFilters={filters.type === 'managed'}
           onClick={() => {
-            if (filters.type === 'managed') {
-              onFilterChange({ ...filters, type: undefined });
-            } else {
-              onFilterChange({ ...filters, type: 'managed' });
-            }
+            onFilterChange({
+              ...filters,
+              type: filters.type === 'managed' ? undefined : 'managed',
+            });
           }}
         >
           <FormattedMessage
