@@ -7,7 +7,7 @@
  */
 
 import { Profile } from '../composable_profile';
-import { ProfileService } from '../profile_service';
+import { AsyncProfileService } from '../profile_service';
 
 export enum SolutionType {
   Observability = 'oblt',
@@ -24,11 +24,15 @@ export interface RootContext {
   solutionType: SolutionType;
 }
 
-export const rootProfileService = new ProfileService<
-  Profile,
+export type RootProfile = Profile;
+
+export const rootProfileService = new AsyncProfileService<
+  RootProfile,
   RootProfileProviderParams,
   RootContext
 >();
+
+export type RootProfileProvider = Parameters<typeof rootProfileService.registerProvider>[0];
 
 rootProfileService.registerProvider({
   order: 0,

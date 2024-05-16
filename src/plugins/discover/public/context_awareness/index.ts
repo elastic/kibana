@@ -9,3 +9,4 @@
 export * from './types';
 export * from './profiles';
 export { useProfileAccessor } from './use_profile_accessor';
+export { ProfilesProvider, useProfiles } from './profiles_provider';
