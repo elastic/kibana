@@ -63,7 +63,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       kibanaUrl
     ).toString();
 
-    const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
+    const apiEndpoint = new URL(`${kibanaUrl}/internal/observability_onboarding`).toString();
 
     return {
       apiEndpoint,
