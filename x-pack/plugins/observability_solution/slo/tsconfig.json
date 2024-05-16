@@ -95,5 +95,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render"
   ]
 }
