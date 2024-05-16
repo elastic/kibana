@@ -33,7 +33,6 @@ Object {
       "package": Object {
         "name": "system",
         "title": "System",
-        "version": "1.56.0",
       },
       "revision": 1,
       "updated_by": "elastic",

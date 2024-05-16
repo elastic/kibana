@@ -20,6 +20,11 @@ import { addLog } from '../../../../utils/add_log';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
+import {
+  createDataViewDataSource,
+  DataSourceType,
+  isDataSourceType,
+} from '../../../../../common/data_sources';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -52,7 +57,7 @@ export const buildStateSubscribe =
 
     if (
       isTextBasedQueryLang &&
-      isEqualState(prevState, nextState, ['index', 'viewMode']) &&
+      isEqualState(prevState, nextState, ['dataSource', 'viewMode']) &&
       !queryChanged
     ) {
       // When there's a switch from data view to es|ql, this just leads to a cleanup of index and viewMode
@@ -60,12 +65,13 @@ export const buildStateSubscribe =
       addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
       return;
     }
+
     if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
+
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sampleSize, sort, index } = prevState;
 
     if (isTextBasedQueryLang) {
       const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
@@ -74,6 +80,8 @@ export const buildStateSubscribe =
         dataState.reset(savedSearch);
       }
     }
+
+    const { hideChart, interval, breakdownField, sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
@@ -81,21 +89,36 @@ export const buildStateSubscribe =
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
-    const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
+    const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isTextBasedQueryLang;
+
     let savedSearchDataView;
+
     // NOTE: this is also called when navigating from discover app to context app
-    if (nextState.index && dataViewChanged) {
+    if (nextState.dataSource && dataSourceChanged) {
+      const dataViewId = isDataSourceType(nextState.dataSource, DataSourceType.DataView)
+        ? nextState.dataSource.dataViewId
+        : undefined;
+
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: nextState.index, savedSearch, isTextBasedQuery: isTextBasedQuery(nextState?.query) },
+        { id: dataViewId, savedSearch, isTextBasedQuery: isTextBasedQueryLang },
         { internalStateContainer: internalState, services }
       );
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        appState.update({ index: nextDataView.id }, true);
+        appState.update(
+          {
+            dataSource: nextDataView.id
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
+              : undefined,
+          },
+          true
+        );
+
         return;
       }
+
       savedSearch.searchSource.setField('index', nextDataView);
       dataState.reset(savedSearch);
       setDataView(nextDataView);
@@ -104,7 +127,7 @@ export const buildStateSubscribe =
 
     savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
 
-    if (dataViewChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
+    if (dataSourceChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
       return;
     }
@@ -115,7 +138,7 @@ export const buildStateSubscribe =
       breakdownFieldChanged ||
       sampleSizeChanged ||
       docTableSortChanged ||
-      dataViewChanged ||
+      dataSourceChanged ||
       queryChanged
     ) {
       const logData = {
@@ -127,7 +150,7 @@ export const buildStateSubscribe =
           nextState.breakdownField
         ),
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
-        dataViewChanged: logEntry(dataViewChanged, index, nextState.index),
+        dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
         queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
       };
 
