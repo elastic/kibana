@@ -17,12 +17,16 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { getAssistantToolParams, isAttackDiscoveryFeatureEnabled } from './helpers';
+import { getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { getLlmType } from '../utils';
+
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
+const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postAttackDiscoveryRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -33,6 +37,9 @@ export const postAttackDiscoveryRoute = (
       path: ATTACK_DISCOVERY,
       options: {
         tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(
@@ -62,16 +69,6 @@ export const postAttackDiscoveryRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-
-          // feature flag check:
-          const attackDiscoveryFeatureEnabled = isAttackDiscoveryFeatureEnabled({
-            assistantContext,
-            pluginName,
-          });
-
-          if (!attackDiscoveryFeatureEnabled) {
-            return response.notFound();
-          }
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
@@ -119,6 +116,7 @@ export const postAttackDiscoveryRoute = (
             logger,
             request,
             temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+            timeout: CONNECTOR_TIMEOUT,
             traceOptions,
           });
 
@@ -127,6 +125,7 @@ export const postAttackDiscoveryRoute = (
             anonymizationFields,
             esClient,
             latestReplacements,
+            langChainTimeout: LANG_CHAIN_TIMEOUT,
             llm,
             onNewReplacements,
             request,
@@ -143,12 +142,13 @@ export const postAttackDiscoveryRoute = (
             });
           }
 
-          const parsedAttackDiscoveries = JSON.parse(rawAttackDiscoveries);
+          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
 
           return response.ok({
             body: {
+              alertsContextCount,
+              attackDiscoveries,
               connector_id: connectorId,
-              attackDiscoveries: parsedAttackDiscoveries,
               replacements: latestReplacements,
             },
           });
