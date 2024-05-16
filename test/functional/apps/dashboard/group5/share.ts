@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe.skip('snapshot share', async () => {
+    describe('snapshot share', async () => {
       describe('test local state', async () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('test filter state', async () => {
+      describe('test filter state', async () => {
         await testFilterState('snapshot');
       });
 
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('saved object share', async () => {
+    describe('saved object share', async () => {
       describe('test filter state', async () => {
         await testFilterState('savedObject');
       });
