@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { useDeleteCases } from './use_delete_cases';
 import * as api from './api';

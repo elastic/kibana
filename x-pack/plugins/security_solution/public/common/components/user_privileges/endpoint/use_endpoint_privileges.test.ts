@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult, RenderResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult, RenderResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';

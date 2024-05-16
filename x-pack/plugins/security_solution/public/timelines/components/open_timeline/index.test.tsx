@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';

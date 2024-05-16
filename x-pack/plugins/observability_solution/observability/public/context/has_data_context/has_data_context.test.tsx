@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from './data_handler';

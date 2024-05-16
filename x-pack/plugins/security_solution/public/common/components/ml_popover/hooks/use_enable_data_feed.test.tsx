@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import { TestProviders } from '../../../mock';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
 import { NormalizedFields } from '../application/components/mappings_editor/types';
 import { useDetailsPageMappingsModelManagement } from './use_details_page_mappings_model_management';

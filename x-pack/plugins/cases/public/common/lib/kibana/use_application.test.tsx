@@ -7,7 +7,7 @@
 
 import type { PublicAppInfo } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { AppMockRenderer } from '../../mock';
 import { createAppMockRenderer } from '../../mock';

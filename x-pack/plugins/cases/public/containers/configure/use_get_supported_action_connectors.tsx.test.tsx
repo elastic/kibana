@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as api from './api';
 import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';

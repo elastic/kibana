@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';

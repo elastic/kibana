@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseTabsParams, UseTabsResult } from './use_tabs';
 import { allThreeTabs, twoTabs, useTabs } from './use_tabs';
 

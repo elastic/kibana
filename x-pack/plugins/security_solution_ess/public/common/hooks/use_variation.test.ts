@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { useVariation } from './use_variation';
 

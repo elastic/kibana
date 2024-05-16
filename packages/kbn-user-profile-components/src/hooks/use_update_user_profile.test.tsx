@@ -7,7 +7,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { act, renderHook, type WrapperComponent } from '@testing-library/react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';

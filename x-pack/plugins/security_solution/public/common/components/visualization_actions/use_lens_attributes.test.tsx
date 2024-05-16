@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';

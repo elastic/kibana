@@ -6,7 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';

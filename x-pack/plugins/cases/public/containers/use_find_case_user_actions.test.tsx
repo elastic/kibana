@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';

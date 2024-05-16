@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useManagementLink } from './use_management_link';
 import { useKibana } from './use_kibana';
 

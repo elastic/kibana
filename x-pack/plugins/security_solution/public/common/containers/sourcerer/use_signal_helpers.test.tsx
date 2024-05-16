@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createSourcererDataView } from './create_sourcerer_data_view';

@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { getPersistentControlsHook } from './use_persistent_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { render, fireEvent } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';

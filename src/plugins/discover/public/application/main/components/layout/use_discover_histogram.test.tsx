@@ -8,7 +8,7 @@
 
 import React, { ReactElement, PropsWithChildren } from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { act, renderHook, WrapperComponent } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';

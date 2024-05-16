@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';

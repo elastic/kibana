@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import * as api from '@kbn/securitysolution-list-api';
 import { PersistHookProps } from '@kbn/securitysolution-io-ts-list-types';
 import {

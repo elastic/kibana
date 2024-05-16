@@ -6,7 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import type { ReturnSignalIndex } from './use_signal_index';
 import { useSignalIndex } from './use_signal_index';

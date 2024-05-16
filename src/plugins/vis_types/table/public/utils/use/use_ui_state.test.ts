@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { TableVisUiState } from '../../types';
 import { useUiState } from './use_ui_state';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as api from './apis/bulk_get_cases';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';

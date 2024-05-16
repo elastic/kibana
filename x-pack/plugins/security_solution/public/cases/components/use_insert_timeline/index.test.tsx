@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { mockTimelineModel } from '../../../common/mock/timeline_results';
 import { useFormatUrl } from '../../../common/components/link_to';

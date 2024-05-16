@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';

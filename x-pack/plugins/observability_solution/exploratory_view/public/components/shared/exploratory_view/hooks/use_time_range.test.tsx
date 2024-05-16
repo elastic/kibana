@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useExpViewTimeRange } from './use_time_range';
 import { ReportTypes } from '../configurations/constants';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

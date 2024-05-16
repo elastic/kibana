@@ -6,7 +6,7 @@
  */
 
 import { useConversation } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React, { PropsWithChildren } from 'react';
 import { MessageRole } from '@kbn/elastic-assistant-common';

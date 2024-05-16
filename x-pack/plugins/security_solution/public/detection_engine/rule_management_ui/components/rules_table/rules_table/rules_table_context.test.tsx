@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';

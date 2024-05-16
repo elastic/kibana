@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import type {
   ExceptionListSchema,
   UseExceptionListsProps,

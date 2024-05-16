@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { SessionStorageType } from './use_markdown_session_storage';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';

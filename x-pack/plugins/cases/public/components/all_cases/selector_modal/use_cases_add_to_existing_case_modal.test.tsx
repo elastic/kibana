@@ -6,7 +6,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';

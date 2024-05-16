@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';

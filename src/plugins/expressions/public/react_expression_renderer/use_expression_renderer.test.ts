@@ -7,7 +7,7 @@
  */
 
 import type { RefObject } from 'react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';

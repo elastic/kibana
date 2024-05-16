@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { AppMockRenderer } from '../../common/mock';

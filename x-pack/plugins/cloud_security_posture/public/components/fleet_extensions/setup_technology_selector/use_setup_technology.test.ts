@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 import { DashboardContextProvider } from '../context/dashboard_context';

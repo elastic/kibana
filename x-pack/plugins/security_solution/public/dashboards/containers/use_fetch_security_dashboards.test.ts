@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { useFetchSecurityDashboards } from './use_fetch_security_dashboards';
 import { getTagsByName } from '../../common/containers/tags/api';

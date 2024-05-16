@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useUpdateCases } from './use_bulk_update_case';
 import { allCases } from './mock';
 import { useToasts } from '../common/lib/kibana';

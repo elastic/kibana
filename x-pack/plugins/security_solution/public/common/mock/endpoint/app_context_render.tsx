@@ -15,8 +15,8 @@ import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
+import type { RenderHookOptions, RenderHookResult } from '@testing-library/react';
+import { renderHook as reactRenderHoook } from '@testing-library/react';
 import type {
   ReactHooksRenderer,
   WrapperComponent,

@@ -6,7 +6,7 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { getUnallowedValueRequestItems } from '../data_quality_panel/allowed_values/helpers';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';

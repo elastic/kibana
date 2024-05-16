@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import { usePostPushToService } from './use_post_push_to_service';
 import { pushedCase } from './mock';

@@ -11,7 +11,7 @@ import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
 import { mockIndexPattern, mockSourcererState, TestProviders, createMockStore } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';
 

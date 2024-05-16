@@ -9,7 +9,7 @@
 import React from 'react';
 import { from } from 'rxjs';
 import { take } from 'rxjs';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { render, act as renderAct } from '@testing-library/react';
 
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';

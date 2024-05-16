@@ -6,7 +6,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
 import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 

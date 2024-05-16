@@ -10,7 +10,7 @@ import {
   renderHook,
   type RenderHookResult,
   type WrapperComponent,
-} from '@testing-library/react-hooks';
+} from '@testing-library/react';
 import { merge } from 'lodash';
 import React, { PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';

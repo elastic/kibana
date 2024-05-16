@@ -8,7 +8,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';

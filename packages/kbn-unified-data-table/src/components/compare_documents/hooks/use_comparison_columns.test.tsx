@@ -12,7 +12,7 @@ import {
   FIELD_COLUMN_WIDTH,
   useComparisonColumns,
 } from './use_comparison_columns';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';

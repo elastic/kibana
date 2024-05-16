@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';

@@ -10,8 +10,8 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
-import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, type WrapperComponent } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

@@ -6,7 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';

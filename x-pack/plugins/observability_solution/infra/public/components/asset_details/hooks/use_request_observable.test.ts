@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';

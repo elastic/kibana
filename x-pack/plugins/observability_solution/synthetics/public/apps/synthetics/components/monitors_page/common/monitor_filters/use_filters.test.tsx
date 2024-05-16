@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFilters } from './use_filters';
 import { useDispatch } from 'react-redux';
 import { WrappedHelper } from '../../../../utils/testing';

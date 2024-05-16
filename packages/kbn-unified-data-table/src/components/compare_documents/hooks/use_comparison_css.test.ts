@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useComparisonCss } from './use_comparison_css';
 
 describe('useComparisonCss', () => {

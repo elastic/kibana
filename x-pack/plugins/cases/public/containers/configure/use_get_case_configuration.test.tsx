@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';

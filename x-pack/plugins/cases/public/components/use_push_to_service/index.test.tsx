@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';

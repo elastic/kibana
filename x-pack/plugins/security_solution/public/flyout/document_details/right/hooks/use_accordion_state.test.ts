@@ -7,8 +7,8 @@
 
 import type { ToggleReducerAction, UseAccordionStateValue } from './use_accordion_state';
 import { useAccordionState, toggleReducer } from './use_accordion_state';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const mockSet = jest.fn();

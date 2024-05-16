@@ -6,7 +6,7 @@
  */
 
 import { useDataView } from './use_data_view';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';

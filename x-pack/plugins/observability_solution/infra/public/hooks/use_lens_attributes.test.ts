@@ -6,7 +6,7 @@
  */
 
 import 'jest-canvas-mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';

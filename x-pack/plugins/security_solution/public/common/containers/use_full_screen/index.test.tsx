@@ -7,8 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { TestProviders } from '../../mock';
-import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import type { RenderResult, WaitForNextUpdate } from '@testing-library/react';
+import { renderHook, act, cleanup } from '@testing-library/react';
 import type { GlobalFullScreen } from '.';
 import { useGlobalFullScreen } from '.';
 

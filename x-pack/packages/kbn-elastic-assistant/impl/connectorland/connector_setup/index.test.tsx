@@ -7,7 +7,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { useConnectorSetup } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';

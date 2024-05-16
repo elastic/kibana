@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useCasesFromAlerts } from './use_cases_from_alerts';
 import * as api from './api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

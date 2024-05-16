@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFlowProgressTelemetry } from './use_flow_progress_telemetry';
 import { useKibana } from './use_kibana';
 

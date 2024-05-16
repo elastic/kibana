@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { CasesContextFeatures } from '../../common/ui';
 import type { UseCasesFeatures } from './use_cases_features';

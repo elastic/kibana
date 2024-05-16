@@ -7,7 +7,7 @@
 
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useResponderActionData } from './use_responder_action_data';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetEndpointDetails } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';

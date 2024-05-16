@@ -6,7 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
