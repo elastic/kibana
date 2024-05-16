@@ -104,9 +104,9 @@ export const getAgentStatusRouteHandler = (
       }
     };
     // 8.15: use the new `agentStatusClientEnabled` FF enabled
-    const getAgentStatusPromise = endpointContext.experimentalFeatures.agentStatusClientEnabled
-      ? agentStatusClient.getAgentStatuses(agentIds)
-      : getAgentStatusByType();
+    const getAgentStatus = endpointContext.experimentalFeatures.agentStatusClientEnabled
+      ? await agentStatusClient.getAgentStatuses(agentIds)
+      : await getAgentStatusByType();
 
     logger.debug(
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
@@ -115,7 +115,7 @@ export const getAgentStatusRouteHandler = (
     try {
       return response.ok({
         body: {
-          data: await getAgentStatusPromise,
+          data: getAgentStatus,
         },
       });
     } catch (e) {

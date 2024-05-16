@@ -469,6 +469,11 @@ export enum HostStatus {
    * Host is unenrolled
    */
   UNENROLLED = 'unenrolled',
+
+  /**
+   * Status is unknown
+   */
+  UNKNOWN = 'unknown',
 }
 
 export type PolicyInfo = Immutable<{

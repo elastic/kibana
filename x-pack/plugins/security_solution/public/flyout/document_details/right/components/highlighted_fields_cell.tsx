@@ -16,7 +16,6 @@ import {
   EndpointAgentStatusById,
 } from '../../../../common/components/agents/agent_status';
 import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../../../common/utils/crowdstrike_alert_check';
-import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useRightPanelContext } from '../context';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -85,17 +84,17 @@ export interface HighlightedFieldsCellProps {
 const FieldsAgentStatus = memo(
   ({
     value,
-    isSentinelOneAgentIdField,
+    agentType,
   }: {
     value: string | undefined;
-    isSentinelOneAgentIdField: boolean;
+    agentType: 'sentinel_one' | 'crowdstrike' | 'endpoint';
   }) => {
     const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-    if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
+    if (agentType !== 'endpoint' || agentStatusClientEnabled) {
       return (
         <AgentStatus
           agentId={String(value ?? '')}
-          agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
+          agentType={agentType}
           data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
         />
       );
@@ -130,6 +129,15 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
     () => originalField === CROWDSTRIKE_AGENT_ID_FIELD,
     [originalField]
   );
+  const agentType = useMemo(() => {
+    if (isSentinelOneAgentIdField) {
+      return 'sentinel_one';
+    }
+    if (isCrowdstrikeAgentIdField) {
+      return 'crowdstrike';
+    }
+    return 'endpoint';
+  }, [isCrowdstrikeAgentIdField, isSentinelOneAgentIdField]);
 
   return (
     <>
@@ -144,11 +152,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell value={value} />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
-                <FieldsAgentStatus
-                  value={value}
-                  isSentinelOneAgentIdField={isSentinelOneAgentIdField}
-                  isCrowdstrikeAgentIdField={isCrowdstrikeAgentIdField}
-                />
+                <FieldsAgentStatus value={value} agentType={agentType} />
               ) : (
                 <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
               )}

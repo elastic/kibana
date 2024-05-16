@@ -11,7 +11,7 @@ import type { HostStatus } from '../../../../common/endpoint/types';
 export const getAgentStatusText = (hostStatus: HostStatus) => {
   return i18n.translate('xpack.securitySolution.endpoint.list.hostStatusValue', {
     defaultMessage:
-      '{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} unenrolled {Unenrolled} other {Unhealthy}}',
+      '{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} unenrolled {Unenrolled} other {Unknown}}',
     values: { hostStatus },
   });
 };
