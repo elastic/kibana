@@ -136,7 +136,7 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.dataSource).toEqual(
+    expect(actualForWithValidAggLevelViewMode.dataSource).toEqual(
       createDataViewDataSource({
         dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
       })
@@ -150,8 +150,10 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
-    expect(actualForWithValidPatternLevelViewMode.index).toBe(
-      savedSearchMock.searchSource.getField('index')?.id
+    expect(actualForWithValidPatternLevelViewMode.dataSource).toEqual(
+      createDataViewDataSource({
+        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
+      })
     );
   });
 
