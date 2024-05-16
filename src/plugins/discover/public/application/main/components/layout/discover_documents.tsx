@@ -131,6 +131,7 @@ function DiscoverDocumentsComponent({
       state.sampleSize,
     ];
   });
+
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -434,7 +435,9 @@ function DiscoverDocumentsComponent({
                   sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                   onUpdateSampleSize={!isTextBasedQuery ? onUpdateSampleSize : undefined}
                   onFieldEdited={onFieldEdited}
-                  configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                  configRowHeight={
+                    !isTextBasedQuery ? uiSettings.get(ROW_HEIGHT_OPTION) : undefined
+                  }
                   showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                   maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                   renderDocumentView={renderDocumentView}

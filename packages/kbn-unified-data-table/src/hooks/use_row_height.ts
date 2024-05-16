@@ -37,6 +37,8 @@ export const useRowHeight = ({
   const rowHeightLines = useMemo(() => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer, key);
 
+    // need to understand when there is a transition from ESQL to DSL and vice versa
+
     const configHasNotChanged = (
       localStorageRecord: DataGridOptionsRecord | null
     ): localStorageRecord is DataGridOptionsRecord =>

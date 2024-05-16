@@ -689,8 +689,11 @@ export const UnifiedDataTable = ({
   const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
     storage,
     consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    key: isPlainRecord ? 'dataGridRowHeightESQL' : 'dataGridRowHeight',
+    configRowHeight:
+      configRowHeight ?? isPlainRecord
+        ? ROWS_HEIGHT_OPTIONS.defaultESQL
+        : ROWS_HEIGHT_OPTIONS.default,
     rowHeightState,
     onUpdateRowHeight,
   });
