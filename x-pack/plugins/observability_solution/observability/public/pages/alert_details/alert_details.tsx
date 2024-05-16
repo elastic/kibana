@@ -199,7 +199,7 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} />
+        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
     )
   ) : (
