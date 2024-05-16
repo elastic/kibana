@@ -53,4 +53,5 @@ export interface InitialyzeTimelineSettings extends Partial<TimelineModelSetting
 
 export interface ESQLOptions {
   query: AggregateQuery;
+  esqlDataViewId: string;
 }

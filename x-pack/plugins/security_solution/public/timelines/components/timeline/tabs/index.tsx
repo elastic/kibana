@@ -174,12 +174,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         return null;
       }
     }, [activeTimelineTab, setConversationTitle, showTimeline]);
+
     const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
       'unifiedComponentsInTimelineEnabled'
     );
 
-    const esqlTabEnabled =
-      showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql;
+    const esqlTabEnabled = showTimeline && activeTimelineTab === TimelineTabs.esql;
 
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop

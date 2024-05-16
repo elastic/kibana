@@ -193,3 +193,8 @@ export const selectTimelineESQLQuery = createSelector(
   selectTimelineESQLOptions,
   (esqlOptions) => esqlOptions?.query
 );
+
+export const selectTimelineColumns = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.columns
+);

@@ -15,7 +15,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { lastValueFrom, pluck } from 'rxjs';
 
 interface UseTextBasedEventsArgs {
-  query: Query | AggregateQuery;
+  query: AggregateQuery;
   dataView?: DataView;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
@@ -54,8 +54,8 @@ export const useTextBasedEvents = ({
   const abortController = useRef(new AbortController());
   const [isLoading, setIsLoading] = useState(false);
 
-  const convertQueryToAst = useCallback(() => {
-    return textBasedQueryStateToAstWithValidation({
+  const convertQueryToAst = useCallback(async () => {
+    const ast = await textBasedQueryStateToAstWithValidation({
       query,
       dataView,
       filters,
@@ -64,6 +64,8 @@ export const useTextBasedEvents = ({
       titleForInspector: 'ESQL Inspector',
       descriptionForInspector: 'Elasticsearch Query',
     });
+
+    return ast;
   }, [query, dataView, filters, inputQuery, timeRange]);
 
   const fetchEvents = useCallback(async () => {
@@ -117,11 +119,14 @@ export const useTextBasedEvents = ({
 
     await lastValueFrom(execution);
 
-    return {
+    const returnOutput = {
       data: finalData,
       textBasedQueryColumns,
       textBasedHeaderWarning,
     };
+    console.log({ returnOutput });
+
+    return returnOutput;
   }, [convertQueryToAst, expressions, inspectorAdapters]);
 
   return {

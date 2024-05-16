@@ -14,9 +14,14 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 interface UseGetDataViewWithTextQueryArgs {
   query: AggregateQuery;
   dataViews: PluginStartDependencies['dataViews'];
+  onSuccess: (dataView: DataView) => void;
 }
 
-export function useGetDataViewWithTextQuery({ query, dataViews }: UseGetDataViewWithTextQueryArgs) {
+export function useGetDataViewWithTextQuery({
+  query,
+  dataViews,
+  onSuccess,
+}: UseGetDataViewWithTextQueryArgs) {
   const [isLoading, setIsLoading] = useState(false);
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
 
@@ -38,9 +43,10 @@ export function useGetDataViewWithTextQuery({ query, dataViews }: UseGetDataView
       dataViewObj.timeFieldName = '@timestamp';
     }
 
-    setIsLoading(false);
+    onSuccess?.(dataViewObj);
     setDataView(dataViewObj);
-  }, [indexPatternFromQuery, dataViews]);
+    setIsLoading(false);
+  }, [indexPatternFromQuery, dataViews, onSuccess]);
 
   return {
     dataView,
