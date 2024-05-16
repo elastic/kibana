@@ -29,17 +29,6 @@ import { findingsNavigation } from '../../common/navigation/constants';
 
 const server = setupMockServiceWorker(true);
 
-jest.mock('rxjs', () => {
-  const actual = jest.requireActual('rxjs');
-  return {
-    ...actual,
-    lastValueFrom: async (source: any) => {
-      const value = await source;
-      return value.result;
-    },
-  };
-});
-
 const renderVulnerabilitiesPage = () => {
   return render(
     <TestProvider {...getMockServerServicesSetup()}>

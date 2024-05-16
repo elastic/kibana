@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setupMockServiceWorkerServer } from '../../../test/__jest__/setup_jest_mocks';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLatestFindings } from './use_latest_findings';
@@ -14,18 +15,7 @@ import {
   bsearchFindingsPageDefault,
   bsearchFindingsPageNoResults,
 } from '../../../test/handlers/bsearch/findings_page';
-import { setupMockServiceWorkerServer } from '../../../test/setup_server.test';
 
-jest.mock('rxjs', () => {
-  const actual = jest.requireActual('rxjs');
-  return {
-    ...actual,
-    lastValueFrom: async (source: any) => {
-      const value = await source;
-      return value.result;
-    },
-  };
-});
 const server = setupMockServiceWorker();
 
 describe('useLatestFindings hook', () => {
