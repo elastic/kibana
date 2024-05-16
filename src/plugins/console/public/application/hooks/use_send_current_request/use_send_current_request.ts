@@ -19,6 +19,7 @@ import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
 import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { SenseEditor } from '../../models';
 
 export const useSendCurrentRequest = () => {
   const {
@@ -47,7 +48,7 @@ export const useSendCurrentRequest = () => {
       dispatch({ type: 'sendRequest', payload: undefined });
 
       // Fire and forget
-      setTimeout(() => track(requests, editor, trackUiMetric), 0);
+      setTimeout(() => track(requests, editor as SenseEditor, trackUiMetric), 0);
 
       const results = await sendRequest({ http, requests });
 
