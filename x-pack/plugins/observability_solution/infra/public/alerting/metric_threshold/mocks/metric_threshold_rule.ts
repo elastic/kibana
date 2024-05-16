@@ -154,6 +154,7 @@ export const buildMetricThresholdAlert = (
         alertOnGroupDisappear: true,
       },
       'kibana.alert.evaluation.values': [2500, 5],
+      'kibana.alert.group': [{ field: 'host.name', value: 'host-1' }],
       'kibana.alert.rule.category': 'Metric threshold',
       'kibana.alert.rule.consumer': 'alerts',
       'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
@@ -166,7 +167,7 @@ export const buildMetricThresholdAlert = (
       '@timestamp': '2023-03-28T14:40:00.000Z',
       'kibana.alert.reason': 'system.cpu.user.pct reported no data in the last 1m for ',
       'kibana.alert.action_group': 'metrics.threshold.nodata',
-      tags: [],
+      tags: ['tag 1', 'tag 2'],
       'kibana.alert.duration.us': 248391946000,
       'kibana.alert.time_range': {
         gte: '2023-03-13T14:06:23.695Z',

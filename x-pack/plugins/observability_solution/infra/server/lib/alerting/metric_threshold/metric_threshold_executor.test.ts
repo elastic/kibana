@@ -28,7 +28,9 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
+import { Group } from '../common/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -956,6 +958,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 1 in the last 1 min for host-01. Alert when above 0.75.',
         tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdA } },
+        group: [{ field: 'host.name', value: alertIdA }],
       });
       testAlertReported(2, {
         id: alertIdB,
@@ -967,6 +970,7 @@ describe('The metric threshold rule type', () => {
         reason: 'test.metric.1 is 3 in the last 1 min for host-02. Alert when above 0.75.',
         tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdB } },
+        group: [{ field: 'host.name', value: alertIdB }],
       });
     });
   });
@@ -2325,6 +2329,7 @@ describe('The metric threshold rule type', () => {
       actionGroup,
       alertState,
       groupByKeys,
+      group,
       conditions,
       reason,
       tags,
@@ -2342,6 +2347,7 @@ describe('The metric threshold rule type', () => {
       }>;
       reason: string;
       tags?: string[];
+      group?: Group[];
     }
   ) {
     expect(services.alertsClient.report).toHaveBeenNthCalledWith(index, {
@@ -2394,6 +2400,18 @@ describe('The metric threshold rule type', () => {
           ? {
               [ALERT_EVALUATION_VALUES]: conditions.map((c) => c.evaluation_value),
               [ALERT_EVALUATION_THRESHOLD]: getThresholds(conditions),
+              ...(groupByKeys
+                ? group
+                  ? {
+                      [ALERT_GROUP]: group,
+                    }
+                  : {
+                      [ALERT_GROUP]: Object.keys(groupByKeys).map((key) => ({
+                        field: key,
+                        value: groupByKeys[key],
+                      })),
+                    }
+                : {}),
             }
           : {}),
         [ALERT_REASON]: reason,

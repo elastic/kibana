@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
@@ -43,8 +44,10 @@ import {
   validGroupByForContext,
   flattenAdditionalContext,
   getGroupByObject,
+  getFormattedGroupBy,
 } from '../common/utils';
 import { getEvaluationValues, getThresholds } from '../common/get_values';
+import { Group } from '../common/types';
 
 import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
@@ -83,15 +86,16 @@ type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
-type MetricThresholdAlertReporter = (
-  id: string,
-  reason: string,
-  actionGroup: MetricThresholdActionGroup,
-  context: MetricThresholdAlertContext,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  thresholds?: Array<number | null>
-) => void;
+type MetricThresholdAlertReporter = (params: {
+  id: string;
+  reason: string;
+  actionGroup: MetricThresholdActionGroup;
+  context: MetricThresholdAlertContext;
+  additionalContext?: AdditionalContext | null;
+  evaluationValues?: Array<number | null>;
+  groups?: object[];
+  thresholds?: Array<number | null>;
+}) => void;
 
 export const createMetricThresholdExecutor =
   (libs: InfraBackendLibs) =>
@@ -138,19 +142,21 @@ export const createMetricThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: MetricThresholdAlertReporter = async (
+    const alertReporter: MetricThresholdAlertReporter = async ({
       id,
       reason,
       actionGroup,
-      contextWithoutAlertDetailsUrl,
+      context: contextWithoutAlertDetailsUrl,
       additionalContext,
       evaluationValues,
-      thresholds
-    ) => {
+      groups,
+      thresholds,
+    }) => {
       const { uuid, start } = alertsClient.report({
         id,
         actionGroup,
       });
+      const groupsPayload = typeof groups !== 'undefined' ? { [ALERT_GROUP]: groups } : {};
 
       alertsClient.setAlertData({
         id,
@@ -158,6 +164,7 @@ export const createMetricThresholdExecutor =
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
+          ...groupsPayload,
           ...flattenAdditionalContext(additionalContext),
         },
         context: {
@@ -205,7 +212,12 @@ export const createMetricThresholdExecutor =
           }),
         };
 
-        await alertReporter(UNGROUPED_FACTORY_KEY, reason, actionGroupId, alertContext);
+        await alertReporter({
+          id: UNGROUPED_FACTORY_KEY,
+          reason,
+          actionGroup: actionGroupId,
+          context: alertContext,
+        });
 
         return {
           state: {
@@ -260,13 +272,14 @@ export const createMetricThresholdExecutor =
     }
 
     const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
-    const groups = [...resultGroupSet];
+    const groupByMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
+    const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
-    const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+    const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
-    // The key of `groups` is the alert instance ID.
-    for (const group of groups) {
+    // The key of `groupArray` is the alert instance ID.
+    for (const group of groupArray) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
@@ -348,6 +361,7 @@ export const createMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);
+        const groups: Group[] = groupByMapping[group];
 
         const alertContext = {
           alertState: stateToAlertMessage[nextState],
@@ -386,15 +400,16 @@ export const createMetricThresholdExecutor =
           ...additionalContext,
         };
 
-        await alertReporter(
-          `${group}`,
+        await alertReporter({
+          id: `${group}`,
           reason,
-          actionGroupId,
-          alertContext,
+          actionGroup: actionGroupId,
+          context: alertContext,
           additionalContext,
           evaluationValues,
-          thresholds
-        );
+          groups,
+          thresholds,
+        });
         scheduledActionsCount++;
       }
     }
