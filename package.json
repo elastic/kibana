@@ -1527,7 +1527,7 @@
     "blob-polyfill": "^7.0.20220408",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^123.0.3",
+    "chromedriver": "^124.0.3",
     "clean-webpack-plugin": "^3.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
