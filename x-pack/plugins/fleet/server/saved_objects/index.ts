@@ -85,6 +85,7 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
+import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
 
 /*
  * Saved object types and mappings
@@ -548,6 +549,10 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 package: { properties: { requires_root: { type: 'boolean' } } },
               },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicySetRequiresRootToV8150,
             },
           ],
         },
