@@ -82,7 +82,7 @@ export const PageReducerStream: FC = () => {
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
-    <Page title={'Reducer stream'}>
+    <Page title={'NDJSON useReducer stream'}>
       <EuiText>
         <p>
           This demonstrates a single endpoint with streaming support that sends old school Redux

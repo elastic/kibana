@@ -87,7 +87,7 @@ export const PageReduxStream: FC = () => {
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
-    <Page title={'Redux Toolkit stream'}>
+    <Page title={'NDJSON Redux Toolkit stream'}>
       <EuiText>
         <p>
           This demonstrates integration of a single endpoint with streaming support with Redux

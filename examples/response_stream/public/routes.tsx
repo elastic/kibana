@@ -36,13 +36,13 @@ export const routes: RouteSectionDef[] = [
         component: <PageSimpleStringStream />,
       },
       {
-        title: 'Reducer stream',
-        id: 'reducer-stream',
+        title: 'NDJSON useReducer stream',
+        id: 'ndjson-usereducer-stream',
         component: <PageReducerStream />,
       },
       {
-        title: 'Redux stream',
-        id: 'redux-stream',
+        title: 'NDJSON Redux Toolkit stream',
+        id: 'ndjson-redux-toolkit-stream',
         component: (
           <ReduxStreamProvider>
             <PageReduxStream />
