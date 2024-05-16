@@ -6,6 +6,7 @@
  */
 import { expect, Page } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '../../helpers/record_video';
 import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';
@@ -21,7 +22,7 @@ export function syntheticsAppPageProvider({
 }: {
   page: Page;
   kibanaUrl: string;
-  params?: Record<string, any>;
+  params: Record<string, any>;
 }) {
   const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
   const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
@@ -33,6 +34,9 @@ export function syntheticsAppPageProvider({
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
   const overview = `${basePath}/app/synthetics`;
   const retry: RetryService = params?.getService('retry');
+
+  recordVideo(page);
+  page.setDefaultTimeout(60 * 1000);
 
   return {
     ...loginPageProvider({
