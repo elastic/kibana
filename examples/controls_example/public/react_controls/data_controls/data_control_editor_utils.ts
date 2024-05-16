@@ -12,6 +12,8 @@ import { DataControlFieldRegistry } from '@kbn/controls-plugin/public/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { isDataControlFactory } from './types';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { i18n } from '@kbn/i18n';
 
 /** This is duplicated from the controls plugin to avoid exporting it */
 export const getDataControlFieldRegistry = memoize(
@@ -43,4 +45,45 @@ const loadFieldRegistryFromDataView = async (
     }
     resolve(fieldRegistry);
   });
+};
+
+export const getControlTypeErrorMessage = ({
+  fieldSelected,
+  controlType,
+}: {
+  fieldSelected?: boolean;
+  controlType?: string;
+}) => {
+  if (!fieldSelected) {
+    return i18n.translate(
+      'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
+      {
+        defaultMessage: 'Select a field first.',
+      }
+    );
+  }
+
+  switch (controlType) {
+    /**
+     * Note that options list controls are currently compatible with every field type; so, there is no
+     * need to have a special error message for these.
+     */
+    case RANGE_SLIDER_CONTROL: {
+      return i18n.translate(
+        'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.rangeSlider',
+        {
+          defaultMessage: 'Range sliders are only compatible with number fields.',
+        }
+      );
+    }
+    default: {
+      /** This shouldn't ever happen - but, adding just in case as a fallback. */
+      return i18n.translate(
+        'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.default',
+        {
+          defaultMessage: 'Select a compatible control type.',
+        }
+      );
+    }
+  }
 };

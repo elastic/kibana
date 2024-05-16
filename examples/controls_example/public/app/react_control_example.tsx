@@ -22,7 +22,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
-import { ControlGroupApi } from '../react_controls/types';
+import { ControlGroupApi } from '../react_controls/control_group/types';
 
 const toggleViewButtons = [
   {

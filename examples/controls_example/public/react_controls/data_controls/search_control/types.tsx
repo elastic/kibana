@@ -10,6 +10,9 @@ import { DefaultDataControlState } from '../types';
 
 export const SEARCH_CONTROL_TYPE = 'searchControl';
 
+export type SearchControlTechniques = 'match' | 'simple_query_string';
+
 export interface SearchControlState extends DefaultDataControlState {
   searchString: string;
+  searchTechnique?: SearchControlTechniques;
 }

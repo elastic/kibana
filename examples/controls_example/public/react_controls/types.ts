@@ -16,6 +16,7 @@ import {
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilter,
+  PublishesPanelTitle,
   PublishesTimeslice,
   PublishesUnsavedChanges,
   PublishingSubject,
@@ -28,16 +29,21 @@ export interface PublishesControlDisplaySettings {
   width: PublishingSubject<ControlWidth | undefined>;
 }
 
+export interface HasCustomPrepend {
+  getCustomPrepend: () => React.FC<{}>;
+}
+
 /** This is the stuff the control group cares about */
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
   Partial<PublishesDisabledActionIds> &
   PublishesControlDisplaySettings &
-  Partial<PublishesFilter & PublishesTimeslice> & // can publish either filters or timeslice
+  Partial<PublishesPanelTitle & HasCustomPrepend> &
+  Partial<PublishesFilter & PublishesTimeslice & PublishesPanelTitle & HasCustomPrepend> & // can publish either filters or timeslice
   HasType &
   HasUniqueId &
-  HasParentApi<ControlGroupApi> & { setDataLoading: (loading: boolean) => void };
+  HasParentApi<ControlGroupApi>;
 
 export interface DefaultControlState {
   grow?: boolean;
@@ -62,12 +68,11 @@ export interface ControlFactory<
   getDisplayName: () => string;
   // getSupportedFieldTypes: () => string[];
   // isFieldCompatible?: (field: DataViewField) => boolean;
-  // CustomOptionsComponent: React.FC<{ internalApi?: InternalApi }>; // internal api manages state
   buildControl: (
     initialState: State,
     buildApi: (
       apiRegistration: ControlApiRegistration<ControlApi>,
-      comparators: StateComparators<ControlStateRegistration<State>>
+      comparators: StateComparators<State>
     ) => ControlApi,
     uuid: string,
     parentApi: ControlGroupApi

@@ -16,12 +16,17 @@ type DefaultControlStateManager = {
   [key in keyof Required<DefaultControlState>]: BehaviorSubject<DefaultControlState[key]>;
 };
 
+type ControlApi = ControlApiRegistration<DefaultControlApi> & {
+  setDataLoading: (loading: boolean) => void;
+  setBlockingError: (error: Error | undefined) => void;
+};
+
 export const initializeDefaultControlApi = (
   controlGroup: ControlGroupApi,
   state: DefaultControlState
 ): {
+  defaultControlApi: ControlApi;
   defaultControlStateManager: DefaultControlStateManager;
-  defaultControlApi: ControlApiRegistration<DefaultControlApi>;
   defaultControlComparators: StateComparators<DefaultControlState>;
 } => {
   const dataLoading = new BehaviorSubject<boolean | undefined>(false);
@@ -29,11 +34,12 @@ export const initializeDefaultControlApi = (
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
 
-  const defaultControlApi: ControlApiRegistration<DefaultControlApi> = {
+  const defaultControlApi: ControlApi = {
     grow,
     width,
     dataLoading,
     blockingError,
+    setBlockingError: (error) => blockingError.next(error),
     setDataLoading: (loading) => dataLoading.next(loading),
   };
 

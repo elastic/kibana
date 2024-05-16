@@ -70,6 +70,7 @@ export const ControlPanel = <
     api?.defaultPanelTitle,
     viewModeSubject
   );
+  console.log(panelTitle, defaultPanelTitle);
 
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
@@ -109,7 +110,13 @@ export const ControlPanel = <
         <EuiFormControlLayout
           fullWidth
           isLoading={loading || Boolean(dataLoading)}
-          prepend={<EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>}
+          prepend={
+            api?.getCustomPrepend ? (
+              api.getCustomPrepend()
+            ) : (
+              <EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>
+            )
+          }
         >
           <ControlComponent
             ref={(newApi) => {

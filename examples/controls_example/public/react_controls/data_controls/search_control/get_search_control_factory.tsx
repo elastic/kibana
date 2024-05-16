@@ -6,16 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
-import { SearchControlState, SEARCH_CONTROL_TYPE } from './types';
+import { SearchControlState, SearchControlTechniques, SEARCH_CONTROL_TYPE } from './types';
+
+const allSearchOptions = [
+  {
+    id: 'match',
+    label: 'Fuzzy match',
+    'data-test-subj': 'searchControl__matchSearchOptionAdditionalSetting',
+  },
+  {
+    id: 'simple_query_string',
+    label: 'Query string',
+    'data-test-subj': 'optionsListControl__queryStringSearchOptionAdditionalSetting',
+  },
+];
+
+const DEFAULT_SEARCH_TECHNIQUE = 'match';
 
 export const getSearchEmbeddableFactory = ({
   core,
@@ -36,21 +52,47 @@ export const getSearchEmbeddableFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: () => {
-      return <>Custom Options</>;
+    CustomOptionsComponent: ({ stateManager }) => {
+      const searchTechnique = useStateFromPublishingSubject(stateManager.searchTechnique);
+
+      return (
+        <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
+          <EuiRadioGroup
+            options={allSearchOptions}
+            idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
+            onChange={(id) => {
+              const newSearchTechnique = id as SearchControlTechniques;
+              // setSearchTechnique(newSearchTechnique);
+              stateManager.searchTechnique.next(newSearchTechnique);
+            }}
+          />
+        </EuiFormRow>
+      );
     },
     buildControl: (initialState, buildApi, uuid, parentApi) => {
-      // console.log('build control');
-      const { dataControlApi, dataControlComparators } = initializeDataControl(
-        initialState,
-        parentApi,
-        { core, dataViews: dataViewsService }
+      console.log(initialState);
+
+      const searchString = new BehaviorSubject<string>(initialState.searchString);
+      const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
+        initialState.searchTechnique
       );
-      const searchString$ = new BehaviorSubject<string>(initialState.searchString);
+
+      const editorStateManager = { searchTechnique };
+
+      const { dataControlApi, dataControlComparators } = initializeDataControl<
+        Omit<SearchControlState, 'searchString'>
+      >(SEARCH_CONTROL_TYPE, initialState, editorStateManager, parentApi, {
+        core,
+        dataViews: dataViewsService,
+      });
 
       const api = buildApi(dataControlApi, {
         ...dataControlComparators,
-        searchString: [searchString$, (newString: string) => searchString$.next(newString)],
+        searchTechnique: [
+          searchTechnique,
+          (newTechnique: SearchControlTechniques | undefined) => searchTechnique.next(newTechnique),
+        ],
+        searchString: [searchString, (newString: string) => searchString.next(newString)],
       });
 
       return {

@@ -13,19 +13,29 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { ControlApiRegistration } from '../types';
+import { ControlApiRegistration, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DefaultDataControlState } from './types';
+import { DataControlApi, DataControlStateManager, DefaultDataControlState } from './types';
 
-// type DiffDefaultDataControlState = Omit<DefaultDataControlState, keyof DefaultControlState>;
-// type DiffDefaultDataControlApi = Omit<DataControlApi, keyof DefaultControlApi>;
+type DiffDefaultDataControlState<State> = Omit<
+  DefaultDataControlState,
+  keyof DefaultControlState & State
+>;
 
-export type DataControlStateManager = {
-  [key in keyof Required<DefaultDataControlState>]: BehaviorSubject<DefaultDataControlState[key]>;
+/** This defines the control-type specific settings/state that can be modified through the custom editor component */
+export type EditorStateManager<State> = {
+  [key in keyof Required<DiffDefaultDataControlState<State>>]: BehaviorSubject<
+    DiffDefaultDataControlState<State>[key]
+  >;
 };
 
-export const initializeDataControl = <State extends DefaultDataControlState>(
+export const initializeDataControl = <
+  State extends DefaultDataControlState,
+  EditorState extends object = object
+>(
+  controlType: string,
   state: State,
+  editorStateManager: DataControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
   services: {
     core: CoreStart;
@@ -57,7 +67,7 @@ export const initializeDataControl = <State extends DefaultDataControlState>(
     fieldName,
     title: panelTitle,
   };
-
+  console.log(editorStateManager, stateManager);
   /**
    * The default panel title will always be the same as the field name, so keep these two things in sync;
    * Skip the first fired event because it was initialized above
@@ -76,7 +86,12 @@ export const initializeDataControl = <State extends DefaultDataControlState>(
   });
 
   const onEdit = async () => {
-    openDataControlEditor(stateManager, false, controlGroup, services);
+    openDataControlEditor(
+      { ...stateManager, ...editorStateManager },
+      controlGroup,
+      services,
+      controlType
+    );
   };
 
   const dataControlApi: ControlApiRegistration<DataControlApi> = {

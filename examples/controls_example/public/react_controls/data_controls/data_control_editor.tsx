@@ -5,7 +5,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -21,9 +21,13 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
@@ -34,25 +38,26 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 // import { getDataControlFieldRegistry } from '@kbn/controls-plugin/public/control_group/editor/data_control_editor_tools';
-import { CoreStart } from '@kbn/core/public';
+import { ControlWidth } from '@kbn/controls-plugin/common';
+import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
+import {
+  getControlTypeErrorMessage,
+  getDataControlFieldRegistry,
+} from './data_control_editor_utils';
 import { DataControlStateManager } from './initialize_data_control';
-import { DataEditorState } from './types';
-import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { ControlWidth } from '@kbn/controls-plugin/common';
+import { DataControlFactory, DataEditorState, isDataControlFactory } from './types';
 
 export interface ControlEditorProps {
-  isCreate: boolean;
-  // api?: DefaultControlApi; // if defined, we are editing an existing control; otherwise, we are creating a new control
-  parentApi: ControlGroupApi; // controls must always have a parent API, so pass it in
-  stateManager: DataControlStateManager;
-  closeFlyout: () => void;
+  controlType?: string; // if provided, then editing existing control; otherwise, creating a new control
+  onCancel: (state: DataEditorState) => void;
   onSave: (state: DataEditorState, type?: string) => void;
-  // onCancel: () => void;
+  stateManager: DataControlStateManager;
+  parentApi: ControlGroupApi; // controls must always have a parent API
   services: {
-    core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   };
 }
@@ -60,91 +65,15 @@ export interface ControlEditorProps {
 const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
-const CONTROL_WIDTH_OPTIONS = [
-  {
-    id: `small`,
-    'data-test-subj': 'control-editor-width-small',
-    label: i18n.translate('controls.controlGroup.management.layout.small', {
-      defaultMessage: 'Small',
-    }),
-  },
-  {
-    id: `medium`,
-    'data-test-subj': 'control-editor-width-medium',
-    label: i18n.translate('controls.controlGroup.management.layout.medium', {
-      defaultMessage: 'Medium',
-    }),
-  },
-  {
-    id: `large`,
-    'data-test-subj': 'control-editor-width-large',
-    label: i18n.translate('controls.controlGroup.management.layout.large', {
-      defaultMessage: 'Large',
-    }),
-  },
-];
-
-// const getControlTypeErrorMessage = ({
-//   fieldSelected,
-//   controlType,
-// }: {
-//   fieldSelected?: boolean;
-//   controlType?: string;
-// }) => {
-//   if (!fieldSelected) {
-//     return i18n.translate(
-//       'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
-//       {
-//         defaultMessage: 'Select a field first.',
-//       }
-//     );
-//   }
-
-//   switch (controlType) {
-//     /**
-//      * Note that options list controls are currently compatible with every field type; so, there is no
-//      * need to have a special error message for these.
-//      */
-//     case RANGE_SLIDER_CONTROL: {
-//       return i18n.translate(
-//         'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.rangeSlider',
-//         {
-//           defaultMessage: 'Range sliders are only compatible with number fields.',
-//         }
-//       );
-//     }
-//     default: {
-//       /** This shouldn't ever happen - but, adding just in case as a fallback. */
-//       return i18n.translate(
-//         'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.default',
-//         {
-//           defaultMessage: 'Select a compatible control type.',
-//         }
-//       );
-//     }
-//   }
-// };
-
 export const DataControlEditor = ({
-  parentApi: controlGroup,
-  stateManager,
-  closeFlyout,
+  controlType,
   onSave,
+  onCancel,
+  stateManager,
+  parentApi: controlGroup,
   /** TODO: These should not be props */
-  services: { dataViews: dataViewService, core },
+  services: { dataViews: dataViewService },
 }: ControlEditorProps) => {
-  // const {
-  //   dataViews: { getIdsWithTitle, get },
-  //   // controls: { getControlFactory, getControlTypes },
-  //   overlays: { openConfirm },
-  // } = pluginServices.getServices();
-
-  const initialState = useRef(
-    Object.keys(stateManager).reduce((prev, key) => {
-      return { ...prev, [key]: stateManager[key as keyof StateManager].getValue() };
-    }, {})
-  );
-
   const [lastUsedDataViewId, defaultGrow, defaultWidth] = useBatchedOptionalPublishingSubjects(
     controlGroup.lastUsedDataViewId,
     controlGroup.grow,
@@ -160,13 +89,13 @@ export const DataControlEditor = ({
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
   const [selectedGrow, setSelectedGrow] = useState(stateManager.grow.getValue());
   const [selectedWidth, setSelectedWidth] = useState(stateManager.width.getValue());
+  const [currentTitle, setCurrentTitle] = useState<string | undefined>(
+    stateManager.title.getValue() || selectedFieldName
+  );
+  const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   // const [selectedSettings, setSelectedSettings] = useState(stateManager.settings.getValue());
 
   // const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
-  const [currentTitle, setCurrentTitle] = useState<string | undefined>(
-    stateManager.title.getValue()
-  );
-  // const [selectedControlType, setSelectedControlType] = useState<string | undefined>(api?.type);
 
   const [controlEditorValid, setControlEditorValid] = useState(false);
   // const [customSettings, setCustomSettings] = useState<Partial<ControlInput>>();
@@ -199,165 +128,121 @@ export const DataControlEditor = ({
     );
   }, [selectedFieldName, setControlEditorValid, selectedDataView]);
 
-  // const CompatibleControlTypesComponent = useMemo(() => {
-  //   // TODO - get control types
-  //   const allDataControlTypes = getAllControlTypes().filter((type) => type !== TIME_SLIDER_CONTROL);
-  //   return (
-  //     <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
-  //       {allDataControlTypes.map((controlType: string) => {
-  //         const factory = getControlFactory(controlType);
-  //         const disabled =
-  //           fieldRegistry && selectedFieldName
-  //             ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(controlType)
-  //             : true;
-  //         const keyPadMenuItem = (
-  //           <EuiKeyPadMenuItem
-  //             key={controlType}
-  //             id={`create__${controlType}`}
-  //             aria-label={factory.getDisplayName()}
-  //             data-test-subj={`create__${controlType}`}
-  //             isSelected={controlType === selectedControlType}
-  //             disabled={disabled}
-  //             onClick={() => setSelectedControlType(controlType)}
-  //             label={factory.getDisplayName()}
-  //           >
-  //             <EuiIcon type={factory.getIconType()} size="l" />
-  //           </EuiKeyPadMenuItem>
-  //         );
+  const dataControlFactories = useMemo(() => {
+    return getAllControlTypes()
+      .map((type) => getControlFactory(type))
+      .filter((factory) => {
+        return isDataControlFactory(factory);
+      });
+  }, []);
 
-  //         return disabled ? (
-  //           <EuiToolTip
-  //             key={`disabled__${controlType}`}
-  //             content={getControlTypeErrorMessage({
-  //               fieldSelected: Boolean(selectedFieldName),
-  //               controlType,
-  //             })}
-  //           >
-  //             {keyPadMenuItem}
-  //           </EuiToolTip>
-  //         ) : (
-  //           keyPadMenuItem
-  //         );
-  //       })}
-  //     </EuiKeyPadMenu>
-  //   );
-  // }, [selectedFieldName, fieldRegistry, getControlFactory, getControlTypes, selectedControlType]);
+  const CompatibleControlTypesComponent = useMemo(() => {
+    return (
+      <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
+        {dataControlFactories.map((factory) => {
+          const disabled =
+            fieldRegistry && selectedFieldName
+              ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
+              : true;
+          const keyPadMenuItem = (
+            <EuiKeyPadMenuItem
+              key={factory.type}
+              id={`create__${factory.type}`}
+              aria-label={factory.getDisplayName()}
+              data-test-subj={`create__${factory.type}`}
+              isSelected={factory.type === selectedControlType}
+              disabled={disabled}
+              onClick={() => setSelectedControlType(factory.type)}
+              label={factory.getDisplayName()}
+            >
+              <EuiIcon type={factory.getIconType()} size="l" />
+            </EuiKeyPadMenuItem>
+          );
 
-  // const onCancel = useCallback(() => {
-  //   const currentState = Object.keys(stateManager).reduce((prev, key) => {
-  //     return { ...prev, [key]: stateManager[key as keyof StateManager].getValue() };
-  //   }, {});
-  //   if (deepEqual(initialState.current, currentState)) {
-  //     closeFlyout();
-  //     return;
-  //   }
-  //   openConfirm(
-  //     i18n.translate('controls.controlGroup.management.discard.sub', {
-  //       defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
-  //     }),
-  //     {
-  //       confirmButtonText: i18n.translate('controls.controlGroup.management.discard.confirm', {
-  //         defaultMessage: 'Discard changes',
-  //       }),
-  //       cancelButtonText: i18n.translate('controls.controlGroup.management.discard.cancel', {
-  //         defaultMessage: 'Cancel',
-  //       }),
-  //       title: i18n.translate('controls.controlGroup.management.discard.title', {
-  //         defaultMessage: 'Discard changes?',
-  //       }),
-  //       buttonColor: 'danger',
-  //     }
-  //   ).then((confirmed) => {
-  //     if (confirmed) {
-  //       closeFlyout();
-  //     }
-  //   });
-  // }, [closeFlyout, openConfirm, stateManager]);
+          return disabled ? (
+            <EuiToolTip
+              key={`disabled__${controlType}`}
+              content={getControlTypeErrorMessage({
+                fieldSelected: Boolean(selectedFieldName),
+                controlType,
+              })}
+            >
+              {keyPadMenuItem}
+            </EuiToolTip>
+          ) : (
+            keyPadMenuItem
+          );
+        })}
+      </EuiKeyPadMenu>
+    );
+  }, [selectedFieldName, fieldRegistry, selectedControlType, controlType, dataControlFactories]);
 
-  // const onSave = useCallback(() => {
-  //   if (!selectedControlType) return;
+  const CustomSettingsComponent = useMemo(() => {
+    if (!selectedControlType || !selectedFieldName || !fieldRegistry) return;
 
-  //   console.log('on save');
-  //   const currentState = Object.keys(stateManager).reduce((prev, key) => {
-  //     return { ...prev, [key]: stateManager[key as keyof StateManager].getValue() };
-  //   }, {} as PanelPackage);
+    const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
+    const CustomSettings = controlFactory.CustomOptionsComponent;
 
-  //   if (!api) {
-  //     // if no API was provided, this is a new control - so, add it to the control group
-  //     controlGroup.addNewPanel(
-  //       { panelType: selectedControlType, initialState: currentState },
-  //       false
-  //     );
-  //     closeFlyout();
-  //     return;
-  //   }
+    if (!CustomSettings) return;
 
-  //   if (selectedControlType !== api.type) {
-  //     controlGroup.replacePanel(api.uuid, {
-  //       panelType: selectedControlType,
-  //       initialState: currentState,
-  //     });
-  //   } else {
-  //     console.log('UPDATE!!!');
-  //   }
-  //   // Object.keys(stateManager).map((key) => {
-  //   //   api.
+    return (
+      <EuiDescribedFormGroup
+        ratio="third"
+        title={
+          <h2>
+            {i18n.translate(
+              'controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle',
+              {
+                defaultMessage: '{controlType} settings',
+                values: { controlType: controlFactory.getDisplayName() },
+              }
+            )}
+          </h2>
+        }
+        description={i18n.translate(
+          'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
+          {
+            defaultMessage: 'Custom settings for your {controlType} control.',
+            values: { controlType: controlFactory.getDisplayName().toLocaleLowerCase() },
+          }
+        )}
+        data-test-subj="control-editor-custom-settings"
+      >
+        <CustomSettings stateManager={stateManager} setControlEditorValid={setControlEditorValid} />
+      </EuiDescribedFormGroup>
+    );
+  }, [fieldRegistry, selectedControlType, selectedFieldName, stateManager]);
 
-  //   closeFlyout();
-  // }, [closeFlyout, api, controlGroup, selectedControlType, stateManager]);
-
-  // const CustomSettingsComponent = useMemo(() => {
-  //   console.log('here 4');
-
-  //   if (!selectedControlType || !selectedFieldName || !fieldRegistry) return;
-
-  //   const controlFactory = getControlFactory(selectedControlType);
-  //   const CustomSettings = (controlFactory as IEditableControlFactory)
-  //     .controlEditorOptionsComponent;
-
-  //   if (!CustomSettings) return;
-
-  //   return (
-  //     <EuiDescribedFormGroup
-  //       ratio="third"
-  //       title={
-  //         <h2>
-  //           {ControlGroupStrings.manageControl.controlTypeSettings.getFormGroupTitle(
-  //             controlFactory.getDisplayName()
-  //           )}
-  //         </h2>
-  //       }
-  //       description={ControlGroupStrings.manageControl.controlTypeSettings.getFormGroupDescription(
-  //         controlFactory.getDisplayName()
-  //       )}
-  //       data-test-subj="control-editor-custom-settings"
-  //     >
-  //       <CustomSettings
-  //         onChange={(settings) => stateManager.settings.next(settings)}
-  //         initialInput={customSettings}
-  //         fieldType={fieldRegistry[selectedFieldName].field.type}
-  //         setControlEditorValid={setControlEditorValid}
-  //       />
-  //     </EuiDescribedFormGroup>
-  //   );
-  // }, [
-  //   selectedControlType,
-  //   selectedFieldName,
-  //   customSettings,
-  //   stateManager.settings,
-  //   getControlFactory,
-  //   fieldRegistry,
-  // ]);
+  const getCurrentState = useCallback(() => {
+    return {
+      dataViewId: selectedDataViewId,
+      fieldName: selectedFieldName,
+      title:
+        currentTitle === '' || currentTitle === selectedFieldDisplayName ? undefined : currentTitle,
+      grow: selectedGrow,
+      width: selectedWidth,
+    };
+  }, [
+    selectedDataViewId,
+    selectedFieldName,
+    selectedFieldDisplayName,
+    currentTitle,
+    selectedGrow,
+    selectedWidth,
+  ]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            Test
-            {/* {!Boolean(api)
-              ? ControlGroupStrings.manageControl.getFlyoutCreateTitle()
-              : ControlGroupStrings.manageControl.getFlyoutEditTitle()} */}
+            {!controlType
+              ? i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
+                  defaultMessage: 'Create control',
+                })
+              : i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
+                  defaultMessage: 'Edit control',
+                })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -365,15 +250,29 @@ export const DataControlEditor = ({
         <EuiForm fullWidth>
           <EuiDescribedFormGroup
             ratio="third"
-            title={<h2>test</h2>}
-            description={'test'}
-            // title={<h2>{ControlGroupStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
-            // description={ControlGroupStrings.manageControl.dataSource.getFormGroupDescription()}
+            title={
+              <h2>
+                {i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupTitle', {
+                  defaultMessage: 'Data source',
+                })}
+              </h2>
+            }
+            description={i18n.translate(
+              'controls.controlGroup.manageControl.dataSource.formGroupDescription',
+              {
+                defaultMessage:
+                  'Select the data view and field that you want to create a control for.',
+              }
+            )}
           >
             {/* {!editorConfig?.hideDataViewSelector && ( */}
             <EuiFormRow
-              label="test"
-              // label={ControlGroupStrings.manageControl.dataSource.getDataViewTitle()}
+              label={i18n.translate(
+                'controls.controlGroup.manageControl.dataSource.dataViewTitle',
+                {
+                  defaultMessage: 'Data view',
+                }
+              )}
             >
               <DataViewPicker
                 dataViews={dataViewListItems}
@@ -396,8 +295,9 @@ export const DataControlEditor = ({
             </EuiFormRow>
             {/* )} */}
             <EuiFormRow
-              label="test"
-              // label={ControlGroupStrings.manageControl.dataSource.getFieldTitle()}
+              label={i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
+                defaultMessage: 'Field',
+              })}
             >
               <FieldPicker
                 filterPredicate={(field: DataViewField) => {
@@ -419,9 +319,16 @@ export const DataControlEditor = ({
                 selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
               />
             </EuiFormRow>
-            {/* <EuiFormRow label={ControlGroupStrings.manageControl.dataSource.getControlTypeTitle()}>
+            <EuiFormRow
+              label={i18n.translate(
+                'controls.controlGroup.manageControl.dataSource.controlTypesTitle',
+                {
+                  defaultMessage: 'Control type',
+                }
+              )}
+            >
               {CompatibleControlTypesComponent}
-            </EuiFormRow> */}
+            </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
             ratio="third"
@@ -496,7 +403,7 @@ export const DataControlEditor = ({
             </EuiFormRow>
             {/* )} */}
           </EuiDescribedFormGroup>
-          {/* {CustomSettingsComponent} */}
+          {CustomSettingsComponent}
           {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
           {/* {removeControl && (
             <>
@@ -525,8 +432,7 @@ export const DataControlEditor = ({
               data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
-                // onCancel();
-                console.log('on cancel');
+                onCancel(getCurrentState());
               }}
             >
               {i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
@@ -542,13 +448,7 @@ export const DataControlEditor = ({
               color="primary"
               disabled={!controlEditorValid}
               onClick={() => {
-                onSave({
-                  dataViewId: selectedDataViewId,
-                  fieldName: selectedFieldName,
-                  title: currentTitle === selectedFieldDisplayName ? undefined : currentTitle,
-                  grow: selectedGrow,
-                  width: selectedWidth,
-                });
+                onSave(getCurrentState());
               }}
             >
               {i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
