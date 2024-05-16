@@ -130,7 +130,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   await ensurePackagesCompletedInstall(soClient, esClient);
 
   // Create policies specified in Kibana config
-  logger.debug(`Creating preconfigured policies`);
+  logger.info(`Creating preconfigured policies`);
   const preconfiguredPolicies = await Promise.allSettled(
     policies.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
@@ -284,7 +284,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             packagePolicy.name === installablePackagePolicy.packagePolicy.name
         );
       });
-      logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
+      logger.info(
+        `Adding preconfigured package policies ${JSON.stringify(
+          packagePoliciesToAdd.map((pol) => ({
+            name: pol.packagePolicy.name,
+            package: pol.installedPackage.name,
+          }))
+        )}`
+      );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         soClient,
