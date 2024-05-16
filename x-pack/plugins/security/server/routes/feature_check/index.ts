@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-export interface SloDetailsPathParams {
-  sloId: string;
-  tabId?: string;
-}
+import { defineSecurityFeatureCheckRoute } from './feature_check';
+import type { RouteDefinitionParams } from '..';
 
-export interface TimeBounds {
-  from: Date;
-  to: Date;
+export function defineSecurityFeatureRoutes(params: RouteDefinitionParams) {
+  defineSecurityFeatureCheckRoute(params);
 }

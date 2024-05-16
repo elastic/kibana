@@ -630,20 +630,19 @@ export class GetPreviewData {
       // Timeslice metric so that the chart is as close to the evaluation as possible.
       // Otherwise due to how the statistics work, the values might not look like
       // they've breached the threshold.
+      const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
       const bucketSize =
         params.indicator.type === 'sli.metric.timeslice' &&
-        params.range.end - params.range.start <= 86_400_000 &&
+        rangeDuration <= 86_400_000 &&
         params.objective?.timesliceWindow
           ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
-              calculateAuto
-                .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
-                ?.asMinutes() ?? 0,
+              calculateAuto.near(100, moment.duration(rangeDuration, 'ms'))?.asMinutes() ?? 0,
               1
             );
       const options: Options = {
         instanceId: params.instanceId,
-        range: params.range,
+        range: { start: params.range.from.getTime(), end: params.range.to.getTime() },
         groupBy: params.groupBy,
         remoteName: params.remoteName,
         groupings: params.groupings,

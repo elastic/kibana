@@ -4,13 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export interface SloDetailsPathParams {
-  sloId: string;
-  tabId?: string;
-}
-
-export interface TimeBounds {
-  from: Date;
-  to: Date;
-}
+export { SecurityFeaturesAPIClient } from './security_features_api_client';
+export type { CheckSecurityFeaturesResponse } from './security_features_api_client';
