@@ -14,6 +14,7 @@ interface SaveModalArgs {
   dashboardId?: string;
   saveAsNew?: boolean;
   redirectToOrigin?: boolean;
+  description?: string;
 }
 
 type DashboardPickerOption =
@@ -65,12 +66,26 @@ export class TimeToVisualizePageObject extends FtrService {
 
   public async setSaveModalValues(
     vizName: string,
-    { saveAsNew, redirectToOrigin, addToDashboard, dashboardId, saveToLibrary }: SaveModalArgs = {}
+    {
+      saveAsNew,
+      redirectToOrigin,
+      addToDashboard,
+      dashboardId,
+      saveToLibrary,
+      description,
+    }: SaveModalArgs = {}
   ) {
     await this.testSubjects.setValue('savedObjectTitle', vizName, {
       typeCharByChar: true,
       clearWithKeyboard: true,
     });
+
+    if (description !== undefined) {
+      await this.testSubjects.setValue('savedObjectDescription', description, {
+        typeCharByChar: true,
+        clearWithKeyboard: true,
+      });
+    }
 
     const hasSaveAsNew = await this.testSubjects.exists('saveAsNewCheckbox');
     if (hasSaveAsNew && saveAsNew !== undefined) {
