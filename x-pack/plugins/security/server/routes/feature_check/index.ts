@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export const roleMappingsAPIClientMock = {
-  create: () => ({
-    getRoleMappings: jest.fn(),
-    getRoleMapping: jest.fn(),
-    saveRoleMapping: jest.fn(),
-    deleteRoleMappings: jest.fn(),
-  }),
-};
+import { defineSecurityFeatureCheckRoute } from './feature_check';
+import type { RouteDefinitionParams } from '..';
+
+export function defineSecurityFeatureRoutes(params: RouteDefinitionParams) {
+  defineSecurityFeatureCheckRoute(params);
+}
