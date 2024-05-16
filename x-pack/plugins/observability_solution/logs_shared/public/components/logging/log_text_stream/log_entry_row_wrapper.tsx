@@ -31,6 +31,7 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
 export interface LogEntryRowWrapperProps {
   scale: TextScale;
   isHighlighted?: boolean;
+  alt: string;
 }
 
 // eslint-disable-next-line import/no-default-export
