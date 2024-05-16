@@ -78,7 +78,7 @@ export const RulesTableToolbar = React.memo(() => {
   );
 
   // Assistant integration for using selected rules as prompt context
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   const {
     state: { rules, selectedRuleIds },
   } = useRulesTableContext();
@@ -97,7 +97,7 @@ export const RulesTableToolbar = React.memo(() => {
         <TabNavigation navTabs={ruleTabs} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {hasAssistantPrivilege && selectedRules.length > 0 && (
+        {hasAssistantPrivilege && isAssistantEnabled && selectedRules.length > 0 && (
           <NewChat
             category="detection-rules"
             conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}

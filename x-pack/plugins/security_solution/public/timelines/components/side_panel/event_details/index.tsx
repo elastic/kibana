@@ -80,9 +80,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
-  const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
+  const useAssistant =
+    hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;

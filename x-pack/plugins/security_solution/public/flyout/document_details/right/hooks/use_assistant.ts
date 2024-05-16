@@ -56,8 +56,9 @@ export const useAssistant = ({
   dataFormattedForFieldBrowser,
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
-  const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const useAssistantHook =
+    hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]

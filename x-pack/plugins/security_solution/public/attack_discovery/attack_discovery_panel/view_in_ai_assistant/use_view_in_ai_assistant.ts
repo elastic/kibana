@@ -25,11 +25,11 @@ export const useViewInAiAssistant = ({
   attackDiscovery: AttackDiscovery;
   replacements?: Replacements;
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
   const useAssistantHook = useMemo(
-    () => (hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop),
-    [hasAssistantPrivilege]
+    () => (hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop),
+    [hasAssistantPrivilege, isAssistantEnabled]
   );
 
   // the prompt context for this insight:
