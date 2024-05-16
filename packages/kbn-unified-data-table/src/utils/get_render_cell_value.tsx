@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -36,6 +36,9 @@ export const getRenderCellValueFn = ({
   maxEntries,
   externalCustomRenderers,
   isPlainRecord,
+  rowHeightLines,
+  autoHeightRows,
+  toggleRowHeight,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -46,6 +49,9 @@ export const getRenderCellValueFn = ({
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
+  rowHeightLines?: number;
+  autoHeightRows: number[];
+  toggleRowHeight: (rowIndex: number) => void;
 }) => {
   return ({
     rowIndex,
@@ -59,6 +65,11 @@ export const getRenderCellValueFn = ({
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
+
+    const onTreeExpand = useCallback(() => {
+      // expand row {rowIndex}
+      toggleRowHeight?.(rowIndex);
+    }, [rowIndex]);
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -122,6 +133,7 @@ export const getRenderCellValueFn = ({
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
+      const isSingleRow = autoHeightRows?.includes(rowIndex) ? false : rowHeightLines === 0;
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -132,6 +144,9 @@ export const getRenderCellValueFn = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
+          isDarkMode={ctx.isDarkMode}
+          isSingleRow={isSingleRow}
+          onTreeExpand={onTreeExpand}
         />
       );
     }

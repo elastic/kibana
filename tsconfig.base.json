@@ -1002,6 +1002,8 @@
       "@kbn/journeys/*": ["packages/kbn-journeys/*"],
       "@kbn/json-ast": ["packages/kbn-json-ast"],
       "@kbn/json-ast/*": ["packages/kbn-json-ast/*"],
+      "@kbn/json-tree": ["packages/kbn-json-tree"],
+      "@kbn/json-tree/*": ["packages/kbn-json-tree/*"],
       "@kbn/kbn-health-gateway-status-plugin": ["test/health_gateway/plugins/status"],
       "@kbn/kbn-health-gateway-status-plugin/*": ["test/health_gateway/plugins/status/*"],
       "@kbn/kbn-sample-panel-action-plugin": ["test/plugin_functional/plugins/kbn_sample_panel_action"],

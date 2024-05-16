@@ -13,6 +13,7 @@ import { defaultRowLineHeight, ROWS_HEIGHT_OPTIONS } from '../constants';
 interface UseRowHeightProps {
   rowHeightLines: number;
   rowLineHeight?: string;
+  autoHeightRows?: number[];
 }
 
 /**
@@ -31,13 +32,22 @@ const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | unde
 export const useRowHeightsOptions = ({
   rowHeightLines,
   rowLineHeight = defaultRowLineHeight,
+  autoHeightRows,
 }: UseRowHeightProps) => {
   return useMemo((): EuiDataGridRowHeightsOptions => {
     const defaultHeight = deserializeRowHeight(rowHeightLines);
+    const rowHeights: Record<number, EuiDataGridRowHeightOption> = {};
+    // only on single row mode
+    if (autoHeightRows?.length && rowHeightLines === 0) {
+      autoHeightRows.forEach((rowIndex) => {
+        rowHeights[rowIndex] = 'auto';
+      });
+    }
 
     return {
       defaultHeight,
       lineHeight: rowLineHeight,
+      rowHeights,
     };
-  }, [rowHeightLines, rowLineHeight]);
+  }, [autoHeightRows, rowHeightLines, rowLineHeight]);
 };

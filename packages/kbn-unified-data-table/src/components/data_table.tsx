@@ -449,6 +449,7 @@ export const UnifiedDataTable = ({
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [autoHeightRows, setAutoHeightRows] = useState<number[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -587,34 +588,6 @@ export const UnifiedDataTable = ({
   }, [dataView, showMultiFields]);
 
   /**
-   * Cell rendering
-   */
-  const renderCellValue = useMemo(
-    () =>
-      getRenderCellValueFn({
-        dataView,
-        rows: displayedRows,
-        useNewFieldsApi,
-        shouldShowFieldHandler,
-        closePopover: () => dataGridRef.current?.closeCellPopover(),
-        fieldFormats: services.fieldFormats,
-        maxEntries: maxDocFieldsDisplayed,
-        externalCustomRenderers,
-        isPlainRecord,
-      }),
-    [
-      dataView,
-      displayedRows,
-      useNewFieldsApi,
-      shouldShowFieldHandler,
-      maxDocFieldsDisplayed,
-      services.fieldFormats,
-      externalCustomRenderers,
-      isPlainRecord,
-    ]
-  );
-
-  /**
    * Render variables
    */
   const randomId = useMemo(() => htmlIdGenerator()(), []);
@@ -721,6 +694,55 @@ export const UnifiedDataTable = ({
     rowHeightState,
     onUpdateRowHeight,
   });
+
+  const toggleRowHeight = useCallback(
+    (rowIndex: number) => {
+      if (isPlainRecord) {
+        // mimimize to single row
+        if (autoHeightRows.includes(rowIndex)) {
+          setAutoHeightRows(autoHeightRows.filter((e) => e !== rowIndex));
+        } else {
+          // expand
+          setAutoHeightRows([...autoHeightRows, rowIndex]);
+        }
+      }
+    },
+    [autoHeightRows, isPlainRecord]
+  );
+
+  /**
+   * Cell rendering
+   */
+  const renderCellValue = useMemo(
+    () =>
+      getRenderCellValueFn({
+        dataView,
+        rows: displayedRows,
+        useNewFieldsApi,
+        shouldShowFieldHandler,
+        closePopover: () => dataGridRef.current?.closeCellPopover(),
+        fieldFormats: services.fieldFormats,
+        maxEntries: maxDocFieldsDisplayed,
+        externalCustomRenderers,
+        isPlainRecord,
+        rowHeightLines,
+        autoHeightRows,
+        toggleRowHeight,
+      }),
+    [
+      dataView,
+      displayedRows,
+      useNewFieldsApi,
+      shouldShowFieldHandler,
+      maxDocFieldsDisplayed,
+      services.fieldFormats,
+      externalCustomRenderers,
+      isPlainRecord,
+      rowHeightLines,
+      autoHeightRows,
+      toggleRowHeight,
+    ]
+  );
 
   const euiGridColumns = useMemo(
     () =>
@@ -966,6 +988,7 @@ export const UnifiedDataTable = ({
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
+    autoHeightRows,
   });
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();

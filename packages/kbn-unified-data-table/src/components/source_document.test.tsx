@@ -47,7 +47,10 @@ describe('Unified data table source document cell rendering', function () {
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         shouldShowFieldHandler={() => false}
         maxEntries={100}
-        isPlainRecord={true}
+        isPlainRecord={false}
+        isDarkMode={false}
+        isSingleRow={false}
+        onTreeExpand={jest.fn()}
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
