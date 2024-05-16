@@ -30,19 +30,17 @@ export function getPreference(getConfig: GetConfigFn) {
 // TODO: Could provide this on runtime contract with dependencies
 // already wired up.
 export function getSearchParamsFromRequest(
-  searchRequest: SearchRequest,
+  { index, body }: SearchRequest,
   dependencies: { getConfig: GetConfigFn }
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { track_total_hits, ...body } = searchRequest.body;
+  const dataView = typeof index !== 'string' ? index : undefined;
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    ...(index && { index: typeof index !== 'string' ? dataView?.title : index }),
     body,
-    track_total_hits,
-    ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
+    ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,
   };
 }

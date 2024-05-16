@@ -363,7 +363,7 @@ export class SearchSource {
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
-        if (searchRequest.index) {
+        if (searchRequest.index && typeof searchRequest.index !== 'string') {
           options.indexPattern = searchRequest.index;
         }
 
@@ -709,8 +709,10 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: DataView) {
-    return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
+  private getIndexType(index?: DataView | string) {
+    return this.shouldOverwriteDataViewType
+      ? this.overwriteDataViewType
+      : typeof index !== 'string' && index?.type;
   }
 
   private readonly getFieldName = (
@@ -788,20 +790,19 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
     const { body, index } = searchRequest;
+    const dataView = typeof index !== 'string' ? index : undefined;
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, runtimeFields } = index
-      ? index.getComputedFields()
-      : {
-          docvalueFields: [],
-          scriptFields: {},
-          runtimeFields: {},
-        };
+    const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
+      docvalueFields: [],
+      scriptFields: {},
+      runtimeFields: {},
+    };
     const fieldListProvided = !!body.fields;
 
     // set defaults
     const _source =
-      index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
+      index && !body.hasOwnProperty('_source') ? dataView?.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = index
@@ -894,7 +895,7 @@ export class SearchSource {
       runtime_mappings: runtimeFields,
       script_fields: scriptedFields,
       fields: this.getFieldsList({
-        index,
+        index: dataView,
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
@@ -963,7 +964,7 @@ export class SearchSource {
       filtersInMustClause,
     };
     return buildEsQuery(
-      index,
+      typeof index !== 'string' ? index : undefined,
       query,
       typeof filters === 'function' ? filters() : filters,
       esQueryConfigs
@@ -1166,6 +1167,7 @@ export class SearchSource {
   toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
+    const dataView = typeof index !== 'string' ? index : undefined;
 
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
@@ -1190,7 +1192,7 @@ export class SearchSource {
     const aggConfigs =
       aggs instanceof AggConfigs
         ? aggs
-        : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
+        : dataView && aggs && this.dependencies.aggs.createAggConfigs(dataView, aggs);
 
     if (aggConfigs) {
       ast.chain.push(...aggConfigs.toExpressionAst().chain);
