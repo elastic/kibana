@@ -29,7 +29,7 @@ interface ActionsClientChatOpenAIParams {
   llmType?: string;
   logger: Logger;
   request: KibanaRequest;
-  streaming?: boolean;
+  streaming: boolean;
   traceId?: string;
   maxRetries?: number;
   model?: string;
@@ -47,15 +47,14 @@ interface ActionsClientChatOpenAIParams {
  * and iterates over the chunks to form the response.
  */
 export class ActionsClientChatOpenAI extends ChatOpenAI {
-  // set streaming to true always
-  streaming = true;
+  streaming: boolean;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
   protected llmType: string;
   // ChatOpenAI class needs these, but they do not matter as we override the openai client with the actions client
   azureOpenAIApiKey = '';
   openAIApiKey = '';
-  model?: string;
+  model: string;
   #temperature?: number;
 
   // Kibana variables
@@ -78,12 +77,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     maxRetries,
     model,
     signal,
+    streaming,
     temperature,
     timeout,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
-      streaming: true,
+      streaming,
       // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
       modelName: model ?? DEFAULT_OPEN_AI_MODEL,
       // these have to be initialized, but are not actually used since we override the openai client with the actions client
@@ -102,9 +102,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#request = request;
     this.#timeout = timeout;
     this.#actionResultData = '';
-    this.streaming = true;
+    this.streaming = streaming;
     this.#signal = signal;
-    this.model = model;
+    this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
     this.#temperature = temperature;
     // matters only for LangSmith logs (Metadata > Invocation Params)
@@ -138,10 +138,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   async completionWithRetry(
     completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
   ): Promise<AsyncIterable<ChatCompletionChunk> | ChatCompletion> {
-    if (!completionRequest.stream) {
-      // fallback for typescript, should never be hit
-      return super.completionWithRetry(completionRequest);
-    }
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
@@ -159,6 +155,35 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         throw new Error(`${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`);
       }
 
+      if (!this.streaming) {
+        const content = get('data.message', actionResult);
+        const usage = get('data.usage', actionResult);
+
+        if (typeof content !== 'string') {
+          throw new Error(
+            `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
+          );
+        }
+
+        const chatCompletion: ChatCompletion = {
+          id: 'doesntmatter',
+          created: Date.now(),
+          model: this.model,
+          object: 'chat.completion',
+          choices: [
+            {
+              finish_reason: 'stop',
+              index: 0,
+              logprobs: null,
+              message: { content, role: 'assistant' },
+            },
+          ],
+          usage,
+        };
+
+        return chatCompletion;
+      }
+
       // cast typing as this is the contract of the actions client
       const result = get('data', actionResult) as {
         consumerStream: Stream<ChatCompletionChunk>;
@@ -172,7 +197,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       return result.consumerStream;
     });
   }
-  formatRequestForActionsClient(completionRequest: ChatCompletionCreateParamsStreaming): {
+  formatRequestForActionsClient(
+    completionRequest: ChatCompletionCreateParamsNonStreaming | ChatCompletionCreateParamsStreaming
+  ): {
     actionId: string;
     params: {
       subActionParams: InvokeAIActionParamsSchema;
@@ -184,9 +211,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return {
       actionId: this.#connectorId,
       params: {
-        // stream must already be true here
         // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
-        subAction: 'invokeAsyncIterator',
+        subAction: completionRequest.stream ? 'invokeAsyncIterator' : 'invokeAI',
         subActionParams: {
           temperature: this.#temperature,
           // possible client model override
