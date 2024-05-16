@@ -452,10 +452,8 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       const { canReadSecurity, hasCompatibleRealms } =
         await this.props.securityFeaturesAPI.checkFeatures();
 
-      const canLoad = canReadSecurity || this.props.readOnly;
-
       this.setState({
-        loadState: canLoad ? this.state.loadState : 'permissionDenied',
+        loadState: canReadSecurity ? this.state.loadState : 'permissionDenied',
         hasCompatibleRealms,
       });
 

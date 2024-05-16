@@ -379,8 +379,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
       const { canReadSecurity, canUseStoredScripts, canUseInlineScripts, hasCompatibleRealms } =
         features;
 
-      const canLoad = canReadSecurity || this.props.readOnly;
-      const loadState: State['loadState'] = canLoad ? 'ready' : 'permissionDenied';
+      const loadState: State['loadState'] = canReadSecurity ? 'ready' : 'permissionDenied';
 
       this.setState({
         loadState,
