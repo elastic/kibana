@@ -76,7 +76,7 @@ export function SparkPlot({
   );
 }
 
-function SparkPlotItem({
+export function SparkPlotItem({
   type,
   color,
   isLoading,

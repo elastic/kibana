@@ -29,7 +29,8 @@ export const TABLE_ROW_ACTIONS = 'endpointTableRowActions';
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
 
 export const visitEndpointList = (): Cypress.Chainable => {
-  return cy.visit(pageById.endpointList.url);
+  cy.visit(pageById.endpointList.url);
+  return cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
 };
 
 /**
