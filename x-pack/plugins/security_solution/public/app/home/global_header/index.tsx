@@ -16,6 +16,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DataviewPicker } from '../../../dataview_picker';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
@@ -96,6 +97,7 @@ export const GlobalHeader = React.memo(() => {
             {showSourcerer && !showTimeline && (
               <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
             )}
+            <DataviewPicker />
             <AssistantHeaderLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
