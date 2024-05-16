@@ -21,7 +21,7 @@ export default {
 
 export const Default = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}}>
       <StoriesProvider>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
@@ -31,7 +31,7 @@ export const Default = () => {
 
 export const CreationError = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}}>
       <StoriesProviderKeyCreationError>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderKeyCreationError>
@@ -41,7 +41,7 @@ export const CreationError = () => {
 
 export const MissingPermissions = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}}>
       <StoriesProviderNoKeyPermissions>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderNoKeyPermissions>
