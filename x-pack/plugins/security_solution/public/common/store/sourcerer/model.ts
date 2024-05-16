@@ -108,11 +108,6 @@ export interface SelectedDataView {
   /** is an update being made to the data view */
   loading: boolean;
   /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
-  /**
    * @deprecated use sourcererDataView.runtimeMappings
    */
   runtimeMappings: SourcererDataView['runtimeMappings'];
