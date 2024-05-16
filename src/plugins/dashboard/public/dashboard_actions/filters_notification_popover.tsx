@@ -25,10 +25,10 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { FiltersNotificationActionApi } from './filters_notification_action';
-import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import { FiltersNotificationActionApi } from './filters_notification_action';
+import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -38,7 +38,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const [filters, query] = useBatchedPublishingSubjects(
     api.filters$ ?? new BehaviorSubject<undefined>(undefined),
-    api.query$ ?? new BehaviorSubject<undefined>(undefined))
+    api.query$ ?? new BehaviorSubject<undefined>(undefined)
+  );
 
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
