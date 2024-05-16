@@ -83,16 +83,14 @@ export const ConnectorSetup = ({
   }, []);
 
   return (
-    <div data-test-subj="prompt">
-      <AddConnectorModal
-        actionTypeRegistry={actionTypeRegistry}
-        actionTypes={actionTypes}
-        onClose={handleClose}
-        onSaveConnector={onSaveConnector}
-        onSelectActionType={setSelectedActionType}
-        selectedActionType={selectedActionType}
-        actionTypeSelectorInline={true}
-      />
-    </div>
+    <AddConnectorModal
+      actionTypeRegistry={actionTypeRegistry}
+      actionTypes={actionTypes}
+      onClose={handleClose}
+      onSaveConnector={onSaveConnector}
+      onSelectActionType={setSelectedActionType}
+      selectedActionType={selectedActionType}
+      actionTypeSelectorInline={true}
+    />
   );
 };
