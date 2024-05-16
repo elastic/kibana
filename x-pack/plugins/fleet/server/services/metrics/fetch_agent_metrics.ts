@@ -19,6 +19,10 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 export interface AgentMetrics {
   agents: AgentUsage;
   agents_per_version: AgentPerVersion[];
+  agents_per_privileges: {
+    root: number;
+    unprivileged: number;
+  };
   upgrading_step: UpgradingSteps;
   unhealthy_reason: UnhealthyReason;
 }
@@ -61,9 +65,11 @@ export const fetchAgentMetrics = async (
   const usage = {
     agents: await getAgentUsage(soClient, esClient),
     agents_per_version: await getAgentsPerVersion(esClient, abortController),
+    agents_per_privileges: await getAgentsPerPrivileges(esClient, abortController),
     upgrading_step: await getUpgradingSteps(esClient, abortController),
     unhealthy_reason: await getUnhealthyReason(esClient, abortController),
   };
+
   return usage;
 };
 
@@ -108,6 +114,68 @@ export const getAgentsPerVersion = async (
       throw error;
     }
     return [];
+  }
+};
+
+export const getAgentsPerPrivileges = async (
+  esClient: ElasticsearchClient,
+  abortController: AbortController
+): Promise<{ root: number; unprivileged: number }> => {
+  try {
+    const response = await retryTransientEsErrors(() =>
+      esClient.search<
+        unknown,
+        {
+          privileges: any;
+        }
+      >(
+        {
+          index: AGENTS_INDEX,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    active: 'true',
+                  },
+                },
+              ],
+            },
+          },
+          size: 0,
+          aggs: {
+            privileges: {
+              filters: {
+                other_bucket_key: 'unprivileged',
+                filters: {
+                  root: {
+                    match: {
+                      'local_metadata.elastic.agent.unprivileged': false,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        { signal: abortController.signal }
+      )
+    );
+
+    return {
+      root: response?.aggregations?.privileges?.buckets?.root?.doc_count ?? 0,
+      unprivileged: response?.aggregations?.privileges?.buckets?.unprivileged?.doc_count ?? 0,
+    };
+  } catch (error) {
+    if (error.statusCode === 404) {
+      appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
+    } else {
+      throw error;
+    }
+    return {
+      root: 0,
+      unprivileged: 0,
+    };
   }
 };
 
