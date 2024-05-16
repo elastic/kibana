@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 servers:
@@ -25,9 +25,18 @@ paths:
                 $ref: '#/components/schemas/RiskEngineStatusResponse'
 components:
   schemas:
-
+    RiskEngineStatus:
+      type: string
+      enum:
+        - 'NOT_INSTALLED'
+        - 'DISABLED'
+        - 'ENABLED'
     RiskEngineStatusResponse:
       type: object
+      required:
+        - legacy_risk_engine_status
+        - risk_engine_status
+        - is_max_amount_of_risk_engines_reached
       properties:
         legacy_risk_engine_status:
           $ref: '#/components/schemas/RiskEngineStatus'
@@ -36,10 +45,3 @@ components:
         is_max_amount_of_risk_engines_reached:
           description: Indicates whether the maximum amount of risk engines has been reached
           type: boolean
-
-    RiskEngineStatus:
-      type: string
-      enum:
-        - 'NOT_INSTALLED'
-        - 'DISABLED'
-        - 'ENABLED'
