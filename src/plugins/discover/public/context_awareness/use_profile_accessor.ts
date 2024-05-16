@@ -11,10 +11,9 @@ import { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useAppStateSelector } from '../application/main/state_management/discover_app_state_container';
 import { useInternalStateSelector } from '../application/main/state_management/discover_internal_state_container';
-import { useContainer } from '../application/main/state_management/discover_state_provider';
 import { useDiscoverServices } from '../hooks/use_discover_services';
-import { ComposableProfile, getMergedAccessor, Profile } from './composable_profile';
-import { dataSourceProfileService, documentProfileService, rootProfileService } from './profiles';
+import { getMergedAccessor, Profile } from './composable_profile';
+import { dataSourceProfileService, recordHasProfile, rootProfileService } from './profiles';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,
@@ -32,28 +31,14 @@ export const useProfileAccessor = <TKey extends keyof Profile>(
     () => dataSourceProfileService.resolve({ dataSource, dataView, query }),
     [dataSource, dataView, query]
   );
-  const stateContainer = useContainer();
-  const documents = useObservable(stateContainer?.dataState.data$.documents$!);
-  const documentContexts = useMemo(
-    () =>
-      (documents?.result ?? []).reduce(
-        (map, curr) => map.set(curr.id, documentProfileService.resolve({ record: curr })),
-        new Map<string, ComposableProfile>()
-      ),
-    [documents]
-  );
 
   return useMemo(() => {
     const profiles = [rootProfile, dataSourceProfile];
 
-    if (record) {
-      const documentContext = documentContexts.get(record.id);
-
-      if (documentContext) {
-        profiles.push(documentContext);
-      }
+    if (recordHasProfile(record)) {
+      profiles.push(record.profile);
     }
 
     return getMergedAccessor(profiles, key, baseImpl);
-  }, [rootProfile, dataSourceProfile, record, key, baseImpl, documentContexts]);
+  }, [rootProfile, dataSourceProfile, record, key, baseImpl]);
 };

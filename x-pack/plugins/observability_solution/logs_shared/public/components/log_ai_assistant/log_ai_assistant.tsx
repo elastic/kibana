@@ -51,7 +51,8 @@ export const LogAIAssistant = ({
       return undefined;
     }
 
-    const message = doc.fields.find((field) => field.field === 'message')?.value[0];
+    const messageValue = doc.fields.find((field) => field.field === 'message')?.value;
+    const message = Array.isArray(messageValue) ? messageValue[0] : messageValue;
 
     return getContextualInsightMessages({
       message: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the message field?`,

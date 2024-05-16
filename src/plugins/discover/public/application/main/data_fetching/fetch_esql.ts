@@ -15,8 +15,9 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DataTableRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
+import { DataTableRecordWithProfile, documentProfileService } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -56,7 +57,7 @@ export function fetchEsql(
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
-        let finalData: DataTableRecord[] = [];
+        let finalData: DataTableRecordWithProfile[] = [];
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
@@ -69,12 +70,21 @@ export function fetchEsql(
             const rows = table?.rows ?? [];
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map((row: Record<string, string>, idx: number) => {
-              return {
+            finalData = rows.map((row, idx) => {
+              const record: DataTableRecord = {
                 id: String(idx),
-                raw: row,
+                raw: {
+                  _id: '',
+                  _index: '',
+                  ...row,
+                },
                 flattened: row,
-              } as unknown as DataTableRecord;
+              };
+
+              return {
+                ...record,
+                profile: documentProfileService.resolve({ record }),
+              };
             });
           }
         });
@@ -91,7 +101,7 @@ export function fetchEsql(
         });
       }
       return {
-        records: [] as DataTableRecord[],
+        records: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
       };

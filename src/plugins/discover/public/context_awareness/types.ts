@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './profiles';
-export { useProfileAccessor } from './use_profile_accessor';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { ComposableProfile } from './composable_profile';
+import type { DocumentProfile } from './profiles';
+
+export interface DataTableRecordWithProfile extends DataTableRecord {
+  profile: ComposableProfile<DocumentProfile>;
+}
