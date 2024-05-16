@@ -42,10 +42,7 @@ export const createDatasetQuality = ({
 
     return (
       <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <SummaryPanelProvider
-          dataStreamStatsClient={dataStreamStatsClient}
-          toasts={core.notifications.toasts}
-        >
+        <SummaryPanelProvider>
           <KibanaContextProviderForPlugin>
             <DatasetQuality />
           </KibanaContextProviderForPlugin>

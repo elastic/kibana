@@ -80,6 +80,27 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerChainguard: Task = {
+  description: 'Creating Docker Chainguard image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'chainguard',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'chainguard',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
@@ -157,6 +178,12 @@ export const CreateDockerContexts: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       baseImage: 'ubuntu',
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'chainguard',
       context: true,
       image: false,
       dockerBuildDate,
