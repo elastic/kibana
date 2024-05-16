@@ -9,6 +9,9 @@ import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 import { CspClientPluginStartDeps } from '../types';
@@ -37,7 +40,10 @@ export const getMockServerServicesSetup = () => {
           search: async ({ params }: { params: any }) => {
             const response = await fetch('http://localhost/internal/bsearch', {
               method: 'POST',
-              body: params,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(params),
             });
             return response.json();
           },
@@ -48,7 +54,23 @@ export const getMockServerServicesSetup = () => {
             const response = await fetch(
               `http://localhost/internal/data_views/fields?pattern=${pattern}`
             );
-            return [response.json()];
+
+            const responseJson = await response.json();
+
+            const fields = responseJson.fields.reduce((acc: any, field: any) => {
+              acc[field.name] = field;
+              return acc;
+            }, {});
+
+            const dataView = createStubDataView({
+              spec: {
+                id: pattern,
+                title: pattern,
+                fields,
+              },
+            });
+
+            return [dataView];
           },
         },
       },
@@ -58,6 +80,14 @@ export const getMockServerServicesSetup = () => {
           const response = await fetch('http://localhost/api/licensing/info');
           const responseJson = await response.json();
           return licenseMock.createLicense(responseJson);
+        },
+      },
+      dataViewFieldEditor: dataViewFieldEditorMock.createStartContract(),
+      unifiedSearch: {
+        ...getMockDependencies().unifiedSearch,
+        ui: {
+          ...getMockDependencies().unifiedSearch.ui,
+          SearchBar,
         },
       },
     } as unknown as Partial<CspClientPluginStartDeps>,

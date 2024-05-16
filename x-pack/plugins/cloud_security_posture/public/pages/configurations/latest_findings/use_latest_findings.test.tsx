@@ -14,7 +14,7 @@ import {
   bsearchFindingsPageDefault,
   bsearchFindingsPageNoResults,
 } from '../../../test/handlers/bsearch/findings_page';
-import { jestSetup } from '../../../test/setup_server.test';
+import { setupMockServiceWorkerServer } from '../../../test/setup_server.test';
 
 jest.mock('rxjs', () => {
   const actual = jest.requireActual('rxjs');
@@ -29,7 +29,7 @@ jest.mock('rxjs', () => {
 const server = setupMockServiceWorker();
 
 describe('useLatestFindings hook', () => {
-  jestSetup(server);
+  setupMockServiceWorkerServer(server);
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     return <TestProvider {...getMockServerServicesSetup()}>{children}</TestProvider>;

@@ -12,7 +12,7 @@ import { SetupServerApi } from 'msw/lib/node';
  * That makes the describe code further down easier to read and makes
  * sure you don't forget the handlers. Can easily be shared between tests.
  */
-export const jestSetup = (server: SetupServerApi) => {
+export const setupMockServiceWorkerServer = (server: SetupServerApi) => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
   afterAll(() => server.close());
   beforeEach(() => {

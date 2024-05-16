@@ -55,6 +55,10 @@ export const FindingsSearchBar = ({
         onQuerySubmit={setQuery}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
+        query={{
+          query: '',
+          language: 'kuery',
+        }}
       />
     </div>
   );

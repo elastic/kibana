@@ -22,8 +22,6 @@ export const Vulnerabilities = () => {
 
   if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
-  console.log('dataViewData', dataViewQuery.data);
-
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,
     dataViewRefetch: dataViewQuery.refetch,

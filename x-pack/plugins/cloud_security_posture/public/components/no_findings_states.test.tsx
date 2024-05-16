@@ -12,9 +12,9 @@ import { NoFindingsStates } from './no_findings_states';
 import {
   cspmStatusNotInstalled,
   cspmStatusCspmNotDeployed,
-} from '../test/handlers/cspm_status_handlers';
+} from '../test/handlers/status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../test/mock_server';
-import { jestSetup } from '../test/setup_server.test';
+import { setupMockServiceWorkerServer } from '../test/setup_server.test';
 
 const server = setupMockServiceWorker(true);
 
@@ -23,7 +23,7 @@ const renderWrapper = (children: React.ReactNode) => {
 };
 
 describe('NoFindingsStates', () => {
-  jestSetup(server);
+  setupMockServiceWorkerServer(server);
 
   describe('Posture Type CSPM', () => {
     it('renders the not-installed component', async () => {

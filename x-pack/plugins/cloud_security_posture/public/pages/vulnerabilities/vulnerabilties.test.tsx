@@ -19,30 +19,46 @@ import {
   cspmStatusCspmNotDeployed,
   cspmStatusIndexingTimeout,
   cspmStatusUnprivileged,
-  cnvmStatusIndexed,
-} from '../../test/handlers/cspm_status_handlers';
+  cspmStatusIndexed,
+} from '../../test/handlers/status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../../test/mock_server';
-import { jestSetup } from '../../test/setup_server.test';
+import { setupMockServiceWorkerServer } from '../../test/setup_server.test';
+import { bsearchVulnerabilitiesPageDefault } from '../../test/handlers/bsearch/vulnerabilities_page';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+import { findingsNavigation } from '../../common/navigation/constants';
 
 const server = setupMockServiceWorker(true);
+
+jest.mock('rxjs', () => {
+  const actual = jest.requireActual('rxjs');
+  return {
+    ...actual,
+    lastValueFrom: async (source: any) => {
+      const value = await source;
+      return value.result;
+    },
+  };
+});
 
 const renderVulnerabilitiesPage = () => {
   return render(
     <TestProvider {...getMockServerServicesSetup()}>
-      <Vulnerabilities />
+      <MemoryRouter initialEntries={[findingsNavigation.vulnerabilities.path]}>
+        <Vulnerabilities />
+      </MemoryRouter>
     </TestProvider>
   );
 };
 
 describe('<Vulnerabilities />', () => {
-  jestSetup(server);
+  setupMockServiceWorkerServer(server);
 
   it('No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ', async () => {
     server.use(cspmStatusCspmNotDeployed);
 
     const { getByText } = renderVulnerabilitiesPage();
 
-    await expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...')).toBeInTheDocument();
     await waitFor(() => expect(getByText('No Agents Installed')).toBeInTheDocument());
 
     expectIdsInDoc({
@@ -60,7 +76,7 @@ describe('<Vulnerabilities />', () => {
     server.use(cspmStatusIndexing);
 
     const { getByText } = renderVulnerabilitiesPage();
-    await expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...')).toBeInTheDocument();
     await waitFor(() => expect(getByText('Scanning your environment')).toBeInTheDocument());
 
     expectIdsInDoc({
@@ -77,7 +93,7 @@ describe('<Vulnerabilities />', () => {
     server.use(cspmStatusIndexingTimeout);
     const { getByText } = renderVulnerabilitiesPage();
 
-    await expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...')).toBeInTheDocument();
     await waitFor(() => expect(getByText('Findings Delayed')).toBeInTheDocument());
 
     expectIdsInDoc({
@@ -94,7 +110,7 @@ describe('<Vulnerabilities />', () => {
     server.use(cspmStatusUnprivileged);
     const { getByText } = renderVulnerabilitiesPage();
 
-    await expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...')).toBeInTheDocument();
     await waitFor(() => expect(getByText('Privileges required')).toBeInTheDocument());
 
     expectIdsInDoc({
@@ -107,18 +123,11 @@ describe('<Vulnerabilities />', () => {
     });
   });
 
-  // it("renders the success state component when 'latest vulnerabilities findings' DataView exists and request status is 'success'", async () => {
-  //   const { getByText } = renderVulnerabilitiesPage();
-
-  //   await expect(getByText('Loading...')).toBeInTheDocument();
-  //   await waitFor(() => expect(getByText('Privileges required')).toBeInTheDocument());
-  // });
-
   it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', async () => {
     server.use(cspmStatusNotInstalled);
     const { getByText } = renderVulnerabilitiesPage();
 
-    await expect(getByText('Loading...')).toBeInTheDocument();
+    expect(getByText('Loading...')).toBeInTheDocument();
     await waitFor(() =>
       expect(getByText('Install Cloud Native Vulnerability Management')).toBeInTheDocument()
     );
@@ -134,13 +143,27 @@ describe('<Vulnerabilities />', () => {
   });
 
   it('renders the success state component when "latest vulnerabilities findings" DataView exists and request status is "success"', async () => {
-    server.use(cnvmStatusIndexed);
+    server.use(cspmStatusIndexed);
+    server.use(bsearchVulnerabilitiesPageDefault);
+    const { getByText, getByTestId } = renderVulnerabilitiesPage();
 
-    const { getByText, getByTestId, debug } = renderVulnerabilitiesPage();
+    // Loading while checking the status API
+    expect(getByText('Loading...')).toBeInTheDocument();
 
-    await expect(getByText('Loading...')).toBeInTheDocument();
-    await expect(getByText('Loading...')).not.toBeInTheDocument();
-    debug();
     await waitFor(() => expect(getByTestId('latest_vulnerabilities_table')).toBeInTheDocument());
+    // Loading while fetching the latest vulnerabilities
+    expect(getByText('Loading results')).toBeInTheDocument();
+
+    await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+
+    expect(getByText('CVE-2024-23652')).toBeInTheDocument();
+    expect(getByText('10')).toBeInTheDocument();
+    expect(getByText('v3')).toBeInTheDocument();
+    expect(getByText('ofloros-azure-test')).toBeInTheDocument();
+    expect(getByText('02e91040625827652')).toBeInTheDocument();
+    expect(getByText('CRITICAL')).toBeInTheDocument();
+    expect(getByText('github.com/moby/buildkit')).toBeInTheDocument();
+    expect(getByText('v0.11.5')).toBeInTheDocument();
+    expect(getByText('0.12.5')).toBeInTheDocument();
   });
 });

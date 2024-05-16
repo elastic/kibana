@@ -1,0 +1,191 @@
+{
+  "id": 0,
+  "result": {
+    "rawResponse": {
+      "took": 3,
+      "timed_out": false,
+      "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": 1,
+        "max_score": null,
+        "hits": [
+          {
+            "_index": "logs-cloud_security_posture.vulnerabilities_latest-default",
+            "_id": "MENndiSV-Xq4A-LwDbWCMO2pcDYAAAAA",
+            "_score": null,
+            "_source": {
+              "agent": {
+                "name": "ip-172-31-22-37.eu-west-1.compute.internal",
+                "id": "4ba1e91a-e431-45ec-bbf3-37fa3ceee10a",
+                "type": "cloudbeat",
+                "ephemeral_id": "75fe4e26-48e8-4071-8fac-c70808aaf626",
+                "version": "8.13.2"
+              },
+              "package": {
+                "path": "opt/Elastic/Agent/data/elastic-agent-2ff5f6/components/cloudbeat",
+                "fixed_version": "0.12.5",
+                "name": "github.com/moby/buildkit",
+                "type": "gobinary",
+                "version": "v0.11.5"
+              },
+              "resource": {
+                "name": "ofloros-azure-test",
+                "id": "02e91040625827652"
+              },
+              "cloud_security_posture": {
+                "package_policy": {
+                  "id": "538b0ddc-a215-46e4-86b3-adb3fba23a73",
+                  "revision": 5
+                }
+              },
+              "elastic_agent": {
+                "id": "4ba1e91a-e431-45ec-bbf3-37fa3ceee10a",
+                "version": "8.13.2",
+                "snapshot": false
+              },
+              "vulnerability": {
+                "severity": "CRITICAL",
+                "package": {
+                  "fixed_version": "0.12.5",
+                  "name": "github.com/moby/buildkit",
+                  "version": "v0.11.5"
+                },
+                "description": "BuildKit is a toolkit for converting source code to build artifacts in an efficient, expressive and repeatable manner. A malicious BuildKit frontend or Dockerfile using RUN --mount could trick the feature that removes empty files created for the mountpoints into removing a file outside the container, from the host system. The issue has been fixed in v0.12.5. Workarounds include avoiding using BuildKit frontends from an untrusted source or building an untrusted Dockerfile containing RUN --mount feature.",
+                "title": "moby/buildkit: possible host system access from mount stub cleaner",
+                "classification": "CVSS",
+                "data_source": {
+                  "ID": "ghsa",
+                  "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago",
+                  "Name": "GitHub Security Advisory Go"
+                },
+                "cwe": ["CWE-22"],
+                "reference": "https://nvd.nist.gov/vuln/detail/CVE-2024-23652",
+                "score": {
+                  "version": "3.1",
+                  "base": 10
+                },
+                "report_id": 1715599993,
+                "scanner": {
+                  "vendor": "Trivy",
+                  "version": "v0.35.0"
+                },
+                "id": "CVE-2024-23652",
+                "category": "lang-pkgs",
+                "enumeration": "CVE",
+                "published_date": "2024-01-31T22:15:54.377Z",
+                "cvss": {
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:H/A:H",
+                    "V3Score": 7.8
+                  },
+                  "nvd": {
+                    "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+                    "V3Score": 9.1
+                  },
+                  "ghsa": {
+                    "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:H",
+                    "V3Score": 10
+                  }
+                },
+                "class": "lang-pkgs"
+              },
+              "network": {
+                "Mac_addresses": ["02:a9:23:e6:54:85"],
+                "Private_ip": "172.31.13.6",
+                "Public_ip": "34.243.42.57"
+              },
+              "cloud": {
+                "availability_zone": "eu-west-1a",
+                "instance": {
+                  "name": "ofloros-azure-test",
+                  "id": "02e91040625827652"
+                },
+                "provider": "aws",
+                "service": {
+                  "name": "AWS EC2"
+                },
+                "machine": {
+                  "Authentication": {
+                    "key": "ofloros-key"
+                  },
+                  "Launch_time": "2023-10-30T11:00:28Z",
+                  "type": "t2.micro",
+                  "Image": "ami-046a9f26a7f14326b"
+                },
+                "region": "eu-west-1",
+                "Security": {
+                  "security_groups": [
+                    {
+                      "group_id": "sg-05e2fcf68ad30cc5a",
+                      "group_name": "launch-wizard-85"
+                    }
+                  ]
+                },
+                "account": {
+                  "name": "elastic-security-cloud-security-dev",
+                  "id": "704479110758"
+                },
+                "Tags": {
+                  "division": "engineering",
+                  "org": "security",
+                  "project": "cloudformation",
+                  "team": "cloud-security",
+                  "Name": "ofloros-azure-test"
+                }
+              },
+              "@timestamp": "2024-05-13T11:47:59.182Z",
+              "cloudbeat": {
+                "commit_time": "0001-01-01T00:00:00Z",
+                "version": "8.13.2",
+                "policy": {}
+              },
+              "ecs": {
+                "version": "8.6.0"
+              },
+              "data_stream": {
+                "namespace": "default",
+                "type": "logs",
+                "dataset": "cloud_security_posture.vulnerabilities"
+              },
+              "host": {
+                "os": {
+                  "platform": "Linux/UNIX"
+                },
+                "name": "ofloros-azure-test",
+                "architecture": "x86_64"
+              },
+              "event": {
+                "agent_id_status": "auth_metadata_missing",
+                "sequence": 1715599993,
+                "ingested": "2024-05-13T16:48:53Z",
+                "created": "2024-05-13T11:47:59.182624233Z",
+                "kind": "state",
+                "id": "65a8bbf6-f37c-4cc3-ac2c-fe51733759de",
+                "type": ["info"],
+                "category": ["vulnerability"],
+                "dataset": "cloud_security_posture.vulnerabilities",
+                "outcome": "success"
+              }
+            },
+            "sort": ["CRITICAL", 10]
+          }
+        ]
+      }
+    },
+    "isPartial": false,
+    "isRunning": false,
+    "requestParams": {
+      "method": "POST",
+      "path": "/logs-cloud_security_posture.vulnerabilities_latest*/_async_search",
+      "querystring": "batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true"
+    },
+    "total": 1,
+    "loaded": 1,
+    "isRestored": false
+  }
+}

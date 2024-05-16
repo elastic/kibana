@@ -163,11 +163,11 @@ export const cspmStatusIndexing = http.get(
         },
         {
           index: 'logs-cloud_security_posture.findings-default*',
-          status: 'empty',
+          status: 'not-empty',
         },
         {
           index: 'logs-cloud_security_posture.scores-default',
-          status: 'not-empty',
+          status: 'empty',
         },
         {
           index: 'logs-cloud_security_posture.vulnerabilities_latest-default',
@@ -227,12 +227,12 @@ export const cspmStatusUnprivileged = http.get(
   () => {
     return HttpResponse.json({
       cspm: {
-        status: 'installed',
+        status: 'unprivileged',
         healthyAgents: 0,
         installedPackagePolicies: 0,
       },
       kspm: {
-        status: 'installed',
+        status: 'unprivileged',
         healthyAgents: 0,
         installedPackagePolicies: 0,
       },
@@ -265,7 +265,7 @@ export const cspmStatusUnprivileged = http.get(
   }
 );
 
-export const cnvmStatusIndexed = http.get(
+export const cspmStatusIndexed = http.get(
   'http://localhost/internal/cloud_security_posture/status',
   () => {
     return HttpResponse.json({
@@ -275,7 +275,7 @@ export const cnvmStatusIndexed = http.get(
         installedPackagePolicies: 1,
       },
       kspm: {
-        status: 'not-installed',
+        status: 'indexed',
         healthyAgents: 0,
         installedPackagePolicies: 0,
       },

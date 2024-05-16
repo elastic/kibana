@@ -5,246 +5,192 @@
  * 2.0.
  */
 import React from 'react';
-import Chance from 'chance';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { of } from 'rxjs';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
-import * as TEST_SUBJECTS from './test_subjects';
-import type { DataView } from '@kbn/data-plugin/common';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { render } from '@testing-library/react';
-import { expectIdsInDoc } from '../../test/utils';
-import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { render, waitFor } from '@testing-library/react';
+import { getMockServerServicesSetup, setupMockServiceWorker } from '../../test/mock_server';
+import {
+  cspmStatusCspmNotDeployed,
+  cspmStatusIndexed,
+  cspmStatusIndexing,
+  cspmStatusIndexingTimeout,
+  cspmStatusNotInstalled,
+  cspmStatusUnprivileged,
+} from '../../test/handlers/status_handlers';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+import { findingsNavigation } from '../../common/navigation/constants';
+import { setupMockServiceWorkerServer } from '../../test/setup_server.test';
+import { bsearchFindingsPageDefault } from '../../test/handlers/bsearch/findings_page';
+import userEvent from '@testing-library/user-event';
 
-jest.mock('../../common/api/use_latest_findings_data_view');
-jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
-jest.mock('../../common/navigation/use_csp_integration_link');
-
-const chance = new Chance();
-
-beforeEach(() => {
-  jest.clearAllMocks();
-
-  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-    createReactQueryResponse({
-      status: 'success',
-      data: true,
-    })
-  );
-
-  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-    createReactQueryResponse({
-      status: 'success',
-      data: true,
-    })
-  );
+jest.mock('rxjs', () => {
+  const actual = jest.requireActual('rxjs');
+  return {
+    ...actual,
+    lastValueFrom: async (source: any) => {
+      const value = await source;
+      return value.result;
+    },
+  };
 });
 
 const renderFindingsPage = () => {
-  render(
-    <TestProvider>
-      <Configurations />
+  return render(
+    <TestProvider {...getMockServerServicesSetup()}>
+      <MemoryRouter initialEntries={[findingsNavigation.findings_default.path]}>
+        <Configurations />
+      </MemoryRouter>
     </TestProvider>
   );
 };
 
+const server = setupMockServiceWorker(true);
+
 describe('<Findings />', () => {
-  it('no findings state: not-deployed - shows NotDeployed instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'not-deployed' },
-          cspm: { status: 'not-deployed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: indexing - shows Indexing instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'indexing' },
-          cspm: { status: 'indexing' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: index-timeout - shows IndexTimeout instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'index-timeout' },
-          cspm: { status: 'index-timeout' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: unprivileged - shows Unprivileged instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'unprivileged' },
-          cspm: { status: 'unprivileged' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-      ],
-    });
-  });
-
-  it("renders the success state component when 'latest findings' DataView exists and request status is 'success'", async () => {
-    const source = await dataPluginMock.createStartContract().search.searchSource.create();
-
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      status: 'success',
-      data: {
-        kspm: { status: 'indexed' },
-        cspm: { status: 'indexed' },
-        indicesDetails: [
-          { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
-          { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-        ],
-      },
-    }));
-    (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
-
-    (useLatestFindingsDataView as jest.Mock).mockReturnValue({
-      status: 'success',
-      data: createStubDataView({
-        spec: {
-          id: CSP_LATEST_FINDINGS_DATA_VIEW,
-        },
-      }),
-    } as UseQueryResult<DataView>);
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER],
-      notToBe: [
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
+  setupMockServiceWorkerServer(server);
 
   it('renders integrations installation prompt if integration is not installed', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'not-installed' },
-          cspm: { status: 'not-installed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-    renderFindingsPage();
+    server.use(cspmStatusNotInstalled);
+    const { getByText } = renderFindingsPage();
 
-    expectIdsInDoc({
-      be: [PACKAGE_NOT_INSTALLED_TEST_SUBJECT],
-      notToBe: [
-        TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
+    expect(getByText('Loading...')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Add CSPM Integration')).toBeInTheDocument());
+    expect(getByText('Add KSPM Integration')).toBeInTheDocument();
+  });
+
+  it('no findings state: not-deployed - shows NotDeployed instead of findings', async () => {
+    server.use(cspmStatusCspmNotDeployed);
+
+    const { getByText } = renderFindingsPage();
+
+    expect(getByText('Loading...')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('No Agents Installed')).toBeInTheDocument());
+  });
+
+  it('no findings state: indexing - shows Indexing instead of findings', async () => {
+    server.use(cspmStatusIndexing);
+
+    const { getByText } = renderFindingsPage();
+    expect(getByText('Loading...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByText('Posture evaluation underway')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Waiting for data to be collected and indexed. Check back later to see your findings'
+        )
+      ).toBeInTheDocument();
     });
   });
+
+  it('no findings state: index-timeout - shows IndexTimeout instead of findings', async () => {
+    server.use(cspmStatusIndexingTimeout);
+
+    const { getByText } = renderFindingsPage();
+    expect(getByText('Loading...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByText('Waiting for Findings data')).toBeInTheDocument();
+      expect(
+        getByText('Collecting findings is taking longer than expected.', { exact: false })
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('no findings state: unprivileged - shows Unprivileged instead of findings', async () => {
+    server.use(cspmStatusUnprivileged);
+
+    const { getByText } = renderFindingsPage();
+    expect(getByText('Loading...')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Privileges required')).toBeInTheDocument());
+  });
+
+  it("renders the 'latest findings' DataTable component when the status is 'indexed'", async () => {
+    server.use(cspmStatusIndexed);
+    server.use(bsearchFindingsPageDefault);
+    const { getByText, getByTestId, getAllByText } = renderFindingsPage();
+
+    // Loading while checking the status API
+    expect(getByText('Loading...')).toBeInTheDocument();
+
+    await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
+    await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+    // Loading while fetching the latest findings
+    // TODO: currently it shows the empty component while syncing the rules states api with the latest hooks
+    // Uncomment this line when the rules states api is in sync with the latest hooks
+    // It's visible when setting internet connection to Slow 3G
+    // expect(getByText('Loading results')).toBeInTheDocument();
+
+    expect(
+      getAllByText(
+        '/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df/resourceGroups/AMIR-QA-RG/providers/Microsoft.Compute/disks/cloudbeatVM_OsDisk_1_e9c9210de1ea4c39973052db6cf95f9b'
+      )
+    ).toHaveLength(2);
+    expect(getAllByText('cloudbeatVM_OsDisk_1_e9c9210de1ea4c39973052db6cf95f9b')).toHaveLength(2);
+    expect(getAllByText('azure-disk')).toHaveLength(2);
+
+    expect(getAllByText('Virtual Machines')).toHaveLength(1);
+    expect(
+      getAllByText(`Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK)`)
+    ).toHaveLength(1);
+    expect(getAllByText('7.3')).toHaveLength(1);
+
+    expect(getAllByText('Logging and Monitoring')).toHaveLength(1);
+    expect(
+      getAllByText(
+        'Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)'
+      )
+    ).toHaveLength(1);
+    expect(getAllByText('5.5')).toHaveLength(1);
+  });
+
+  describe('SearchBar', () => {
+    it('set search query', async () => {
+      server.use(cspmStatusIndexed);
+      server.use(bsearchFindingsPageDefault);
+      const { getByText, getByTestId, getAllByText } = renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(getByText('Loading...')).toBeInTheDocument();
+
+      await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+
+      expect(getAllByText('azure-disk')).toHaveLength(2);
+
+      const queryInput = getByTestId('queryInput');
+      userEvent.type(queryInput, 'rule.section : "Logging and Monitoring"');
+
+      const submitButton = getByTestId('querySubmitButton');
+      userEvent.click(submitButton);
+
+      await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
+    });
+  });
+  // describe('Flyout', () => {
+  //   it('Opens the findings flyout', async () => {
+  //     server.use(cspmStatusIndexed);
+  //     server.use(bsearchFindingsPageDefault);
+  //     const { getByText, getByTestId, getAllByText, debug } = renderFindingsPage();
+
+  //     // Loading while checking the status API
+  //     expect(getByText('Loading...')).toBeInTheDocument();
+
+  //     await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
+  //     await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
+  //     await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+
+  //     expect(getAllByText('azure-disk')).toHaveLength(2);
+
+  //     debug(undefined, 9999999);
+  //     const queryInput = getByTestId('queryInput');
+  //     userEvent.type(queryInput, 'rule.section : "Logging and Monitoring"');
+
+  //     const submitButton = getByTestId('querySubmitButton');
+  //     userEvent.click(submitButton);
+
+  //     await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
+  //   });
+  // });
 });
