@@ -8,6 +8,7 @@
 import React from 'react';
 import { noop } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
@@ -21,6 +22,8 @@ import { ExecutionLogTable } from './execution_log_table';
 jest.mock('../../../../../common/containers/sourcerer');
 jest.mock('../../../../rule_monitoring/components/execution_results_table/use_execution_results');
 jest.mock('../rule_details_context');
+
+const coreStart = coreMock.createStart();
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 mockUseSourcererDataView.mockReturnValue({
@@ -42,7 +45,7 @@ describe('ExecutionLogTable', () => {
   test('Shows total events returned', () => {
     const ruleDetailsContext = useRuleDetailsContextMock.create();
     (useRuleDetailsContext as jest.Mock).mockReturnValue(ruleDetailsContext);
-    render(<ExecutionLogTable ruleId={'0'} selectAlertsTab={noop} />, {
+    render(<ExecutionLogTable ruleId={'0'} selectAlertsTab={noop} {...coreStart} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByTestId('executionsShowing')).toHaveTextContent('Showing 7 rule executions');
