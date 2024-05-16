@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { KbnClient } from '@kbn/test';
 import { deleteAllAlertingData } from '../../../../common/lib/delete_all_alerting_data';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -18,10 +19,18 @@ const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
   supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertestWithoutAuth: any,
+  kbnServer: KbnClient
 ) => {
   describe(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+    beforeEach(async () => {
+      await deleteAllAlertingData({ kbnServer });
+    });
+
+    afterEach(async () => {
+      await objectRemover.removeAll();
+      await deleteAllAlertingData({ kbnServer });
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -194,14 +203,6 @@ const findTestUtils = (
             )
             .auth(user.username, user.password);
 
-          const responseAll = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find?per_page=1000&sort_field=createdAt`
-            )
-            .auth(user.username, user.password);
-
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
@@ -231,7 +232,6 @@ const findTestUtils = (
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              console.log('----------', JSON.stringify(responseAll.body), '----------');
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.equal(perPage);
@@ -668,16 +668,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    before(async () => {
-      await deleteAllAlertingData({ kbnServer });
-    });
-
-    afterEach(async () => {
-      await objectRemover.removeAll();
-      await deleteAllAlertingData({ kbnServer });
-    });
-
-    findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
-    findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
+    findTestUtils('public', objectRemover, supertest, supertestWithoutAuth, kbnServer);
+    findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth, kbnServer);
   });
 }
