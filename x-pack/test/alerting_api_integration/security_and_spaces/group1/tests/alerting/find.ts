@@ -674,9 +674,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await objectRemover.removeAll();
-    });
-
-    after(async () => {
       await deleteAllAlertingData({ kbnServer });
     });
 
