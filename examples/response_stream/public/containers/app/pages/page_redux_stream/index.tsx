@@ -102,13 +102,19 @@ export const PageReduxStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton
+            data-test-subj="responseStreamStartButton"
+            color="primary"
+            size="s"
+            onClick={onClickHandler}
+            aria-label={buttonLabel}
+          >
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiBadge>{progress}%</EuiBadge>
+            <EuiBadge data-test-subj="responseStreamProgressBadge">{progress}%</EuiBadge>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -118,7 +124,9 @@ export const PageReduxStream: FC = () => {
       <EuiSpacer />
       <BarChartRace entities={entities} />
       <EuiText>
-        <p>{getStatusMessage(isRunning, isCancelled, progress)}</p>
+        <p data-test-subj="responseStreamStatusMessage">
+          {getStatusMessage(isRunning, isCancelled, progress)}
+        </p>
         <EuiCheckbox
           id="responseStreamSimulateErrorsCheckbox"
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
