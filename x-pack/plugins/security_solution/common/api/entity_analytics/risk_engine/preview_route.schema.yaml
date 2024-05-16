@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 servers:
@@ -40,30 +40,28 @@ components:
       required:
         - data_view_id
       properties:
+        data_view_id:
+          $ref: '../common/common.schema.yaml#/components/schemas/DataViewId'
+          description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
         after_keys:
           description: Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-          allOf:
-            - $ref: 'common.yml#/components/schemas/AfterKeys'
-        data_view_id:
-          $ref: 'common.yml#/components/schemas/DataViewId'
-          description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
+          $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
         debug:
           description: If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
           type: boolean
         filter:
-          $ref: 'common.yml#/components/schemas/Filter'
+          $ref: '../common/common.schema.yaml#/components/schemas/Filter'
           description: An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
         page_size:
-          $ref: 'common.yml#/components/schemas/PageSize'
+          $ref: '../common/common.schema.yaml#/components/schemas/PageSize'
         identifier_type:
           description: Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
-          allOf:
-            - $ref: 'common.yml#/components/schemas/IdentifierType'
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
         range:
-          $ref: 'common.yml#/components/schemas/DateRange'
+          $ref: '../common/common.schema.yaml#/components/schemas/DateRange'
           description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
         weights:
-          $ref: 'common.yml#/components/schemas/RiskScoreWeights'
+          $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreWeights'
 
     RiskScoresPreviewResponse:
       type: object
@@ -74,7 +72,7 @@ components:
         after_keys:
           description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
           allOf:
-            - $ref: 'common.yml#/components/schemas/AfterKeys'
+            - $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
         debug:
           description: Object containing debug information, particularly the internal request and response from elasticsearch
           type: object
@@ -84,7 +82,15 @@ components:
             response:
               type: string
         scores:
-          type: array
-          description: A list of risk scores
-          items:
-            $ref: 'common.yml#/components/schemas/RiskScore'
+          type: object
+          properties:
+            host:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of host risk scores
+            user:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of user risk scores
