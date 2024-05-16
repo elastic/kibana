@@ -108,7 +108,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    docLinks,
     getComments,
     http,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
@@ -831,7 +830,6 @@ const AssistantComponent: React.FC<Props> = ({
                 <AssistantHeader
                   selectedConversation={currentConversation}
                   defaultConnector={defaultConnector}
-                  docLinks={docLinks}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
                   onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}

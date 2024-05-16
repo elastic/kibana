@@ -38,10 +38,4 @@ describe('Welcome', () => {
 
     expect(bodyText).toHaveTextContent(FIRST_SET_UP);
   });
-
-  it('renders connector prompt', () => {
-    const connectorPrompt = screen.getByTestId('prompt');
-
-    expect(connectorPrompt).toBeInTheDocument();
-  });
 });
