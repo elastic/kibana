@@ -11,10 +11,7 @@ import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getSlackAction } from '..';
 import { getWebHookAction } from '..';
 
-const createConnector = async (
-  supertest: SuperTest.Agent,
-  payload: Record<string, unknown>
-) =>
+const createConnector = async (supertest: SuperTest.Agent, payload: Record<string, unknown>) =>
   (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
     .body;
 const createWebHookConnector = (supertest: SuperTest.Agent) =>

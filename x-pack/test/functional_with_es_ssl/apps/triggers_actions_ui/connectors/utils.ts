@@ -48,10 +48,7 @@ export const createSlackConnector = async ({
   return connector;
 };
 
-export const getConnectorByName = async (
-  name: string,
-  supertest: SuperTest.Agent
-) => {
+export const getConnectorByName = async (name: string, supertest: SuperTest.Agent) => {
   const { body } = await supertest
     .get(`/api/actions/connectors`)
     .set('kbn-xsrf', 'foo')
@@ -109,10 +106,7 @@ async function createAlwaysFiringRule(
   return createdRule;
 }
 
-export async function getAlertSummary(
-  ruleId: string,
-  supertest: SuperTest.Agent
-) {
+export async function getAlertSummary(ruleId: string, supertest: SuperTest.Agent) {
   const { body: summary } = await supertest
     .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
     .expect(200);

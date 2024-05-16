@@ -484,10 +484,7 @@ export const getLegacyRiskScoreDashboards = async ({
   return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
 };
 
-export const riskEngineRouteHelpersFactory = (
-  supertest: SuperTest.Agent,
-  namespace?: string
-) => ({
+export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => ({
   init: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
@@ -579,11 +576,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
       .expect(expectStatusCode),
 });
 
-export const installLegacyRiskScore = async ({
-  supertest,
-}: {
-  supertest: SuperTest.Agent;
-}) => {
+export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
