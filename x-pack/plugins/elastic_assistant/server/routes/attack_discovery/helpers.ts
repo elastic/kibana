@@ -37,6 +37,7 @@ export const getAssistantToolParams = ({
   alertsIndexPattern,
   anonymizationFields,
   esClient,
+  langChainTimeout,
   latestReplacements,
   llm,
   onNewReplacements,
@@ -46,6 +47,7 @@ export const getAssistantToolParams = ({
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
+  langChainTimeout: number;
   latestReplacements: Replacements;
   llm: ActionsClientLlm;
   onNewReplacements: (newReplacements: Replacements) => void;
@@ -61,6 +63,7 @@ export const getAssistantToolParams = ({
   isEnabledKnowledgeBase: false, // not required for attack discovery
   chain: undefined, // not required for attack discovery
   esClient,
+  langChainTimeout,
   llm,
   modelExists: false, // not required for attack discovery
   onNewReplacements,
