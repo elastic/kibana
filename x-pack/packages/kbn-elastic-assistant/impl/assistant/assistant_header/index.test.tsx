@@ -30,6 +30,7 @@ const testProps: AssistantHeaderProps = {
   showAnonymizedValues: false,
   conversations: mockConversations,
   refetchConversationsState: jest.fn(),
+  isAssistantEnabled: true,
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({
