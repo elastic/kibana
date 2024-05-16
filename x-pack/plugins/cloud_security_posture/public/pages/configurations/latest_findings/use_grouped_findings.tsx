@@ -99,8 +99,6 @@ export const useGroupedFindings = ({
         })
       );
 
-      console.log('aggregations:', aggregations);
-
       if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
 
       return aggregations;

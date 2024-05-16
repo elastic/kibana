@@ -125,6 +125,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     notifications: { toasts },
   } = useKibana().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+
   /**
    * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
    * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array

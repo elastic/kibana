@@ -91,8 +91,6 @@ export class Fetch {
           this.interceptors,
           controller
         );
-
-        // console.log('fetch', interceptedOptions);
         const initialResponse = this.fetchResponse(interceptedOptions);
 
         const interceptedResponse = await interceptResponse(
@@ -108,7 +106,6 @@ export class Fetch {
           resolve(interceptedResponse.body as TResponseBody);
         }
       } catch (error) {
-        console.log('fetch error', error);
         if (!(error instanceof HttpInterceptHaltError)) {
           reject(error);
         }
@@ -119,11 +116,9 @@ export class Fetch {
   };
 
   private createRequest(options: HttpFetchOptionsWithPath): Request {
-    // console.log('withGlobalContext', options.context);
-    // console.log('params.executionContext', this.params.executionContext);
     const context = this.params.executionContext.withGlobalContext(options.context);
     const { version } = options;
-    // console.log('createRequest', options, context, version);
+
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -158,24 +153,20 @@ export class Fetch {
     if (asSystemRequest) {
       fetchOptions.headers['kbn-system-request'] = 'true';
     }
-    // console.log('createRequest', url, fetchOptions);
+
     return new Request(url, fetchOptions as RequestInit);
   }
 
   private async fetchResponse(
     fetchOptions: HttpFetchOptionsWithPath
   ): Promise<HttpResponse<unknown>> {
-    // console.log('fetchResponse fetchOptions', fetchOptions);
     const request = this.createRequest(fetchOptions);
-    // console.log('fetchResponse createRequest', request);
     let response: Response;
     let body = null;
 
     try {
       response = await window.fetch(request);
-      // console.log('fetchResponse after', response);
     } catch (err) {
-      // console.log('fetchResponse error', err);
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
 

@@ -28,15 +28,10 @@ export const fromStreamingXhr = (
   const isErrorStatus = () => xhr.status === 0 || xhr.status >= 400;
 
   const processBatch = () => {
-    console.log('processBatch');
     if (aborted) return;
     if (isErrorStatus()) return;
 
     const { responseText } = xhr;
-    console.log('xhr', xhr);
-    console.log('responseText', responseText);
-    console.log('index', index);
-    console.log('responseText.length', responseText.length);
     if (index >= responseText.length) return;
     subject.next(responseText.substr(index));
     index = responseText.length;
@@ -67,10 +62,8 @@ export const fromStreamingXhr = (
       if (signal) signal.removeEventListener('abort', onBatchAbort);
 
       if (isErrorStatus()) {
-        console.log('isErrorStatus', isErrorStatus());
         subject.error(new BfetchRequestError(xhr.status));
       } else {
-        console.log('subject.complete', 'subject.complete');
         subject.complete();
       }
     }

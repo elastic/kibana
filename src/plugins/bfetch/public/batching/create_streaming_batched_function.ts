@@ -139,7 +139,6 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
 
         stream.subscribe({
           next: (json: string) => {
-            console.log('json', json);
             try {
               const response = JSON.parse(json);
               if (response.error) {
