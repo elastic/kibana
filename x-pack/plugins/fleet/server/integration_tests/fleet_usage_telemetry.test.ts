@@ -482,6 +482,10 @@ describe('fleet usage telemetry', () => {
           num_host_urls: 0,
         },
         packages: [],
+        agents_per_privileges: {
+          root: 0,
+          unprivileged: 4,
+        },
         agents_per_version: [
           {
             version: '8.6.0',
