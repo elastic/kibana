@@ -106,12 +106,10 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
-      logAnomalyDebugData();
       await esArchiver.load(auditPath);
       await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
-      logAnomalyDebugData();
     });
 
     after(async () => {
