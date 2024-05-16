@@ -120,7 +120,6 @@ BY : 'by';
 AND : 'and';
 ASC : 'asc';
 ASSIGN : '=';
-CAST_OP : '::';
 COMMA : ',';
 DESC : 'desc';
 DOT : '.';
@@ -199,7 +198,6 @@ FROM_COMMA : COMMA -> type(COMMA);
 FROM_ASSIGN : ASSIGN -> type(ASSIGN);
 FROM_QUOTED_STRING : QUOTED_STRING -> type(QUOTED_STRING);
 
-OPTIONS : 'options';
 METADATA : 'metadata';
 
 fragment FROM_UNQUOTED_IDENTIFIER_PART

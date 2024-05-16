@@ -218,6 +218,14 @@
       "warning": []
     },
     {
+      "query": "from `index`",
+      "error": [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'"
+      ],
+      "warning": []
+    },
+    {
       "query": "from index, other_index",
       "error": [],
       "warning": []
