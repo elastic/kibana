@@ -12,7 +12,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import React from 'react';
 import { DataSourceType, DiscoverDataSource, isDataSourceType } from '../../../common/data_sources';
 import { Profile } from '../composable_profile';
-import { ProfileService } from '../profile_service';
+import { AsyncProfileService } from '../profile_service';
 
 export enum DataSourceCategory {
   Logs = 'logs',
@@ -31,7 +31,7 @@ export interface DataSourceContext {
 
 export type DataSourceProfile = Profile;
 
-export const dataSourceProfileService = new ProfileService<
+export const dataSourceProfileService = new AsyncProfileService<
   DataSourceProfile,
   DataSourceProfileProviderParams,
   DataSourceContext

@@ -28,6 +28,8 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
+import { ComposableProfile } from '../../../context_awareness/composable_profile';
+import { dataSourceProfileService } from '../../../context_awareness';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -144,6 +146,7 @@ export function getDataStateContainer({
   getInternalState,
   getSavedSearch,
   setDataView,
+  setDataSourceProfile,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -151,6 +154,7 @@ export function getDataStateContainer({
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
+  setDataSourceProfile: (profile: ComposableProfile) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -284,14 +288,23 @@ export function getDataStateContainer({
 
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = getAppState().query;
-    const currentDataView = getSavedSearch().searchSource.getField('index');
+    let dataView = getSavedSearch().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
-      const nextDataView = await getEsqlDataView(query, currentDataView, services);
-      if (nextDataView !== currentDataView) {
+      const nextDataView = await getEsqlDataView(query, dataView, services);
+      if (nextDataView !== dataView) {
         setDataView(nextDataView);
+        dataView = nextDataView;
       }
     }
+
+    const dataSourceProfile = await dataSourceProfileService.resolve({
+      dataSource: getAppState().dataSource,
+      dataView,
+      query,
+    });
+
+    setDataSourceProfile(dataSourceProfile);
 
     if (resetQuery) {
       refetch$.next('reset');

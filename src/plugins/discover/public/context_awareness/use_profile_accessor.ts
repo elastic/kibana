@@ -9,9 +9,8 @@
 import { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
 import { useAppStateSelector } from '../application/main/state_management/discover_app_state_container';
-import { useInternalStateSelector } from '../application/main/state_management/discover_internal_state_container';
 import { getMergedAccessor, Profile } from './composable_profile';
-import { dataSourceProfileService, recordHasProfile } from './profiles';
+import { recordHasProfile } from './profiles';
 import { useProfiles } from './profiles_provider';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
@@ -19,22 +18,17 @@ export const useProfileAccessor = <TKey extends keyof Profile>(
   baseImpl: Profile[TKey],
   { record }: { record?: DataTableRecord } = {}
 ) => {
-  const dataSource = useAppStateSelector((state) => state.dataSource);
-  const dataView = useInternalStateSelector((state) => state.dataView);
-  const query = useAppStateSelector((state) => state.query);
-  const dataSourceProfile = useMemo(
-    () => dataSourceProfileService.resolve({ dataSource, dataView, query }),
-    [dataSource, dataView, query]
-  );
-  const { profiles } = useProfiles();
+  // Why does this fail to build without useAppStateSelector?
+  useAppStateSelector((state) => state.dataSource);
+  const profiles = useProfiles();
 
   return useMemo(() => {
-    const allProfiles = [...profiles, dataSourceProfile];
+    let allProfiles = profiles;
 
     if (recordHasProfile(record)) {
-      allProfiles.push(record.profile);
+      allProfiles = [...profiles, record.profile];
     }
 
     return getMergedAccessor(allProfiles, key, baseImpl);
-  }, [baseImpl, dataSourceProfile, key, profiles, record]);
+  }, [baseImpl, key, profiles, record]);
 };
