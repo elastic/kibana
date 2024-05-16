@@ -117,7 +117,7 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_disable_legacy_url_aliases`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
