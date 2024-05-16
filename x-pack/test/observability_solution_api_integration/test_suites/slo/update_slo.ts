@@ -14,7 +14,7 @@ import { loadTestData } from './helper/load_test_data';
 import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('Update SLO', function () {
+  describe('@ess @serverless Update SLOs', function () {
     const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
@@ -486,7 +486,6 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/internal/transform/transforms/slo-${id}-1`)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
         .set('elastic-api-version', '1')
         .send()
         .expect(404);
@@ -494,7 +493,6 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAPI
         .get(`/internal/transform/transforms/slo-summary-${id}-1`)
         .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .set('elastic-api-version', '1')
         .send()
@@ -504,7 +502,6 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/internal/transform/transforms/slo-${id}-2`)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
         .set('elastic-api-version', '1')
         .send()
         .expect(200);
@@ -512,7 +509,6 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAPI
         .get(`/internal/transform/transforms/slo-summary-${id}-2`)
         .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .set('elastic-api-version', '1')
         .send()
@@ -538,7 +534,6 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAPI
         .get(`/internal/transform/transforms/slo-${id}-2`)
         .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .set('elastic-api-version', '1')
         .send()
@@ -618,6 +613,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAPI
         .put(`/api/observability/slos/${id}`)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
         .send({
           ...request,
           objective: {
