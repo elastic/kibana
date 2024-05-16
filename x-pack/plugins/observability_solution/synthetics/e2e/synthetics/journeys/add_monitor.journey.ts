@@ -150,7 +150,11 @@ const createMonitorJourney = ({
       page.setDefaultTimeout(60 * 1000);
       recordVideo(page);
 
-      const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+      const syntheticsApp = syntheticsAppPageProvider({
+        page,
+        kibanaUrl: params.kibanaUrl,
+        params,
+      });
 
       step('Go to monitor management', async () => {
         await syntheticsApp.navigateToMonitorManagement(true);

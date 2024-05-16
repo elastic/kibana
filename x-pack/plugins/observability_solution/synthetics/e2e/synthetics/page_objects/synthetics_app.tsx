@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';
@@ -13,7 +14,15 @@ const SIXTY_SEC_TIMEOUT = {
   timeout: 60 * 1000,
 };
 
-export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
+export function syntheticsAppPageProvider({
+  page,
+  kibanaUrl,
+  params,
+}: {
+  page: Page;
+  kibanaUrl: string;
+  params?: Record<string, any>;
+}) {
   const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
   const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
   const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
@@ -23,6 +32,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
   const settingsPage = `${basePath}/app/synthetics/settings`;
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
   const overview = `${basePath}/app/synthetics`;
+  const retry: RetryService = params?.getService('retry');
 
   return {
     ...loginPageProvider({
@@ -162,8 +172,10 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async selectLocationsAddEdit({ locations }: { locations: string[] }) {
       for (let i = 0; i < locations.length; i++) {
-        await page.click(this.byTestId('syntheticsMonitorConfigLocations'));
-        await page.click(`text=${locations[i]}`);
+        await retry.try(async () => {
+          await page.click(this.byTestId('syntheticsMonitorConfigLocations'));
+          await page.click(`text=${locations[i]}`);
+        });
       }
     },
 
