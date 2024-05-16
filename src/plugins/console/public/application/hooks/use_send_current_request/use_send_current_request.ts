@@ -31,7 +31,7 @@ export const useSendCurrentRequest = () => {
 
   return useCallback(async () => {
     try {
-      const editor = registry.getInputEditor();
+      const editor = registry.getInputEditor() as SenseEditor;
       const variables = storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
