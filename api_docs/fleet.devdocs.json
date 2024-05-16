@@ -18905,6 +18905,54 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.isValidDataset",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidDataset",
+        "description": [],
+        "signature": [
+          "(dataset: string, allowBlank: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidDataset.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataset",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidDataset.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowBlank",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.isValidNamespace",
         "type": "Function",
         "tags": [],

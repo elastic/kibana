@@ -25,6 +25,7 @@ import { DiscoverAppState } from '../../state_management/discover_app_state_cont
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const customisationService = createCustomizationService();
 
@@ -39,7 +40,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+  });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {

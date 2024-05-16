@@ -16,9 +16,8 @@ import {
   resourceLabel,
 } from '../../../../data_types/logs/translations';
 import * as constants from '../../../../../../common/data_types/logs/constants';
-import { TooltipButtonComponent } from './tooltip_button';
+import { TooltipButton } from './tooltip_button';
 import { FieldWithToken } from './field_with_token';
-import { HoverPopover } from './hover_popover';
 
 const spacingCSS = css`
   margin-bottom: ${euiThemeVars.euiSizeS};
@@ -26,14 +25,10 @@ const spacingCSS = css`
 
 export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   return (
-    <HoverPopover
-      button={
-        <TooltipButtonComponent
-          displayText={column.displayAsText}
-          headerRowHeight={headerRowHeight}
-        />
-      }
-      title={resourceLabel}
+    <TooltipButton
+      displayText={column.displayAsText}
+      headerRowHeight={headerRowHeight}
+      popoverTitle={resourceLabel}
     >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
@@ -49,6 +44,6 @@ export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridCol
           <FieldWithToken field={field} key={field} />
         ))}
       </div>
-    </HoverPopover>
+    </TooltipButton>
   );
 };
