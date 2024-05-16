@@ -1844,6 +1844,14 @@ module.exports = {
       },
     },
 
+    /** Observerability Solution API Integration tests
+     * Ensures appropriate mocha tagging for tests
+     */
+    {
+      files: ['x-pack/test/observability_solution_api_integration/**/*.{ts,tsx}'],
+      rules: { '@kbn/eslint/require_mocha_tagging': 'error' },
+    },
+
     /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
