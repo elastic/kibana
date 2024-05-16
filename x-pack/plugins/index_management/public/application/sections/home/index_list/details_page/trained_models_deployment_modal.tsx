@@ -13,7 +13,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 interface SemanticTextProps {
-  isSemanticTextEnabled: boolean;
   setIsModalVisible: (isVisible: boolean) => void;
   refreshModal: () => void;
   pendingDeployments: Array<string | undefined>;
@@ -25,7 +24,6 @@ const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 const TRAINED_MODELS_MANAGE = 'trained_models';
 
 export function TrainedModelsDeploymentModal({
-  isSemanticTextEnabled,
   setIsModalVisible,
   refreshModal,
   pendingDeployments = [],
@@ -35,6 +33,10 @@ export function TrainedModelsDeploymentModal({
   const modalTitleId = useGeneratedHtmlId();
   const closeModal = () => setIsModalVisible(false);
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
+
+  useEffect(() => {
+    setIsModalVisible(pendingDeployments.length > 0);
+  }, [pendingDeployments, setIsModalVisible]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -176,11 +178,9 @@ export function TrainedModelsDeploymentModal({
     );
   };
 
-  return isSemanticTextEnabled ? (
-    ErroredDeployments.length > 0 ? (
-      <ErroredModelsDeploymentModal />
-    ) : (
-      <PendingModelsDeploymentModal />
-    )
-  ) : null;
+  return ErroredDeployments.length > 0 ? (
+    <ErroredModelsDeploymentModal />
+  ) : (
+    <PendingModelsDeploymentModal />
+  );
 }
