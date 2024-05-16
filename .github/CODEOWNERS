@@ -1565,6 +1565,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/components/agents/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
