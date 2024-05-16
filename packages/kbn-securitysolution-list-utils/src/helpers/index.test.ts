@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches, getHasWrongOperator } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -178,6 +178,25 @@ describe('Helpers', () => {
     test('it returns false if none of the esTypes map to kibana type string', () => {
       expect(
         fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['bool', 'unmapped'] })
+      ).toBeFalsy();
+    });
+  });
+  describe('getHasWrongOperator', () => {
+    test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
+      expect(
+        getHasWrongOperator([{ entries: [{ type: 'match', value: 'withwildcard*' }] }])
+      ).toBeTruthy();
+    });
+    test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
+      expect(
+        getHasWrongOperator([
+          {
+            entries: [
+              { type: 'match', value: 'nowildcard' },
+              { type: 'wildcard', value: 'withwildcard*' },
+            ],
+          },
+        ])
       ).toBeFalsy();
     });
   });
