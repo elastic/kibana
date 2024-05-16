@@ -93,25 +93,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const focusTrapButtonRef = useRef<HTMLButtonElement>(null);
 
-  // "onRuleChanged" fn triggers a full re-render of button component,
-  // preventing us from returning focus to the cell that initiated these changes.
-  // This method acts as a wrapper around "onRuleChanged" and ensures that focus is returned
-  // to the correct location after the main action is executed.
-  const onRuleChangedWrapped: RulesListNotifyBadgeProps['onRuleChanged'] = useMemo(
-    () =>
-      async (...args) => {
-        const returnFocusTimeout = 100;
-        try {
-          await onRuleChanged(...args);
-        } finally {
-          setTimeout(() => {
-            focusTrapButtonRef.current?.focus();
-          }, returnFocusTimeout);
-        }
-      },
-    [onRuleChanged]
-  );
-
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -330,15 +311,16 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(true);
         closePopover();
         await snoozeRule(schedule);
-        await onRuleChangedWrapped();
+        await onRuleChanged();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [closePopover, snoozeRule, onRuleChangedWrapped, toasts]
+    [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
   const onApplyUnsnooze = useCallback(
@@ -347,15 +329,16 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(true);
         closePopover();
         await unsnoozeRule(scheduleIds);
-        await onRuleChangedWrapped();
+        await onRuleChanged();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [closePopover, unsnoozeRule, onRuleChangedWrapped, toasts]
+    [closePopover, unsnoozeRule, onRuleChanged, toasts]
   );
 
   const popover = (
