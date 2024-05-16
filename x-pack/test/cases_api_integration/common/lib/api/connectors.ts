@@ -221,7 +221,7 @@ export const createCaseWithConnector = async ({
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null } | null;
   createCaseReq?: CasePostRequest;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | string[]>;
 }): Promise<{
   postedCase: Case;
   connector: CreateConnectorResponse;
