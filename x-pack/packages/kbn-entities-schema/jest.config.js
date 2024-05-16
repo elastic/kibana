@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-oam-schema'],
+  roots: ['<rootDir>/x-pack/packages/kbn-entities-schema'],
 };

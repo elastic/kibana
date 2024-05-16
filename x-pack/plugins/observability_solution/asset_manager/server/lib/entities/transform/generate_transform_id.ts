@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_TRANSFORM_PREFIX } from '../../../../common/constants_entities';
 
 export function generateTransformId(definition: EntityDefinition) {

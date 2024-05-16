@@ -4598,6 +4598,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entities-schema@link:x-pack/packages/kbn-entities-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
@@ -5435,10 +5439,6 @@
   uid ""
 
 "@kbn/notifications-plugin@link:x-pack/plugins/notifications":
-  version "0.0.0"
-  uid ""
-
-"@kbn/oam-schema@link:x-pack/packages/kbn-oam-schema":
   version "0.0.0"
   uid ""
 

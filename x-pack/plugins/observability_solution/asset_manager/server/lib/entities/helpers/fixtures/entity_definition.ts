@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { entityDefinitionSchema } from '@kbn/oam-schema';
+import { entityDefinitionSchema } from '@kbn/entities-schema';
 export const entityDefinition = entityDefinitionSchema.parse({
   id: 'admin-console-logs-service',
   name: 'Services for Admin Console',

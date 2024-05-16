@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { generateProcessors } from './ingest_pipeline/generate_processors';
 import { retryTransientEsErrors } from './helpers/retry';
 import { EntitySecurityException } from './errors/entity_security_exception';

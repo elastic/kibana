@@ -6,7 +6,7 @@
  */
 
 import { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 
 export const SO_ENTITY_DEFINITION_TYPE = 'entity-definition';
 

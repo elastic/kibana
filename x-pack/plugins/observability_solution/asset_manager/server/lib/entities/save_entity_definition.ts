@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 

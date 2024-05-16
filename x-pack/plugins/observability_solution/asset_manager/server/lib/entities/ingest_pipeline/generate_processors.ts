@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { generateIndexName } from '../helpers/generate_index_name';
 
 function createIdTemplate(definition: EntityDefinition) {

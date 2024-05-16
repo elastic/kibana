@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/oam-schema';
+import { EntityDefinition } from '@kbn/entities-schema';
 import { generateIndexName } from './helpers/generate_index_name';
 
 export async function deleteIndex(

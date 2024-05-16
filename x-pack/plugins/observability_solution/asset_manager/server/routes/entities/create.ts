@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { EntityDefinition, entityDefinitionSchema } from '@kbn/oam-schema';
+import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { saveEntityDefinition } from '../../lib/entities/save_entity_definition';

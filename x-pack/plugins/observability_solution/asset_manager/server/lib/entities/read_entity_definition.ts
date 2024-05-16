@@ -6,7 +6,7 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { EntityDefinition, entityDefinitionSchema } from '@kbn/oam-schema';
+import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 
