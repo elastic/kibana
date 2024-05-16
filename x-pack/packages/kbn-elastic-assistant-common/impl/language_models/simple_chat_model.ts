@@ -72,7 +72,8 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.llmType = llmType ?? 'openai';
     this.model = model;
     this.temperature = temperature;
-    this.streaming = streaming;
+    // only enable streaming for bedrock
+    this.streaming = streaming && llmType === 'bedrock';
   }
 
   _llmType() {
@@ -94,11 +95,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
-    console.log('heyo args', {
-      messages,
-      options,
-      runManager,
-    });
     const formattedMessages = [];
     if (messages.length === 2) {
       messages.forEach((message, i) => {
@@ -122,7 +118,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const requestBody = {
       actionId: this.#connectorId,
       params: {
-        // hard code to non-streaming subaction as this class only supports non-streaming
         subAction: this.streaming ? 'invokeStream' : 'invokeAI',
         subActionParams: {
           model: this.#request.body.model,
@@ -155,24 +150,42 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       return content; // per the contact of _call, return a string
     }
 
+    // Bedrock streaming
     const readable = get('data', actionResult) as Readable;
 
     if (typeof readable?.read !== 'function') {
       throw new Error('Action result status is error: result is not streamable');
     }
 
-    const handleLLMNewToken = (token: string) => runManager?.handleLLMNewToken(token);
+    let currentOutput = '';
+    let finalOutputIndex = -1;
+    const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+    let streamingFinished = false;
+    const finalOutputStopRegex = /(?<!\\)\"/;
+    const handleLLMNewToken = (token: string) => {
+      if (finalOutputIndex === -1) {
+        // Remove whitespace to simplify parsing
+        currentOutput += token.replace(/\s/g, '');
+        if (currentOutput.includes(finalOutputStartToken)) {
+          finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+        }
+      } else if (!streamingFinished) {
+        const finalOutputEndIndex = token.search(finalOutputStopRegex);
+        if (finalOutputEndIndex !== -1) {
+          streamingFinished = true;
+        } else {
+          runManager?.handleLLMNewToken(token);
+        }
+      }
+    };
 
-    // do not await, blocks stream for UI
     const parsed = await parseBedrockStream(
       readable,
       this.#logger,
       this.#signal,
       handleLLMNewToken
     );
-    console.log('heyo parsed', parsed);
 
-    // return readable.pipe(new PassThrough());
     return parsed; // per the contact of _call, return a string
   }
 }
