@@ -24,6 +24,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import {
   createRule,
@@ -397,14 +398,11 @@ export const clearLegacyTransforms = async ({
   es: Client;
   log: ToolingLog;
 }): Promise<void> => {
-  const transforms = legacyTransformIds.map((transform) =>
-    es.transform.deleteTransform({
-      transform_id: transform,
-      force: true,
-    })
-  );
   try {
-    await Promise.all(transforms);
+    await removeLegacyTransforms({
+      namespace: 'default',
+      esClient: es,
+    });
   } catch (e) {
     log.warning(`Error deleting legacy transforms: ${e.message}`);
   }
@@ -424,8 +422,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
 
     await supertest
       .post(
@@ -433,8 +430,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
   } catch (e) {
     log.warning(`Error deleting legacy dashboards: ${e.message}`);
   }
