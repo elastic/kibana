@@ -14,6 +14,7 @@ export {
   replaceRequestVariables,
   getCurlRequest,
   trackSentRequests,
+  getAutoIndentedRequests,
 } from './requests_utils';
 export {
   getDocumentationLinkFromAutocomplete,

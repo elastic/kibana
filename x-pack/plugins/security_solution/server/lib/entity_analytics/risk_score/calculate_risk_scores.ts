@@ -15,11 +15,14 @@ import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  AfterKeys,
+  EntityRiskScoreRecord,
+  RiskScoreWeights,
+} from '../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
-  type RiskWeights,
-  type RiskScore,
   getRiskLevel,
   RiskCategories,
   RiskWeightTypes,
@@ -36,7 +39,6 @@ import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
-  CalculateScoresResponse,
   RiskScoreBucket,
 } from '../types';
 import { RISK_SCORING_SUM_MAX, RISK_SCORING_SUM_VALUE } from './constants';
@@ -54,7 +56,7 @@ const formatForResponse = ({
   now: string;
   identifierField: string;
   includeNewFields: boolean;
-}): RiskScore => {
+}): EntityRiskScoreRecord => {
   const riskDetails = bucket.top_inputs.risk_details;
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
@@ -114,7 +116,7 @@ const buildIdentifierTypeAggregation = ({
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
   scriptedMetricPainless: PainlessScripts;
 }): AggregationsAggregationContainer => {
@@ -173,7 +175,7 @@ const processScores = async ({
   identifierField: string;
   logger: Logger;
   now: string;
-}): Promise<RiskScore[]> => {
+}): Promise<EntityRiskScoreRecord[]> => {
   if (buckets.length === 0) {
     return [];
   }
@@ -232,7 +234,7 @@ export const calculateRiskScores = async ({
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
-} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
+} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();

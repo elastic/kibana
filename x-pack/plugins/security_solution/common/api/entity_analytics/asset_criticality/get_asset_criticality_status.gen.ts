@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Asset Criticality Status Schema
- *   version: 1.0.0
+ *   version: 1
  */
 
 export type AssetCriticalityStatusResponse = z.infer<typeof AssetCriticalityStatusResponse>;
