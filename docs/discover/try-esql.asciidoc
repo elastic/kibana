@@ -1,5 +1,5 @@
 [[try-esql]]
-== Use {esql}
+== Using {esql}
 
 The Elasticsearch Query Language, {esql}, makes it easier to explore your data without leaving Discover. 
 
@@ -17,7 +17,7 @@ To be able to select **Language {esql}** from the Data views menu the `enableESQ
 
 To load the sample data:
 
-. On the home page, click **Language sample data**.
+. On the home page, click **Try sample data**.
 . Click **Other sample data sets**.
 . On the Sample web logs card, click **Add data**.
 . Open the main menu and select *Discover*.
