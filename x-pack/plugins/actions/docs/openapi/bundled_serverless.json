@@ -1339,8 +1339,8 @@
           },
           "defaultModel": {
             "type": "string",
-            "description": "The generative artificial intelligence model for Google Gemini to use. Current support is for the Anthropic Claude models.\n",
-            "default": "anthropic.claude-3-sonnet-20240229-v1:0"
+            "description": "The generative artificial intelligence model for Google Gemini to use.\n",
+            "default": "gemini-1.5-pro-preview-0409"
           }
         }
       },
@@ -1349,22 +1349,12 @@
         "description": "Defines secrets for connectors when type is `.gemini`.",
         "type": "object",
         "required": [
-          "accessKey",
-          "secret",
-          "apiKey"
+          "accessToken"
         ],
         "properties": {
-          "accessKey": {
+          "accessToken": {
             "type": "string",
-            "description": "The Google access key for authentication."
-          },
-          "secret": {
-            "type": "string",
-            "description": "The Google secret for authentication."
-          },
-          "apiKey": {
-            "type": "string",
-            "description": "API Key to authenticate to Google Gemini."
+            "description": "Access token to authenticate to Google Gemini."
           }
         }
       },

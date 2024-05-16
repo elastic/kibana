@@ -139,6 +139,3 @@ const getDashboardId = (selectedProvider: string, spaceId: string): string =>
       return `generative-ai-token-usage-${ai}-${spaceId}`;
   }
   
-  // `generative-ai-token-usage-${
-  //   selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
-  // }-${spaceId}`;
