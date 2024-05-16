@@ -114,7 +114,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#chainguard}}
-RUN apk --no-cache add bash fontconfig libstdc++ nss findutils shadow
+RUN apk --no-cache add bash curl fontconfig libstdc++ nss findutils shadow
 {{/chainguard}}
 
 # Bring in Kibana from the initial stage.
