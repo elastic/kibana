@@ -135,7 +135,7 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTestAge
             const { type, id } = test.request;
             await supertest
               .get(`${getUrlPrefix(spaceId)}/api/saved_objects/resolve/${type}/${id}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

@@ -155,7 +155,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTestAgen
             const query = test.overwrite ? '?overwrite=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

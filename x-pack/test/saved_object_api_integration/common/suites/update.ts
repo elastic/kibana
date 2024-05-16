@@ -94,7 +94,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTestAgen
             const requestBody = { attributes, ...(upsert && { upsert: attributes }) };
             await supertest
               .put(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

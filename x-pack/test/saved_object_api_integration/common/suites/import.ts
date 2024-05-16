@@ -310,7 +310,7 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
               : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
               .expect(test.responseStatusCode)
               .then(test.responseBody);

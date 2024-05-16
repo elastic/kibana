@@ -119,7 +119,7 @@ export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTes
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_resolve`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(test.request)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

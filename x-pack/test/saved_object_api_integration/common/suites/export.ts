@@ -259,7 +259,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTestAgen
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(test.request)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

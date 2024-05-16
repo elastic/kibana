@@ -118,7 +118,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             await supertest
               .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
               .query({ ...(force && { force }) })
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

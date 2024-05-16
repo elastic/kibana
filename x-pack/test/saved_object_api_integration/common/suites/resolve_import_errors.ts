@@ -373,7 +373,7 @@ export function resolveImportErrorsTestSuiteFactory(
             const query = test.createNewCopies ? '?createNewCopies=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .field('retries', JSON.stringify(test.request.retries))
               .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
               .expect(test.responseStatusCode)

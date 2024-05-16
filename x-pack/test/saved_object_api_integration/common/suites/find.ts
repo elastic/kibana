@@ -298,7 +298,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent)
 
             await supertest
               .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

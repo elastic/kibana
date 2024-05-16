@@ -81,7 +81,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) 
             const { type, id } = test.request;
             await supertest
               .get(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

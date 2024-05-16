@@ -118,7 +118,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
             const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
             await supertest
               .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
