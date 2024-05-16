@@ -35,7 +35,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
-      const serviceNames = [...Array(numServices).keys()].map((index) => `synth-node-${index}`);
+      const serviceNames = [...Array(numServices).keys()].map((index) => `synth-service-${index}`);
 
       const HOSTS = Array(numHosts)
         .fill(0)
@@ -183,7 +183,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service('synth-java')
+                .service('service-with-logs-only')
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',

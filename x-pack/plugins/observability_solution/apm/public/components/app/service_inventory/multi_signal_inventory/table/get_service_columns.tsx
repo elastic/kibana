@@ -17,12 +17,18 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AssetServiceListItem } from '../../../../../../common/assets/types';
+import {
+  asMillisecondDuration,
+  asPercent,
+  asTransactionRate,
+} from '../../../../../../common/utils/formatters';
 
 import { Breakpoints } from '../../../../../hooks/use_breakpoints';
 import { unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
+import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn, ManagedTable, SortFunction } from '../../../../shared/managed_table';
 
 export enum ServiceInventoryFieldName {
@@ -45,8 +51,6 @@ export function getServiceColumns({
   link: any;
 }): Array<ITableColumn<AssetServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
-  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
-  const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
 
   return [
     {
@@ -58,14 +62,35 @@ export function getServiceColumns({
       render: (_, { service }) => <ServiceLink query={{ ...query }} serviceName={service.name} />,
     },
     {
+      field: ServiceInventoryFieldName.ServiceEnvironment,
+      name: i18n.translate('xpack.apm.multiSignal.servicesTable.environmentColumnLabel', {
+        defaultMessage: 'Environment',
+      }),
+      sortable: true,
+      width: `${unit * 9}px`,
+      dataType: 'number',
+      render: (_, { service }) => (
+        <EnvironmentBadge environments={service.environment ? [service.environment] : []} />
+      ),
+      align: RIGHT_ALIGNMENT,
+    },
+    {
       field: ServiceInventoryFieldName.Latency,
       name: i18n.translate('xpack.apm.multiSignal.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
       sortable: true,
       dataType: 'number',
-
       align: RIGHT_ALIGNMENT,
+      render: (_, { metrics }) => {
+        return (
+          <ListMetric
+            isLoading={false}
+            hideSeries={true}
+            valueLabel={asMillisecondDuration(metrics.latency)}
+          />
+        );
+      },
     },
     {
       field: ServiceInventoryFieldName.Throughput,
@@ -75,6 +100,15 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
+      render: (_, { metrics }) => {
+        return (
+          <ListMetric
+            isLoading={false}
+            hideSeries={true}
+            valueLabel={asTransactionRate(metrics.throughput)}
+          />
+        );
+      },
     },
     {
       field: ServiceInventoryFieldName.TransactionErrorRate,
@@ -84,6 +118,15 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
+      render: (_, { metrics }) => {
+        return (
+          <ListMetric
+            isLoading={false}
+            hideSeries={true}
+            valueLabel={asPercent(metrics.transactionErrorRate, 1)}
+          />
+        );
+      },
     },
     {
       field: ServiceInventoryFieldName.LogRatePerMinute,
@@ -93,6 +136,11 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
+      render: (_, { metrics }) => {
+        return (
+          <ListMetric isLoading={false} hideSeries={true} valueLabel={metrics.logRatePerMinute} />
+        );
+      },
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
@@ -102,6 +150,15 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
+      render: (_, { metrics }) => {
+        return (
+          <ListMetric
+            isLoading={false}
+            hideSeries={true}
+            valueLabel={asPercent(metrics.logErrorRate, 1)}
+          />
+        );
+      },
     },
   ];
 }
