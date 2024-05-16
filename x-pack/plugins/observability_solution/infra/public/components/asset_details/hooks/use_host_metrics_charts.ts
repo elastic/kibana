@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { HostMetricTypes } from '../charts/types';
 
-export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
 interface UseChartsOptions {
   overview?: boolean;
 }
@@ -101,9 +101,7 @@ export const useHostKpiCharts = ({
       ...chart,
       seriesColor: options?.seriesColor,
       decimals: 1,
-      subtitle: options?.getSubtitle
-        ? options?.getSubtitle(chart.value)
-        : getSubtitleFromFormula(chart.value),
+      subtitle: getSubtitle(options, chart),
       ...(dataViewId && {
         dataset: {
           index: dataViewId,
@@ -151,3 +149,12 @@ const getHostsCharts = async ({
       return [];
   }
 };
+
+function getSubtitle(
+  options: { getSubtitle?: ((formulaValue: string) => string) | undefined } | undefined,
+  chart: { value: string }
+) {
+  return options?.getSubtitle
+    ? options?.getSubtitle(chart.value)
+    : getSubtitleFromFormula(chart.value);
+}
