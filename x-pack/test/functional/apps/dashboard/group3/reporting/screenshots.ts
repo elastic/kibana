@@ -155,7 +155,8 @@ export default function ({
       });
     });
 
-    describe('Preserve Layout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183566
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
