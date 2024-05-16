@@ -6,32 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useContext, useMemo, useState } from 'react';
+import React, { createContext, FC, useContext, useMemo } from 'react';
 import { ComposableProfile } from './composable_profile';
 
-const profilesContext = createContext<{
-  profiles: ComposableProfile[];
-  setDataSourceProfile: (profile: ComposableProfile) => void;
-}>({
-  profiles: [],
-  setDataSourceProfile: () => {},
-});
+const profilesContext = createContext<ComposableProfile[]>([]);
 
-export const ProfilesProvider: FC<{ rootProfile: ComposableProfile }> = ({
-  rootProfile,
-  children,
-}) => {
-  const [dataSourceProfile, setDataSourceProfile] = useState<ComposableProfile>();
+export const ProfilesProvider: FC<{
+  rootProfile: ComposableProfile;
+  dataSourceProfile: ComposableProfile | undefined;
+}> = ({ rootProfile, dataSourceProfile, children }) => {
   const profiles = useMemo(
     () => [rootProfile, dataSourceProfile].filter(profileExists),
     [dataSourceProfile, rootProfile]
   );
 
-  return (
-    <profilesContext.Provider value={{ profiles, setDataSourceProfile }}>
-      {children}
-    </profilesContext.Provider>
-  );
+  return <profilesContext.Provider value={profiles}>{children}</profilesContext.Provider>;
 };
 
 export const useProfiles = () => useContext(profilesContext);

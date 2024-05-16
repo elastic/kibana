@@ -59,6 +59,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+import { ComposableProfile } from '../../../context_awareness/composable_profile';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -81,6 +82,7 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
+  setDataSourceProfile: (profile: ComposableProfile) => void;
 }
 
 export interface LoadParams {
@@ -219,6 +221,7 @@ export function getDiscoverStateContainer({
   services,
   customizationContext,
   stateStorageContainer,
+  setDataSourceProfile,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -294,6 +297,7 @@ export function getDiscoverStateContainer({
     getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
+    setDataSourceProfile,
   });
 
   const loadDataViewList = async () => {

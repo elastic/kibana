@@ -73,11 +73,13 @@ export function DiscoverMainRoute({
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
+  const [dataSourceProfile, setDataSourceProfile] = useState<ComposableProfile>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
     customizationContext,
     stateStorageContainer,
+    setDataSourceProfile,
   });
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
@@ -367,7 +369,7 @@ export function DiscoverMainRoute({
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
-      <ProfilesProvider rootProfile={rootProfile}>
+      <ProfilesProvider rootProfile={rootProfile} dataSourceProfile={dataSourceProfile}>
         <DiscoverMainProvider value={stateContainer}>
           <>
             <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />

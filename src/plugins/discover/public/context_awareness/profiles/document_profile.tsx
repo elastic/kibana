@@ -49,10 +49,7 @@ documentProfileService.registerProvider({
     },
   },
   resolve: (params) => {
-    if (
-      'message' in params.record.flattened &&
-      typeof params.record.flattened.message === 'string'
-    ) {
+    if ('message' in params.record.flattened && params.record.flattened.message != null) {
       return {
         isMatch: true,
         context: {
