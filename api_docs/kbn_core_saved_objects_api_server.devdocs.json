@@ -3865,6 +3865,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkUpdateObject.mergeAttributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mergeAttributes",
+            "description": [
+              "\nBy default, update will merge the provided attributes with the ones present on the document\n(performing a standard partial update). Setting this option to `false` will change the behavior, performing\na \"full\" update instead, where the provided attributes will fully replace the existing ones.\nDefaults to `true`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8037,6 +8053,22 @@
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsUpdateOptions.mergeAttributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mergeAttributes",
+            "description": [
+              "\nBy default, update will merge the provided attributes with the ones present on the document\n(performing a standard partial update). Setting this option to `false` will change the behavior, performing\na \"full\" update instead, where the provided attributes will fully replace the existing ones.\nDefaults to `true`."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
