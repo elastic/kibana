@@ -35,6 +35,7 @@ export interface ToolbarSelectorProps {
   options: SelectableEntry[];
   searchable: boolean;
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
+  optionMatcher?: EuiSelectableProps['optionMatcher'];
 }
 
 export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
@@ -45,6 +46,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   options,
   searchable,
   onChange,
+  optionMatcher,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -146,6 +148,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         data-test-subj={`${dataTestSubj}Selectable`}
         options={options}
         onChange={onSelectionChange}
+        optionMatcher={optionMatcher}
         listProps={{
           truncationProps: { truncation: 'middle' },
           isVirtualized: searchable,

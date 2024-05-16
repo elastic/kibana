@@ -698,6 +698,34 @@ describe('Sourcerer Hooks', () => {
         expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
+
+    it('should update the title of the data view according to the selected patterns', async () => {
+      const { result, rerender } = renderHook<SourcererScopeName, SelectedDataView>(
+        () => useSourcererDataView(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
+
+      expect(result.current.sourcererDataView?.title).toBe(
+        'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*'
+      );
+
+      const testPatterns = ['anotherTestPattern', 'justATestPattern'];
+      await act(async () => {
+        store.dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.default,
+            selectedDataViewId: 'security-solution-default',
+            selectedPatterns: testPatterns,
+          })
+        );
+
+        await rerender();
+
+        expect(result.current.sourcererDataView?.title).toBe(testPatterns.join(','));
+      });
+    });
   });
 });
 

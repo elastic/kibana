@@ -154,7 +154,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to add a filter in the grid cell or document flyout
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Function triggered when a column is resized by the user
    */
@@ -514,11 +514,13 @@ export const UnifiedDataTable = ({
       },
       valueToStringConverter,
       componentsTourSteps,
+      isPlainRecord,
     }),
     [
       componentsTourSteps,
       darkMode,
       dataView,
+      isPlainRecord,
       displayedRows,
       expandedDoc,
       isFilterActive,

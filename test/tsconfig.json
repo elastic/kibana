@@ -66,7 +66,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/enterprise-search-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/discover-plugin",
     "@kbn/core-http-common",
     "@kbn/event-annotation-plugin",
     "@kbn/event-annotation-common",
@@ -74,5 +73,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/monaco",
     "@kbn/esql-utils",
+    "@kbn/search-types",
   ]
 }

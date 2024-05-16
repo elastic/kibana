@@ -279,7 +279,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.osqueryEnabled (boolean)',
         'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',

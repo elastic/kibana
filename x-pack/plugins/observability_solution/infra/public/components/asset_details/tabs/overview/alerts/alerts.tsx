@@ -10,9 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui'
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { useBoolean } from '../../../../../hooks/use_boolean';
 import { AlertsSectionTitle } from '../section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
 import { Section } from '../../../components/section';

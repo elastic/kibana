@@ -21,6 +21,11 @@ import { DiscoverServices } from '../../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import {
+  createDataViewDataSource,
+  createEsqlDataSource,
+  DiscoverDataSource,
+} from '../../../../../common/data_sources';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -45,12 +50,16 @@ export function getStateDefaults({
   const { searchSource } = savedSearch;
   const { data, uiSettings, storage } = services;
   const dataView = searchSource.getField('index');
-
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const isTextBasedQueryMode = isTextBasedQuery(query);
   const sort = getSortArray(savedSearch.sort ?? [], dataView!, isTextBasedQueryMode);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
+  const dataSource: DiscoverDataSource | undefined = isTextBasedQueryMode
+    ? createEsqlDataSource()
+    : dataView?.id
+    ? createDataViewDataSource({ dataViewId: dataView.id })
+    : undefined;
 
   const defaultState: DiscoverAppState = {
     query,
@@ -63,7 +72,7 @@ export function getStateDefaults({
         )
       : sort,
     columns,
-    index: isTextBasedQueryMode ? undefined : dataView?.id,
+    dataSource,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,

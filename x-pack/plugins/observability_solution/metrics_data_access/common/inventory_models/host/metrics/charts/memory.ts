@@ -14,14 +14,13 @@ import {
   DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  MEMORY_USAGE_LABEL,
 } from '../../../shared/charts/constants';
 
 const memoryUsageBreakdown: LensConfigWithId = {
   id: 'memoryUsageBreakdown',
   chartType: 'xy',
-  title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.memoryUsage', {
-    defaultMessage: 'Memory Usage',
-  }),
+  title: MEMORY_USAGE_LABEL,
   layers: [
     {
       seriesType: 'area',

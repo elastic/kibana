@@ -73,6 +73,8 @@
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types",
+    "@kbn/try-in-console"
   ]
 }

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { getESQLWithSafeLimit, ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';

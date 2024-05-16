@@ -4674,6 +4674,7 @@ components:
               properties:
                 log_level:
                   type: string
+                  nullable: true
                   enum:
                     - debug
                     - info
@@ -4864,6 +4865,8 @@ components:
           type: number
         agents:
           type: number
+        unprivileged_agents:
+          type: number
         agent_features:
           type: array
           items:
@@ -4894,6 +4897,11 @@ components:
             Advanced settings stored in the agent policy, e.g.
             agent_limits_go_max_procs
           nullable: true
+        supports_agentless:
+          type: boolean
+          description: >-
+            Indicates whether the agent policy supports agentless integrations.
+            Only allowed in a serverless environment.
       required:
         - id
         - status

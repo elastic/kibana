@@ -71,8 +71,10 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
   const { data: rulesData } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTags(rule.metadata)
   );
+  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const startServices = { notifications, analytics, i18n: i18nStart, theme };
   const isRuleMuted = rule?.state === 'muted';
-  const { notifications } = useKibana().services;
+
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -83,8 +85,8 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       };
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
-      await refetchRulesStates();
-      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+      refetchRulesStates();
+      showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
         numberOfRules: 1,
         numberOfDetectionRules: rulesData?.total || 0,
       });
