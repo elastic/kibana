@@ -193,21 +193,7 @@ describe('PackagePolicyInputPanel', () => {
     licensePath: '/package/agentless_test_package/1.0.1-rc1/LICENSE.txt',
     keepPoliciesUpToDate: false,
     status: 'installed',
-    installationInfo: {
-      created_at: '2024-05-08T13:04:00.741Z',
-      updated_at: '2024-05-14T08:52:20.581Z',
-      namespaces: [],
-      type: 'epm-packages',
-      installed_kibana: [],
-      installed_kibana_space_id: 'default',
-      installed_es: [],
-      install_status: 'installed',
-      install_source: 'upload',
-      name: 'agentless_test_package',
-      version: '1.0.1-rc1',
-      verification_status: 'unknown',
-      latest_install_failed_attempts: [],
-    },
+    installationInfo: {},
   } as unknown as PackageInfo;
 
   const mockPackageInput: RegistryInput = {
@@ -349,12 +335,15 @@ describe('PackagePolicyInputPanel', () => {
       },
     ],
   } as NewPackagePolicyInput;
-  const render = () => {
+  const render = (
+    packageInfo: PackageInfo,
+    packageInputStreams: RegistryStreamWithDataStream[]
+  ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputPanel
-        packageInfo={mockPackageInfo}
+        packageInfo={packageInfo}
         packageInput={mockPackageInput}
-        packageInputStreams={mockPackageInputStreams}
+        packageInputStreams={packageInputStreams}
         packagePolicyInput={packagePolicyInput}
         updatePackagePolicyInput={mockUpdatePackagePolicyInput}
         inputValidationResults={inputValidationResults}
@@ -367,58 +356,171 @@ describe('PackagePolicyInputPanel', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
+  describe('When agentless is enabled', () => {
+    beforeEach(() => {
+      useAgentlessPolicyMock.mockReturnValue({
+        isAgentlessEnabled: true,
+        isAgentlessPackagePolicy: jest.fn(),
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+      });
+    });
 
-  it('when agentless, should render inputs specific to env', async () => {
-    useAgentlessPolicyMock.mockReturnValue({
-      isAgentlessEnabled: true,
-      isAgentlessPackagePolicy: jest.fn(),
-      isAgentlessAgentPolicy: jest.fn(),
-      isAgentlessIntegration: jest.fn(),
-    });
-    render();
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
-      ).toBeInTheDocument();
-    });
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect sample logs from instances')
-      ).toBeInTheDocument();
-    });
-    await waitFor(async () => {
-      expect(await renderResult.findByText('Sample logs on Agentless')).toBeInTheDocument();
-    });
-    await waitFor(async () => {
-      expect(
-        await renderResult.queryByText('Sample logs hidden in agentless')
-      ).not.toBeInTheDocument();
+    it('should render inputs specific to env', async () => {
+      render(mockPackageInfo, mockPackageInputStreams);
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect sample logs from instances')
+        ).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Sample logs on Agentless')).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(
+          await renderResult.queryByText('Sample logs hidden in agentless')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 
-  it('when stateful, should render inputs specific to the env', async () => {
-    useAgentlessPolicyMock.mockReturnValue({
-      isAgentlessEnabled: false,
-      isAgentlessPackagePolicy: jest.fn(),
-      isAgentlessAgentPolicy: jest.fn(),
-      isAgentlessIntegration: jest.fn(),
+  describe('When agentless not enabled', () => {
+    beforeEach(() => {
+      useAgentlessPolicyMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessPackagePolicy: jest.fn(),
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+      });
     });
-    render();
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
-      ).toBeInTheDocument();
+
+    it('should render inputs specific to the env', async () => {
+      render(mockPackageInfo, mockPackageInputStreams);
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect sample logs from instances')
+        ).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(await renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(
+          await renderResult.queryByText('Sample logs hidden in agentless')
+        ).toBeInTheDocument();
+      });
     });
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect sample logs from instances')
-      ).toBeInTheDocument();
-    });
-    await waitFor(async () => {
-      expect(await renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
-    });
-    await waitFor(async () => {
-      expect(await renderResult.queryByText('Sample logs hidden in agentless')).toBeInTheDocument();
+
+    it('should render inputs when hide_in_deployment_modes is not present', async () => {
+      const packageInputStreams: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Sample logs',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              default: ['/var/log/*.log'],
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Collect sample logs',
+          data_stream: {
+            title: 'Default data stream',
+            release: 'ga',
+            type: 'logs',
+            package: 'agentless_test_package',
+            dataset: 'agentless_test_package.default_data_stream',
+            path: 'default_data_stream',
+            elasticsearch: {
+              'ingest_pipeline.name': 'default',
+            },
+            ingest_pipeline: 'default',
+            streams: [
+              {
+                input: 'logfile',
+                title: 'Sample logs',
+                template_path: 'stream.yml.hbs',
+                vars: [
+                  {
+                    name: 'paths',
+                    type: 'text',
+                    title: 'Paths',
+                    multi: false,
+                    default: ['/var/log/*.log'],
+                    required: false,
+                    show_user: true,
+                  },
+                ],
+                description: 'Collect sample log - hidden in agentless',
+              },
+            ],
+          },
+        },
+      ];
+      const packageInfo = {
+        ...mockPackageInfo,
+        data_streams: [
+          {
+            title: 'Default data stream',
+            release: 'ga',
+            type: 'logs',
+            package: 'agentless_test_package',
+            dataset: 'agentless_test_package.default_data_stream',
+            path: 'default_data_stream',
+            elasticsearch: {
+              'ingest_pipeline.name': 'default',
+            },
+            ingest_pipeline: 'default',
+            streams: [
+              {
+                input: 'logfile',
+                title: 'Sample logs',
+                template_path: 'stream.yml.hbs',
+                vars: [
+                  {
+                    name: 'paths',
+                    type: 'text',
+                    title: 'Paths',
+                    multi: false,
+                    default: ['/var/log/*.log'],
+                    required: false,
+                    show_user: true,
+                  },
+                ],
+                description: 'Collect sample logs',
+              },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo;
+      render(packageInfo, packageInputStreams);
+
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect sample logs from instances')
+        ).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Sample logs')).toBeInTheDocument();
+      });
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Collect sample logs')).toBeInTheDocument();
+      });
     });
   });
 });
