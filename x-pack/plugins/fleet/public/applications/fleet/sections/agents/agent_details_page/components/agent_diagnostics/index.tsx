@@ -22,7 +22,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -40,10 +39,6 @@ import {
 } from '../../../../../hooks';
 import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
 import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
-
-const MarginedIcon = styled(EuiIcon)`
-  margin-right: 7px;
-`;
 
 export interface AgentDiagnosticsProps {
   agent: Agent;
@@ -159,9 +154,6 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
-  const errorIcon = <MarginedIcon type="warning" color="red" />;
-  const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
-
   const columns: Array<EuiBasicTableColumn<AgentDiagnostics>> = [
     {
       field: 'id',
@@ -184,22 +176,30 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiLink>
         ) : (
           <EuiLink color="subdued" disabled>
-            {currentItem?.status ? (
-              <EuiToolTip
-                content={
-                  <>
-                    <p>Diagnostics status: {currentItem?.status}</p>
-                    <p>{getErrorMessage(currentItem?.error)}</p>
-                  </>
-                }
-              >
-                {errorIcon}
-              </EuiToolTip>
-            ) : (
-              errorIcon
-            )}
-            &nbsp;
-            {currentItem?.name}
+            <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
+              {currentItem?.error ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.requestDiagnostics.errorGeneratingFileMessage"
+                        defaultMessage="Error generating file: {reason}"
+                        values={{ reason: currentItem.error }}
+                      />
+                    }
+                  >
+                    <EuiIcon type="warning" color="danger" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : currentItem?.status ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={currentItem.status}>
+                    <EuiIcon type="warning" color="danger" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem>{currentItem?.name}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiLink>
         );
       },
@@ -232,6 +232,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText', {
             defaultMessage: 'Delete',
           }),
+          available: (item: AgentDiagnostics) => item.status !== 'IN_PROGRESS',
           description: i18n.translate(
             'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
             {
@@ -271,6 +272,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             agentCount={1}
             onClose={() => {
               setIsRequestDiagnosticsModalOpen(false);
+              loadData();
             }}
           />
         </EuiPortal>
