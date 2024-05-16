@@ -157,6 +157,7 @@ export const useLatestFindingsGrouping = ({
     error,
     filters,
     setActivePageIndex,
+    urlQuery,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -271,5 +272,6 @@ export const useLatestFindingsGrouping = ({
     totalPassedFindings,
     totalFailedFindings,
     isEmptyResults,
+    urlQuery,
   };
 };

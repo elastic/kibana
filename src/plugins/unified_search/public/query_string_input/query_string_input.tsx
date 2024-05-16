@@ -311,9 +311,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   private getRecentSearchSuggestions = (query: string) => {
-    // if (!this.persistedLog) {
-    return [];
-    // }
+    if (!this.persistedLog) {
+      return [];
+    }
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;

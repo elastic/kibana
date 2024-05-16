@@ -137,6 +137,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     error,
     filters,
     setActivePageIndex,
+    urlQuery,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -202,5 +203,6 @@ export const useLatestVulnerabilitiesGrouping = ({
     filters,
     error,
     isEmptyResults,
+    urlQuery,
   };
 };

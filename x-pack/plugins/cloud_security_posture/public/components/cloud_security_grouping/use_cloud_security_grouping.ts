@@ -139,5 +139,6 @@ export const useCloudSecurityGrouping = ({
     onChangeGroupsPage,
     onResetFilters,
     filters: urlQuery.filters,
+    urlQuery,
   };
 };

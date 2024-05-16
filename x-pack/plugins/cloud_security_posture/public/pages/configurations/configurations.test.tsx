@@ -145,7 +145,7 @@ describe('<Findings />', () => {
   });
 
   describe('SearchBar', () => {
-    it('set search query', async () => {
+    it.only('set search query', async () => {
       server.use(cspmStatusIndexed);
       server.use(bsearchFindingsPageDefault);
       const { getByText, getByTestId, getAllByText } = renderFindingsPage();
