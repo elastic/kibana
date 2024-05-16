@@ -7,11 +7,15 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
+import { PassThrough } from 'stream';
+import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
+  StreamingResponseSchema,
+  RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/gemini/schema';
 import {
@@ -22,6 +26,7 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
   RunApiLatestResponse,
+  StreamingResponse,
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
@@ -232,6 +237,81 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
     return { message: res.completion };
   }
+
+  private async streamAPI({
+    body,
+    model: reqModel,
+    temperature,
+    signal,
+    timeout,
+  }: RunActionParams): Promise<StreamingResponse> {
+    console.log('rohan test inside stream API')
+    const currentModel = reqModel ?? this.model;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent`;
+    const accessToken = this.secrets.accessToken;
+
+    const response = await this.request({
+      url: `${this.url}${path}`,
+      method: 'post',
+      responseSchema: StreamingResponseSchema,
+      data: body,
+      responseType: 'stream',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      signal,
+      timeout,
+    });
+    // const candidate = response.data.candidates[0];
+    // const completionText = candidate.content.parts[0].text;
+    console.log('Stream API response received');
+
+    // response.data.on('data', (chunk: any) => {
+    //   console.log('Received chunk:', chunk.toString());
+    // });
+
+    // response.data.on('end', () => {
+    //   console.log('Stream ended');
+    // });
+
+    // response.data.on('error', (err: any) => {
+    //   console.error('Stream error:', err);
+    // });
+
+
+    // return { completion: completionText }
+
+    return response.data.pipe(new PassThrough()); //this.runApiLatest({ ...requestArgs, responseSchema: StreamingResponseSchema });
+  }
+
+  /**
+   *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
+   *  request to the Bedrock API with the formatted messages and model. It then returns a Transform stream
+   *  that pipes the response from the API through the transformToString function,
+   *  which parses the proprietary response into a string of the response text alone
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   */
+  public async invokeStream({
+    messages,
+    model,
+    stopSequences,
+    temperature,
+    signal,
+    timeout,
+  }: InvokeAIActionParams): Promise<IncomingMessage> {
+    const res = (await this.streamAPI({
+      body: JSON.stringify(JSON.parse(messages)),
+      model,
+      stopSequences,
+      temperature,
+      signal,
+      timeout,
+    })) as unknown as IncomingMessage;
+    return res;
+  }
+
 }
 
 /** Format the json body to meet Gemini payload requirements */
