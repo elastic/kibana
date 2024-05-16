@@ -22,6 +22,7 @@ export interface ConnectionDetailsOptsLinks {
 export interface ConnectionDetailsOptsEndpoints {
   url?: string;
   id?: string;
+  cloudIdLearMoreLink?: string;
 }
 
 export interface ConnectionDetailsOptsApiKeys {
@@ -31,3 +32,5 @@ export interface ConnectionDetailsOptsApiKeys {
   }>;
   hasPermission: () => Promise<boolean>;
 }
+
+export type TabID = 'endpoints' | 'apiKeys';

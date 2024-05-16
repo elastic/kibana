@@ -88,3 +88,6 @@ export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
 
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
 export const SYNTHETICS_DEFAULT_GROUPINGS = ['monitor.name', 'observer.geo.name', 'monitor.id'];
+
+// in hours
+export const DEFAULT_STALE_SLO_THRESHOLD_HOURS = 48;
