@@ -32,6 +32,7 @@ export const EndpointsTab: React.FC = () => {
         <CloudIdRow
           value={endpoints.id}
           showCloudId={showCloudId}
+          learnMoreUrl={service.opts.endpoints?.cloudIdLearMoreLink}
           onShowCloudIdToggle={service.toggleShowCloudId}
           onCopyClick={() => service.emitTelemetryEvent(['copy_cloud_id_clicked'])}
         />
