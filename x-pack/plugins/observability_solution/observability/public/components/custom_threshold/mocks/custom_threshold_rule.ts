@@ -16,12 +16,11 @@ export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}
 ): CustomThresholdRule => {
   return {
-    alertTypeId: 'metrics.alert.threshold',
+    ruleTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
     updatedBy: 'admin',
     createdAt: new Date('2023-02-20T15:25:32.125Z'),
     updatedAt: new Date('2023-03-02T16:24:41.177Z'),
-    apiKey: 'apiKey',
     apiKeyOwner: 'admin',
     notifyWhen: null,
     muteAll: false,

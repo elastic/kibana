@@ -47,7 +47,7 @@ export async function resolveEmbeddableSloUserInput(
               />
             </QueryClientProvider>
           </KibanaContextProvider>,
-          { i18n: coreStart.i18n, theme: coreStart.theme }
+          coreStart
         )
       );
     } catch (error) {
