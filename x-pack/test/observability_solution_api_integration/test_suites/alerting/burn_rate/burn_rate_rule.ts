@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
@@ -23,8 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
-  describe('Burn rate rule', () => {
+  describe('@serverless @ess Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
@@ -120,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const dependencyRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -192,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -294,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should find the created rule with correct information about the consumer', async () => {
         const match = await alertingApi.findRule(ruleId);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
     });
   });

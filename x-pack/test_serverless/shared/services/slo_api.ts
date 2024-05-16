@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '@kbn/slo-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
@@ -180,6 +183,54 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
             .expect(204);
         })
       );
+    },
+    async getSLOSummaryDataById(id: string) {
+      return await es.search({
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { 'slo.id': id },
+                },
+                {
+                  term: { isTempDoc: false },
+                },
+              ],
+            },
+          },
+        },
+      });
+    },
+
+    async getSLORollupDataById(id: string) {
+      return await es.search({
+        index: SLO_DESTINATION_INDEX_PATTERN,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { 'slo.id': id },
+                },
+              ],
+            },
+          },
+        },
+      });
+    },
+
+    async deleteTestSourceData() {
+      try {
+        await es.deleteByQuery({
+          index: 'kbn-data-forge-fake_hosts*',
+          query: { term: { 'system.network.name': 'eth1' } },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('SLO api integration test data not found');
+      }
     },
   };
 }
