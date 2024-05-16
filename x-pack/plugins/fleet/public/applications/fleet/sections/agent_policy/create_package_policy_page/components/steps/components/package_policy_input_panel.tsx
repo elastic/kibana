@@ -105,16 +105,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       )
     );
 
-    const showRegistryVars = useCallback(
+    // Hide registry variables based on `hide_in_deployment_modes` value
+    const hideRegistryVars = useCallback(
       (registryVar: RegistryVarsEntry) => {
-        if (
+        if (!registryVar.hide_in_deployment_modes) return false;
+        return (
           (isAgentlessEnabled &&
-            registryVar.hide_in_deployment_modes?.find((mode) => mode !== 'agentless')) ||
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'agentless')) ||
           (!isAgentlessEnabled &&
-            registryVar.hide_in_deployment_modes?.find((mode) => mode !== 'default'))
-        )
-          return true;
-        return false;
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'default'))
+        );
       },
       [isAgentlessEnabled]
     );
@@ -124,12 +124,12 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         return (
           !!packageInputStream.vars &&
           packageInputStream.vars.length > 0 &&
-          !!packageInputStream.vars.find((registryVar: RegistryVarsEntry) =>
-            showRegistryVars(registryVar)
+          !!packageInputStream.vars.find(
+            (registryVar: RegistryVarsEntry) => !hideRegistryVars(registryVar)
           )
         );
       },
-      [showRegistryVars]
+      [hideRegistryVars]
     );
 
     // Errors state

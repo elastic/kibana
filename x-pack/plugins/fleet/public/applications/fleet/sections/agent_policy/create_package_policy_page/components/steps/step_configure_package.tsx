@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -21,11 +21,17 @@ import {
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  RegistryPolicyTemplate,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
+import { useAgentlessPolicy } from '../../single_page_layout/hooks/setup_technology';
 
 import { PackagePolicyInputPanel } from './components';
 
@@ -48,6 +54,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   noTopRule = false,
   isEditPage = false,
 }) => {
+  const { isAgentlessEnabled } = useAgentlessPolicy();
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
     () =>
@@ -58,13 +65,32 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
+
+  const filterByDeploymentModes = useCallback(
+    (policyTemplate: RegistryPolicyTemplate) => {
+      if (!policyTemplate.deployment_modes) return true;
+      return (
+        (isAgentlessEnabled && policyTemplate.deployment_modes?.agentless.enabled === true) ||
+        (!isAgentlessEnabled && policyTemplate?.deployment_modes?.default?.enabled === true)
+      );
+    },
+    [isAgentlessEnabled]
+  );
+
+  // Exclude the policy templates not enabled for the current environment
+  const filteredPackagePolicyTemplates = useMemo(() => {
+    return packagePolicyTemplates.filter(
+      (policyTemplate) => filterByDeploymentModes(policyTemplate) === true
+    );
+  }, [packagePolicyTemplates, filterByDeploymentModes]);
+
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
-    packagePolicyTemplates.length ? (
+    filteredPackagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
-          {packagePolicyTemplates.map((policyTemplate) => {
+          {filteredPackagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
             return inputs.map((packageInput) => {
               const packagePolicyInput = packagePolicy.inputs.find(

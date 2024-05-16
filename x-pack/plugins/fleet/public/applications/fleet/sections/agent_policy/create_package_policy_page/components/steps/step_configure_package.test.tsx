@@ -12,10 +12,18 @@ import { safeLoad } from 'js-yaml';
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
+import { useAgentlessPolicy } from '../../single_page_layout/hooks/setup_technology';
 
 import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
+
+jest.mock('../../single_page_layout/hooks/setup_technology', () => {
+  return {
+    useAgentlessPolicy: jest.fn(),
+  };
+});
+const useAgentlessPolicyMock = useAgentlessPolicy as jest.MockedFunction<typeof useAgentlessPolicy>;
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
@@ -132,39 +140,132 @@ describe('StepConfigurePackage', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should show nothing to configure if no matching integration', async () => {
-    packageInfo.policy_templates = [];
-    render();
+  describe('When agentless not enabled', () => {
+    beforeEach(() => {
+      useAgentlessPolicyMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessPackagePolicy: jest.fn(),
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+      });
+    });
 
-    await waitFor(async () => {
-      expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
+    it('should show nothing to configure if no matching integration', async () => {
+      packageInfo.policy_templates = [];
+      render();
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
+      });
+    });
+
+    it('should render without data streams or vars', async () => {
+      packageInfo.data_streams = [];
+      packagePolicy.inputs[0].streams = [];
+      render();
+
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect logs from Nginx instances')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should show inputs of policy templates and update package policy with input enabled: false', async () => {
+      render();
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect logs from Nginx instances')
+        ).toBeInTheDocument();
+      });
+      act(() => {
+        fireEvent.click(renderResult.getByRole('switch'));
+      });
+      expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
     });
   });
 
-  it('should show inputs of policy templates and update package policy with input enabled: false', async () => {
-    render();
-
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect logs from Nginx instances')
-      ).toBeInTheDocument();
+  describe('When agentless is enabled', () => {
+    beforeEach(() => {
+      useAgentlessPolicyMock.mockReturnValue({
+        isAgentlessEnabled: true,
+        isAgentlessPackagePolicy: jest.fn(),
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+      });
     });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+
+    it('should show nothing to configure if no matching integration', async () => {
+      packageInfo.policy_templates = [];
+      render();
+      await waitFor(async () => {
+        expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
+      });
     });
-    expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
-  });
 
-  it('should render without data streams or vars', async () => {
-    packageInfo.data_streams = [];
-    packagePolicy.inputs[0].streams = [];
+    it('should render with deployment_modes enabled', async () => {
+      packageInfo.policy_templates = [
+        {
+          name: 'nginx',
+          title: 'Nginx logs and metrics',
+          description: 'Collect logs and metrics from Nginx instances',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs from Nginx instances',
+              description: 'Collecting Nginx access and error logs',
+            },
+          ],
+          multiple: true,
+          deployment_modes: {
+            agentless: {
+              enabled: true,
+            },
+          },
+        },
+      ];
+      packageInfo.data_streams = [];
+      packagePolicy.inputs[0].streams = [];
 
-    render();
+      render();
 
-    await waitFor(async () => {
-      expect(
-        await renderResult.findByText('Collect logs from Nginx instances')
-      ).toBeInTheDocument();
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByText('Collect logs from Nginx instances')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should not render with deployment_modes disabled', async () => {
+      packageInfo.policy_templates = [
+        {
+          name: 'nginx',
+          title: 'Nginx logs and metrics',
+          description: 'Collect logs and metrics from Nginx instances',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs from Nginx instances',
+              description: 'Collecting Nginx access and error logs',
+            },
+          ],
+          multiple: true,
+          deployment_modes: {
+            agentless: {
+              enabled: false,
+            },
+          },
+        },
+      ];
+      packageInfo.data_streams = [];
+      packagePolicy.inputs[0].streams = [];
+
+      render();
+
+      await waitFor(async () => {
+        expect(
+          await renderResult.queryByText('Collect logs from Nginx instances')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 });
