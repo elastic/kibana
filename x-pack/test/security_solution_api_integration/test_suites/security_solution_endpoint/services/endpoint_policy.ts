@@ -25,7 +25,7 @@ import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;

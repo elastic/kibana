@@ -40,7 +40,7 @@ import {
   startTransform,
   stopTransform,
 } from './data_stream_helper';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -16,7 +16,7 @@ import {
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { targetTags } from '../../security_solution_endpoint/target_tags';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
 import { deleteEventsStream } from './data_stream_helper';
 

@@ -17,7 +17,7 @@ import {
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
 import { HEADERS } from '../../headers';

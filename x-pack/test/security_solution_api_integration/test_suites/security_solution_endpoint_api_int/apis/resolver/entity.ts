@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

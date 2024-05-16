@@ -8,12 +8,14 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
-import { services } from './services';
+import { services } from '../services';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
 
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('./config.base.ts'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../../functional/config.base.js')
+  );
 
   return generateConfig({
     ftrConfigProviderContext,

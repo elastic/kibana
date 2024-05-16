@@ -14,7 +14,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   ArtifactBodyType,
   getArtifactsListTestsData,

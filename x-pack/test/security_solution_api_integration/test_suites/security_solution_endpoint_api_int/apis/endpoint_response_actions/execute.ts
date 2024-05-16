@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {

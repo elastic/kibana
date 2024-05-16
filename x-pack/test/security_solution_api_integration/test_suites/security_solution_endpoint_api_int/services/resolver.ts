@@ -12,7 +12,7 @@ import {
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
 

@@ -7,11 +7,11 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
-import { svlServices } from './services';
+import { svlServices } from '../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const serverlessTestsConfig = await readConfigFile(
-    require.resolve('../../config/serverless/config.base.ts')
+    require.resolve('../../../../test_serverless/shared/config.base.ts')
   );
 
   return generateConfig({

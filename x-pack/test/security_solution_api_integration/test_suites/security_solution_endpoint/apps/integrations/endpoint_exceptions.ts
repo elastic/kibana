@@ -12,7 +12,7 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

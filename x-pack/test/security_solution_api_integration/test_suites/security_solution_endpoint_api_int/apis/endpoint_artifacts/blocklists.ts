@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';

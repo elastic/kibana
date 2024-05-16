@@ -6,7 +6,7 @@
  */
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 
 export default function ({ getService }: FtrProviderContext) {

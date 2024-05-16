@@ -6,27 +6,56 @@
  */
 
 import { Config } from '@kbn/test';
-import { getRegistryUrlAsArray, createEndpointDockerConfig } from './registry';
-import { SUITE_TAGS } from '../security_solution_endpoint/config.base';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { pageObjects } from '../page_objects';
+import {
+  getRegistryUrlAsArray,
+  createEndpointDockerConfig,
+} from '../../security_solution_endpoint_api_int/registry';
+import type { TargetTags } from '../target_tags';
+
+export const SUITE_TAGS: Record<
+  'ess' | 'serverless',
+  { include: TargetTags[]; exclude: TargetTags[] }
+> = {
+  ess: {
+    include: ['@ess'],
+    exclude: ['@skipInEss'],
+  },
+  serverless: {
+    include: ['@serverless'],
+    exclude: ['@skipInServerless', '@brokenInServerless'],
+  },
+};
 
 export const generateConfig = async ({
+  ftrConfigProviderContext,
   baseConfig,
+  testFiles,
   junitReportName,
   kbnServerArgs = [],
   target,
   services,
 }: {
+  ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
+  testFiles: string[];
   junitReportName: string;
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
   services: any;
 }): Promise<Config> => {
+  const { readConfigFile } = ftrConfigProviderContext;
+
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../../../functional/config.base.js')
+  );
+
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('./apis')],
+    pageObjects,
+    testFiles,
     dockerServers: createEndpointDockerConfig(),
-    services,
     junit: {
       reportName: junitReportName,
     },
@@ -34,6 +63,21 @@ export const generateConfig = async ({
       ...baseConfig.get('suiteTags'),
       include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
       exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
+    },
+    services,
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      ...baseConfig.get('apps'),
+
+      ['securitySolutionManagement']: {
+        pathname: '/app/security/administration',
+      },
+      ['security']: {
+        pathname: '/app/security',
+      },
+      ['securitySolutionTimelines']: {
+        pathname: '/app/security/timelines',
+      },
     },
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
@@ -46,11 +90,11 @@ export const generateConfig = async ({
         `--xpack.fleet.packages.0.version=latest`,
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
-        // set any experimental feature flags for testing
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
-
         ...kbnServerArgs,
       ],
+    },
+    layout: {
+      fixedHeaderHeight: 200,
     },
   };
 };

@@ -11,7 +11,7 @@ import {
   getAllEndpointSecurityRoles,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export const ROLE = ENDPOINT_SECURITY_ROLE_NAMES;
 
