@@ -5,30 +5,18 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
-import type { AuthorizationCurrentUserApiKeyPrivilegesResponse } from '@kbn/security-plugin-types-public/src/authorization/authorization_service';
 
 import type { ConfigType } from '../config';
 
 interface SetupParams {
   config: ConfigType;
-  http: HttpSetup;
 }
 
 export class AuthorizationService {
-  public setup({ config, http }: SetupParams): AuthorizationServiceSetup {
+  public setup({ config }: SetupParams): AuthorizationServiceSetup {
     const isRoleManagementEnabled = () => config.roleManagementEnabled;
 
-    const getCurrentUserApiKeyPrivileges = async () => {
-      const { canManageApiKeys, canManageCrossClusterApiKeys, canManageOwnApiKeys } =
-        (await http.get(
-          '/internal/security/api_key'
-        )) as AuthorizationCurrentUserApiKeyPrivilegesResponse;
-
-      return { canManageApiKeys, canManageCrossClusterApiKeys, canManageOwnApiKeys };
-    };
-
-    return { isRoleManagementEnabled, getCurrentUserApiKeyPrivileges };
+    return { isRoleManagementEnabled };
   }
 }

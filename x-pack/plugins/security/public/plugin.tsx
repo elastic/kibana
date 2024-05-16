@@ -115,7 +115,6 @@ export class SecurityPlugin
 
     this.authz = this.authorizationService.setup({
       config: this.config,
-      http: core.http,
     });
 
     this.securityApiClients = {
