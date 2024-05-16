@@ -20,8 +20,8 @@ export default defineCypressConfig({
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
-  viewportHeight: 1440,
-  viewportWidth: 2560,
+  viewportHeight: 1200,
+  viewportWidth: 1920,
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
@@ -35,7 +35,7 @@ export default defineCypressConfig({
       esArchiver(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
-          launchOptions.args.push('--window-size=1920,1080');
+          launchOptions.args.push('--window-size=1920,1200');
           return launchOptions;
         }
         if (browser.family === 'chromium') {

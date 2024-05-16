@@ -43,8 +43,8 @@ export const getCypressBaseConfig = (
       video: true,
       videoCompression: 15,
       videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
-      viewportHeight: 1440,
-      viewportWidth: 2560,
+      viewportHeight: 1200,
+      viewportWidth: 1920,
       experimentalStudio: true,
 
       env: {
@@ -83,7 +83,7 @@ export const getCypressBaseConfig = (
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           on('before:browser:launch', (browser, launchOptions) => {
             if (browser.name === 'chrome' && browser.isHeadless) {
-              launchOptions.args.push('--window-size=1920,1080');
+              launchOptions.args.push('--window-size=1920,1200');
               return launchOptions;
             }
             if (browser.family === 'chromium') {
