@@ -12,9 +12,10 @@ import type {
 
 import type { PackagePolicy } from '../../../../common';
 
-export const model10OnWriteScanFix: SavedObjectModelDataBackfillFn<PackagePolicy, PackagePolicy> = (
-  packagePolicyDoc
-) => {
+export const packagePolicyV10OnWriteScanFix: SavedObjectModelDataBackfillFn<
+  PackagePolicy,
+  PackagePolicy
+> = (packagePolicyDoc) => {
   if (packagePolicyDoc.attributes.package?.name !== 'endpoint') {
     return { attributes: packagePolicyDoc.attributes };
   }

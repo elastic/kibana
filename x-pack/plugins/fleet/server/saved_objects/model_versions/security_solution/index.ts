@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { model10OnWriteScanFix } from './model_10_on_write_scan_fix';
+export { packagePolicyV10OnWriteScanFix } from './v10_on_write_scan_fix';
