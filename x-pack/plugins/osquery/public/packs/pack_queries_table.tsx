@@ -187,5 +187,5 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 };
 
 export const PackQueriesTable = React.memo(PackQueriesTableComponent);
-// eslint-disable-next-line import/no-default-export
+
 export default PackQueriesTable;

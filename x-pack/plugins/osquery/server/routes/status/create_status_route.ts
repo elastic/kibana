@@ -200,7 +200,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 }
               })
             );
-            // eslint-disable-next-line no-empty
           } catch (e) {}
         }
 

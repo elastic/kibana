@@ -24,7 +24,6 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const enablePrivileges = () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   jest.spyOn(privileges, 'useActionResultsPrivileges').mockImplementation(() => ({
     data: true,

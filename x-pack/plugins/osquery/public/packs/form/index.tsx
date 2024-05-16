@@ -173,7 +173,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         } else {
           await createAsync(serializer(values));
         }
-        // eslint-disable-next-line no-empty
       } catch (e) {}
     },
     [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]

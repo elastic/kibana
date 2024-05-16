@@ -37,7 +37,6 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
         } else {
           throw new Error('No data view found');
         }
-        // eslint-disable-next-line no-empty
       } catch (e) {}
 
       if (!dataView && dataViews.getCanSaveSync()) {
@@ -46,7 +45,6 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
             title: 'logs-osquery_manager.result*',
             timeFieldName: '@timestamp',
           });
-          // eslint-disable-next-line no-empty
         } catch (e) {}
       }
 
@@ -56,7 +54,6 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
             title: 'logs-osquery_manager.result*',
             timeFieldName: '@timestamp',
           });
-          // eslint-disable-next-line no-empty
         } catch (e) {}
       }
 

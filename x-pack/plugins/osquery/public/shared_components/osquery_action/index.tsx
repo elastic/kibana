@@ -103,5 +103,4 @@ OsqueryActionComponent.displayName = 'OsqueryAction';
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);
 
-// eslint-disable-next-line import/no-default-export
 export { OsqueryAction as default };

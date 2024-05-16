@@ -60,7 +60,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
       commands?.map((command) => {
         if (command.name === 'submitOnCmdEnter') {
           // on CMD/CTRL + Enter submit the query
-          // eslint-disable-next-line no-bitwise
+
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec);
         }
       });

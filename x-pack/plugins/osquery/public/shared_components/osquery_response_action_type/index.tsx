@@ -170,5 +170,5 @@ const OsqueryResponseActionParamsFormComponent = ({
 const OsqueryResponseActionParamsForm = React.memo(OsqueryResponseActionParamsFormComponent);
 
 // Export as default in order to support lazy loading
-// eslint-disable-next-line import/no-default-export
+
 export { OsqueryResponseActionParamsForm as default };

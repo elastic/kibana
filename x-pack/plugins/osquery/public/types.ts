@@ -27,7 +27,6 @@ import type {
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {

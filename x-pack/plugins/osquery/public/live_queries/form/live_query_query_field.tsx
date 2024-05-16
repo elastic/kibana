@@ -170,5 +170,4 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
 const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
 
-// eslint-disable-next-line import/no-default-export
 export { LiveQueryQueryField as default };

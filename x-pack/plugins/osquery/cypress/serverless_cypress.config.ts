@@ -9,7 +9,6 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { getFailedSpecVideos } from './support/filter_videos';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
-// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../node_modules/cypress-multi-reporters',
   reporterOptions: {

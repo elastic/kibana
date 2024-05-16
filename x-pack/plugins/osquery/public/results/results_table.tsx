@@ -183,7 +183,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
             try {
               return JSON.stringify(ecsFieldValue, null, 2);
-              // eslint-disable-next-line no-empty
             } catch (e) {}
           }
 

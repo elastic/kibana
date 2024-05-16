@@ -539,7 +539,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {}
           {/* @ts-ignore*/}
           <EuiComboBox
             css={resultComboBoxCss}
@@ -780,7 +780,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     const oneLineQuery = removeMultilines(query);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ast: Record<string, any> | undefined;
 
     try {
@@ -847,7 +846,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               data?.map,
               (mapValue: {
                 type: string;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 source: { type: string; variant: string; name: any | string; alias: any };
               }) => {
                 if (mapValue?.type === 'join') {
@@ -1059,5 +1058,4 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   );
 });
 
-// eslint-disable-next-line import/no-default-export
 export default ECSMappingEditorField;

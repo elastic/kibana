@@ -198,7 +198,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       let currentPacks = {};
       try {
         currentPacks = JSON.parse(config)?.packs;
-        // eslint-disable-next-line no-empty
       } catch (e) {}
 
       if (newConfig) {
@@ -229,7 +228,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         let parsedConfig;
         try {
           parsedConfig = JSON.parse(config);
-          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         if (isEmpty(parsedConfig)) {
@@ -262,7 +260,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           if (response.results) {
             setPolicyAgentsCount(response.results.total);
           }
-          // eslint-disable-next-line no-empty
         } catch (e) {}
       };
 
@@ -275,7 +272,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
             if (response.item) {
               setAgentPolicy(response.item);
             }
-            // eslint-disable-next-line no-empty
           } catch (e) {}
         }
       };

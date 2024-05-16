@@ -72,5 +72,4 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
 
 const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);
 
-// eslint-disable-next-line import/no-default-export
 export { OsqueryActionResultsWrapper as default };

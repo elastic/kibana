@@ -29,5 +29,4 @@ const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, ch
 
 const ServicesWrapper = React.memo(ServicesWrapperComponent);
 
-// eslint-disable-next-line import/no-default-export
 export { ServicesWrapper as default };

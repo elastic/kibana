@@ -40,7 +40,6 @@ import { waitUntil } from '../tasks/wait_until';
 import { isServerless } from '../tasks/serverless';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface SuiteConfigOverrides {
       env?: {

@@ -130,7 +130,7 @@ export const generateAgentSelection = (
         break;
       default:
         // this should never happen!
-        // eslint-disable-next-line no-console
+
         console.error(`unknown group type ${groupType}`);
     }
   }

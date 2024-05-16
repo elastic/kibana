@@ -72,12 +72,11 @@ describe('replaceParamsQuery', () => {
   });
 
   it('handle complex windows query with registry as param', () => {
-    // eslint-disable-next-line no-useless-escape
     const query = `select * FROM registry WHERE key LIKE 'HKEY_USERS\{{user.id}}\Software\Microsoft\IdentityCRL\Immersive\production\Token\{0CB4A94A-6E8C-477B-88C8-A3799FC97414}'`;
     const { result, skipped } = replaceParamsQuery(query, {
       user: { id: 'S-1-5-20' },
     });
-    // eslint-disable-next-line no-useless-escape
+
     const expectedQuery = `select * FROM registry WHERE key LIKE 'HKEY_USERS\S-1-5-20\Software\Microsoft\IdentityCRL\Immersive\production\Token\{0CB4A94A-6E8C-477B-88C8-A3799FC97414}'`;
     expect(result).toBe(expectedQuery);
     expect(skipped).toBe(false);

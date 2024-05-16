@@ -53,7 +53,6 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
     const serializedData = serializer(payload);
     try {
       await handleSubmit(serializedData);
-      // eslint-disable-next-line no-empty
     } catch (e) {}
   };
 
