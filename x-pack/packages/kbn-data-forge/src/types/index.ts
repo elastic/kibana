@@ -170,7 +170,7 @@ export interface CliOptions {
   elasticsearchHost: string;
   elasticsearchUsername: string;
   elasticsearchPassword: string;
-  elasticsearchApiKey: undefined | string;
+  elasticsearchApiKey?: undefined | string;
   kibanaUrl: string;
   kibanaUsername: string;
   kibanaPassword: string;
@@ -178,5 +178,5 @@ export interface CliOptions {
   eventTemplate: string;
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
-  alignEventsToInterval: boolean;
+  alignEventsToInterval: number;
 }
