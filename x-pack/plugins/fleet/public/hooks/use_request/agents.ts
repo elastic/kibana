@@ -17,6 +17,7 @@ import type {
   PostRequestBulkDiagnosticsRequest,
   PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
+  DeleteAgentUploadResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -245,7 +246,7 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
 }
 
 export function sendDeleteAgentUpload(fileId: string, options?: RequestOptions) {
-  return sendRequest<GetAgentUploadsResponse>({
+  return sendRequest<DeleteAgentUploadResponse>({
     path: agentRouteService.getAgentFileDeletePath(fileId),
     method: 'delete',
     version: API_VERSIONS.public.v1,

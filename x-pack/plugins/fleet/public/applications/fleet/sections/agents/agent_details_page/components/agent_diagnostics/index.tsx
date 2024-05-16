@@ -31,13 +31,15 @@ import {
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from '../../../../../../../../common/services';
 
-import { sendGetAgentUploads, useAuthz, useLink, useStartServices } from '../../../../../hooks';
+import {
+  sendGetAgentUploads,
+  useAuthz,
+  useLink,
+  useStartServices,
+  sendDeleteAgentUpload,
+} from '../../../../../hooks';
 import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
 import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
-
-const FlexStartEuiFlexItem = styled(EuiFlexItem)`
-  align-self: flex-start;
-`;
 
 const MarginedIcon = styled(EuiIcon)`
   margin-right: 7px;
@@ -92,6 +94,31 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       });
     }
   }, [agent.id, notifications.toasts, setLoadInterval]);
+
+  const deleteFile = (fileId: string) => {
+    sendDeleteAgentUpload(fileId).then(({ data, error }) => {
+      if (error || data?.deleted === false) {
+        notifications.toasts.addError(error || new Error('Request returned `deleted: false`'), {
+          title: i18n.translate(
+            'xpack.fleet.requestDiagnostics.errorDeletingUploadNotificationTitle',
+            {
+              defaultMessage: 'Error deleting diagnostics file',
+            }
+          ),
+        });
+      } else {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.requestDiagnostics.successDeletingUploadNotificationTitle',
+            {
+              defaultMessage: 'Diagnostics file deleted',
+            }
+          ),
+        });
+      }
+      loadData();
+    });
+  };
 
   useEffect(() => {
     loadData();
@@ -211,7 +238,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
               defaultMessage: 'Delete diagnostics file',
             }
           ),
-          onClick: (item: AgentDiagnostics) => {},
+          onClick: (item: AgentDiagnostics) => {
+            deleteFile(item.id);
+          },
         },
       ],
     },
