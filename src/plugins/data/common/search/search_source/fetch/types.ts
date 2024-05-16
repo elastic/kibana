@@ -20,7 +20,7 @@ import { GetConfigFn } from '../../../types';
  * FIXME: replace with estypes.SearchRequest?
  */
 export interface SearchRequest {
-  index?: DataView;
+  index?: DataView | string;
   query?: Array<Query | AggregateQuery>;
   filters?: Filter[] | (() => Filter[]);
   [propName: string]: any;

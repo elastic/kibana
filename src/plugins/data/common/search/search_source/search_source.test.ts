@@ -36,6 +36,7 @@ const indexPattern = {
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
+  getAllowHidden: () => false,
 } as unknown as DataView;
 
 const indexPattern2 = {
