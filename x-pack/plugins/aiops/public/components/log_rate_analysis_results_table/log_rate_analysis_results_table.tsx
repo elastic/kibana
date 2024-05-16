@@ -209,6 +209,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
           &nbsp;
           <EuiIconTip
             size="s"
+            position="top"
             color="subdued"
             type="questionInCircle"
             className="eui-alignTop"
@@ -260,6 +261,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
           &nbsp;
           <EuiIconTip
             size="s"
+            position="top"
             color="subdued"
             type="questionInCircle"
             className="eui-alignTop"
@@ -291,6 +293,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
           &nbsp;
           <EuiIconTip
             size="s"
+            position="top"
             color="subdued"
             type="questionInCircle"
             className="eui-alignTop"
