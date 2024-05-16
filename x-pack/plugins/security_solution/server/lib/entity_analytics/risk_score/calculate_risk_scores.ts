@@ -18,11 +18,14 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  AfterKeys,
+  EntityRiskScoreRecord,
+  RiskScoreWeights,
+} from '../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
-  type RiskWeights,
-  type RiskScore,
   getRiskLevel,
   RiskCategories,
 } from '../../../../common/entity_analytics/risk_engine';
@@ -45,7 +48,6 @@ import {
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
-  CalculateScoresResponse,
   RiskScoreBucket,
 } from '../types';
 import {
@@ -67,7 +69,7 @@ const formatForResponse = ({
   now: string;
   identifierField: string;
   includeNewFields: boolean;
-}): RiskScore => {
+}): EntityRiskScoreRecord => {
   const riskDetails = bucket.top_inputs.risk_details;
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
@@ -173,7 +175,7 @@ const buildIdentifierTypeAggregation = ({
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
@@ -249,7 +251,7 @@ const processScores = async ({
   identifierField: string;
   logger: Logger;
   now: string;
-}): Promise<RiskScore[]> => {
+}): Promise<EntityRiskScoreRecord[]> => {
   if (buckets.length === 0) {
     return [];
   }
@@ -302,7 +304,7 @@ export const calculateRiskScores = async ({
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
-} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
+} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const filter = [
