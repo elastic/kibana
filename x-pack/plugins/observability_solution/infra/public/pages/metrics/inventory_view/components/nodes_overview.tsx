@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -63,6 +64,7 @@ export const NodesOverview = ({
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const { onPageReady } = usePerformanceContext();
 
   const closeFlyout = useCallback(
     () => setFlyoutUrlState({ detailsItemId: null }),
@@ -114,6 +116,10 @@ export const NodesOverview = ({
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
   const isStatic = ['xs', 's'].includes(currentBreakpoint!);
+
+  if (!loading) {
+    onPageReady();
+  }
 
   if (view === 'table') {
     return (
