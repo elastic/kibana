@@ -218,7 +218,7 @@ function getQuotedText(ctx: ParserRuleContext) {
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [66 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [66 /* esql_parser.UNQUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
