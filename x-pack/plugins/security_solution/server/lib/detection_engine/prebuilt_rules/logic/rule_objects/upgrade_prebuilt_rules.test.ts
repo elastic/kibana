@@ -18,6 +18,7 @@ import { createRules } from '../../../rule_management/logic/crud/create_rules';
 import { deleteRules } from '../../../rule_management/logic/crud/delete_rules';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from '../../mocks';
 import { getQueryRuleParams, getThreatRuleParams } from '../../../rule_schema/mocks';
+import { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 jest.mock('../../../rule_management/logic/crud/patch_rules');
 jest.mock('../../../rule_management/logic/crud/create_rules');
@@ -25,18 +26,21 @@ jest.mock('../../../rule_management/logic/crud/delete_rules');
 
 describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let rulesManagementClient: RulesManagementClient;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
+    rulesManagementClient = new RulesManagementClient(rulesClient);
   });
 
   describe('when upgrading a prebuilt rule to a newer version with the same rule type', () => {
     const prepackagedRule = getPrebuiltRuleMock({
       rule_id: 'rule-to-upgrade',
     });
+    let installedRule: ReturnType<typeof getRuleMock>;
 
     beforeEach(() => {
-      const installedRule = getRuleMock(
+      installedRule = getRuleMock(
         getQueryRuleParams({
           ruleId: 'rule-to-upgrade',
         })
@@ -50,25 +54,36 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('patches existing rule with incoming version data', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
-      expect(patchRules).toHaveBeenCalledWith(
+      expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          nextParams: expect.objectContaining(prepackagedRule),
+          id: installedRule.id,
+          data: expect.objectContaining({
+            name: prepackagedRule.name,
+            params: expect.objectContaining({
+              ruleId: prepackagedRule.rule_id,
+            }),
+          }),
         })
       );
     });
 
     it('makes sure enabled state is preserved', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      const {
+        results: [upgradedRule],
+      } = await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
-      expect(patchRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          nextParams: expect.objectContaining({
-            enabled: undefined,
-          }),
-        })
-      );
+      expect(upgradedRule.result.enabled).toBe(installedRule.enabled);
+    });
+
+    it('makes sure disabled state is preserved', async () => {
+      installedRule.enabled = false;
+      const {
+        results: [upgradedRule],
+      } = await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
+
+      expect(upgradedRule.result.enabled).toBe(installedRule.enabled);
     });
   });
 
@@ -122,7 +137,7 @@ describe('updatePrebuiltRules', () => {
       (deleteRules as jest.Mock).mockImplementation(() => (lastCalled = 'deleteRules'));
       (createRules as jest.Mock).mockImplementation(() => (lastCalled = 'createRules'));
 
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(deleteRules).toHaveBeenCalledTimes(1);
       expect(createRules).toHaveBeenCalledTimes(1);
@@ -130,7 +145,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('recreates a rule with incoming version data', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -141,7 +156,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('restores saved object id', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -151,7 +166,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('restores enabled state', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -161,7 +176,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('restores actions', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -176,7 +191,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('restores exceptions list', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -186,7 +201,7 @@ describe('updatePrebuiltRules', () => {
     });
 
     it('restores timeline reference', async () => {
-      await upgradePrebuiltRules(rulesClient, [prepackagedRule]);
+      await upgradePrebuiltRules(rulesManagementClient, [prepackagedRule]);
 
       expect(createRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -211,7 +226,9 @@ describe('updatePrebuiltRules', () => {
       data: [getRuleMock(getThreatRuleParams())],
     });
 
-    await upgradePrebuiltRules(rulesClient, [{ ...prepackagedRule, ...updatedThreatParams }]);
+    await upgradePrebuiltRules(rulesManagementClient, [
+      { ...prepackagedRule, ...updatedThreatParams },
+    ]);
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({

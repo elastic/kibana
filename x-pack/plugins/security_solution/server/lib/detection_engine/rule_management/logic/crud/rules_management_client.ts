@@ -56,7 +56,7 @@
  *  9.  INSTALL NEW PREBUILT RULES ✅
  *  10. UPGRADE PREBUILT RULE WITH TYPE CHANGE ✅
  *  11. UPGRADE PREBUILT RULE OF SAME TYPE ✅
- *  12. IMPORT NON EXISTING RULE
+ *  12. IMPORT NON EXISTING RULE ✅
  *  13. IMPORT EXISTING RULE - with override option
  *  14. CREATE RULE EXCEPTIONS
  *
@@ -138,7 +138,7 @@ interface ImportExistingRuleProps {
 //    a. When creating a custom rule
 //    b. When creating a prebuilt rule
 //    c. When upgrading a prebuilt rule with type change
-// 3. Check that when patching
+// 3. Check that when patching the enabled state is maintained
 
 export class RulesManagementClient {
   private readonly rulesClient: RulesClient;
@@ -148,14 +148,12 @@ export class RulesManagementClient {
   }
 
   // 1.  CREATE CUSTOM RULE
-  // Need to pass enabled flag?
   public createCustomRule = async (
     createCustomRulePayload: CreateCustomRuleProps
   ): Promise<RuleAlertType> => {
     const { params } = createCustomRulePayload;
 
     const rule = await this._createRule(params, { immutable: false });
-
     return rule;
   };
 
@@ -176,14 +174,14 @@ export class RulesManagementClient {
 
     const update = await this._updateRule({ ruleUpdate, existingRule });
 
-    const enabled = ruleUpdate.enabled ?? true;
-    await this._toggleRuleEnabledOnUpdate(existingRule, ruleUpdate.enabled ?? false);
+    const enabled = ruleUpdate.enabled ?? existingRule.enabled;
+    await this._toggleRuleEnabledOnUpdate(existingRule, enabled);
 
     return { ...update, enabled };
   };
 
   // 5.  PATCH RULE
-  public patchRule = async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType | null> => {
+  public patchRule = async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
     const { nextParams, existingRule } = patchRulePayload;
     const update = await this._patchRule(patchRulePayload);
 
@@ -239,7 +237,7 @@ export class RulesManagementClient {
   };
 
   // 12. IMPORT RULE
-  public importNewRule = async (importRulePayload: ImportNewRuleProps): Promise<RuleAlertType> => {
+  public _importNewRule = async (importRulePayload: ImportNewRuleProps): Promise<RuleAlertType> => {
     const { ruleToImport, options } = importRulePayload;
 
     return this._createRule(ruleToImport, {
@@ -248,7 +246,7 @@ export class RulesManagementClient {
     });
   };
 
-  public importExistingRule = async (
+  public _importExistingRule = async (
     importRulePayload: ImportExistingRuleProps
   ): Promise<RuleAlertType> => {
     const { ruleToImport, existingRule } = importRulePayload;
