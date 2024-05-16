@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -20,6 +21,7 @@ import type {
   ResponseActionUploadParameters,
   EndpointActionData,
   LogsEndpointActionResponse,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -60,6 +62,12 @@ export interface CommonResponseActionMethodOptions
 export interface ProcessPendingActionsMethodOptions {
   addToQueue: (...docs: LogsEndpointActionResponse[]) => void;
   abortSignal: AbortSignal;
+}
+
+export interface GetFileDownloadMethodResponse {
+  stream: Readable;
+  fileName: string;
+  mimeType?: string;
 }
 
 /**
@@ -118,4 +126,18 @@ export interface ResponseActionsClient {
    * the time of this writing, is being controlled by the background task.
    */
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
+
+  /**
+   * Retrieve a file for download
+   * @param actionId
+   * @param fileId
+   */
+  getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse>;
+
+  /**
+   * Retrieve info about a file
+   * @param actionId
+   * @param fileId
+   */
+  getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
 }
