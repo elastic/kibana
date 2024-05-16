@@ -171,10 +171,12 @@ export default function ({
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.share.closeShareModal();
 
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url ?? '');
+        if (await PageObjects.share.isShareMenuOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
