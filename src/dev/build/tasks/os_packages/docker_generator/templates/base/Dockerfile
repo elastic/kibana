@@ -39,29 +39,6 @@ RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
 
-# Add an init process, check the checksum to make sure it's a match
-RUN set -e ; \
-    TINI_BIN="" ; \
-    case "$(arch)" in \
-        aarch64) \
-            TINI_BIN='tini-arm64' ; \
-            ;; \
-        x86_64) \
-            TINI_BIN='tini-amd64' ; \
-            ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
-    esac ; \
-  TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
-  mv "${TINI_BIN}" /bin/tini ; \
-  chmod +x /bin/tini
-RUN mkdir -p /usr/share/fonts/local && \
-  curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
-  echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
-
 {{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
@@ -96,7 +73,7 @@ RUN for iter in {1..10}; do \
       {{packageManager}} update  && \
       {{packageManager}} upgrade -y  && \
       {{packageManager}} install -y --no-install-recommends \
-       fontconfig libnss3 ca-certificates  && \
+       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
       {{packageManager}} clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
@@ -104,15 +81,36 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 
+# Add an init process, check the checksum to make sure it's a match
+RUN set -e ; \
+    TINI_BIN="" ; \
+    case "$(arch)" in \
+        aarch64) \
+            TINI_BIN='tini-arm64' ; \
+            ;; \
+        x86_64) \
+            TINI_BIN='tini-amd64' ; \
+            ;; \
+        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+    esac ; \
+  TINI_VERSION='v0.19.0' ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  sha256sum -c "${TINI_BIN}.sha256sum" ; \
+  rm "${TINI_BIN}.sha256sum" ; \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
+
+RUN mkdir /usr/share/fonts/local
+RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+RUN fc-cache -v
+
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
-COPY --from=builder --chown=0:0 /bin/tini /bin/tini
 {{#cloud}}
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
-# Load reporting fonts
-COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
-RUN fc-cache -v
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
