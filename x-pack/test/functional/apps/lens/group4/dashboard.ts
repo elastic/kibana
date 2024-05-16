@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
+  const log = getService('log');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -320,6 +321,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // check the success state
       await PageObjects.dashboard.verifyNoRenderErrors();
+    });
+
+    it('should work in lens with by-value charts', async () => {
+      // create a new dashboard, then a new visualization in Lens.
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.clickNewDashboard();
+      await testSubjects.click('dashboardEditorMenuButton');
+      await testSubjects.click('visType-lens');
+      // Configure it and save to return to the dashboard.
+      await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+      await PageObjects.lens.save('test', true);
+      log.debug('\n\n\n\n made it here');
+      // Edit the visualization now and get back to Lens editor
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await testSubjects.click('navigateToLensEditorLink');
+      // Click on Share, then Copy link and paste the link in a new tab.
+      await PageObjects.lens.openPermalinkShare();
+      const url = await PageObjects.lens.getUrl();
+      await browser.openNewTab();
+      await browser.navigateTo(url);
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getTitle()).to.be('test');
     });
   });
 }
