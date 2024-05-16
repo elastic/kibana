@@ -44,22 +44,16 @@ export class CreateSLO {
     const rollbackOperations = [];
 
     await this.repository.save(slo, { throwOnConflict: true });
-    rollbackOperations.push(async () => {
-      await this.repository.deleteById(slo.id);
-    });
+    rollbackOperations.push(() => this.repository.deleteById(slo.id));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
       await this.transformManager.install(slo);
-      rollbackOperations.push(async () => {
-        await this.transformManager.uninstall(rollupTransformId);
-      });
+      rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
 
       await this.transformManager.start(rollupTransformId);
-      rollbackOperations.push(async () => {
-        await this.transformManager.stop(rollupTransformId);
-      });
+      rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
 
       await retryTransientEsErrors(
         () =>
@@ -68,22 +62,18 @@ export class CreateSLO {
           ),
         { logger: this.logger }
       );
-      rollbackOperations.push(async () => {
-        await this.esClient.ingest.deletePipeline(
+      rollbackOperations.push(() =>
+        this.esClient.ingest.deletePipeline(
           { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
           { ignore: [404] }
-        );
-      });
+        )
+      );
 
       await this.summaryTransformManager.install(slo);
-      rollbackOperations.push(async () => {
-        await this.summaryTransformManager.uninstall(summaryTransformId);
-      });
+      rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
 
       await this.summaryTransformManager.start(summaryTransformId);
-      rollbackOperations.push(async () => {
-        await this.summaryTransformManager.stop(summaryTransformId);
-      });
+      rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
       await retryTransientEsErrors(
         () =>
