@@ -103,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      // Discover defaults to short urls - is this test helpful? Clarify in separate PR
-      xit('generates a report with single timefilter', async () => {
+      it('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
