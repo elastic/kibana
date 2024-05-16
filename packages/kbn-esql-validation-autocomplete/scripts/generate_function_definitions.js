@@ -321,7 +321,7 @@ import type { FunctionDefinition } from './types';
 (async function main() {
   const ESFunctionDefinitionsDirectory = join(
     __dirname,
-    '../../../../elasticsearch/docs/reference/esql/functions/kibana/definition'
+    '../../../elasticsearch/docs/reference/esql/functions/kibana/definition'
   );
 
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
@@ -344,7 +344,7 @@ import type { FunctionDefinition } from './types';
   evalFunctionDefinitions.push(...extraFunctions);
 
   await writeFile(
-    join(__dirname, 'functions.ts'),
+    join(__dirname, '../src/definitions/functions.ts'),
     printGeneratedFunctionsFile(evalFunctionDefinitions)
   );
 
