@@ -290,9 +290,6 @@ export function syntheticsAppPageProvider({
       name,
       inlineScript,
       recorderScript,
-      params,
-      username,
-      password,
       apmServiceName,
       locations,
     }: {
