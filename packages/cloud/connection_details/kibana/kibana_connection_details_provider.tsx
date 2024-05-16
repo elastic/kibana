@@ -38,6 +38,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
     endpoints: {
       id: start.plugins?.cloud?.cloudId,
       url: start.plugins?.cloud?.elasticsearchUrl,
+      cloudIdLearMoreLink: docLinks?.links?.cloud?.beatsAndLogstashConfiguration,
       ...options?.endpoints,
     },
     apiKeys: {
