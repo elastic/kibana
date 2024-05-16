@@ -12,11 +12,14 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN {{packageManager}} install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip
 {{/ubi}}
 {{#ubuntu}}
-RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
 {{/ubuntu}}
+{{#chainguard}}
+RUN apk --no-cache add curl
+{{/chainguard}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
@@ -32,8 +35,8 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
-# Exclude serverless.yml disabled assets
 {{#serverless}}
+# Exclude serverless.yml disabled assets
   --exclude=screenshotting-plugin/chromium \
   --exclude=screenshotting-plugin/server/assets \
 {{/serverless}}
@@ -90,10 +93,10 @@ EXPOSE 5601
 
 {{#ubi}}
 RUN for iter in {1..10}; do \
-      {{packageManager}} update --setopt=tsflags=nodocs -y && \
-      {{packageManager}} install --setopt=tsflags=nodocs -y \
+      microdnf update --setopt=tsflags=nodocs -y && \
+      microdnf install --setopt=tsflags=nodocs -y \
         fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
-      {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
+      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
@@ -101,16 +104,19 @@ RUN for iter in {1..10}; do \
 {{#ubuntu}}
 RUN for iter in {1..10}; do \
       export DEBIAN_FRONTEND=noninteractive && \
-      {{packageManager}} update  && \
-      {{packageManager}} upgrade -y  && \
-      {{packageManager}} install -y --no-install-recommends \
-       fontconfig libnss3 ca-certificates  && \
-      {{packageManager}} clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
+      apt-get update  && \
+      apt-get upgrade -y  && \
+      apt-get install -y --no-install-recommends \
+       fontconfig libnss3 ca-certificates && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
 {{/ubuntu}}
+{{#chainguard}}
+RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+{{/chainguard}}
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
