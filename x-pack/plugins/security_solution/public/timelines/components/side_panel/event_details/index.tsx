@@ -82,8 +82,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
-  const useAssistant =
-    hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
+  const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
@@ -123,7 +122,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     isAlert
       ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
       : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
-    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+    isAssistantEnabled
   );
 
   const header = useMemo(

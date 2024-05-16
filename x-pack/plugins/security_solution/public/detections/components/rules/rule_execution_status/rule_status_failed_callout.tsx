@@ -75,7 +75,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        {hasAssistantPrivilege && isAssistantEnabled && (
+        {hasAssistantPrivilege && (
           <NewChat
             category="detection-rules"
             color={color}
@@ -84,6 +84,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
             tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+            isAssistantEnabled={isAssistantEnabled}
           >
             {i18n.ASK_ASSISTANT_ERROR_BUTTON}
           </NewChat>

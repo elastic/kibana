@@ -57,8 +57,7 @@ export const useAssistant = ({
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
-  const useAssistantHook =
-    hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
+  const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -74,7 +73,8 @@ export const useAssistant = ({
     isAlert
       ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
       : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
-    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+    isAssistantEnabled
   );
 
   return {

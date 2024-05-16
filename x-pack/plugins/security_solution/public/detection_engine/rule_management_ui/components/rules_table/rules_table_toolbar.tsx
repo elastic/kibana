@@ -97,7 +97,7 @@ export const RulesTableToolbar = React.memo(() => {
         <TabNavigation navTabs={ruleTabs} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {hasAssistantPrivilege && isAssistantEnabled && selectedRules.length > 0 && (
+        {hasAssistantPrivilege && selectedRules.length > 0 && (
           <NewChat
             category="detection-rules"
             conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
@@ -105,6 +105,7 @@ export const RulesTableToolbar = React.memo(() => {
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
             tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+            isAssistantEnabled={isAssistantEnabled}
           />
         )}
       </EuiFlexItem>

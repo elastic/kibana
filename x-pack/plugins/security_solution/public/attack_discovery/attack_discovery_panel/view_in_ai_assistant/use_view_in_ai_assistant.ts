@@ -12,8 +12,6 @@ import { useAssistantAvailability } from '../../../assistant/use_assistant_avail
 import { getAttackDiscoveryMarkdown } from '../../get_attack_discovery_markdown/get_attack_discovery_markdown';
 import type { AttackDiscovery } from '../../types';
 
-const useAssistantNoop = () => ({ promptContextId: undefined, showAssistantOverlay: () => {} });
-
 /**
  * This category is provided in the prompt context for the assistant
  */
@@ -27,11 +25,6 @@ export const useViewInAiAssistant = ({
 }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
-  const useAssistantHook = useMemo(
-    () => (hasAssistantPrivilege && isAssistantEnabled ? useAssistantOverlay : useAssistantNoop),
-    [hasAssistantPrivilege, isAssistantEnabled]
-  );
-
   // the prompt context for this insight:
   const getPromptContext = useCallback(
     async () =>
@@ -41,7 +34,7 @@ export const useViewInAiAssistant = ({
       }),
     [attackDiscovery]
   );
-  const { promptContextId, showAssistantOverlay: showOverlay } = useAssistantHook(
+  const { promptContextId, showAssistantOverlay: showOverlay } = useAssistantOverlay(
     category,
     attackDiscovery.title, // conversation title
     attackDiscovery.title, // description used in context pill
@@ -49,6 +42,7 @@ export const useViewInAiAssistant = ({
     attackDiscovery.id, // accept the UUID default for this prompt context
     null, // suggestedUserPrompt
     null, // tooltip
+    isAssistantEnabled,
     replacements ?? null
   );
 
