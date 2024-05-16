@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export interface SloDetailsPathParams {
-  sloId: string;
-  tabId?: string;
-}
-
-export interface TimeBounds {
-  from: Date;
-  to: Date;
-}
+export const securityFeaturesAPIClientMock = {
+  create: () => ({
+    checkFeatures: jest.fn(),
+  }),
+};
