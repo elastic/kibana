@@ -6,9 +6,9 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiPortal } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
 import {
+  EuiPortal,
+  EuiToolTip,
   EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
@@ -20,6 +20,7 @@ import {
   EuiSkeletonText,
   formatDate,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +50,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
   const [isLoading, setIsLoading] = useState(true);
-  const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
+  const [isShowingExpiredEntries, setIsShowingExpiredEntries] = useState(false);
+  const [visibleDiagnosticsEntries, setVisibleDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
+  const [allDiagnosticsEntries, setAllDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [loadInterval, setLoadInterval] = useState(10000);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
@@ -65,7 +68,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         throw new Error('No data');
       }
       const entries = uploadsResponse.data.items;
-      setDiagnosticEntries(entries);
+      setAllDiagnosticEntries(entries);
       setIsLoading(false);
 
       // query faster if an action is in progress, for quicker feedback
@@ -131,9 +134,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   }, [loadData, loadInterval]);
 
   useEffect(() => {
-    setPrevDiagnosticEntries(diagnosticsEntries);
+    setPrevDiagnosticEntries(allDiagnosticsEntries);
     if (prevDiagnosticsEntries.length > 0) {
-      diagnosticsEntries
+      allDiagnosticsEntries
         .filter((newEntry) => {
           const oldEntry = prevDiagnosticsEntries.find((entry) => entry.id === newEntry.id);
           return newEntry.status === 'READY' && (!oldEntry || oldEntry?.status !== 'READY');
@@ -152,7 +155,17 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           );
         });
     }
-  }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
+  }, [prevDiagnosticsEntries, allDiagnosticsEntries, notifications.toasts]);
+
+  useEffect(() => {
+    if (isShowingExpiredEntries) {
+      setVisibleDiagnosticEntries(allDiagnosticsEntries);
+    } else {
+      setVisibleDiagnosticEntries(
+        allDiagnosticsEntries.filter((entry) => entry.status !== 'EXPIRED')
+      );
+    }
+  }, [allDiagnosticsEntries, isShowingExpiredEntries]);
 
   const columns: Array<EuiBasicTableColumn<AgentDiagnostics>> = [
     {
@@ -161,7 +174,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         defaultMessage: 'File',
       }),
       render: (id: string) => {
-        const currentItem = diagnosticsEntries.find((item) => item.id === id);
+        const currentItem = allDiagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
           <EuiLink href={getAbsolutePath(currentItem?.filePath)} download target="_blank">
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
@@ -211,7 +224,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       }),
       dataType: 'date',
       render: (id: string) => {
-        const currentItem = diagnosticsEntries.find((item) => item.id === id);
+        const currentItem = allDiagnosticsEntries.find((item) => item.id === id);
         return (
           <EuiText size="s" color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
             {formatDate(currentItem?.createTime, 'lll')}
@@ -232,7 +245,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText', {
             defaultMessage: 'Delete',
           }),
-          available: (item: AgentDiagnostics) => item.status !== 'IN_PROGRESS',
+          available: (item: AgentDiagnostics) => item.status === 'READY',
           description: i18n.translate(
             'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
             {
@@ -250,7 +263,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const requestDiagnosticsButton = (
     <EuiButton
       fill
-      size="m"
+      size="s"
       onClick={() => {
         setIsRequestDiagnosticsModalOpen(true);
       }}
@@ -277,7 +290,21 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           />
         </EuiPortal>
       )}
-      <EuiFlexGroup direction="row" gutterSize="l" alignItems="center">
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.calloutText"
+            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="m"
+        alignItems="center"
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem grow={false}>
           {isAgentRequestDiagnosticsSupported(agent) ? (
             requestDiagnosticsButton
@@ -295,19 +322,25 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             </EuiToolTip>
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are periodically deleted via an ILM policy."
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.fleet.requestDiagnostics.showExpiredFilesLabel"
+                defaultMessage="Show expired file requests"
+              />
+            }
+            checked={isShowingExpiredEntries}
+            onChange={(e) => setIsShowingExpiredEntries(e.target.checked)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={3} />
       ) : (
-        <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
+        <EuiBasicTable<AgentDiagnostics> items={visibleDiagnosticsEntries} columns={columns} />
       )}
     </>
   );
