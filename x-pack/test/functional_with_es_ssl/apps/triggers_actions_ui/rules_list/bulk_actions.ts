@@ -253,11 +253,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
+
       expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('3 rules');
 
       await testSubjects.click('ruleTypeFilterButton');
-      await testSubjects.existOrFail('ruleTypetest.noopFilterOption');
       await testSubjects.click('ruleTypetest.noopFilterOption');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('ruleTypeFilterButton');
+
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click('selectAllRulesButton');
 
@@ -287,12 +290,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.getVisibleText('statusDropdown')).to.be('Disabled');
 
       await testSubjects.click('rules-list-clear-filter');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.existOrFail('ruleStatusFilterOption-enabled');
       await testSubjects.click('ruleStatusFilterOption-enabled');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('ruleStatusFilterButton');
+
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('selectAllRulesButton');
 
@@ -303,14 +309,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       toastTitle = await toasts.getTitleAndDismiss();
-      try {
-        expect(toastTitle).to.eql('Deleted 1 rule');
-      } catch (e) {
-        objectRemover.add(rule2.id, 'alert', 'alerts');
-        throw e;
-      }
+      expect(toastTitle).to.eql('Deleted 1 rule');
 
       await testSubjects.click('rules-list-clear-filter');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('2 rules');
