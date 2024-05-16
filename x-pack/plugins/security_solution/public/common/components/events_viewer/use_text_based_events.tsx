@@ -93,7 +93,6 @@ export const useTextBasedEvents = ({
 
     execution.pipe(pluck('result')).subscribe((resp) => {
       const response = resp as Datatable | TextBasedErrorResponse;
-      console.log({ response });
       if ('type' in response && response.type === 'error') {
         error = response.error.message;
       } else {
@@ -124,7 +123,6 @@ export const useTextBasedEvents = ({
       textBasedQueryColumns,
       textBasedHeaderWarning,
     };
-    console.log({ returnOutput });
 
     return returnOutput;
   }, [convertQueryToAst, expressions, inspectorAdapters]);

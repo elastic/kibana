@@ -10,7 +10,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { ColumnHeaderOptions } from '@kbn/securitysolution-data-table/common/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { isEmpty } from 'lodash';
@@ -45,12 +45,6 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   const [dataLoadingState, setDataLoadingState] = useState<DataLoadingState>(
     DataLoadingState.loaded
   );
-
-  useEffect(() => {
-    return () => {
-      console.log('unmounting');
-    };
-  }, []);
 
   const { query: esqlQuery, esqlDataViewId } = useSelector((state: State) =>
     selectTimelineESQLOptions(state, timelineId)
@@ -89,8 +83,6 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     },
   });
 
-  console.log({ esqlDataView, esqlDataViewId });
-
   const { getDataView, isLoading: isDataViewLoading } = useGetDataViewWithTextQuery({
     query: esqlQuery,
     dataViews,
@@ -116,7 +108,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
       return {
         rows: result.data,
         cols: timelineColumns,
-        warning: result.textBasedHeaderWarning,
+        warnings: result.textBasedHeaderWarning,
       };
     }
 
@@ -132,6 +124,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     return {
       rows: result.data,
       cols: newCols,
+      warnings: result.textBasedHeaderWarning,
     };
 
     // const columns = timelineColumns
@@ -147,7 +140,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     warnings: unknown;
   }>({
     queryKey: ['esql'],
-    queryFn: onFetch,
+    queryFn: () => onFetch(),
     enabled: false,
     initialData: {
       rows: [],
@@ -156,11 +149,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     },
   });
 
-  console.log({ successData: data });
-
   const hasError = !metaDataColumns.includes('_id') || !metaDataColumns.includes('_index');
-
-  console.log({ hasError });
 
   const onQuerySubmit = useCallback(async () => {
     setDataLoadingState(DataLoadingState.loading);
@@ -210,7 +199,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
       {hasError ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiTextColor color="danger" size="s">
+            <EuiTextColor color="danger">
               <p>{`Metadata columns _id and _index must be included in form "from index metadata _id, _index | keep _id, _index" to enabled extra features. `}</p>
               <p> {JSON.stringify(data?.warnings ?? [])}</p>
             </EuiTextColor>
@@ -242,4 +231,5 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default UnifiedEsql;

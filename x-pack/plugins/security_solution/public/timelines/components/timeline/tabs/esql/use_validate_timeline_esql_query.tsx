@@ -42,8 +42,6 @@ export function useValidateTimelineESQLQuery(query: AggregateQuery) {
     return metadataColumns;
   }, [ast]);
 
-  console.log({ metaDataColumns });
-
   return {
     errors,
     hasKeepClause,
