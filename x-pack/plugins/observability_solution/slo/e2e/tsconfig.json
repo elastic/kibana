@@ -11,10 +11,8 @@
     { "path": "../../../../test/tsconfig.json" },
     { "path": "../../../../../test/tsconfig.json" },
     "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/ux-plugin/e2e",
     "@kbn/ftr-common-functional-services",
-    "@kbn/apm-plugin",
-    "@kbn/es-archiver",
+    "@kbn/synthetics-plugin/e2e",
+    "@kbn/data-forge",
   ]
 }
