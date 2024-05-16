@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { type IStaticAssets } from '@kbn/core-http-server';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
@@ -29,6 +30,16 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
     return { hasPrivileges };
   },
 });
+
+function createScriptDownloadUrl(staticAssets: IStaticAssets, kibanaHost: string) {
+  const scriptPath = staticAssets.getPluginAssetHref('standalone_agent_setup.sh');
+  const isAbsolute = scriptPath.startsWith('http');
+
+  if (isAbsolute) {
+    return scriptPath;
+  }
+  return `${kibanaHost}${scriptPath}`;
+}
 
 const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/environment',
@@ -58,11 +69,8 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
       getFallbackKibanaUrl(coreStart); // falls back to local network binding
-    const installScriptPath = coreStart.http.staticAssets.getPluginAssetHref(
-      'standalone_agent_setup.sh'
-    );
+    const scriptDownloadUrl = createScriptDownloadUrl(coreStart.http.staticAssets, kibanaUrl);
 
-    const scriptDownloadUrl = `${kibanaUrl}${installScriptPath}`;
     const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
     return {
