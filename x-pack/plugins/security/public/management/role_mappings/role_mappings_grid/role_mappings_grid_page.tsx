@@ -457,7 +457,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         hasCompatibleRealms,
       });
 
-      if (canLoad) {
+      if (canReadSecurity) {
         this.performInitialLoad();
       }
     } catch (e) {
