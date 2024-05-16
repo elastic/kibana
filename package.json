@@ -646,7 +646,6 @@
     "@typescript-eslint/parser": "^5.62.0",
     "@typescript-eslint/typescript-estree": "^5.62.0",
     "@yarnpkg/lockfile": "^1.1.0",
-    "abab": "^2.0.4",
     "aggregate-error": "^3.1.0",
     "antlr4ts-cli": "^0.5.0-alpha.3",
     "apidoc-markdown": "^7.3.0",
