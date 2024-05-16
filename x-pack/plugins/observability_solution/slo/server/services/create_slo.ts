@@ -97,7 +97,7 @@ export class CreateSLO {
     temporaryDoc: Record<string, any>;
     rollUpTransformCompositeQuery: string;
     summaryTransformCompositeQuery: string;
-  } {
+  }> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
