@@ -43,6 +43,7 @@ export interface AssistantHeaderProps {
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
+  isAssistantEnabled: boolean;
 }
 
 /**
@@ -66,6 +67,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
   conversations,
   refetchConversationsState,
   onConversationCreate,
+  isAssistantEnabled,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -136,6 +138,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
         isExpanded={!!chatHistoryVisible}
         setIsExpanded={setChatHistoryVisible}
         onConversationCreate={onConversationCreate}
+        isAssistantEnabled={isAssistantEnabled}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>

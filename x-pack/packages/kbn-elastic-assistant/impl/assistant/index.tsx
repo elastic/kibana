@@ -36,6 +36,8 @@ import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
+import { BlockBotCallToAction } from './block_bot/cta';
+import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import {
   getDefaultConnector,
@@ -57,7 +59,6 @@ import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
 import { SystemPrompt } from './prompt_editor/system_prompt';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
-import { AssistantHeader } from './assistant_header';
 import * as i18n from './translations';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
@@ -80,10 +81,8 @@ import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetc
 
 export interface Props {
   conversationTitle?: string;
-  embeddedLayout?: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
-  showTitle?: boolean;
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
@@ -97,10 +96,8 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationTitle,
-  embeddedLayout = false,
   promptContextId = '',
   shouldRefocusPrompt = false,
-  showTitle = true,
   setConversationTitle,
   onCloseFlyout,
   chatHistoryVisible,
@@ -111,6 +108,7 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
+    docLinks,
     getComments,
     http,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
@@ -833,6 +831,7 @@ const AssistantComponent: React.FC<Props> = ({
                 <AssistantHeader
                   selectedConversation={currentConversation}
                   defaultConnector={defaultConnector}
+                  docLinks={docLinks}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
                   onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
@@ -846,6 +845,7 @@ const AssistantComponent: React.FC<Props> = ({
                   conversations={conversations}
                   refetchConversationsState={refetchConversationsState}
                   onConversationCreate={handleCreateConversation}
+                  isAssistantEnabled={isAssistantEnabled}
                 />
 
                 {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -884,16 +884,14 @@ const AssistantComponent: React.FC<Props> = ({
                   )
                 }
               >
-                <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
-                </EuiFlexGroup>
-                {/* <BlockBotCallToAction
-                    connectorPrompt={connectorPrompt}
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                    isWelcomeSetup={isWelcomeSetup}
-                  /> */}
+                {!isAssistantEnabled ? (
+                  <BlockBotCallToAction http={http} isAssistantEnabled={isAssistantEnabled} />
+                ) : (
+                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </EuiFlyoutBody>
               <EuiFlyoutFooter
                 css={css`
