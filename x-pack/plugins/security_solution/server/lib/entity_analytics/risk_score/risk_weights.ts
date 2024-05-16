@@ -7,17 +7,17 @@
 
 import { keyBy, merge } from 'lodash';
 import type {
-  GlobalRiskWeight,
-  IdentifierType,
-  RiskCategoryRiskWeight,
-  RiskWeight,
-  RiskWeights,
-} from '../../../../common/entity_analytics/risk_engine';
+  RiskScoreWeight,
+  RiskScoreWeightCategory,
+  RiskScoreWeightGlobal,
+  RiskScoreWeights,
+} from '../../../../common/api/entity_analytics/common';
+import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 import { RiskCategories, RiskWeightTypes } from '../../../../common/entity_analytics/risk_engine';
 
 const RISK_CATEGORIES = Object.values(RiskCategories);
 
-const DEFAULT_CATEGORY_WEIGHTS: RiskWeights = RISK_CATEGORIES.map((category) => ({
+const DEFAULT_CATEGORY_WEIGHTS: RiskScoreWeights = RISK_CATEGORIES.map((category) => ({
   type: RiskWeightTypes.riskCategory,
   value: category,
   host: 1,
@@ -30,9 +30,9 @@ const DEFAULT_CATEGORY_WEIGHTS: RiskWeights = RISK_CATEGORIES.map((category) => 
 const convertCategoryToEventKindValue = (category?: string): string | undefined =>
   category === 'category_1' ? 'signal' : category;
 
-const isGlobalIdentifierTypeWeight = (weight: RiskWeight): weight is GlobalRiskWeight =>
+const isGlobalIdentifierTypeWeight = (weight: RiskScoreWeight): weight is RiskScoreWeightGlobal =>
   weight.type === RiskWeightTypes.global;
-const isRiskCategoryWeight = (weight: RiskWeight): weight is RiskCategoryRiskWeight =>
+const isRiskCategoryWeight = (weight: RiskScoreWeight): weight is RiskScoreWeightCategory =>
   weight.type === RiskWeightTypes.riskCategory;
 
 export const getGlobalWeightForIdentifierType = ({
@@ -40,15 +40,18 @@ export const getGlobalWeightForIdentifierType = ({
   weights,
 }: {
   identifierType: IdentifierType;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
 }): number | undefined => {
   return weights?.find(isGlobalIdentifierTypeWeight)?.[identifierType];
 };
 
-const getRiskCategoryWeights = (weights?: RiskWeights): RiskCategoryRiskWeight[] =>
+const getRiskCategoryWeights = (weights?: RiskScoreWeights): RiskScoreWeightCategory[] =>
   weights?.filter(isRiskCategoryWeight) ?? [];
 
-const getWeightForIdentifierType = (weight: RiskWeight, identifierType: IdentifierType): number => {
+const getWeightForIdentifierType = (
+  weight: RiskScoreWeight,
+  identifierType: IdentifierType
+): number => {
   const configuredWeight = weight[identifierType];
   return typeof configuredWeight === 'number' ? configuredWeight : 1;
 };
@@ -61,7 +64,7 @@ export const buildCategoryCountDeclarations = (): string => {
   return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_count'] = 0;`).join('');
 };
 
-export const buildCategoryWeights = (userWeights?: RiskWeights): RiskCategoryRiskWeight[] => {
+export const buildCategoryWeights = (userWeights?: RiskScoreWeights): RiskScoreWeightCategory[] => {
   const categoryWeights = getRiskCategoryWeights(userWeights);
 
   return Object.values(
@@ -82,7 +85,7 @@ export const buildWeightingOfScoreByCategory = ({
   userWeights,
   identifierType,
 }: {
-  userWeights?: RiskWeights;
+  userWeights?: RiskScoreWeights;
   identifierType: IdentifierType;
 }): string => {
   const otherClause = `weighted_score = score;`;

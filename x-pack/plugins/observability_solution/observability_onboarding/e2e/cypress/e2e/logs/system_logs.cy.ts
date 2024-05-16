@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// Failing: See https://github.com/elastic/kibana/issues/183341
-describe.skip('[Logs onboarding] System logs', () => {
+describe('[Logs onboarding] System logs', () => {
   describe('System integration', () => {
     beforeEach(() => {
       cy.deleteIntegration('system');
@@ -19,7 +18,7 @@ describe.skip('[Logs onboarding] System logs', () => {
       });
 
       it('navigates to observability logs onboarding page', () => {
-        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+        cy.getByTestSubj('observabilityOnboardingFlowBackToSelectionButton').click();
 
         cy.url().should('include', '/app/observabilityOnboarding');
       });
