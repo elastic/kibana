@@ -92,7 +92,7 @@ export async function getAgentUploads(
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const isActionExpired = action.expiration ? Date.parse(action.expiration) < Date.now() : false;
     const status =
-      file?.Status ?? (action.error ? 'FAILED' : isActionExpired ? 'EXPIRED' : 'IN_PROGRESS');
+      file?.Status ?? (isActionExpired ? 'EXPIRED' : action.error ? 'FAILED' : 'IN_PROGRESS');
     const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
@@ -267,12 +267,16 @@ export async function deleteAgentUploadFile(
         )
       )[0];
 
+      if (updateMetadataStatusResponse.total === 0) {
+        throw new Error(`Failed to update file ${id} metadata`);
+      }
+
       return {
         id,
-        deleted: !!(updateMetadataStatusResponse.total === 1),
+        deleted: true,
       };
     } else {
-      return { id, deleted: false };
+      throw new Error(`Failed to delete file ${id} from file storage data stream`);
     }
   } catch (error) {
     appContextService.getLogger().error(error);
