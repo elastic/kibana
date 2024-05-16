@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-// "candidates": [
-//   {
-//     "content": {
-//       "parts": [
-//         {
-//           "text": string
-//         }
-//       ]
-//     },
-// ]
 
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_GEMINI_MODEL } from './constants';
