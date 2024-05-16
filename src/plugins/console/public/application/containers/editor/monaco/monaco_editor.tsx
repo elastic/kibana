@@ -23,7 +23,7 @@ import {
   useSetupAutocompletePolling,
   useSetupAutosave,
   useResizeCheckerUtils,
-  useRegisterKeyboardCommands,
+  useKeyboardCommandsUtils,
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
@@ -49,7 +49,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const registerKeyboardCommands = useRegisterKeyboardCommands();
+  const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
 
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
@@ -91,7 +91,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
-  }, [destroyResizeChecker]);
+    unregisterKeyboardCommands();
+  }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);

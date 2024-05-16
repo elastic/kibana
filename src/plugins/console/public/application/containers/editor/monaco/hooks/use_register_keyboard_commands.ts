@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+// eslint-disable-next-line @kbn/eslint/module_migration,@kbn/imports/no_unresolvable_imports
+import { IDisposable } from 'monaco-editor';
 
 interface RegisterKeyboardCommandsParams {
   /** The current Monaco editor instance. */
@@ -36,8 +39,36 @@ const MOVE_TO_LINE_ACTION_ID = 'moveToLine';
  *
  * @param params The {@link RegisterKeyboardCommandsParams} to use.
  */
-export const useRegisterKeyboardCommands = () => {
-  return (params: RegisterKeyboardCommandsParams) => {
+export const useKeyboardCommandsUtils = () => {
+  const sendRequestAction = useRef<IDisposable | null>(null);
+  const autoIndentAction = useRef<IDisposable | null>(null);
+  const openDocsAction = useRef<IDisposable | null>(null);
+  const moveToPreviousAction = useRef<IDisposable | null>(null);
+  const moveToNextAction = useRef<IDisposable | null>(null);
+  const moveToLineAction = useRef<IDisposable | null>(null);
+
+  const disposeAllActions = () => {
+    if (sendRequestAction.current) {
+      sendRequestAction.current.dispose();
+    }
+    if (autoIndentAction.current) {
+      autoIndentAction.current.dispose();
+    }
+    if (openDocsAction.current) {
+      openDocsAction.current.dispose();
+    }
+    if (moveToPreviousAction.current) {
+      moveToPreviousAction.current.dispose();
+    }
+    if (moveToNextAction.current) {
+      moveToNextAction.current.dispose();
+    }
+    if (moveToLineAction.current) {
+      moveToLineAction.current.dispose();
+    }
+  };
+
+  const registerKeyboardCommands = (params: RegisterKeyboardCommandsParams) => {
     const {
       editor,
       sendRequest,
@@ -55,7 +86,9 @@ export const useRegisterKeyboardCommands = () => {
       window.open(documentation, '_blank');
     };
 
-    editor.addAction({
+    disposeAllActions();
+
+    sendRequestAction.current = editor.addAction({
       id: SEND_REQUEST_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.sendRequest', {
         defaultMessage: 'Send request',
@@ -65,7 +98,7 @@ export const useRegisterKeyboardCommands = () => {
       run: sendRequest,
     });
 
-    editor.addAction({
+    autoIndentAction.current = editor.addAction({
       id: AUTO_INDENT_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.autoIndent', {
         defaultMessage: 'Apply indentations',
@@ -75,43 +108,43 @@ export const useRegisterKeyboardCommands = () => {
       run: autoIndent,
     });
 
-    editor.addAction({
+    openDocsAction.current = editor.addAction({
       id: OPEN_DOCS_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.openDocs', {
-        defaultMessage: 'Open documentations',
+        defaultMessage: 'Open documentation',
       }),
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
       run: openDocs,
     });
 
-    editor.addAction({
+    moveToPreviousAction.current = editor.addAction({
       id: MOVE_UP_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.moveToPreviousRequestEdge', {
-        defaultMessage: 'Move to next request end/start',
+        defaultMessage: 'Move to previous request start or end',
       }),
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow],
       run: moveToPreviousRequestEdge,
     });
 
-    editor.addAction({
+    moveToNextAction.current = editor.addAction({
       id: MOVE_DOWN_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.moveToNextRequestEdge', {
-        defaultMessage: 'Move to next request end/start',
+        defaultMessage: 'Move to next request start or end',
       }),
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow],
       run: moveToNextRequestEdge,
     });
 
-    editor.addAction({
+    moveToLineAction.current = editor.addAction({
       id: MOVE_TO_LINE_ACTION_ID,
       label: i18n.translate('console.keyboardCommandActionLabel.moveToLine', {
         defaultMessage: 'Move cursor to a line',
       }),
       // eslint-disable-next-line no-bitwise
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyM],
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL],
       run: () => {
         const line = parseInt(prompt('Enter line number') ?? '', 10);
         if (!isNaN(line)) {
@@ -121,5 +154,7 @@ export const useRegisterKeyboardCommands = () => {
     });
   };
 
-  // TODO: Add unregisterCommand function
+  const unregisterKeyboardCommands = () => disposeAllActions();
+
+  return { registerKeyboardCommands, unregisterKeyboardCommands };
 };
