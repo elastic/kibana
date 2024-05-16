@@ -155,3 +155,13 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
 // 4 hrs in seconds
 // 4 * 60 * 60
 export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400;
+
+/**
+ * The passcodes used for accessing the content of a zip file (ex. from a `get-file` response action)
+ */
+export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentType, string>> =
+  Object.freeze({
+    endpoint: 'elastic',
+    sentinel_one: 'Elastic@123',
+    crowdstrike: 'tbd..',
+  });

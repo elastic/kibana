@@ -67,15 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowRadioButtonState(
-            testData.jobConfig.job_id,
-            true
-          );
-          await ml.dashboardJobSelectionTable.applyJobSelection();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
         });
 
         it('can configure single metric viewer panel', async () => {
-          await ml.dashboardEmbeddables.assertSingleMetricViewerEmbeddableInitializerExists();
           await ml.singleMetricViewer.assertDetectorInputExist();
           await ml.singleMetricViewer.assertDetectorInputValue(
             testData.expected.detectorInputValue
