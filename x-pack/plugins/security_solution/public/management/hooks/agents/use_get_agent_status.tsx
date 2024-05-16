@@ -47,6 +47,7 @@ export const useGetSentinelOneAgentStatus = (
   });
 };
 
+// 8.14, 8.15 used for fetching agent status
 export const useGetAgentStatus = (
   agentIds: string[],
   agentType: string,
