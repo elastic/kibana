@@ -22,6 +22,7 @@ export interface ConnectionDetailsOptsLinks {
 export interface ConnectionDetailsOptsEndpoints {
   url?: string;
   id?: string;
+  cloudIdLearMoreLink?: string;
 }
 
 export interface ConnectionDetailsOptsApiKeys {

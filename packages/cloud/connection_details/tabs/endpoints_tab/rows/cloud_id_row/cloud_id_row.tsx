@@ -9,9 +9,10 @@
 import * as React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CopyInput } from '../../../components/copy_input';
-import { useConnectionDetailsService } from '../../../context';
-import { useBehaviorSubject } from '../../../hooks/use_behavior_subject';
+import { CopyInput } from '../../../../components/copy_input';
+import { useConnectionDetailsService } from '../../../../context';
+import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
+import { Label } from './label';
 
 export interface CloudIdRowProps {
   value: string;
@@ -38,9 +39,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
 
       {showCloudId && (
         <EuiFormRow
-          label={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.label', {
-            defaultMessage: 'Cloud ID',
-          })}
+          label={<Label learnMoreUrl={service.opts.endpoints?.cloudIdLearMoreLink} />}
           helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
             defaultMessage:
               'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
