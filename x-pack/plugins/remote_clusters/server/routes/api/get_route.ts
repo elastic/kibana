@@ -34,9 +34,11 @@ export const register = (deps: RouteDependencies): void => {
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
-      // Retrieve the cluster information for all the configured remote clusters
+      // Retrieve the cluster information for all the configured remote clusters.
+      //_none is never a valid index/alias/data-stream name so that way we can avoid
+      // using * which could be computationally expensive.
       const clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
-        name: clusterNames.map((cluster) => `${cluster}:*`),
+        name: clusterNames.map((cluster) => `${cluster}:_none`),
       });
 
       const body = clusterNames.map((clusterName: string): any => {
