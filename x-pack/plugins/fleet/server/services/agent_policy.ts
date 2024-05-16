@@ -183,7 +183,11 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-    logger.debug(`Agent policy ${id} update completed`);
+    logger.info(
+      `Agent policy ${id} update completed, revision: ${
+        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
+      }`
+    );
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
