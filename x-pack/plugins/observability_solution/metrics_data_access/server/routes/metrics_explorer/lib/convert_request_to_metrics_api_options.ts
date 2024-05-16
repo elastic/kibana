@@ -40,6 +40,12 @@ export const convertRequestToMetricsAPIOptions = (
     metricsApiOptions.groupBy = isArray(options.groupBy) ? options.groupBy : [options.groupBy];
   }
 
+  if (options.groupInstance) {
+    metricsApiOptions.groupInstance = isArray(options.groupInstance)
+      ? options.groupInstance
+      : [options.groupInstance];
+  }
+
   if (options.filterQuery) {
     try {
       const filterObject = JSON.parse(options.filterQuery);

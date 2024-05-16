@@ -34,13 +34,14 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
   stateContainer.appState.update({
-    index: dataView?.id,
+    dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
     interval: 'auto',
     hideChart: false,
   });
