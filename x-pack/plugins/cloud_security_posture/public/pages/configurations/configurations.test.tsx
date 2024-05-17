@@ -8,7 +8,7 @@ import { setupMockServiceWorkerServer } from '../../test/__jest__/setup_jest_moc
 import React from 'react';
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../../test/mock_server';
 import {
   cspmStatusCspmNotDeployed,
@@ -33,7 +33,7 @@ const renderFindingsPage = () => {
   );
 };
 
-const server = setupMockServiceWorker();
+const server = setupMockServiceWorker(true);
 
 describe('<Findings />', () => {
   setupMockServiceWorkerServer(server);
@@ -137,6 +137,7 @@ describe('<Findings />', () => {
     it('set search query', async () => {
       server.use(cspmStatusIndexed);
       server.use(bsearchFindingsPageDefault);
+
       const { getByText, getByTestId, getAllByText } = renderFindingsPage();
 
       // Loading while checking the status API
@@ -153,6 +154,53 @@ describe('<Findings />', () => {
 
       const submitButton = getByTestId('querySubmitButton');
       userEvent.click(submitButton);
+
+      await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
+
+      userEvent.clear(queryInput);
+      userEvent.click(submitButton);
+      await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(2));
+    });
+    it('add filter', async () => {
+      server.use(cspmStatusIndexed);
+      server.use(bsearchFindingsPageDefault);
+      const { getByText, getByTestId, getAllByText } = renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(getByText('Loading...')).toBeInTheDocument();
+
+      await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+
+      expect(getAllByText('azure-disk')).toHaveLength(2);
+
+      userEvent.click(getByTestId('addFilter'), undefined, { skipPointerEventsCheck: true });
+
+      await waitFor(() => expect(getByTestId('filterFieldSuggestionList')).toBeInTheDocument());
+
+      const filterFieldSuggestionListInput = within(
+        getByTestId('filterFieldSuggestionList')
+      ).getByTestId('comboBoxSearchInput');
+
+      userEvent.type(filterFieldSuggestionListInput, 'rule.section');
+      userEvent.keyboard('{enter}');
+
+      const filterOperatorListInput = within(getByTestId('filterOperatorList')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      userEvent.click(filterOperatorListInput, undefined, { skipPointerEventsCheck: true });
+
+      const filterOption = within(
+        getByTestId('comboBoxOptionsList filterOperatorList-optionsList')
+      ).getByRole('option', { name: 'is' });
+      fireEvent.click(filterOption);
+
+      const filterParamsInput = within(getByTestId('filterParams')).getByRole('textbox');
+      userEvent.type(filterParamsInput, 'Logging and Monitoring');
+      userEvent.keyboard('{enter}');
+
+      userEvent.click(getByTestId('saveFilter'), undefined, { skipPointerEventsCheck: true });
 
       await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
     });

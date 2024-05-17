@@ -18,11 +18,15 @@ export const bsearchFindingsPageDefault = http.post(
 
     const filter = jsonRequest?.query?.bool?.filter;
 
-    if (
+    const hasQuerySearchTest =
       isArray(filter) &&
       isArray(filter?.[0]?.bool?.should) &&
-      filter?.[0]?.bool?.should?.[0]?.term?.['rule.section']?.value === 'Logging and Monitoring'
-    ) {
+      filter?.[0]?.bool?.should?.[0]?.term?.['rule.section']?.value === 'Logging and Monitoring';
+
+    const hasFilterTest =
+      isArray(filter) && filter?.[0]?.match_phrase?.['rule.section'] === 'Logging and Monitoring';
+
+    if (hasQuerySearchTest || hasFilterTest) {
       return HttpResponse.json(filteredFindingJson);
     }
 

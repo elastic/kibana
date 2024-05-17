@@ -6,8 +6,8 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import * as vulnerabilitiesLatestJson from './mocks/logs-cloud_security_posture.vulnerabilities_latest.json';
-import * as findingsLatestJson from './mocks/logs-cloud_security_posture.findings_latest.json';
+import * as vulnerabilitiesLatestJson from './mocks/logs_cloud_security_posture.vulnerabilities_latest.json';
+import * as findingsLatestJson from './mocks/logs_cloud_security_posture.findings_latest.json';
 
 export const defaultDataViewFindHandler = http.get(
   'http://localhost/internal/data_views/fields',

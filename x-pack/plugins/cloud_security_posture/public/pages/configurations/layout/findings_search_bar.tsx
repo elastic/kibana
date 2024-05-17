@@ -22,7 +22,7 @@ interface FindingsSearchBarProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
   loading: boolean;
   placeholder?: string;
-  query: SearchBarQueryProps['query'];
+  query: SearchBarQueryProps;
 }
 
 export const FindingsSearchBar = ({
@@ -58,9 +58,10 @@ export const FindingsSearchBar = ({
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
         query={{
-          query: query?.query || '',
-          language: query?.language || 'kuery',
+          query: query?.query?.query || '',
+          language: query?.query?.language || 'kuery',
         }}
+        filters={query?.filters || []}
       />
     </div>
   );
