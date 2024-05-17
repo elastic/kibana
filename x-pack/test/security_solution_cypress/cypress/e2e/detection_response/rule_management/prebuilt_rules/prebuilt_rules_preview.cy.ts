@@ -137,8 +137,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       { package: 'windows', version: '^1.5.0' },
     ],
     required_fields: [
-      { ecs: true, name: 'event.type', type: 'keyword' },
-      { ecs: true, name: 'file.extension', type: 'keyword' },
+      { name: 'event.type', type: 'keyword' },
+      { name: 'file.extension', type: 'keyword' },
     ],
     timeline_id: '3e827bab-838a-469f-bd1e-5e19a2bff2fd',
     timeline_title: 'Alerts Involving a Single User Timeline',
