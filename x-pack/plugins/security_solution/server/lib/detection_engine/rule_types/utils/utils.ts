@@ -1014,13 +1014,16 @@ export const getDisabledActionsWarningText = ({
 }: {
   alertsCreated: boolean;
   disabledActions: SanitizedRuleAction[];
-}) =>
-  `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action${
-    disabledActions.length > 1 ? 's' : '' // action(s)
-  } ${disabledActions.map((action) => action.actionTypeId)} ${
-    disabledActions.length > 1 ? 'are' : 'is' // are / is
+}) => {
+  const moreThanOneAction = disabledActions.length > 1;
+  const actionTypes = disabledActions.map((action) => action.actionTypeId);
+  return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action${
+    moreThanOneAction ? 's' : '' // action(s)
+  } ${actionTypes} ${
+    moreThanOneAction ? 'are' : 'is' // are / is
   } disabled. Please check your license / tier and ensure the connector${
-    disabledActions.length > 1 ? 's' : '' // action(s)
-  } ${disabledActions.map((action) => action.actionTypeId)} ${
-    disabledActions.length > 1 ? 'are' : 'is' // are / is
+    moreThanOneAction ? 's' : '' // action(s)
+  } ${actionTypes} ${
+    moreThanOneAction ? 'are' : 'is' // are / is
   } enabled for your given license / tier`;
+};
