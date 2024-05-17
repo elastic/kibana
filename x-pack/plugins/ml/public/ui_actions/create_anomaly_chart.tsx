@@ -63,7 +63,7 @@ export function createAddAnomalyChartsPanelAction(
         );
         const initialState = await resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
-          pluginStart.data.dataViews,
+          pluginStart,
           context.embeddable,
           context.embeddable.uuid
         );

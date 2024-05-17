@@ -7,39 +7,55 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
+import { kibanaContextMock } from '../../application/contexts/kibana/__mocks__/kibana_context';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context/context';
 const defaultOptions = { wrapper: I18nProvider };
+jest.mock('../../application/services/anomaly_detector_service', () => {
+  return {
+    AnomalyDetectorService: jest.fn().mockImplementation(() => {
+      return {
+        getJobs$: jest.fn(),
+      };
+    }),
+  };
+});
 
 describe('AnomalyChartsInitializer', () => {
   test('should render anomaly charts initializer', async () => {
     const onCreate = jest.fn();
     const onCancel = jest.fn();
+    const adJobsApiService = jest.fn();
 
-    const jobIds = ['test-job'];
-    const defaultTitle = getDefaultExplorerChartsPanelTitle(jobIds);
+    const defaultTitle = getDefaultExplorerChartsPanelTitle([]);
     const input = {
       maxSeriesToPlot: 12,
     };
     const { getByTestId } = render(
-      <AnomalyChartsInitializer
-        defaultTitle={defaultTitle}
-        initialInput={input}
-        onCreate={(params) => onCreate(params)}
-        onCancel={onCancel}
-      />,
+      <KibanaContextProvider services={kibanaContextMock.services}>
+        <AnomalyChartsInitializer
+          initialInput={input}
+          onCreate={(params) => onCreate(params)}
+          onCancel={onCancel}
+          adJobsApiService={adJobsApiService as unknown as MlApiServices['jobs']}
+        />
+      </KibanaContextProvider>,
       defaultOptions
     );
+
     const confirmButton = screen.getByText(/Confirm/i).closest('button');
     expect(confirmButton).toBeDefined();
     expect(onCreate).toHaveBeenCalledTimes(0);
 
     userEvent.click(confirmButton!);
     expect(onCreate).toHaveBeenCalledWith({
-      panelTitle: defaultTitle,
+      jobIds: [],
+      title: defaultTitle,
       maxSeriesToPlot: input.maxSeriesToPlot,
     });
 

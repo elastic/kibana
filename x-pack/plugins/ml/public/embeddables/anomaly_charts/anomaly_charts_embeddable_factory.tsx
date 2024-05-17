@@ -84,13 +84,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 './anomaly_charts_setup_flyout'
               );
               const result = await resolveEmbeddableAnomalyChartsUserInput(
-                {
-                  ...coreStartServices,
-                  ...pluginsStartServices,
-                },
-                // @TODO: add data view based on job so filter bar
-                // reflects data view data
-                pluginsStartServices.data.dataViews,
+                coreStartServices,
+                pluginsStartServices,
                 parentApi,
                 uuid,
                 {

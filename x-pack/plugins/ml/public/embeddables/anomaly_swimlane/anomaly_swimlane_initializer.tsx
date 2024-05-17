@@ -33,6 +33,7 @@ import type { SwimlaneType } from '../../application/explorer/explorer_constants
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
+import { getJobSelectionErrors } from '../utils';
 
 export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
 
@@ -44,16 +45,6 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
   adJobsApiService: MlApiServices['jobs'];
 }
-
-const getJobSelectionErrors = (jobIds: string[]) => {
-  if (jobIds.length === 0) {
-    return [
-      i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.jobSelectionRequiredError', {
-        defaultMessage: 'Job selection is required',
-      }),
-    ];
-  }
-};
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
   onCreate,

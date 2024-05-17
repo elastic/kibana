@@ -8,68 +8,54 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { extractInfluencers } from '../../../common/util/job_utils';
-import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../application/services/http_service';
 import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableState } from '..';
-import { resolveJobSelection } from '../common/resolve_job_selection';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
-import { mlApiServicesProvider } from '../../application/services/ml_api_service';
-import { getDefaultExplorerChartsPanelTitle } from './utils';
+import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
+import { getMlGlobalServices } from '../../application/util/get_services';
+import type { MlStartDependencies } from '../../plugin';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,
-  dataViews: DataViewsContract,
+  pluginStart: MlStartDependencies,
   parentApi: unknown,
   focusedPanelId: string,
   input?: Partial<Pick<AnomalyChartsEmbeddableInput, 'title' | 'jobIds' | 'maxSeriesToPlot'>>
 ): Promise<Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>> {
   const { http, overlays, ...startServices } = coreStart;
-
-  const { getJobs } = mlApiServicesProvider(new HttpService(http));
+  const adJobsApiService = jobsApiProvider(new HttpService(http));
+  const mlServices = getMlGlobalServices(http, pluginStart.data.dataViews);
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(
-        coreStart,
-        dataViews,
-        input?.jobIds,
-        false,
-        true
-      );
-      const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
-      const { jobs } = await getJobs({ jobId: jobIds.join(',') });
-      const influencers = extractInfluencers(jobs);
-      influencers.push(VIEW_BY_JOB_LABEL);
-      const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
-
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          <AnomalyChartsInitializer
-            defaultTitle={title}
-            initialInput={input}
-            onCreate={({ panelTitle, maxSeriesToPlot }) => {
-              resolve({
-                jobIds,
-                title: panelTitle,
-                panelTitle,
-                maxSeriesToPlot,
-              } as Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>);
-              flyoutSession.close();
-              overlayTracker?.clearOverlays();
-            }}
-            onCancel={() => {
-              reject();
-              flyoutSession.close();
-              overlayTracker?.clearOverlays();
-            }}
-          />,
+          <KibanaContextProvider services={{ ...coreStart, ...pluginStart, mlServices }}>
+            <AnomalyChartsInitializer
+              initialInput={input}
+              onCreate={({ jobIds, title, maxSeriesToPlot }) => {
+                resolve({
+                  jobIds,
+                  title,
+                  maxSeriesToPlot,
+                } as Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
+              }}
+              onCancel={() => {
+                reject();
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
+              }}
+              adJobsApiService={adJobsApiService}
+            />
+          </KibanaContextProvider>,
           startServices
         ),
         {
-          // @todo: match width of this and flyout from resolveJobSelection
           type: 'push',
           ownFocus: true,
           size: 's',
