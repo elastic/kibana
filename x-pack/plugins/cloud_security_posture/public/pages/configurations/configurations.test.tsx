@@ -8,7 +8,7 @@ import React from 'react';
 import Chance from 'chance';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_latest_findings_data_view';
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -197,7 +197,7 @@ describe('<Findings />', () => {
     }));
     (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
 
-    (useLatestFindingsDataView as jest.Mock).mockReturnValue({
+    (useDataView as jest.Mock).mockReturnValue({
       status: 'success',
       data: createStubDataView({
         spec: {
