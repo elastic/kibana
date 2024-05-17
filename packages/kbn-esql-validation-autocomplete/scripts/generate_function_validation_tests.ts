@@ -10,8 +10,9 @@ import { readFileSync, writeFileSync } from 'fs';
 import { camelCase } from 'lodash';
 import { join } from 'path';
 import * as recast from 'recast';
+import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
-import { evalFunctionsDefinitions } from '../src/definitions/functions';
+import { evalFunctionDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
@@ -22,7 +23,7 @@ import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describ
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
 
-  for (const definition of evalFunctionsDefinitions) {
+  for (const definition of evalFunctionDefinitions) {
     testCasesByFunction.set(definition.name, generateTestsForEvalFunction(definition));
   }
 
@@ -364,50 +365,6 @@ function generateEvalCommandTestsForEvalFunction(
         }`,
         expectedErrors
       );
-
-      if (!signRest.minParams) {
-        // test that additional args are spotted
-        const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
-          name: 'extraArg',
-          type: 'number',
-        });
-        const refSignature = signatures[0];
-        // get the expected args from the first signature in case of errors
-        const minNumberOfArgs = refSignature.params.filter(({ optional }) => !optional).length;
-        const fullNumberOfArgs = refSignature.params.length;
-        const hasOptionalArgs = minNumberOfArgs < fullNumberOfArgs;
-        const hasTooManyArgs = fieldMappingWithOneExtraArg.length > fullNumberOfArgs;
-
-        // the validation engine tries to be smart about signatures with optional args
-        let messageQuantifier = 'exactly ';
-        if (hasOptionalArgs && hasTooManyArgs) {
-          messageQuantifier = 'no more than ';
-        }
-        if (!hasOptionalArgs && !hasTooManyArgs) {
-          messageQuantifier = 'at least ';
-        }
-        testCases.set(
-          `from a_index | eval ${
-            getFunctionSignatures(
-              {
-                name,
-                ...defRest,
-                signatures: [{ params: fieldMappingWithOneExtraArg, ...signRest }],
-              },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          [
-            `Error: [${name}] function expects ${messageQuantifier}${
-              fullNumberOfArgs === 1
-                ? 'one argument'
-                : fullNumberOfArgs === 0
-                ? '0 arguments'
-                : `${fullNumberOfArgs} arguments`
-            }, got ${fieldMappingWithOneExtraArg.length}.`,
-          ]
-        );
-      }
     }
 
     // test that wildcard won't work as arg
@@ -430,6 +387,79 @@ function generateEvalCommandTestsForEvalFunction(
       );
     }
   }
+
+  // test that the function can have too many args
+  if (signatures.some(({ minParams }) => minParams)) {
+    // at least one signature is variadic, so no way
+    // to have too many arguments
+    return;
+  }
+
+  // test that additional args are spotted
+
+  const getNumberOfParams = (signature: FunctionDefinition['signatures'][number]) => ({
+    all: signature.params.length,
+    required: signature.params.filter(({ optional }) => !optional).length,
+  });
+
+  // get the signature with the greatest number of params
+  const [first, ...rest] = signatures;
+  let signatureWithGreatestNumberOfParams = first;
+  let { all: maxNumberOfArgs, required: minNumberOfArgs } = getNumberOfParams(first);
+
+  for (const signature of rest) {
+    const numberOfParams = signature.params.length;
+    if (numberOfParams > signatureWithGreatestNumberOfParams.params.length) {
+      signatureWithGreatestNumberOfParams = signature;
+    }
+
+    maxNumberOfArgs = Math.max(maxNumberOfArgs, numberOfParams);
+    const numberOfRequiredParams = signature.params.filter(({ optional }) => !optional).length;
+    minNumberOfArgs = Math.min(minNumberOfArgs, numberOfRequiredParams);
+  }
+
+  const fieldMappingWithOneExtraArg = getFieldMapping(
+    signatureWithGreatestNumberOfParams.params
+  ).concat({
+    name: 'extraArg',
+    type: 'number',
+  });
+
+  // get the expected args from the first signature in case of errors
+  const hasOptionalArgs = minNumberOfArgs < maxNumberOfArgs;
+  const hasTooManyArgs = fieldMappingWithOneExtraArg.length > maxNumberOfArgs;
+
+  // the validation engine tries to be smart about signatures with optional args
+  let messageQuantifier = 'exactly ';
+  if (hasOptionalArgs && hasTooManyArgs) {
+    messageQuantifier = 'no more than ';
+  }
+  if (!hasOptionalArgs && !hasTooManyArgs) {
+    messageQuantifier = 'at least ';
+  }
+  testCases.set(
+    `from a_index | eval ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [
+            { ...signatureWithGreatestNumberOfParams, params: fieldMappingWithOneExtraArg },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    [
+      `Error: [${name}] function expects ${messageQuantifier}${
+        maxNumberOfArgs === 1
+          ? 'one argument'
+          : maxNumberOfArgs === 0
+          ? '0 arguments'
+          : `${maxNumberOfArgs} arguments`
+      }, got ${fieldMappingWithOneExtraArg.length}.`,
+    ]
+  );
 }
 
 function generateEvalCommandTestsForAggFunction(
@@ -848,13 +878,13 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 
-const toInteger = evalFunctionsDefinitions.find(({ name }) => name === 'to_integer')!;
-const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_string')!;
-const toDateSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toBooleanSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_boolean')!;
-const toIpSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_ip')!;
-const toGeoPointSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_geopoint')!;
-const toCartesianPointSignature = evalFunctionsDefinitions.find(
+const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
+const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
+const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toCartesianPointSignature = evalFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianpoint'
 )!;
 
@@ -996,11 +1026,11 @@ function generateIncorrectlyTypedParameters(
       }
       const canBeFieldButNotString = Boolean(
         fieldTypes.filter((t) => t !== 'string').includes(type) &&
-          signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+          signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
       );
       const canBeFieldButNotNumber =
         fieldTypes.filter((t) => t !== 'number').includes(type) &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
+        signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'number');
       const isLiteralType = /literal$/.test(type);
       // pick a field name purposely wrong
       const nameValue =
@@ -1027,6 +1057,9 @@ function generateIncorrectlyTypedParameters(
   //
   // This is not future-proof...
   const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
+    if (fnParams.length !== wrongFieldMapping.length) {
+      return Infinity;
+    }
     const typeMatches = fnParams.map(({ type }, i) => {
       if (wrongFieldMapping[i].wrong) {
         const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
@@ -1045,7 +1078,7 @@ function generateIncorrectlyTypedParameters(
       const fieldName = wrongFieldMapping[i].name;
       if (
         fieldName === 'numberField' &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+        signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
       ) {
         return;
       }

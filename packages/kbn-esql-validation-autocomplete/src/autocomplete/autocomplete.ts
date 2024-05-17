@@ -80,7 +80,11 @@ import {
   getSourcesHelper,
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
-import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
+import {
+  getFunctionsToIgnoreForStats,
+  getParamAtPosition,
+  isAggFunctionUsedAlready,
+} from './helper';
 import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
@@ -1192,13 +1196,7 @@ async function getFunctionArgsSuggestions(
      * for the current parameter position in the given function definition,
      */
     const allParamDefinitionsForThisPosition = validSignatures
-      .map((signature) =>
-        signature.params.length > argIndex
-          ? signature.params[argIndex]
-          : signature.minParams
-          ? signature.params[signature.params.length - 1]
-          : null
-      )
+      .map((signature) => getParamAtPosition(signature, argIndex))
       .filter(nonNullable);
 
     // Separate the param definitions into two groups:
