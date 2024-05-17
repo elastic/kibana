@@ -78,14 +78,18 @@ export const createPipeline = async ({
   id,
   modelId,
 }: CreatePipelineParams): Promise<boolean> => {
-  const response = await esClient.ingest.putPipeline(
-    knowledgeBaseIngestPipeline({
-      id,
-      modelId,
-    })
-  );
+  try {
+    const response = await esClient.ingest.putPipeline(
+      knowledgeBaseIngestPipeline({
+        id,
+        modelId,
+      })
+    );
 
-  return response.acknowledged;
+    return response.acknowledged;
+  } catch (e) {
+    return false;
+  }
 };
 
 interface DeletePipelineParams {

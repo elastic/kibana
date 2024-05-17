@@ -51,9 +51,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
               },
             });
           }
-          // const dataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-          //   false
-          // );
+
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
             return assistantResponse.error({

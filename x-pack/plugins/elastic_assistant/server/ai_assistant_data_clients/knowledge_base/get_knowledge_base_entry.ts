@@ -16,7 +16,7 @@ export interface GetKnowledgeBaseEntryParams {
   logger: Logger;
   knowledgeBaseIndex: string;
   id: string;
-  user?: AuthenticatedUser | null;
+  user: AuthenticatedUser;
 }
 
 export const getKnowledgeBaseEntry = async ({
@@ -26,26 +26,24 @@ export const getKnowledgeBaseEntry = async ({
   id,
   user,
 }: GetKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
-  const filterByUser = user
-    ? [
-        {
-          nested: {
-            path: 'users',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match: user.profile_uid
-                      ? { 'users.id': user.profile_uid }
-                      : { 'users.name': user.username },
-                  },
-                ],
+  const filterByUser = [
+    {
+      nested: {
+        path: 'users',
+        query: {
+          bool: {
+            must: [
+              {
+                match: user.profile_uid
+                  ? { 'users.id': user.profile_uid }
+                  : { 'users.name': user.username },
               },
-            },
+            ],
           },
         },
-      ]
-    : [];
+      },
+    },
+  ];
   try {
     const response = await esClient.search<EsKnowledgeBaseEntrySchema>({
       query: {

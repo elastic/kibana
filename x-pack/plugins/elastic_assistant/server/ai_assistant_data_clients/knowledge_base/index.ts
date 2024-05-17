@@ -204,8 +204,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       const kbDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
       if (!kbDocsLoaded) {
         this.options.logger.debug(`Loading KB docs...`);
-        const loadedKnowledgeBase = await loadESQL(esStore, this.options.logger);
-        this.options.logger.debug(`${loadedKnowledgeBase}`);
+        await loadESQL(esStore, this.options.logger);
       } else {
         this.options.logger.debug(`Knowledge Base docs already loaded!`);
       }
