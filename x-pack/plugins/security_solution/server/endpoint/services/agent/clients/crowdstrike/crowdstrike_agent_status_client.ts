@@ -39,7 +39,7 @@ export enum CROWDSTRIKE_STATUS_RESPONSE {
 
 export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
-  async getAgentStatusFromConnectorAction(agentIds: string[]) {
+  private async getAgentStatusFromConnectorAction(agentIds: string[]) {
     const connectorActionsClient = this.options.connectorActionsClient;
 
     let connectorList: ConnectorWithExtraFindData[] = [];
