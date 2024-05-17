@@ -13,6 +13,8 @@ import { DataViewApiProvider } from './data_view_api';
 import { AlertingApiProvider } from './alerting_api';
 import { SloApiProvider } from './slo_api';
 export type { RoleCredentials } from './svl_user_manager';
+export type { InternalRequestHeader } from './svl_common_api';
+export type { SupertestWithoutAuthType } from './supertest';
 
 export const services = {
   supertest: SupertestProvider,
