@@ -457,7 +457,10 @@ export class DataGridService extends FtrService {
     return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
-  public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
+  public async expandFieldCellPopoverInFlyout(
+    fieldName: string,
+    actionName: string
+  ): Promise<void> {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
@@ -465,6 +468,10 @@ export class DataGridService extends FtrService {
     await this.retry.waitFor('grid cell popover to appear', async () => {
       return this.testSubjects.exists(`${actionName}-${fieldName}`);
     });
+  }
+
+  public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
+    await this.expandFieldCellPopoverInFlyout(fieldName, actionName);
     await this.testSubjects.click(`${actionName}-${fieldName}`);
   }
 
