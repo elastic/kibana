@@ -49,7 +49,6 @@ export const handleStreamStorage = async ({
 
 const parseGeminiStream: StreamParser = async (stream, logger, abortSignal) => {
   let responseBody = '';
-  console.log("rohan test inside parseGeminiStream")
   stream.on('data', (chunk) => {
     responseBody += chunk.toString();
   });
@@ -115,11 +114,10 @@ const parseOpenAIResponse = (responseBody: string) =>
       return prev + (msg.content || '');
     }, '');
 
-
+/** Parse Gemini stream response body */
 const parseGeminiResponse = (responseBody: string) =>{
-  console.log("rohan test parseGeminiResponse in parse_stream responseBody=",responseBody );
   return responseBody
-    .split('\r')
+    .split('\n')
     .filter((line) => {
       return line.startsWith('data: ') && !line.endsWith('[DONE]');
     })
@@ -150,6 +148,7 @@ const parseGeminiResponse = (responseBody: string) =>{
       return prev + text;
     }, '');
   }
+
 const parseBedrockStream: StreamParser = async (responseStream, logger, abortSignal) => {
   const responseBuffer: Uint8Array[] = [];
   if (abortSignal) {
