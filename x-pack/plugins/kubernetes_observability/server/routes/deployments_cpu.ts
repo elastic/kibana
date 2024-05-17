@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
-import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod } from '../lib/utils';
 import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -29,12 +29,14 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             query: schema.object({
               name: schema.string(),
               namespace: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
+        var period =  checkDefaultPeriod(request.query.period);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
           {
@@ -89,7 +91,7 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
           const time = extractFieldValue(fields['@timestamp']);
           for (var entries of hitsPodsAggs) {
             const podName = entries.key;
-            const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
+            const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client, period);
             const esResponsePods = await client.search(dslPods);
             const [reason, pod] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
 

@@ -138,6 +138,15 @@ export function checkDefaultNamespace(namespace: string | undefined): string {
     }
 }
 
+
+export function checkDefaultPeriod(period: string | undefined): string {
+    if (period == null || period == undefined || period == '') {
+        return period = "now-5m"
+    } else {
+        return period
+    }
+}
+
 export function toPct(num: number | undefined): number | undefined {
     return num === undefined ? undefined : num * 100;
 }

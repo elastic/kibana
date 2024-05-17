@@ -11,7 +11,7 @@ const limits: Limits = {
 // Define the global Deviation limit to categorise memory memory_usage_median_absolute_deviation
 const deviation = 5e+7 // We define that deviations more than 50Megabytes should be looked by the user
 
-export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespace: string, client: ElasticsearchClient) {
+export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespace: string, client: ElasticsearchClient, period: string) {
     const mustsPodsCpu = [
         {
             term: {
@@ -29,7 +29,7 @@ export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespac
         {
             range: {
                 "@timestamp": {
-                    "gte": "now-5m"
+                    "gte": period
                 }
             }
         }
@@ -136,7 +136,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
 }
 
 
-export function defineQueryGeneralMemoryUtilisation(namespace: string, client: ElasticsearchClient) {
+export function defineQueryGeneralMemoryUtilisation(namespace: string, client: ElasticsearchClient, period: string) {
     const mustsPodsCpu = [
         {
             term: {
@@ -149,7 +149,7 @@ export function defineQueryGeneralMemoryUtilisation(namespace: string, client: E
         {
             range: {
                 "@timestamp": {
-                    "gte": "now-5m"
+                    "gte": period
                 }
             }
         }
