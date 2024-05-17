@@ -316,9 +316,9 @@ ${JSON.stringify(
                 ci: process.env.CI,
               };
 
-              let shutdownEs;
               // Setup fleet if Cypress config requires it
               let fleetServer: void | StartedFleetServer;
+              let shutdownEs;
 
               try {
                 shutdownEs = await pRetry(
@@ -374,9 +374,7 @@ ${JSON.stringify(
                         // over from an interrupted run) is killed and a new one restarted
                         force: true,
                       }),
-                    {
-                      retries: 1,
-                    }
+                    { retries: 2, forever: false }
                   );
                 }
 

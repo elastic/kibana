@@ -141,7 +141,8 @@ export const startFleetServer = async ({
     const serviceToken = isServerless
       ? ''
       : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
-          retries: 1,
+          retries: 2,
+          forever: false,
         });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
