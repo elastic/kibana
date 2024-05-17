@@ -17,10 +17,12 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
+  MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
@@ -110,6 +112,7 @@ describe('configure', () => {
             key: 'template_key_1',
             name: 'Template 1',
             description: 'this is first template',
+            tags: ['foo', 'bar'],
             caseFields: {
               title: 'case using sample template',
             },
@@ -118,6 +121,7 @@ describe('configure', () => {
             key: 'template_key_2',
             name: 'Template 2',
             description: 'this is second template',
+            tags: [],
             caseFields: null,
           },
         ],
@@ -222,6 +226,7 @@ describe('configure', () => {
             key: 'template_key_1',
             name: 'Template 1',
             description: 'this is first template',
+            tags: ['foo', 'bar'],
             caseFields: {
               title: 'case using sample template',
             },
@@ -247,6 +252,7 @@ describe('configure', () => {
         key: 'template_key_1',
         name: 'Template 1',
         description: 'this is first template',
+        tags: [],
         caseFields: {
           title: 'case using sample template',
         },
@@ -511,6 +517,7 @@ describe('configure', () => {
       key: 'template_key_1',
       name: 'Template 1',
       description: 'this is first template',
+      tags: ['foo', 'bar'],
       caseFields: {
         title: 'case using sample template',
       },
@@ -594,6 +601,24 @@ describe('configure', () => {
           TemplateConfigurationRt.decode({ ...defaultRequest, description: longDesc })
         )
       ).toContain('The length of the description is too long. The maximum length is 1000.');
+    });
+
+    it(`throws an error when there are more than ${MAX_TAGS_PER_TEMPLATE} tags`, async () => {
+      const tags = Array(MAX_TAGS_PER_TEMPLATE + 1).fill('foobar');
+
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, tags }))
+      ).toContain(
+        `The length of the field template's tags is too long. Array must be of length <= 10.`
+      );
+    });
+
+    it(`throws an error when the a tag is more than ${MAX_TEMPLATE_TAG_LENGTH} characters`, async () => {
+      const tag = 'a'.repeat(MAX_TEMPLATE_TAG_LENGTH + 1);
+
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, tags: [tag] }))
+      ).toContain(`The length of the template's tag is too long. The maximum length is 50.`);
     });
 
     describe('caseFields', () => {

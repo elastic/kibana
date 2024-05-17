@@ -380,6 +380,7 @@ describe('client', () => {
                 key: 'template_1',
                 name: 'template 1',
                 description: 'test',
+                tags: ['foo', 'bar'],
                 caseFields: {
                   title: 'Case title',
                   description: 'This is test desc',
@@ -415,6 +416,7 @@ describe('client', () => {
                   key: 'template_1',
                   name: 'template 1',
                   description: 'test',
+                  tags: ['foo', 'bar'],
                   caseFields: {
                     title: 'Case title',
                     description: 'This is test desc',
@@ -450,6 +452,7 @@ describe('client', () => {
                 key: 'template_1',
                 name: 'template 1',
                 description: 'test',
+                tags: ['foo', 'bar'],
                 caseFields: {
                   title: 'Case title',
                   description: 'This is test desc',
@@ -532,12 +535,14 @@ describe('client', () => {
                   key: 'template_1',
                   name: 'template 1',
                   description: 'test',
+                  tags: ['foo', 'bar'],
                   caseFields: null,
                 },
                 {
                   key: 'template_1',
                   name: 'template 2',
                   description: 'test',
+                  tags: [],
                   caseFields: {
                     title: 'Case title',
                   },
@@ -798,6 +803,7 @@ describe('client', () => {
                   key: 'template_1',
                   name: 'template 1',
                   description: 'this is test description',
+                  tags: ['foo', 'bar'],
                   caseFields: null,
                 },
               ],
@@ -814,6 +820,7 @@ describe('client', () => {
                     key: 'template_1',
                     name: 'template 1',
                     description: 'this is test description',
+                    tags: ['foo', 'bar'],
                     caseFields: {
                       assignees: [{ uid: '1' }],
                     },
@@ -928,6 +935,7 @@ describe('client', () => {
                   key: 'duplicated_key',
                   name: 'template 2',
                   description: 'test',
+                  tags: [],
                   caseFields: {
                     title: 'Case title',
                   },
@@ -957,6 +965,7 @@ describe('client', () => {
               key: 'template_1',
               name: 'template 1',
               description: 'test',
+              tags: ['foo', 'bar'],
               caseFields: {
                 customFields: [
                   {
@@ -1043,6 +1052,7 @@ describe('client', () => {
                     key: 'template_1',
                     name: 'template 1',
                     description: 'this is test description',
+                    tags: ['foo', 'bar'],
                     caseFields: {
                       customFields: [
                         {
@@ -1081,6 +1091,7 @@ describe('client', () => {
                     key: 'template_1',
                     name: 'template 1',
                     description: 'test',
+                    tags: ['foo', 'bar'],
                     caseFields: {
                       customFields: [
                         {
@@ -1196,6 +1207,7 @@ describe('client', () => {
                     key: 'template_1',
                     name: 'template 1',
                     description: 'this is test description',
+                    tags: [],
                     caseFields: {
                       assignees: [{ uid: '1' }],
                     },

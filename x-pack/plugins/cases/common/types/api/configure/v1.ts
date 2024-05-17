@@ -10,10 +10,12 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
@@ -69,32 +71,51 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
   fieldName: 'customFields',
 });
 
-export const TemplateConfigurationRt = rt.strict({
-  /**
-   * key of template
-   */
-  key: regexStringRt({
-    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
-    pattern: '^[a-z0-9_-]+$',
-    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+export const TemplateConfigurationRt = rt.intersection([
+  rt.strict({
+    /**
+     * key of template
+     */
+    key: regexStringRt({
+      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
+      pattern: '^[a-z0-9_-]+$',
+      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+    }),
+    /**
+     * name of template
+     */
+    name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
+    /**
+     * description of templates
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+    }),
+    /**
+     * case fields
+     */
+    caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRequestRt]),
   }),
-  /**
-   * name of template
-   */
-  name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
-  /**
-   * description of templates
-   */
-  description: limitedStringSchema({
-    fieldName: 'description',
-    min: 1,
-    max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
-  }),
-  /**
-   * case fields
-   */
-  caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRequestRt]),
-});
+  rt.exact(
+    rt.partial({
+      /**
+       * tags of templates
+       */
+      tags: limitedArraySchema({
+        codec: limitedStringSchema({
+          fieldName: `template's tag`,
+          min: 0,
+          max: MAX_TEMPLATE_TAG_LENGTH,
+        }),
+        min: 0,
+        max: MAX_TAGS_PER_TEMPLATE,
+        fieldName: `template's tags`,
+      }),
+    })
+  ),
+]);
 
 export const TemplatesConfigurationRt = limitedArraySchema({
   codec: TemplateConfigurationRt,

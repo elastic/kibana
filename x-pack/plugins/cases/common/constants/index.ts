@@ -137,6 +137,8 @@ export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
+export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
+export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 
 /**
  * Cases features
