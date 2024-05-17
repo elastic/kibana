@@ -93,28 +93,22 @@ const RequiredFieldsList = ({
 
   const fieldValue: RequiredFieldInput[] = formData[path] ?? [];
 
-  const fieldsWithTypes = useMemo(
+  const typesByFieldName: Record<string, string[]> = useMemo(
     () =>
-      indexPatternFields.filter((indexPatternField) => Boolean(indexPatternField.esTypes?.length)),
+      indexPatternFields.reduce((accumulator, field) => {
+        if (field.esTypes?.length) {
+          accumulator[field.name] = field.esTypes;
+        }
+        return accumulator;
+      }, {} as Record<string, string[]>),
     [indexPatternFields]
   );
 
-  const allFieldNames = useMemo(() => fieldsWithTypes.map(({ name }) => name), [fieldsWithTypes]);
+  const allFieldNames = useMemo(() => Object.keys(typesByFieldName), [typesByFieldName]);
 
   const selectedFieldNames = fieldValue.map(({ name }) => name);
 
   const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
-
-  const typesByFieldName: Record<string, string[]> = useMemo(
-    () =>
-      fieldsWithTypes.reduce((accumulator, browserField) => {
-        if (browserField.esTypes) {
-          accumulator[browserField.name] = browserField.esTypes;
-        }
-        return accumulator;
-      }, {} as Record<string, string[]>),
-    [fieldsWithTypes]
-  );
 
   const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
     if (
