@@ -222,6 +222,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 onExtendRange={(newDateExpression) =>
                                   updateDateRange({ startDateExpression: newDateExpression })
                                 }
+                                aria-owns="streamEntry logTextStreamEntry"
                               />
                               {items.map((item, idx) => {
                                 const currentTime = item.logEntry.cursor.time;
