@@ -34,6 +34,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
       await pageObjects.indexManagement.indexDetailsPage.expectStartIngestingDataSectionToExist();
     });
-
   });
 };
