@@ -106,14 +106,14 @@ export const TableFieldValue = ({
   const truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
 
   const valueRef = useRef<HTMLDivElement>(null);
-  const [valueScrollHeight, setValueScrollHeight] = useState<number>(0);
+  const [collapsedScrollHeight, setCollapsedScrollHeight] = useState<number>(0);
 
   const [isValueExpanded, setIsValueExpanded] = useState(false);
   const isCollapsible =
     truncateMaxHeight > 0 &&
     String(rawValue).length > COLLAPSE_LINE_LENGTH &&
     // Don't collapse if the field value fits into the available height anyway (when the screen width is large enough)
-    (!valueScrollHeight || valueScrollHeight > truncateMaxHeight);
+    (!collapsedScrollHeight || collapsedScrollHeight > truncateMaxHeight);
   const isCollapsed = isCollapsible && !isValueExpanded;
 
   const valueClassName = classNames({
@@ -129,9 +129,9 @@ export const TableFieldValue = ({
 
   useEffect(() => {
     if (isCollapsible && isCollapsed && valueRef.current?.scrollHeight) {
-      setValueScrollHeight(valueRef.current.scrollHeight);
+      setCollapsedScrollHeight(valueRef.current.scrollHeight);
     }
-  }, [isCollapsible, isCollapsed, setValueScrollHeight]);
+  }, [isCollapsible, isCollapsed, setCollapsedScrollHeight]);
 
   return (
     <Fragment>
