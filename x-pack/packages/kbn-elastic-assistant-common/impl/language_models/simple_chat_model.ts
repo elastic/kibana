@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import {
   SimpleChatModel,
   type BaseChatModelParams,
@@ -16,10 +17,8 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { Readable } from 'stream';
-import { parseBedrockStream } from '@kbn/elastic-assistant-plugin/server/lib/parse_stream';
 import { getDefaultArguments } from './constants';
-import { ExecuteConnectorRequestBody } from '../..';
+import { ExecuteConnectorRequestBody, parseBedrockStream } from '../..';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
   content: prompt,
@@ -69,7 +68,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.#logger = logger;
     this.#signal = signal;
     this.#request = request;
-    this.llmType = llmType ?? 'openai';
+    this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
     // only enable streaming for bedrock
