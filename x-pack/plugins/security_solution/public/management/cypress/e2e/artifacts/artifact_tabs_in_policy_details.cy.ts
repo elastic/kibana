@@ -83,6 +83,7 @@ describe(
     });
 
     for (const testData of getArtifactsListTestsData()) {
+      // FLAKY: https://github.com/elastic/kibana/issues/183670
       // FLAKY: https://github.com/elastic/kibana/issues/183671
       describe.skip(`${testData.title} tab`, () => {
         beforeEach(() => {
