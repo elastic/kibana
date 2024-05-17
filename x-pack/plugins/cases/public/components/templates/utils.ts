@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields } from '@kbn/cases-plugin/common/types/domain';
-import { getConnectorsFormDeserializer, isEmptyValue } from '../utils';
+import { getConnectorsFormSerializer, isEmptyValue } from '../utils';
 import type { TemplateFormProps } from './types';
 
 export const removeEmptyFields = (
@@ -24,8 +23,6 @@ export const removeEmptyFields = (
             customFields: nonEmptyFields,
           };
         }
-      } else if (key === 'connectorFields' && !isEmptyValue(value)) {
-        initialValue = { [key]: value };
       } else if (!isEmptyValue(value)) {
         initialValue = { [key]: value };
       }
@@ -42,29 +39,16 @@ export const removeEmptyFields = (
 
 export const templateSerializer = <T extends TemplateFormProps | null>(data: T): T => {
   if (data !== null && data.caseFields) {
-    console.log('templateSerializer', { data });
-    const serializedFields = removeEmptyFields(data.caseFields);
+    const { fields, ...rest } = data.caseFields;
+    const connectorFields = getConnectorsFormSerializer({ fields: fields ?? null });
+    const serializedFields = removeEmptyFields(rest);
 
-    return {
-      ...data,
-      caseFields: serializedFields as TemplateFormProps['caseFields'],
-    };
-  }
-
-  return data;
-};
-
-export const templateDeserializer = <T extends TemplateFormProps | null>(data: T): T => {
-  if (data && data.caseFields) {
-    const connectorFields = data.caseFields.fields
-      ? getConnectorsFormDeserializer({ fields: data.caseFields.fields })
-      : { fields: {} };
     return {
       ...data,
       caseFields: {
-        ...data?.caseFields,
-        fields: connectorFields?.fields,
-      },
+        ...serializedFields,
+        fields: connectorFields.fields,
+      } as TemplateFormProps['caseFields'],
     };
   }
 

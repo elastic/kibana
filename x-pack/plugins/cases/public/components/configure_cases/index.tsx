@@ -323,7 +323,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setFlyOutVisibility, setCustomFieldToEdit]);
 
   const onFlyoutSave = useCallback(
-    (data: CustomFieldConfiguration | TemplateFormProps | null) => {
+    (data: CustomFieldConfiguration | TemplateFormProps | null | {}) => {
       if (flyoutType === 'customField') {
         const updatedCustomFields = addOrReplaceField(
           customFields,
@@ -347,13 +347,26 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
       if (flyoutType === 'template') {
         const { caseFields, ...rest } = data as TemplateFormProps;
-        const transformedCustomFields = caseFields?.customFields
-          ? transformCustomFieldsData(caseFields?.customFields, customFields)
+        const {
+          connectorId,
+          fields,
+          customFields: templateCustomFields,
+          ...otherCaseFields
+        } = caseFields ?? {};
+        const transformedCustomFields = templateCustomFields
+          ? transformCustomFieldsData(templateCustomFields, customFields)
           : [];
+        const templateConnector = connectorId ? getConnectorById(connectorId, connectors) : null;
+
+        const transformedConnector = templateConnector
+          ? normalizeActionConnector(templateConnector, fields)
+          : getNoneConnector();
+
         const transformedData: TemplateConfiguration = {
           ...rest,
           caseFields: {
-            ...caseFields,
+            ...otherCaseFields,
+            connector: transformedConnector,
             customFields: transformedCustomFields,
           },
         };
@@ -377,6 +390,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationId,
       configurationVersion,
       connector,
+      connectors,
       customFields,
       templates,
       persistCaseConfigure,

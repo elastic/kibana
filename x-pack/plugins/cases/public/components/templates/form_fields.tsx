@@ -11,10 +11,9 @@ import { TextField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/co
 import { EuiSteps } from '@elastic/eui';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
-import { schema } from './schema';
 import { Connector } from './connector';
-import { ActionConnector } from '../../containers/configure/types';
-import { CasesConfigurationUI } from '../../containers/types';
+import type { ActionConnector } from '../../containers/configure/types';
+import type { CasesConfigurationUI } from '../../containers/types';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
@@ -82,12 +81,11 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
             isLoading={isSubmitting}
             configurationConnector={configurationConnector}
             path="caseFields.connectorId"
-            schema={schema}
           />
         </div>
       ),
     }),
-    [connectors, isSubmitting]
+    [connectors, configurationConnector, isSubmitting]
   );
 
   const allSteps = useMemo(

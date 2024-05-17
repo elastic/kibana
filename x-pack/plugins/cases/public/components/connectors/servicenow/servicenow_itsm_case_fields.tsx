@@ -13,7 +13,6 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';
@@ -34,11 +33,13 @@ const defaultFields: Fields = {
 
 const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   connector,
+  path = 'fields',
 }) => {
   const form = useFormContext();
-  const [{ fields }] = useFormData<{ fields: ServiceNowITSMFieldsType }>();
+  const [formData] = useFormData();
+  const fieldsData = path === 'caseFields.fields' ? formData?.caseFields?.fields : formData?.fields;
 
-  const { category = null } = fields ?? {};
+  const { category = null } = fieldsData ?? {};
 
   const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
@@ -106,7 +107,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path="fields.urgency"
+              path={`${path}.urgency`}
               component={SelectField}
               config={{
                 label: i18n.URGENCY,
@@ -127,7 +128,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path="fields.severity"
+              path={`${path}.severity`}
               component={SelectField}
               config={{
                 label: i18n.SEVERITY,
@@ -146,7 +147,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path="fields.impact"
+              path={`${path}.impact`}
               component={SelectField}
               config={{
                 label: i18n.IMPACT,
@@ -167,7 +168,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path="fields.category"
+              path={`${path}.category`}
               component={SelectField}
               config={{
                 label: i18n.CATEGORY,
@@ -187,7 +188,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path="fields.subcategory"
+              path={`${path}.subcategory`}
               component={SelectField}
               config={{
                 label: i18n.SUBCATEGORY,

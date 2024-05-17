@@ -33,6 +33,7 @@ const defaultFields: Fields = {
 
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   connector,
+  path = 'fields',
 }) => {
   const form = useFormContext();
   const [{ fields }] = useFormData<{ fields: ServiceNowSIRFieldsType }>();
@@ -100,7 +101,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <UseField
-                      path="fields.destIp"
+                      path={`${path}.destIp`}
                       config={{ defaultValue: true }}
                       component={CheckBoxField}
                       componentProps={{
@@ -114,7 +115,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <UseField
-                      path="fields.sourceIp"
+                      path={`${path}.sourceIp`}
                       config={{ defaultValue: true }}
                       component={CheckBoxField}
                       componentProps={{
@@ -130,7 +131,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <UseField
-                      path="fields.malwareUrl"
+                      path={`${path}.malwareUrl`}
                       config={{ defaultValue: true }}
                       component={CheckBoxField}
                       componentProps={{
@@ -144,7 +145,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <UseField
-                      path="fields.malwareHash"
+                      path={`${path}.malwareHash`}
                       config={{ defaultValue: true }}
                       component={CheckBoxField}
                       componentProps={{
@@ -164,7 +165,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path="fields.priority"
+              path={`${path}.priority`}
               component={SelectField}
               config={{
                 label: i18n.PRIORITY,
@@ -185,7 +186,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path="fields.category"
+              path={`${path}.category`}
               component={SelectField}
               config={{
                 label: i18n.CATEGORY,
@@ -205,7 +206,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path="fields.subcategory"
+              path={`${path}.subcategory`}
               component={SelectField}
               config={{
                 label: i18n.SUBCATEGORY,

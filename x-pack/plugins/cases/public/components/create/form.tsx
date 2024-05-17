@@ -48,7 +48,6 @@ import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
 import { CustomFields } from './custom_fields';
-import { schema } from './schema';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big

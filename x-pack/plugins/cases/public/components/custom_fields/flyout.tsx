@@ -23,6 +23,7 @@ import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
+import { isEmpty } from 'lodash';
 
 export interface CustomFieldFlyoutProps {
   disabled: boolean;
@@ -45,7 +46,7 @@ const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
-      data: { key: '', label: '', type: CustomFieldTypes.TEXT, required: false },
+      data: {},
     }),
   });
 

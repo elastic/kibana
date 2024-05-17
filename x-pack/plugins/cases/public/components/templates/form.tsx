@@ -12,9 +12,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ActionConnector } from '../../../common/types/domain';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import { templateDeserializer, templateSerializer } from './utils';
+import { templateSerializer } from './utils';
 import type { TemplateFormProps } from './types';
-import { CasesConfigurationUI } from '../../containers/types';
+import type { CasesConfigurationUI } from '../../containers/types';
 
 export interface TemplateFormState {
   isValid: boolean | undefined;
@@ -46,7 +46,6 @@ const FormComponent: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     serializer: templateSerializer,
-    deserializer: templateDeserializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

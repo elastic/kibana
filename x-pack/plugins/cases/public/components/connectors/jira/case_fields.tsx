@@ -13,7 +13,6 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { isEmpty } from 'lodash';
-import type { JiraFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
@@ -23,11 +22,16 @@ import { SearchIssues } from './search_issues';
 
 const { emptyField } = fieldValidators;
 
-const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
-  const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
+const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
+  connector,
+  path = 'fields',
+}) => {
+  const [formData] = useFormData();
+
   const { http } = useKibana().services;
 
-  const { issueType } = fields ?? {};
+  const fieldsData = path === 'caseFields.fields' ? formData?.caseFields?.fields : formData?.fields;
+  const { issueType } = fieldsData ?? {};
 
   const {
     isLoading: isLoadingIssueTypesData,
@@ -76,7 +80,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
   return (
     <div data-test-subj={'connector-fields-jira'}>
       <UseField
-        path="fields.issueType"
+        path={`${path}.issueType`}
         component={SelectField}
         config={{
           label: i18n.ISSUE_TYPE,
@@ -107,7 +111,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
         <div style={{ display: hasParent ? 'block' : 'none' }}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <SearchIssues actionConnector={connector} />
+              <SearchIssues path={path} actionConnector={connector} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -116,7 +120,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
           <EuiFlexGroup>
             <EuiFlexItem>
               <UseField
-                path="fields.priority"
+                path={`${path}.priority`}
                 component={SelectField}
                 config={{
                   label: i18n.PRIORITY,

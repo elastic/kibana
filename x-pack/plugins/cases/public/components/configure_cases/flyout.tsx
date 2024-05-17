@@ -29,8 +29,7 @@ import type {
 
 import * as i18n from './translations';
 import type { TemplateFormProps } from '../templates/types';
-import { CaseActionConnector } from '../types';
-import { CasesConfigurationUI } from '../../containers/types';
+import type { CasesConfigurationUI } from '../../containers/types';
 
 export interface FlyoutProps {
   disabled: boolean;

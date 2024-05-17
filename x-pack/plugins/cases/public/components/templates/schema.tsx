@@ -6,7 +6,7 @@
  */
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { FIELD_TYPES, FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   MAX_DESCRIPTION_LENGTH,
@@ -128,7 +128,6 @@ export const schema: FormSchema<TemplateFormProps> = {
       labelAppend: OptionalFieldLabel,
     },
     connectorId: {
-      type: FIELD_TYPES.SUPER_SELECT,
       labelAppend: OptionalFieldLabel,
       label: i18n.CONNECTORS,
       defaultValue: 'none',

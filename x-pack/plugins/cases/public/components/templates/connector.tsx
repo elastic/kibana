@@ -8,24 +8,22 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import type { FieldConfig, FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { TemplateFormProps } from '../templates/types';
-import { CasesConfigurationUI } from '../../containers/types';
+import type { CasesConfigurationUI } from '../../containers/types';
+import { schema } from './schema';
 
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   path?: string;
-  schema: FormSchema<TemplateFormProps>;
   configurationConnector: CasesConfigurationUI['connector'];
 }
 
@@ -33,11 +31,10 @@ const ConnectorComponent: React.FC<Props> = ({
   connectors,
   isLoading,
   path,
-  schema,
   configurationConnector,
 }) => {
-  const [{ connectorId }] = useFormData({ watch: ['caseFields.connectorId'] });
-  const connector = getConnectorById(connectorId, connectors) ?? null;
+  const [{ caseFields }] = useFormData({ watch: ['caseFields.connectorId'] });
+  const connector = getConnectorById(caseFields?.connectorId, connectors) ?? null;
 
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
@@ -62,14 +59,6 @@ const ConnectorComponent: React.FC<Props> = ({
     );
   }
 
-  console.log('connector component', {
-    defaultConnectorId,
-    path,
-    connectors,
-    connector,
-    connectorId,
-  });
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -83,13 +72,12 @@ const ConnectorComponent: React.FC<Props> = ({
             dataTestSubj: 'caseConnectors',
             disabled: isLoading,
             idAria: 'caseConnectors',
-            isLoading: isLoading,
-            // handleChange: onConnectorChange,
+            isLoading,
           }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ConnectorFieldsForm connector={connector} />
+        <ConnectorFieldsForm path={'caseFields.fields'} connector={connector} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

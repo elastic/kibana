@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import type { FieldConfig, FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
@@ -24,15 +24,9 @@ interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   isLoadingConnectors: boolean;
-  path?: string;
 }
 
-const ConnectorComponent: React.FC<Props> = ({
-  connectors,
-  isLoading,
-  isLoadingConnectors,
-  path,
-}) => {
+const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const connector = getConnectorById(connectorId, connectors) ?? null;
 
@@ -63,13 +57,11 @@ const ConnectorComponent: React.FC<Props> = ({
     );
   }
 
-  console.log('connector component', { defaultConnectorId, path, connectors, connector });
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField
-          path={path ?? 'connectorId'}
+          path={'connectorId'}
           config={connectorIdConfig}
           component={ConnectorSelector}
           defaultValue={defaultConnectorId}
