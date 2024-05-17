@@ -197,13 +197,14 @@ describe('Infra Locators', () => {
       view: 'map' as const,
     };
 
-    const expected = Object.keys(params).reduce((acc, key) => {
+    const expected = Object.keys(params).reduce((acc: Record<string, string | undefined>, key) => {
       acc[key] =
         key === 'metric' || key === 'customOptions' || key === 'customMetrics'
           ? params[key]
-          : rison.encodeUnknown(params[key]);
+          : rison.encodeUnknown(params[key as keyof typeof params]);
       return acc;
     }, {});
+
     const queryStringParams = querystring.stringify(expected);
 
     it('should create a link to Inventory with no state', async () => {
