@@ -67,8 +67,8 @@ export default function (providerContext: FtrProviderContext) {
     }
   ) => {
     const expiration = opts.expired
-      ? Moment(opts.timestamp).subtract(1, 'hour')
-      : Moment(opts.timestamp).add(1, 'hour');
+      ? Moment(opts.timestamp).subtract(6, 'hour')
+      : Moment(opts.timestamp).add(6, 'hour');
 
     await esClient.index(
       {
