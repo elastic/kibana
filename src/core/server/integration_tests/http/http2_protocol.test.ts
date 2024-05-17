@@ -96,5 +96,12 @@ describe('Http2 - Smoke tests', () => {
       expect(response.status).toBe(200);
       expect(response.body).toStrictEqual({ ok: true });
     });
+
+    test('Should respond to POST endpoint on HTTP/1.1', async () => {
+      const response = await supertest(innerServerListener).post('/');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toStrictEqual({ ok: true });
+    });
   });
 });
