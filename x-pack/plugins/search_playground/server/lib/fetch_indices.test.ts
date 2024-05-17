@@ -19,8 +19,8 @@ describe('fetch indices', () => {
     },
     'index-2': {
       aliases: {
-        'search-alias-1': {},
-        'search-alias-2': {},
+        'search-alias-3': {},
+        'search-alias-4': {},
       },
     },
     'index-3': {
@@ -48,7 +48,15 @@ describe('fetch indices', () => {
     );
 
     expect(indexData).toEqual({
-      indexNames: ['index-1', 'index-2', 'index-3'],
+      indexNames: [
+        'index-1',
+        'index-2',
+        'index-3',
+        'search-alias-1',
+        'search-alias-2',
+        'search-alias-3',
+        'search-alias-4',
+      ],
     });
   });
 });
