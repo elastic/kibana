@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import { IBasePath } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-
-import { upperCase } from 'lodash';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { ExecutorType } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { upperCase } from 'lodash';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+  SUPPRESSED_PRIORITY_ACTION,
+} from '../../../../common/constants';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
@@ -29,6 +34,9 @@ import {
 } from '../../../../common/field_names/slo';
 import { Duration } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
+import { evaluate } from './lib/evaluate';
+import { evaluateDependencies } from './lib/evaluate_dependencies';
+import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import {
   AlertStates,
   BurnRateAlertContext,
@@ -38,16 +46,7 @@ import {
   BurnRateRuleTypeState,
   WindowSchema,
 } from './types';
-import {
-  ALERT_ACTION,
-  HIGH_PRIORITY_ACTION,
-  MEDIUM_PRIORITY_ACTION,
-  LOW_PRIORITY_ACTION,
-  SUPPRESSED_PRIORITY_ACTION,
-} from '../../../../common/constants';
-import { evaluate } from './lib/evaluate';
-import { evaluateDependencies } from './lib/evaluate_dependencies';
-import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
+import { formatTimeToExhaustErrorBudgetInHours } from './utils';
 
 export const getRuleExecutor = ({
   basePath,
@@ -189,6 +188,10 @@ export const getRuleExecutor = ({
             sloInstanceId: instanceId,
             slo,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
+            errorBudgetExhaustionTime: formatTimeToExhaustErrorBudgetInHours(
+              longWindowBurnRate,
+              slo.timeWindow
+            ),
           };
 
           alertsClient.setAlertData({ id: alertId, context });

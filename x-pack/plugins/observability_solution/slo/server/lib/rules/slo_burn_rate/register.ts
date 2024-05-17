@@ -100,6 +100,10 @@ export function sloBurnRateRuleType(
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
+        {
+          name: 'errorBudgetExhaustionTime',
+          description: errorBudgetExhaustionTimeActionVariableDescription,
+        },
       ],
     },
     alerts: {
@@ -178,5 +182,12 @@ export const suppressedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.suppressedActionDescription',
   {
     defaultMessage: 'The suppressed action group.',
+  }
+);
+
+export const errorBudgetExhaustionTimeActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.errorBudgetExhaustionTimeActionDescription',
+  {
+    defaultMessage: 'Time in hour before we exhaust the full error budget.',
   }
 );
