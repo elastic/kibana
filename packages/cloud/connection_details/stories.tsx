@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { ConnectionDetailsOptsProvider } from './context';
 import type { ConnectionDetailsOpts } from './types';
 
@@ -41,8 +41,15 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  return <ConnectionDetailsOptsProvider {...defaultOpts}>{children}</ConnectionDetailsOptsProvider>;
+export const StoriesProvider: React.FC<React.PropsWithChildren<Partial<ConnectionDetailsOpts>>> = ({
+  children,
+  ...rest
+}) => {
+  return (
+    <ConnectionDetailsOptsProvider {...{ ...defaultOpts, ...rest }}>
+      {children}
+    </ConnectionDetailsOptsProvider>
+  );
 };
 
 export const StoriesProviderKeyCreationError: React.FC<React.PropsWithChildren> = ({
