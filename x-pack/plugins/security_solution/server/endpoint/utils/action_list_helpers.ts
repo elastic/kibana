@@ -39,6 +39,12 @@ const getActionTypeFilter = (actionType: string): SearchRequest => {
       }
     : {};
 };
+
+/**
+ * TODO:PT Delete utiltiy
+ *
+ * @deprecated
+ */
 export const getActions = async ({
   agentTypes,
   commands,

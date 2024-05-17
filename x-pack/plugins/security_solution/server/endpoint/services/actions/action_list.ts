@@ -6,23 +6,22 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchActionRequests } from './utils/fetch_action_requests';
+import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ActionListApiResponse, LogsEndpointAction } from '../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
-import { getActions } from '../../utils/action_list_helpers';
-
 import {
-  categorizeResponseResults,
   createActionDetailsRecord,
-  formatEndpointActionResults,
+  getActionIdFromActionResponse,
   getAgentHostNamesWithIds,
+  isLogsEndpointActionResponse,
   mapToNormalizedActionRequest,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
@@ -200,14 +199,10 @@ const getActionDetailsList = async ({
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
-  let actionRequests;
-  let actionReqIds;
-  let actionResponses;
-  let agentsHostInfo: { [id: string]: string };
+  let actionRequests: LogsEndpointAction[] = [];
 
   try {
-    // fetch actions with matching agent_ids if any
-    const { actionIds, actionRequests: _actionRequests } = await getActions({
+    actionRequests = await fetchActionRequests({
       agentTypes,
       commands,
       esClient,
@@ -220,8 +215,6 @@ const getActionDetailsList = async ({
       unExpiredOnly,
       types,
     });
-    actionRequests = _actionRequests;
-    actionReqIds = actionIds;
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
@@ -234,18 +227,20 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  if (!actionRequests?.body?.hits?.hits) {
-    // return empty details array
+  const totalRecords = actionRequests.length;
+
+  if (!totalRecords) {
     return { actionDetails: [], totalRecords: 0 };
   }
 
-  // format endpoint actions into { type, item } structure
-  const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
-  const totalRecords = (actionRequests?.body?.hits?.total as unknown as SearchTotalHits).value;
-
-  // normalized actions with a flat structure to access relevant values
-  const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
-    formattedActionRequests.map((action) => mapToNormalizedActionRequest(action.item.data));
+  const normalizedActionRequests = actionRequests.map(mapToNormalizedActionRequest);
+  const agentIds: string[] = [];
+  const actionReqIds = normalizedActionRequests.map((actionReq) => {
+    agentIds.push(...actionReq.agents);
+    return actionReq.id;
+  });
+  let actionResponses: FetchActionResponsesResult;
+  let agentsHostInfo: { [id: string]: string };
 
   try {
     // get all responses for given action Ids and agent Ids
@@ -253,10 +248,10 @@ const getActionDetailsList = async ({
     [actionResponses, agentsHostInfo] = await Promise.all([
       fetchActionResponses({ esClient, agentIds: elasticAgentIds, actionIds: actionReqIds }),
 
-      await getAgentHostNamesWithIds({
+      getAgentHostNamesWithIds({
         esClient,
         metadataService,
-        agentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+        agentIds,
       }),
     ]);
   } catch (error) {
@@ -271,21 +266,34 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  // categorize responses as fleet and endpoint responses
-  const categorizedResponses = categorizeResponseResults({
-    results: actionResponses.data,
-  });
+  const responsesByActionId = [
+    ...actionResponses.endpointResponses,
+    ...actionResponses.fleetResponses,
+  ].reduce<{ [actionId: string]: FetchActionResponsesResult }>((acc, response) => {
+    const actionId = getActionIdFromActionResponse(response);
 
-  // compute action details list for each action id
+    if (!acc[actionId]) {
+      acc[actionId] = {
+        endpointResponses: [],
+        fleetResponses: [],
+      };
+    }
+
+    if (isLogsEndpointActionResponse(response)) {
+      acc[actionId].endpointResponses.push(response);
+    } else {
+      acc[actionId].fleetResponses.push(response);
+    }
+
+    return acc;
+  }, {});
+
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
-    // pick only those responses that match the current action id
-    const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
-      categorizedResponse.type === 'response'
-        ? categorizedResponse.item.data.EndpointActions.action_id === action.id
-        : categorizedResponse.item.data.action_id === action.id
+    const actionRecord = createActionDetailsRecord(
+      action,
+      responsesByActionId[action.id] ?? [],
+      agentsHostInfo
     );
-
-    const actionRecord = createActionDetailsRecord(action, matchedResponses, agentsHostInfo);
 
     if (withOutputs && !withOutputs.includes(action.id)) {
       delete actionRecord.outputs;

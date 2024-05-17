@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import { i18n } from '@kbn/i18n';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
@@ -360,7 +361,7 @@ const mapActionResponsesByAgentId = <
  * Given an Action response, this will return the Agent ID for that action response.
  * @param actionResponse
  */
-const getAgentIdFromActionResponse = (
+export const getAgentIdFromActionResponse = (
   actionResponse: EndpointActionResponse | LogsEndpointActionResponse
 ): string => {
   if (isLogsEndpointActionResponse(actionResponse)) {
@@ -372,6 +373,20 @@ const getAgentIdFromActionResponse = (
   return actionResponse.agent_id;
 };
 
+/**
+ * Given an Action response from either Endpoint or Fleet, utility will return its action id
+ * @param actionResponse
+ */
+export const getActionIdFromActionResponse = (
+  actionResponse: EndpointActionResponse | LogsEndpointActionResponse
+): string => {
+  if (isLogsEndpointActionResponse(actionResponse)) {
+    return actionResponse.EndpointActions.action_id;
+  }
+
+  return actionResponse.action_id;
+};
+
 // common helpers used by old and new log API
 export const getDateFilters = ({
   startDate,
@@ -379,8 +394,8 @@ export const getDateFilters = ({
 }: {
   startDate?: string;
   endDate?: string;
-}) => {
-  const dateFilters = [];
+}): QueryDslQueryContainer[] => {
+  const dateFilters: QueryDslQueryContainer[] = [];
   if (startDate) {
     dateFilters.push({ range: { '@timestamp': { gte: startDate } } });
   }
