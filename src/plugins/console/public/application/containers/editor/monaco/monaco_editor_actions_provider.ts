@@ -413,14 +413,19 @@ export class MonacoEditorActionsProvider {
     }
     let position = this.editor.getPosition() as monaco.IPosition;
     const requests = await this.getSelectedParsedRequests();
+    let prefix = '';
+    let suffix = '';
     // if there are requests at the cursor/selection, insert either before or after
     if (requests.length > 0) {
-      // if on the 1st line of the 1st request, insert before
+      // if on the 1st line of the 1st request, insert at the beginning of that line
       if (position && position.lineNumber === requests[0].startLineNumber) {
-        position = { column: 1, lineNumber: position.lineNumber < 2 ? 1 : position.lineNumber - 1 };
+        position = { column: 1, lineNumber: position.lineNumber };
+        suffix = '\n';
       } else {
-        // otherwise insert after
-        position = { column: 1, lineNumber: requests[requests.length - 1].endLineNumber + 1 };
+        // otherwise insert at the end of the last line of the last request
+        const lastLineNumber = requests[requests.length - 1].endLineNumber;
+        position = { column: model.getLineMaxColumn(lastLineNumber), lineNumber: lastLineNumber };
+        prefix = '\n';
       }
     } else {
       // if not inside a request, insert the request at the cursor position
@@ -428,22 +433,6 @@ export class MonacoEditorActionsProvider {
         // if no cursor position, insert at the beginning
         position = { lineNumber: 1, column: 1 };
       }
-    }
-    // add new lines around the request inserted from history
-    let prefix = '\n';
-    let suffix = '\n';
-    // check the text before the inserted request: content on the line above or empty
-    const textBefore = position.lineNumber > 1 ? model.getLineContent(position.lineNumber - 1) : '';
-    if (!textBefore) {
-      // if there is no text before, don't insert a new line before the request
-      prefix = '';
-    }
-    // check the text after the inserted request
-    const textAfter =
-      position.lineNumber <= model.getLineCount() ? model.getLineContent(position.lineNumber) : '';
-    if (!textAfter) {
-      // if there is no text after, don't insert a new line after the request
-      suffix = '';
     }
     const edit: monaco.editor.IIdentifiedSingleEditOperation = {
       range: {
