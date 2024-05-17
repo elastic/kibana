@@ -90,6 +90,7 @@ import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
@@ -915,7 +916,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -940,7 +940,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -1026,7 +1025,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-
           <EuiSpacer size="m" />
 
           <>
@@ -1115,6 +1113,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <EuiSpacer size="l" />
+
+          {!isMlRule(ruleType) && (
+            <>
+              <RequiredFields
+                path="requiredFields"
+                indexPatternFields={indexPattern.fields}
+                isIndexPatternLoading={isIndexPatternLoading}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
 
           <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
 
