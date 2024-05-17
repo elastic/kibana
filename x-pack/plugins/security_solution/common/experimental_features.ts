@@ -258,6 +258,11 @@ export const allowedExperimentalValues = Object.freeze({
   malwareOnWriteScanOptionAvailable: true,
 
   /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
+
+  /**
    *  Enables Security AI Assistant's Flyout mode
    */
   aiAssistantFlyoutMode: true,
