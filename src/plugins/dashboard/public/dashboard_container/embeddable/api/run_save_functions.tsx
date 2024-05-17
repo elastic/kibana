@@ -12,9 +12,9 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
 import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
+import { v4 } from 'uuid';
 import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
 import { prefixReferencesFromPanel } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
@@ -29,23 +29,37 @@ import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
 
 const serializeAllPanelState = async (
-  dashboard: DashboardContainer
+  dashboard: DashboardContainer,
+  saveAsCopy?: boolean
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
   const {
     embeddable: { reactEmbeddableRegistryHasKey },
   } = pluginServices.getServices();
   const references: Reference[] = [];
-  const panels = cloneDeep(dashboard.getInput().panels);
-  for (const [uuid, panel] of Object.entries(panels)) {
-    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+  const newPanelsMap: DashboardPanelMap = {};
+
+  for (const [uuid, panel] of Object.entries(dashboard.getInput().panels)) {
+    const newUuid = saveAsCopy ? v4() : uuid;
+    if (!reactEmbeddableRegistryHasKey(panel.type)) {
+      newPanelsMap[newUuid] = {
+        ...panel,
+        gridData: { ...panel.gridData, i: newUuid },
+        explicitInput: { ...panel.explicitInput, id: newUuid },
+      };
+      continue;
+    }
     const api = dashboard.children$.value[uuid];
     if (api && apiHasSerializableState(api)) {
       const serializedState = api.serializeState();
-      panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
-      references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
+      newPanelsMap[newUuid] = {
+        ...panel,
+        gridData: { ...panel.gridData, i: newUuid },
+        explicitInput: { ...serializedState.rawState, id: newUuid },
+      };
+      references.push(...prefixReferencesFromPanel(newUuid, serializedState.references ?? []));
     }
   }
-  return { panels, references };
+  return { panels: newPanelsMap, references };
 };
 
 export function runSaveAs(this: DashboardContainer) {
@@ -105,7 +119,7 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const { panels: nextPanels, references } = await serializeAllPanelState(this);
+      const { panels: nextPanels, references } = await serializeAllPanelState(this, newCopyOnSave);
       const dashboardStateToSave: DashboardContainerInput = {
         ...currentState,
         panels: nextPanels,
