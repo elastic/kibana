@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
 import { Form, useForm } from '../../../../shared_imports';
 
@@ -706,15 +707,17 @@ function TestForm({
   });
 
   return (
-    <Form form={form} component="form">
-      <RequiredFields
-        path="requiredFieldsField"
-        indexPatternFields={indexPatternFields}
-        isIndexPatternLoading={isIndexPatternLoading}
-      />
-      <button type="button" onClick={form.submit}>
-        {'Submit'}
-      </button>
-    </Form>
+    <I18nProvider>
+      <Form form={form} component="form">
+        <RequiredFields
+          path="requiredFieldsField"
+          indexPatternFields={indexPatternFields}
+          isIndexPatternLoading={isIndexPatternLoading}
+        />
+        <button type="button" onClick={form.submit}>
+          {'Submit'}
+        </button>
+      </Form>
+    </I18nProvider>
   );
 }
