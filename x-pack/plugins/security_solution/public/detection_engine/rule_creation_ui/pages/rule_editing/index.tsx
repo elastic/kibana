@@ -150,13 +150,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
-  const esqlIndex = useEsqlIndex(
-    defineStepData.queryBar.query.query,
-    defineStepData.ruleType,
-    // allow to compute index from query only when query is valid or user switched to another tab
-    // to prevent multiple data view initiations with partly typed index names
-    defineStepForm.isValid || activeStep !== RuleStep.defineRule
-  );
+
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
+
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, defineStepData.ruleType]
