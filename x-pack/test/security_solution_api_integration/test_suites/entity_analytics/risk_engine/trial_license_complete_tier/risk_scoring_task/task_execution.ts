@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
               log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
             }
 
-            expect(transformStats.transforms[0].state).to.eql('started');
+            expect(latestTransform.state).to.eql('started');
           });
 
           describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
