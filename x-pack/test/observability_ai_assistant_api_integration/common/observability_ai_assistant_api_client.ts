@@ -70,7 +70,7 @@ type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;
 //  end(one:string)
 //  end(one:string, two:string)
 // }
-// would lose the first signature. This keeps up to height signatures.
+// would lose the first signature. This keeps up to eight signatures.
 type OverloadedParameters<T> = T extends {
   (...args: infer A1): any;
   (...args: infer A2): any;
