@@ -16,10 +16,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason } from '@kbn/discover-utils';
+import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
+import { getUnifiedDocViewerServices } from '../../plugin';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -101,11 +102,19 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
 }: TableFieldValueProps) => {
-  const [fieldOpen, setFieldOpen] = useState(false);
+  const { uiSettings } = getUnifiedDocViewerServices();
+  const truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
 
-  const value = String(rawValue);
-  const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
-  const isCollapsed = isCollapsible && !fieldOpen;
+  const valueRef = useRef<HTMLDivElement>(null);
+  const [valueScrollHeight, setValueScrollHeight] = useState<number>(0);
+
+  const [isValueExpanded, setIsValueExpanded] = useState(false);
+  const isCollapsible =
+    truncateMaxHeight > 0 &&
+    String(rawValue).length > COLLAPSE_LINE_LENGTH &&
+    // Don't collapse if the field value fits into the available height anyway (when the screen width is large enough)
+    (!valueScrollHeight || valueScrollHeight > truncateMaxHeight);
+  const isCollapsed = isCollapsible && !isValueExpanded;
 
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -113,7 +122,16 @@ export const TableFieldValue = ({
     dscTruncateByHeight: isCollapsible && isCollapsed,
   });
 
-  const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
+  const onToggleCollapse = useCallback(
+    () => setIsValueExpanded((fieldOpenPrev) => !fieldOpenPrev),
+    [setIsValueExpanded]
+  );
+
+  useEffect(() => {
+    if (isCollapsible && isCollapsed && valueRef.current?.scrollHeight) {
+      setValueScrollHeight(valueRef.current.scrollHeight);
+    }
+  }, [isCollapsible, isCollapsed, setValueScrollHeight]);
 
   return (
     <Fragment>
@@ -125,6 +143,7 @@ export const TableFieldValue = ({
         </EuiFlexGroup>
       )}
       <div
+        ref={valueRef}
         className={valueClassName}
         data-test-subj={`tableDocViewRow-${field}-value`}
         // Value returned from formatFieldValue is always sanitized
