@@ -84,7 +84,7 @@ export class UpdateSLO {
           `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}].`
         );
 
-        asyncForEach(rollbackOperations.reverse(), async (operation) => {
+        await asyncForEach(rollbackOperations.reverse(), async (operation) => {
           try {
             await operation();
           } catch (rollbackErr) {
