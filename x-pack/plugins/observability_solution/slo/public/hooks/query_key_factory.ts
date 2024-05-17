@@ -62,7 +62,7 @@ export const sloKeys = {
   ) => [...sloKeys.all, 'burnRates', sloId, instanceId, windows] as const,
   preview: (
     indicator: Indicator,
-    range: { start: number; end: number },
+    range: { from: Date; to: Date },
     groupings?: Record<string, unknown>
   ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
