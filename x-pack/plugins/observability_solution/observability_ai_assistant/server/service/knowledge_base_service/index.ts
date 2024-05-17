@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { map, orderBy } from 'lodash';
+import { isEmpty, map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
@@ -360,12 +360,18 @@ export class KnowledgeBaseService {
       return customSearchConnectorIndex.split(',');
     }
 
-    // GET _connector?filter_path=results.index_name
     const response = (await client.transport.request({
       method: 'GET',
       path: '_connector',
     })) as { results: Array<{ index_name: string }> };
-    return response.results.map((result) => result.index_name);
+    const connectorIndices = response.results.map((result) => result.index_name);
+
+    // preserve backwards compatibility with 8.14 (may not be needed in the future)
+    if (isEmpty(connectorIndices)) {
+      return ['search-*'];
+    }
+
+    return connectorIndices;
   }
 
   private async recallFromConnectors({
