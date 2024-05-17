@@ -27,7 +27,6 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
-import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -67,7 +66,7 @@ export const bulkPatchRulesRoute = (
 
           const savedObjectsClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = new RulesManagementClient(rulesClient);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,

@@ -23,7 +23,6 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
-import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -64,7 +63,7 @@ export const createRuleRoute = (
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = new RulesManagementClient(rulesClient);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 

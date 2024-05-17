@@ -24,7 +24,6 @@ import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptio
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
-import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.versioned
@@ -57,7 +56,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
           const savedObjectsClient = (await context.core).savedObjects.client;
-          const rulesManagementClient = new RulesManagementClient(rulesClient);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: (await context.licensing).license,

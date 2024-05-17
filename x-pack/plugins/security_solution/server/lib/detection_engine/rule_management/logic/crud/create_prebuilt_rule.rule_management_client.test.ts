@@ -7,37 +7,31 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { RulesManagementClient } from './rules_management_client';
+import { createPrebuiltRule } from './rules_management_client';
 
 import { getPrebuiltRuleAsset } from '../../../rule_schema/mocks';
 
-describe('RuleManagementClient.createCustomRule', () => {
+import { _createRule } from './internal_methods.rules_management_client';
+
+jest.mock('./internal_methods.rules_management_client');
+
+describe('RuleManagementClient.createPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let rulesManagementClient: RulesManagementClient;
 
   beforeEach(() => {
+    jest.resetAllMocks();
     rulesClient = rulesClientMock.create();
-    rulesManagementClient = new RulesManagementClient(rulesClient);
   });
 
-  it('should create a prebuilt rule with the correct parameters', async () => {
+  it('should call _createRule with the correct arguments and options', async () => {
     const ruleAsset = getPrebuiltRuleAsset();
 
-    await rulesManagementClient.createPrebuiltRule({ ruleAsset });
+    await createPrebuiltRule(rulesClient, { ruleAsset });
 
-    expect(rulesClient.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          name: ruleAsset.name,
-          enabled: false,
-          params: expect.objectContaining({
-            ruleId: ruleAsset.rule_id,
-            immutable: true,
-          }),
-        }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
-      })
-    );
+    expect(_createRule).toHaveBeenCalledTimes(1);
+    expect(_createRule).toHaveBeenCalledWith(rulesClient, ruleAsset, {
+      immutable: true,
+      defaultEnabled: false,
+    });
   });
 });

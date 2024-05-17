@@ -6,20 +6,18 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { RulesManagementClient } from './rules_management_client';
+import { deleteRule } from './rules_management_client';
 
 describe('RuleManagementClient.deleteRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let rulesManagementClient: RulesManagementClient;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    rulesManagementClient = new RulesManagementClient(rulesClient);
   });
 
-  it('should delete the rule along with its actions, and statuses', async () => {
+  it('should call rulesClient.delete passing the expected ruleId', async () => {
     const ruleId = 'ruleId';
-    await rulesManagementClient.deleteRule({
+    await deleteRule(rulesClient, {
       ruleId,
     });
 

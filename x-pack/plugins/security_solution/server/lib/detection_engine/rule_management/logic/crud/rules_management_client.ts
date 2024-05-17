@@ -6,31 +6,45 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+
 import type {
-  PatchRuleRequestBody,
   RuleCreateProps,
   RuleObjectId,
   RuleToImport,
+  PatchRuleRequestBody,
   RuleUpdateProps,
 } from '../../../../../../common/api/detection_engine';
-import { convertCreateAPIToInternalSchema } from '../..';
-import type { RuleAlertType, RuleParams } from '../../../rule_schema';
+
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import {
-  convertPatchAPIToInternalSchema,
-  convertUpdateAPIToInternalSchema,
-} from '../../normalization/rule_converters';
+
 import { readRules } from './read_rules';
 import { PrepackagedRulesError } from '../../../prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
 
-interface CreateRuleOptions {
+import {
+  convertPatchAPIToInternalSchema,
+  convertUpdateAPIToInternalSchema,
+  convertCreateAPIToInternalSchema,
+} from '../../normalization/rule_converters';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import type { RuleAlertType, RuleParams } from '../../../rule_schema';
+
+export interface CreateRuleOptions {
   /* Optionally pass an ID to use for the rule document. If not provided, an ID will be generated. */
   /* This is the ES document ID, NOT the rule_id */
   id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
   allowMissingConnectorSecrets?: boolean;
+}
+
+export interface _UpdateRuleProps {
+  existingRule: RuleAlertType;
+  ruleUpdate: RuleUpdateProps;
+}
+
+export interface _PatchRuleProps {
+  existingRule: RuleAlertType;
+  nextParams: PatchRuleRequestBody;
 }
 
 interface CreateCustomRuleProps {
@@ -41,17 +55,7 @@ interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-interface _UpdateRuleProps {
-  existingRule: RuleAlertType;
-  ruleUpdate: RuleUpdateProps;
-}
-
 type UpdateRuleProps = _UpdateRuleProps;
-
-interface _PatchRuleProps {
-  existingRule: RuleAlertType;
-  nextParams: PatchRuleRequestBody;
-}
 
 type PatchRuleProps = _PatchRuleProps;
 
@@ -260,6 +264,7 @@ export const importExistingRule = async (
   });
 };
 
+/* -------- Internal Methods -------- */
 export const _createRule = async (
   rulesClient: RulesClient,
   params: RuleCreateProps,

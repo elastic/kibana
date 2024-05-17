@@ -50,7 +50,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = new RulesManagementClient(rulesClient);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const rule = await readRules({ rulesClient, id, ruleId });
 

@@ -21,7 +21,7 @@ import { readRules } from '../crud/read_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import type { RulesManagementClient } from '../crud/rules_management_client';
+import type { IRulesManagementClient } from '../crud/rules_management_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -60,7 +60,7 @@ export const importRules = async ({
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesClient: RulesClient;
-  rulesManagementClient: RulesManagementClient;
+  rulesManagementClient: IRulesManagementClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
