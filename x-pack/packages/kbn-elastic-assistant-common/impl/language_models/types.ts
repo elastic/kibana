@@ -40,6 +40,11 @@ export interface InvokeAIActionParamsSchema {
   signal?: AbortSignal;
   timeout?: number;
 }
+export interface RunActionParamsSchema {
+  body: string;
+  signal?: AbortSignal;
+  timeout?: number;
+}
 
 export interface TraceOptions {
   evaluationId?: string;
