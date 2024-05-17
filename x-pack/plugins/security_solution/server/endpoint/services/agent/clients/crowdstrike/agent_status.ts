@@ -16,7 +16,6 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { stringify } from '../../../../utils/stringify';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
