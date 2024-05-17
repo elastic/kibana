@@ -130,33 +130,16 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         });
       },
       async expectIndexDetailsPageIsLoaded() {
-        await testSubjects.existOrFail('indexDetailsTab-overview')
-        await testSubjects.existOrFail('indexDetailsContent')
+        await testSubjects.existOrFail('indexDetailsTab-overview');
+        await testSubjects.existOrFail('indexDetailsContent');
         await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewHowToManageDataStreamsButton');
         await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewViewAllAliasesButton');
-        await testSubjects.existOrFail('indexDetailsBackToIndicesButton')
-      },
-      async storageCardExist() {
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewStorageCard')
-      },
-      async expectTotalDatasetSizeToMatch(storageSize: string){
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewTotalStoreSize')
-        const totalStorageSize = await testSubjects.getVisibleText('serverlessSearchIndexDetailOverviewTotalStoreSize')
-        expect(totalStorageSize).to.be(storageSize)
-      },
-      async expectDeletedDocsToMatch(deletedDocs:string){
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewDeletedDocs')
-        const totalDeletedDocs = await testSubjects.getVisibleText('serverlessSearchIndexDetailOverviewDeletedDocs')
-        expect(totalDeletedDocs).to.be(deletedDocs)
-      },
-      async storageCardDoesNotExist() {
-        await testSubjects.missingOrFail('serverlessSearchIndexDetailOverviewTotalStoreSize')
+        await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
       },
       async expectStartIngestingDataSectionToExist(){
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAPICallsLink')
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaApiButton')
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaConnectorButton')
-
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAPICallsLink');
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaApiButton');
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaConnectorButton');
       },
     },
     async clickCreateIndexButton() {
@@ -195,16 +178,16 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('indexActionsContextMenuButton');
     },
     async contextMenuIsVisible(){
-      await testSubjects.existOrFail('indexContextMenu')
-      await testSubjects.existOrFail('deleteIndexMenuButton')
+      await testSubjects.existOrFail('indexContextMenu');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
       await testSubjects.click('deleteIndexMenuButton');
     },
     async confirmDeleteModalIsVisible(){
-      await testSubjects.existOrFail('confirmModalTitleText')
-      const modalText:string = await testSubjects.getVisibleText('confirmModalTitleText')
-      expect(modalText).to.be('Delete index')
-      await testSubjects.existOrFail('confirmModalConfirmButton')
-      await testSubjects.click('confirmModalConfirmButton')
+      await testSubjects.existOrFail('confirmModalTitleText');
+      const modalText:string = await testSubjects.getVisibleText('confirmModalTitleText');
+      expect(modalText).to.be('Delete index');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
       // wait for index to be deleted
       await testSubjects.missingOrFail('confirmModalConfirmButton');
     },
@@ -217,7 +200,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
         })
       );
-      expect(indexNames.includes(indexName)).to.be(false)
+      expect(indexNames.includes(indexName)).to.be(false);
     }
   };
 }

@@ -14,7 +14,6 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiIcon,
   EuiI18nNumber,
   EuiText,
   EuiBadge,
@@ -184,64 +183,6 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
             </EuiFlexGroup>
           </IndexOverviewPanel>
         </EuiFlexItem>
-        {indexData.count > 0 && (
-          <EuiFlexItem data-test-subj="serverlessSearchIndexDetailOverviewStorageCard">
-            <IndexOverviewPanel
-              title={
-                <FormattedMessage
-                  id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.title"
-                  defaultMessage="Storage"
-                />
-              }
-              footer={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon size="s" type="documents" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText
-                      color="subdued"
-                      size="xs"
-                      data-test-subj="serverlessSearchIndexDetailOverviewDeletedDocs"
-                    >
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.documentCount"
-                        defaultMessage="{documentCount} Documents / {deletedCount} Deleted"
-                        values={{
-                          documentCount: <EuiI18nNumber value={indexData.count} />,
-                          deletedCount: (
-                            <EuiI18nNumber value={indexData?.indexStorage.deletedDocs} />
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <EuiFlexGroup alignItems="baseline" gutterSize="s">
-                <EuiFlexItem
-                  grow={false}
-                  data-test-subj="serverlessSearchIndexDetailOverviewTotalStoreSize"
-                >
-                  <IndexOverviewPanelStat>
-                    {indexData?.indexStorage.totalStoreSize}
-                  </IndexOverviewPanelStat>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.totalLabel"
-                        defaultMessage="Total"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </IndexOverviewPanel>
-          </EuiFlexItem>
-        )}
       </EuiFlexGrid>
       {indexData.count === 0 && (
         <>
