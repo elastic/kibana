@@ -47,7 +47,12 @@ import {
   PackagePolicyNotFoundError,
   PackagePolicyRequestError,
 } from '../../errors';
-import { getInstallations, getPackageInfo } from '../../services/epm/packages';
+import {
+  getInstallation,
+  getInstallations,
+  getPackageInfo,
+  removeInstallation,
+} from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
@@ -237,6 +242,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  let wasPackageAlreadyInstalled = false;
 
   if ('output_id' in newPolicy) {
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
@@ -266,6 +272,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
 
+    const installation = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: pkg!.name,
+    });
+    wasPackageAlreadyInstalled = installation?.install_status === 'installed';
+
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
@@ -290,6 +302,27 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    appContextService
+      .getLogger()
+      .error(`Error while creating package policy due to error: ${error.message}`);
+    if (!wasPackageAlreadyInstalled) {
+      const installation = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: pkg!.name,
+      });
+      if (installation) {
+        appContextService
+          .getLogger()
+          .info(`rollback ${pkg!.name}-${pkg!.version} package installation after error`);
+        await removeInstallation({
+          savedObjectsClient: soClient,
+          pkgName: pkg!.name,
+          pkgVersion: pkg!.version,
+          esClient,
+        });
+      }
+    }
+
     if (error.statusCode) {
       return response.customError({
         statusCode: error.statusCode,

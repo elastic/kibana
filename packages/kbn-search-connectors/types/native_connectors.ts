@@ -2605,7 +2605,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       ssl_enabled: {
         default_value: false,
@@ -3147,7 +3147,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       fetch_size: {
         default_value: 50,
@@ -4003,13 +4003,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
+            defaultMessage: 'Salesforce',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4284,7 +4303,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       use_text_extraction_service: {
         default_value: false,

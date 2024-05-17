@@ -101,7 +101,7 @@ describe('SourcesPanelForStartChat component', () => {
       noFieldsIndicesWarning: 'index1',
     });
 
-    render(<SourcesPanelForStartChat />);
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
     expect(screen.getByTestId('NoIndicesFieldsMessage')).toBeInTheDocument();
     expect(screen.getByTestId('NoIndicesFieldsMessage')).toHaveTextContent('index1');
   });

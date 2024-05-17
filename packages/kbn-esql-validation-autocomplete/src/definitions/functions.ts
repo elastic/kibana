@@ -40,8 +40,10 @@ const dateDiffSuggestions = [
   'year',
   'quarter',
   'month',
-  'week',
+  'dayofyear',
   'day',
+  'week',
+  'weekday',
   'hour',
   'minute',
   'second',
@@ -557,7 +559,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        returnType: 'string',
+        returnType: 'version',
         examples: [`from index | EVAL version = to_version(stringField)`],
       },
     ],
@@ -602,48 +604,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
           { name: 'startTimestamp', type: 'date' },
           { name: 'endTimestamp', type: 'date' },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string', constantOnly: true },
-          { name: 'endTimestamp', type: 'date' },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'date' },
-          { name: 'endTimestamp', type: 'string', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string', constantOnly: true },
-          { name: 'endTimestamp', type: 'string', constantOnly: true },
         ],
         returnType: 'number',
         examples: [],

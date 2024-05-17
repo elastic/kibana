@@ -63,7 +63,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
 
-  const observedUser = useObservedUser(userName);
+  const observedUser = useObservedUser(userName, scopeId);
   const email = observedUser.details.user?.email;
   const managedUser = useManagedUser(userName, email, observedUser.isLoading);
 
