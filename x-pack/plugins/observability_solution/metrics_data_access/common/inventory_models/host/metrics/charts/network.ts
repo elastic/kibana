@@ -13,14 +13,13 @@ import {
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
+  NETWORK_LABEL,
 } from '../../../shared/charts/constants';
 
 const rxTx: LensConfigWithId = {
   id: 'rxTx',
   chartType: 'xy',
-  title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
-    defaultMessage: 'Network',
-  }),
+  title: NETWORK_LABEL,
   layers: [
     {
       seriesType: 'area',

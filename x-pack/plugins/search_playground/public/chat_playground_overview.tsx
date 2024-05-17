@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PlaygroundProvider } from './providers/playground_provider';
@@ -14,15 +14,30 @@ import { PlaygroundProvider } from './providers/playground_provider';
 import { App } from './components/app';
 import { PlaygroundToolbar } from './embeddable';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
+import { useKibana } from './hooks/use_kibana';
 
 export const ChatPlaygroundOverview: React.FC = () => {
+  const {
+    services: { console: consolePlugin },
+  } = useKibana();
+
+  const embeddableConsole = useMemo(
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
+    [consolePlugin]
+  );
+
   return (
     <PlaygroundProvider
       defaultValues={{
         indices: [],
       }}
     >
-      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlPlaygroundPage">
+      <EuiPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="svlPlaygroundPage"
+        grow={false}
+      >
         <EuiPageTemplate.Header
           pageTitle={
             <EuiFlexGroup>
@@ -48,6 +63,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
           rightSideItems={[<PlaygroundHeaderDocs />, <PlaygroundToolbar />]}
         />
         <App />
+        {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
   );

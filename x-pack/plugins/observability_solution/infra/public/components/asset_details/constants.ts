@@ -15,5 +15,7 @@ export const APM_HOST_FILTER_FIELD = 'host.hostname';
 export const ASSET_DETAILS_URL_STATE_KEY = 'assetDetails';
 
 export const INTEGRATIONS = {
-  [INTEGRATION_NAME.kubernetes]: 'kubernetes.node',
+  [INTEGRATION_NAME.kubernetesNode]: 'kubernetes.node',
+  [INTEGRATION_NAME.kubernetesContainer]: 'kubernetes.container',
+  [INTEGRATION_NAME.docker]: 'docker',
 };
