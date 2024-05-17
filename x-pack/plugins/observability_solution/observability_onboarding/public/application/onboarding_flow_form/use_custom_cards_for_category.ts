@@ -28,6 +28,7 @@ export function useCustomCardsForCategory(
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
+  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otelLogs/${location.search}`);
 
   switch (category) {
     case 'apm':
@@ -165,6 +166,23 @@ export function useCustomCardsForCategory(
             },
           ],
           url: customLogsUrl,
+          version: '',
+          integration: '',
+        },
+        {
+          id: 'otel-logs',
+          type: 'virtual',
+          title: 'OTel Logs',
+          description: 'Collect logs using the OTel collector',
+          name: 'custom-logs-virtual',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+            },
+          ],
+          url: otelLogsUrl,
           version: '',
           integration: '',
         },

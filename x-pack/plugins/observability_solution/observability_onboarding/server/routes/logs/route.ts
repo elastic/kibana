@@ -73,6 +73,21 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
+const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/otel/api_key',
+  options: { tags: [] },
+  params: t.type({}),
+  async handler(resources): Promise<{ apiKeyEncoded: string }> {
+    const { context } = resources;
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
+
+    return { apiKeyEncoded };
+  },
+});
+
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/logs/flow',
   options: { tags: [] },
@@ -124,4 +139,5 @@ export const logsOnboardingRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createFlowRoute,
+  ...createAPIKeyRoute,
 };
