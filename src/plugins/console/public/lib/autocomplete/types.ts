@@ -13,7 +13,7 @@ export interface ResultTerm {
   meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
-  name?: string;
+  name?: string | boolean;
   value?: string;
   score?: number;
   template?: { __raw?: boolean; value?: string; [key: string]: unknown };

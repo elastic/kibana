@@ -138,8 +138,8 @@ export const getUrlPathCompletionItems = (
         // map autocomplete items to completion items
         .map((item) => {
           return {
-            label: item.name!,
-            insertText: item.name!,
+            label: item.name + '',
+            insertText: item.name + '',
             detail: item.meta ?? i18nTexts.endpoint,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
@@ -200,8 +200,8 @@ export const getUrlParamsCompletionItems = (
         // map autocomplete items to completion items
         .map((item) => {
           return {
-            label: item.name!,
-            insertText: item.name!,
+            label: item.name + '',
+            insertText: item.name + '',
             detail: item.meta ?? i18nTexts.param,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
@@ -253,7 +253,7 @@ export const getBodyCompletionItems = (
   context.editor = editor;
   context.requestStartRow = requestStartLineNumber;
   populateContext(bodyTokens, context, editor, true, components);
-
+  console.log(context);
   if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
     const wordUntilPosition = model.getWordUntilPosition(position);
     // if there is " after the cursor, replace it
@@ -276,8 +276,8 @@ export const getBodyCompletionItems = (
     };
     return (
       context.autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
+        // filter out items that don't have name
+        .filter(({ name }) => name !== undefined)
         // map autocomplete items to completion items
         .map((item) => {
           const suggestion = {
@@ -302,15 +302,21 @@ const getInsertText = (
   bodyContent: string,
   context: AutoCompleteContext
 ): string => {
-  if (!name) {
+  if (name === undefined) {
     return '';
   }
-  let insertText = bodyContent.endsWith('"') ? '' : '"';
-  if (insertValue && insertValue !== '{' && insertValue !== '[') {
-    insertText += `${insertValue}"`;
+  let insertText = '';
+  if (typeof name === 'string') {
+    insertText = bodyContent.endsWith('"') ? '' : '"';
+    if (insertValue && insertValue !== '{' && insertValue !== '[') {
+      insertText += `${insertValue}"`;
+    } else {
+      insertText += `${name}"`;
+    }
   } else {
-    insertText += `${name}"`;
+    insertText = name + '';
   }
+
   // check if there is template to add
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
   if (conditionalTemplate) {
@@ -334,11 +340,11 @@ const getInsertText = (
 };
 
 const getConditionalTemplate = (
-  name: string,
+  name: string | boolean,
   bodyContent: string,
   endpoint: AutoCompleteContext['endpoint']
 ) => {
-  if (!endpoint || !endpoint.data_autocomplete_rules) {
+  if (typeof name !== 'string' || !endpoint || !endpoint.data_autocomplete_rules) {
     return;
   }
   // get the autocomplete rules for the request body
