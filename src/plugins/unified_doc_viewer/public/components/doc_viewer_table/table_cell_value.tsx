@@ -7,12 +7,21 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import classNames from 'classnames';
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
+
+const COLLAPSE_LINE_LENGTH = 350;
 
 interface IgnoreWarningProps {
   reason: IgnoredReason;
@@ -92,13 +101,23 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
 }: TableFieldValueProps) => {
+  const [fieldOpen, setFieldOpen] = useState(false);
+
+  const value = String(rawValue);
+  const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
+  const isCollapsed = isCollapsible && !fieldOpen;
+
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     kbnDocViewer__value: true,
+    dscTruncateByHeight: isCollapsible && isCollapsed,
   });
+
+  const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
+
   return (
     <Fragment>
-      {ignoreReason && (
+      {(isCollapsible || ignoreReason) && (
         <EuiFlexGroup gutterSize="s">
           {ignoreReason && (
             <EuiFlexItem grow={false}>
@@ -114,6 +133,24 @@ export const TableFieldValue = ({
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: formattedValue }}
       />
+      {isCollapsible && (
+        <div>
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            data-test-subj={`toggleLongFieldValue-${field}`}
+            onClick={onToggleCollapse}
+          >
+            {isCollapsed
+              ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
+                  defaultMessage: 'View more',
+                })
+              : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
+                  defaultMessage: 'View less',
+                })}
+          </EuiButtonEmpty>
+        </div>
+      )}
     </Fragment>
   );
 };
