@@ -22,6 +22,9 @@ const services = {
       if (key === 'discover:showMultiFields') {
         return true;
       }
+      if (key === 'truncate:maxHeight') {
+        return 115;
+      }
     },
   },
   fieldFormats: {
