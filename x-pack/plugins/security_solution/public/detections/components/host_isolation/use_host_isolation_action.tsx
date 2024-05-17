@@ -117,7 +117,7 @@ export const useHostIsolationAction = ({
       (!!crowdstrikeAgentId && crowdstrikeManualHostActionsEnabled),
   });
 
-  const externalAgentStatus = externalAgentData?.[`${externalAgentId}`];
+const externalAgentStatus = externalAgentData?.[externalAgentId];
 
   const isHostIsolated = useMemo(() => {
     if (
