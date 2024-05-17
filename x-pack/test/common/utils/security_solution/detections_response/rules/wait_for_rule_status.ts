@@ -16,7 +16,7 @@ import { waitFor } from '../wait_for';
 import { routeWithNamespace } from '../route_with_namespace';
 
 interface WaitForRuleStatusBaseParams {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
   afterDate?: Date;
   namespace?: string;

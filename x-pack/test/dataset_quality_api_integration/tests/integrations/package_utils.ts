@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 
 export interface IntegrationPackage {
   name: string;
@@ -26,7 +26,7 @@ export async function installCustomIntegration({
   supertest,
   customIntegration,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   customIntegration: CustomIntegration;
 }) {
   const { integrationName, datasets } = customIntegration;
@@ -41,7 +41,7 @@ export async function installPackage({
   supertest,
   pkg,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   pkg: IntegrationPackage;
 }) {
   const { name, version } = pkg;
@@ -56,7 +56,7 @@ export async function uninstallPackage({
   supertest,
   pkg,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   pkg: IntegrationPackage;
 }) {
   const { name, version } = pkg;
