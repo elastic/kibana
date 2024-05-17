@@ -91,12 +91,14 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'test_template_1',
             name: 'First test template',
             description: 'This is a first test template',
+            tags: [],
             caseFields: null,
           },
           {
             key: 'test_template_2',
             name: 'Second test template',
             description: 'This is a second test template',
+            tags: ['foobar'],
             caseFields: {
               title: 'Case with sample template 2',
               description: 'case desc',
