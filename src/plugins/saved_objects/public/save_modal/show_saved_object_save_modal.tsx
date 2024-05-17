@@ -7,7 +7,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../kibana_services';

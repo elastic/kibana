@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';

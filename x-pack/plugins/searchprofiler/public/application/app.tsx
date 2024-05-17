@@ -18,7 +18,6 @@ import {
   ProfileLoadingPlaceholder,
   EmptyTreePlaceHolder,
   ProfileQueryEditor,
-  OnHighlightChangeArgs,
 } from './components';
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';

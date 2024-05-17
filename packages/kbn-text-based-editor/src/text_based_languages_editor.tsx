@@ -55,7 +55,7 @@ import {
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
-import { ResizableButton, ResizableButtonProps } from './resizable_button';
+import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';

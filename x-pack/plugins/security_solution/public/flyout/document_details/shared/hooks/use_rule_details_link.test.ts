@@ -6,7 +6,7 @@
  */
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { UseRuleDetailsLinkParams } from './use_rule_details_link';
 import { useRuleDetailsLink } from './use_rule_details_link';
 

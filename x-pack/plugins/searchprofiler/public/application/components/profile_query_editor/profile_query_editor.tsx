@@ -23,7 +23,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
-import { Editor, EditorInstance, Props as EditorProps } from './editor';
+import { Editor, EditorInstance } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';
 

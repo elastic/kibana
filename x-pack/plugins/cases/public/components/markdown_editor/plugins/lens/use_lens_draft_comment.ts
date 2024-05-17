@@ -9,7 +9,6 @@ import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { MarkdownEditorRef } from '../../editor';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
 import type { MarkdownEditorRef } from '../../editor';

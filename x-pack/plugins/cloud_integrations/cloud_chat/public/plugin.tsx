@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, type PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
