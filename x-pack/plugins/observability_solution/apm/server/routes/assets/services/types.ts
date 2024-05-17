@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-export interface SignalTypes {
-  'asset.trace'?: boolean;
-  'asset.logs'?: boolean;
+import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
+import { TraceMetrics } from './get_services_transaction_stats';
+
+export enum SignalType {
+  ASSET_TRACES = 'asset.traces',
+  ASSET_LOGS = 'asset.logs',
 }
 
 interface ServiceItem {
   environment?: string;
   name: string;
 }
+
+type SignalTypes = Record<SignalType, boolean | undefined>;
 
 interface AssetItem {
   signalTypes: SignalTypes;
@@ -28,6 +33,11 @@ export interface ServiceAssetDocument {
   service: ServiceItem;
 }
 
+export interface AssetService {
+  asset: AssetItem;
+  service: ServiceItem;
+}
+
 export interface AssetServicesResponse {
-  services: Array<{ asset: AssetItem; service: ServiceItem }>;
+  services: Array<AssetService & { metrics: TraceMetrics & LogsRatesMetrics }>;
 }

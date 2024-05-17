@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -85,31 +86,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [hasPackageListLoaded, setHasPackageListLoaded] = useState<boolean>(false);
-  const onPackageListLoaded = useCallback(() => {
-    setHasPackageListLoaded(true);
-  }, []);
-  const packageListRef = useRef<HTMLDivElement | null>(null);
-  const formRef = useRef<HTMLDivElement | null>(null);
+  const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
+  const searchResultsRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
-  const [scrollToCategory, setScrollToCategory] = useState<Category | null>(
-    searchParams.get('category') as Category | null
-  );
-
-  useEffect(() => {
-    if (scrollToCategory === null || !hasPackageListLoaded) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
-    }, 10);
-
-    return () => clearTimeout(timeout);
-  }, [scrollToCategory, hasPackageListLoaded]);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const searchParam = searchParams.get('search') ?? '';
@@ -126,17 +106,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListRef.current) {
-        // adding a slight delay causes the search bar to be rendered
-        new Promise((r) => setTimeout(r, 10)).then(() =>
-          packageListRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          })
+      if (searchResultsRef.current) {
+        setTimeout(
+          scrollIntoViewWithOffset,
+          40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+          searchResultsRef.current,
+          parseInt(euiTheme.size.l, 10)
         );
       }
     },
-    []
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const customCards = useCustomCardsForCategory(
@@ -148,7 +127,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   let isSelectingCategoryWithKeyboard: boolean = false;
 
   return (
-    <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
+    <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -192,17 +171,25 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               onChange={() => {
                 setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
-                if (!isSelectingCategoryWithKeyboard) {
-                  setScrollToCategory(option.id);
+              }}
+              onClick={() => {
+                if (!isSelectingCategoryWithKeyboard && suggestedPackagesRef.current) {
+                  setTimeout(
+                    scrollIntoViewWithOffset,
+                    40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+                    suggestedPackagesRef.current,
+                    parseInt(euiTheme.size.l, 10)
+                  );
                 }
               }}
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      {searchParams.get('category') && (
-        <>
-          <EuiSpacer />
+      {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
+      <div hidden={!searchParams.get('category') || !customCards}>
+        <EuiSpacer />
+        <div ref={suggestedPackagesRef}>
           <TitleWithIcon
             iconType="savedObjectsApp"
             title={i18n.translate(
@@ -213,16 +200,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             )}
           />
           <EuiSpacer size="s" />
-
-          {Array.isArray(customCards) && (
-            <OnboardingFlowPackageList
-              customCards={customCards}
-              flowSearch={integrationSearch}
-              flowCategory={searchParams.get('category')}
-              onLoaded={onPackageListLoaded}
-            />
-          )}
-
+          <OnboardingFlowPackageList
+            customCards={customCards}
+            flowSearch={integrationSearch}
+            flowCategory={searchParams.get('category')}
+          />
+        </div>
+        <div ref={searchResultsRef}>
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
@@ -235,7 +219,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
             flowCategory={searchParams.get('category')}
-            ref={packageListRef}
             customCards={customCards
               ?.filter(
                 // Filter out collection cards and regular integrations that show up via search anyway
@@ -244,8 +227,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               .concat(virtualSearchResults)}
             joinCardLists
           />
-        </>
-      )}
+        </div>
+      </div>
     </EuiPanel>
   );
 };
@@ -282,3 +265,16 @@ const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType 
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
+  // Fixed header in Kibana is different height between serverless and stateful so need to calculate dynamically.
+  const fixedHeaders = document.querySelectorAll('#globalHeaderBars [data-fixed-header=true]');
+  fixedHeaders.forEach((header) => {
+    offset += header.getBoundingClientRect().height;
+  });
+
+  window.scrollTo({
+    behavior: 'smooth',
+    top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
+  });
+}
