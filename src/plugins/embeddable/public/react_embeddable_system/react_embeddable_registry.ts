@@ -9,9 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
-type AnyReactEmbeddableFactory = ReactEmbeddableFactory<any, any, any>;
-
-const registry: { [key: string]: () => Promise<AnyReactEmbeddableFactory> } = {};
+const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>> } = {};
 
 /**
  * Registers a new React embeddable factory. This should be called at plugin start time.
@@ -20,9 +18,13 @@ const registry: { [key: string]: () => Promise<AnyReactEmbeddableFactory> } = {}
  * @param getFactory an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
  */
-export const registerReactEmbeddableFactory = (
+export const registerReactEmbeddableFactory = <
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  RuntimeState extends object = SerializedState
+>(
   type: string,
-  getFactory: () => Promise<AnyReactEmbeddableFactory>
+  getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>>
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
@@ -39,8 +41,7 @@ export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== 
 export const getReactEmbeddableFactory = async <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState,
-  ExternalState extends object = object
+  RuntimeState extends object = SerializedState
 >(
   key: string
 ): Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>> => {
@@ -51,7 +52,5 @@ export const getReactEmbeddableFactory = async <
         values: { key },
       })
     );
-  return registry[key]() as unknown as Promise<
-    ReactEmbeddableFactory<SerializedState, Api, RuntimeState>
-  >;
+  return registry[key]();
 };

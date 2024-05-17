@@ -17,7 +17,7 @@ import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
-  initialState: SerializedState;
+  initialState?: SerializedState;
 }
 
 export interface PresentationContainer
