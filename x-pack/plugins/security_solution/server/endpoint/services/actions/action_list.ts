@@ -19,9 +19,8 @@ import type {
 
 import {
   createActionDetailsRecord,
-  getActionIdFromActionResponse,
   getAgentHostNamesWithIds,
-  isLogsEndpointActionResponse,
+  mapResponsesByActionId,
   mapToNormalizedActionRequest,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
@@ -266,28 +265,7 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  const responsesByActionId = [
-    ...actionResponses.endpointResponses,
-    ...actionResponses.fleetResponses,
-  ].reduce<{ [actionId: string]: FetchActionResponsesResult }>((acc, response) => {
-    const actionId = getActionIdFromActionResponse(response);
-
-    if (!acc[actionId]) {
-      acc[actionId] = {
-        endpointResponses: [],
-        fleetResponses: [],
-      };
-    }
-
-    if (isLogsEndpointActionResponse(response)) {
-      acc[actionId].endpointResponses.push(response);
-    } else {
-      acc[actionId].fleetResponses.push(response);
-    }
-
-    return acc;
-  }, {});
-
+  const responsesByActionId = mapResponsesByActionId(actionResponses);
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     const actionRecord = createActionDetailsRecord(
       action,

@@ -126,6 +126,36 @@ export const mapToNormalizedActionRequest = (
   };
 };
 
+/**
+ * Maps the list of fetch action responses (from both Endpoint and Fleet indexes) to a Map
+ * whose keys are the action ID and value is the set of responses for that action id
+ * @param actionResponses
+ */
+export const mapResponsesByActionId = (
+  actionResponses: FetchActionResponsesResult
+): { [actionId: string]: FetchActionResponsesResult } => {
+  return [...actionResponses.endpointResponses, ...actionResponses.fleetResponses].reduce<{
+    [actionId: string]: FetchActionResponsesResult;
+  }>((acc, response) => {
+    const actionId = getActionIdFromActionResponse(response);
+
+    if (!acc[actionId]) {
+      acc[actionId] = {
+        endpointResponses: [],
+        fleetResponses: [],
+      };
+    }
+
+    if (isLogsEndpointActionResponse(response)) {
+      acc[actionId].endpointResponses.push(response);
+    } else {
+      acc[actionId].fleetResponses.push(response);
+    }
+
+    return acc;
+  }, {});
+};
+
 type ActionCompletionInfo = Pick<
   Required<ActionDetails>,
   'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
@@ -170,7 +200,7 @@ export const getActionCompletionInfo = <
       completedAt: undefined,
     };
 
-    // Store the outputs and agent state for any agent that has received a response
+    // Store the outputs and agent state for any agent that sent a response
     if (agentResponses) {
       completedInfo.agentState[agentId].isCompleted = agentResponses.isCompleted;
       completedInfo.agentState[agentId].wasSuccessful = agentResponses.wasSuccessful;
