@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
-
+  const testIndexName = `index-ftr-test-${Math.random()}`;
   describe('Index Details ', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
@@ -27,9 +27,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
-
+    it('can create an index', async () => {
+      await pageObjects.indexManagement.clickCreateIndexButton();
+      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+      await pageObjects.indexManagement.clickCreateIndexSaveButton();
+      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+    });
     it('index with no documents', async () => {
-      await pageObjects.indexManagement.toggleHiddenIndices();
       await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
       await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
       await pageObjects.indexManagement.indexDetailsPage.expectStartIngestingDataSectionToExist();
