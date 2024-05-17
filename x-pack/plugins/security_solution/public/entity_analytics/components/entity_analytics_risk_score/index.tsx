@@ -37,7 +37,7 @@ import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { UserPanelKey } from '../../../flyout/entity_details/user_right';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
-import { useRequiredRiskEnginePrivileges } from '../../hooks/use_required_risk_engine_privileges';
+import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
@@ -160,7 +160,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
-  const privileges = useRequiredRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges(['read']);
 
   if (!isAuthorized) {
     return null;

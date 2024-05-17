@@ -23,7 +23,7 @@ export interface MissingPrivileges {
 
 export const getMissingIndexPrivileges = (
   privileges: EntityAnalyticsPrivileges['privileges']['elasticsearch']['index'],
-  required?: NonEmptyArray<RiskEngineIndexPrivilege>
+  required: NonEmptyArray<RiskEngineIndexPrivilege> = ['read', 'write']
 ): MissingIndexPrivileges => {
   const missingIndexPrivileges: MissingIndexPrivileges = [];
 
