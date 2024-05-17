@@ -961,8 +961,9 @@ export class SearchSource {
     } else {
       body.fields = filteredDocvalueFields;
     }
+
     // @ts-ignore
-    body.fields = body.fields.filter((field) => Boolean(field));
+    body.fields = body.fields?.filter((field) => Boolean(field));
 
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
