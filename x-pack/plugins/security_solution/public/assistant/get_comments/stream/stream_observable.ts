@@ -185,7 +185,6 @@ export const getStreamObservable = ({
 
     // read data from Gemini stream
     function readGemini() {
-      console.log("rohan test inside readGemini stream_observable")
       reader
           .read()
           .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
