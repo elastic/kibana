@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiBadge } from '@elastic/eui';
+import {
+  DataTableRecord,
+  getMessageFieldWithFallbacks,
+  LogDocumentOverview,
+} from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import {
@@ -64,40 +72,46 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
     getCellRenderers: (prev) => () => ({
       ...prev(),
       ['@timestamp']: (props) => {
-        const date = new Date((props.row.flattened['@timestamp'] as string[])[0]);
+        const timestamp = getFieldValue(props.row, '@timestamp');
 
         return (
-          <>
-            <span style={{ color: 'red' }}>{date.getFullYear()}</span>-
-            <span style={{ color: 'green' }}>{date.getMonth() + 1}</span>-
-            <span style={{ color: 'blue' }}>{date.getDate()}</span>{' '}
-            <span style={{ color: 'purple' }}>
-              {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}
-            </span>
-          </>
+          <EuiBadge color="hollow" title={timestamp}>
+            {timestamp}
+          </EuiBadge>
         );
       },
-      timestamp: (props) => {
-        const date = new Date((props.row.flattened['@timestamp'] as string[])[0]);
+      ['log.level']: (props) => {
+        const level = getFieldValue(props.row, 'log.level');
+
+        if (!level) {
+          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+        }
+
+        const levelMap: Record<string, string> = {
+          info: 'primary',
+          debug: 'default',
+          error: 'danger',
+        };
 
         return (
-          <>
-            <span style={{ color: 'red' }}>{date.getFullYear()}</span>-
-            <span style={{ color: 'green' }}>{date.getMonth() + 1}</span>-
-            <span style={{ color: 'blue' }}>{date.getDate()}</span>{' '}
-            <span style={{ color: 'purple' }}>
-              {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}
-            </span>
-          </>
+          <EuiBadge color={levelMap[level]} title={level}>
+            {capitalize(level)}
+          </EuiBadge>
         );
       },
       message: (props) => {
-        const message = (props.row.flattened.message as string[])[0];
+        const { field, value } = getMessageFieldWithFallbacks(
+          props.row.flattened as unknown as LogDocumentOverview
+        );
+
+        if (!value) {
+          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+        }
 
         return (
-          <div style={{ border: '1px solid #c1c1c1', padding: '2px', borderRadius: '4px' }}>
-            {message}
-          </div>
+          <>
+            <strong>{field}:</strong> <span>{value}</span>
+          </>
         );
       },
     }),
@@ -115,7 +129,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
       indices = params.dataView.getIndexPattern().split(',');
     }
 
-    if (indices.every((index) => index.includes('logs'))) {
+    if (indices.every((index) => index.startsWith('logs-'))) {
       return {
         isMatch: true,
         context: { category: DataSourceCategory.Logs },
@@ -135,7 +149,7 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
     },
   },
   resolve: (params) => {
-    if ('message' in params.record.flattened && params.record.flattened.message != null) {
+    if (getFieldValue(params.record, 'data_stream.type') === 'logs') {
       return {
         isMatch: true,
         context: {
@@ -151,3 +165,8 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
 rootProfileService.registerProvider(o11yRootProfileProvider);
 dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
 documentProfileService.registerProvider(logDocumentProfileProvider);
+
+const getFieldValue = (record: DataTableRecord, field: string) => {
+  const value = record.flattened[field];
+  return Array.isArray(value) ? value[0] : value;
+};

@@ -8,7 +8,6 @@
 
 import { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
-import { useAppStateSelector } from '../application/main/state_management/discover_app_state_container';
 import { getMergedAccessor, Profile } from './composable_profile';
 import { recordHasProfile } from './profiles';
 import { useProfiles } from './profiles_provider';
@@ -18,8 +17,6 @@ export const useProfileAccessor = <TKey extends keyof Profile>(
   baseImpl: Profile[TKey],
   { record }: { record?: DataTableRecord } = {}
 ) => {
-  // Why does this fail to build without useAppStateSelector?
-  useAppStateSelector((state) => state.dataSource);
   const profiles = useProfiles();
 
   return useMemo(() => {
